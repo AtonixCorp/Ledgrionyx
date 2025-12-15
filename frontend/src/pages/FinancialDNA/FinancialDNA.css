@@ -1,0 +1,397 @@
+.financial-dna-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.dna-loader {
+  text-align: center;
+}
+
+.dna-helix {
+  font-size: 5rem;
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.dna-loader p {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #667eea;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.page-header h1 {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.page-header p {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+.dna-hero-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 3rem;
+  color: white;
+  margin-bottom: 3rem;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+.profile-badge {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.badge-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.profile-badge h2 {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.profile-badge p {
+  font-size: 1.1rem;
+  opacity: 0.95;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.overall-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.score-label {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.score-circle {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.score-number {
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.score-max {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.profile-highlights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.highlight-section h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.highlight-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.highlight-section li {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.dna-traits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.trait-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.trait-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.trait-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.trait-icon {
+  font-size: 2.5rem;
+}
+
+.trait-header h3 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.trait-type {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.trait-description {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.trait-score {
+  margin: 1.5rem 0;
+}
+
+.score-bar {
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 1.5s ease;
+}
+
+.score-fill.risk {
+  background: linear-gradient(90deg, #f39c12 0%, #e74c3c 100%);
+}
+
+.score-fill.savings {
+  background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.score-fill.crypto {
+  background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+}
+
+.trait-score span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #7f8c8d;
+}
+
+.trait-details {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.trait-details p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #2c3e50;
+}
+
+.trait-details strong {
+  color: #667eea;
+}
+
+.top-categories {
+  margin-top: 1rem;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.category-item:last-child {
+  border-bottom: none;
+}
+
+.recommendation-box {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: #fff8e1;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #ffa726;
+  margin-top: 1rem;
+}
+
+.recommendation-box span {
+  font-size: 1.3rem;
+}
+
+.recommendation-box p {
+  margin: 0;
+  color: #5d4037;
+  font-size: 0.9rem;
+}
+
+.archetype-traits {
+  margin: 1.5rem 0;
+}
+
+.archetype-traits strong {
+  color: #2c3e50;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.traits-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.trait-badge {
+  background: #667eea;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.asset-mix {
+  margin-top: 1rem;
+}
+
+.asset-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 60px;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.asset-bar {
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.asset-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 1s ease;
+}
+
+.crypto-assets {
+  margin-top: 1rem;
+}
+
+.crypto-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.crypto-item:last-child {
+  border-bottom: none;
+}
+
+.dna-footer {
+  text-align: center;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  color: #7f8c8d;
+}
+
+.dna-footer p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .financial-dna-page {
+    padding: 1rem;
+  }
+
+  .dna-hero-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .profile-highlights {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dna-traits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+  }
+
+  .asset-item {
+    grid-template-columns: 80px 1fr 50px;
+    font-size: 0.85rem;
+  }
+}
