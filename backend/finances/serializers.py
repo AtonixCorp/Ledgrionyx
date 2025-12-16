@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from .models import (
     Expense, Income, Budget, UserProfile, Organization, Entity, Role, Permission,
     TeamMember, TaxExposure, ComplianceDeadline, CashflowForecast, AuditLog,
-    ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE
+    ModelTemplate, FinancialModel, Scenario, SensitivityAnalysis, AIInsight,
+    CustomKPI, KPICalculation, Report, Consolidation, ConsolidationEntity,
+    TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE
 )
 
 
@@ -207,3 +209,132 @@ class PersonalDashboardSerializer(serializers.Serializer):
     active_countries = serializers.ListField(child=serializers.CharField())
     pending_insights = serializers.ListField(child=serializers.DictField())
     upcoming_deadlines = serializers.ListField(child=serializers.DictField())
+
+
+# ============ FINANCIAL MODELING SERIALIZERS ============
+
+class ModelTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ModelTemplate
+        fields = ['id', 'name', 'template_type', 'description', 'industry', 'version', 'is_active', 'default_assumptions', 'calculation_logic', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class FinancialModelSerializer(serializers.ModelSerializer):
+    user_name = serializers.ReadOnlyField(source='user.get_full_name')
+    organization_name = serializers.ReadOnlyField(source='organization.name')
+    template_name = serializers.ReadOnlyField(source='template.name')
+
+    class Meta:
+        model = FinancialModel
+        fields = ['id', 'name', 'model_type', 'status', 'user', 'user_name', 'organization', 'organization_name', 'template', 'template_name', 'input_data', 'assumptions', 'results', 'metadata', 'enterprise_value', 'equity_value', 'irr', 'moic', 'created_at', 'updated_at', 'calculated_at']
+        read_only_fields = ['created_at', 'updated_at', 'calculated_at']
+
+
+class FinancialModelCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating financial models"""
+    class Meta:
+        model = FinancialModel
+        fields = ['name', 'model_type', 'organization', 'template', 'input_data', 'assumptions']
+
+
+class ScenarioSerializer(serializers.ModelSerializer):
+    financial_model_name = serializers.ReadOnlyField(source='financial_model.name')
+
+    class Meta:
+        model = Scenario
+        fields = ['id', 'name', 'scenario_type', 'financial_model', 'financial_model_name', 'assumptions_override', 'results', 'enterprise_value', 'irr', 'probability', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class SensitivityAnalysisSerializer(serializers.ModelSerializer):
+    financial_model_name = serializers.ReadOnlyField(source='financial_model.name')
+
+    class Meta:
+        model = SensitivityAnalysis
+        fields = ['id', 'financial_model', 'financial_model_name', 'variable_name', 'base_value', 'range_min', 'range_max', 'steps', 'results', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class AIInsightSerializer(serializers.ModelSerializer):
+    financial_model_name = serializers.ReadOnlyField(source='financial_model.name')
+
+    class Meta:
+        model = AIInsight
+        fields = ['id', 'financial_model', 'financial_model_name', 'insight_type', 'priority', 'title', 'description', 'confidence_score', 'supporting_data', 'recommendations', 'is_read', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class CustomKPISerializer(serializers.ModelSerializer):
+    organization_name = serializers.ReadOnlyField(source='organization.name')
+
+    class Meta:
+        model = CustomKPI
+        fields = ['id', 'organization', 'organization_name', 'name', 'formula', 'description', 'unit', 'target_value', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class KPICalculationSerializer(serializers.ModelSerializer):
+    kpi_name = serializers.ReadOnlyField(source='kpi.name')
+    financial_model_name = serializers.ReadOnlyField(source='financial_model.name')
+
+    class Meta:
+        model = KPICalculation
+        fields = ['id', 'kpi', 'kpi_name', 'financial_model', 'financial_model_name', 'value', 'status', 'calculated_at']
+        read_only_fields = ['calculated_at']
+
+
+class ReportSerializer(serializers.ModelSerializer):
+    financial_model_name = serializers.ReadOnlyField(source='financial_model.name')
+    generated_by_name = serializers.ReadOnlyField(source='generated_by.get_full_name')
+
+    class Meta:
+        model = Report
+        fields = ['id', 'title', 'report_type', 'financial_model', 'financial_model_name', 'content', 'summary', 'recommendations', 'export_format', 'file_path', 'generated_by', 'generated_by_name', 'is_public', 'version', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ConsolidationEntitySerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+    entity_country = serializers.ReadOnlyField(source='entity.country')
+
+    class Meta:
+        model = ConsolidationEntity
+        fields = ['id', 'consolidation', 'entity', 'entity_name', 'entity_country', 'ownership_percentage', 'acquisition_date', 'goodwill', 'pnl_data', 'balance_sheet_data', 'cashflow_data']
+
+
+class ConsolidationSerializer(serializers.ModelSerializer):
+    organization_name = serializers.ReadOnlyField(source='organization.name')
+    entities = ConsolidationEntitySerializer(source='entities.all', many=True, read_only=True)
+
+    class Meta:
+        model = Consolidation
+        fields = ['id', 'name', 'organization', 'organization_name', 'status', 'consolidation_date', 'reporting_currency', 'include_minority_interest', 'eliminate_intercompany', 'consolidated_pnl', 'consolidated_balance_sheet', 'consolidated_cashflow', 'adjustments', 'total_assets', 'total_liabilities', 'shareholders_equity', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class TaxCalculationSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+
+    class Meta:
+        model = TaxCalculation
+        fields = ['id', 'entity', 'entity_name', 'tax_year', 'calculation_type', 'jurisdiction', 'taxable_income', 'tax_rate', 'deductions', 'credits', 'calculated_tax', 'effective_rate', 'breakdown', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class ComplianceDeadlineSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+
+    class Meta:
+        model = ComplianceDeadline
+        fields = ['id', 'entity', 'entity_name', 'deadline_type', 'description', 'due_date', 'status', 'jurisdiction', 'responsible_person', 'notes', 'reminder_days', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class CashflowForecastSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+
+    class Meta:
+        model = CashflowForecast
+        fields = ['id', 'entity', 'entity_name', 'forecast_type', 'forecast_date', 'period_months', 'historical_data', 'forecast_data', 'assumptions', 'total_forecast', 'growth_rate', 'confidence_level', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']

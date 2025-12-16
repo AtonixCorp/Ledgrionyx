@@ -461,3 +461,344 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.action} {self.model_name} by {self.user} on {self.created_at}"
+
+
+# ===== FINANCIAL MODELING MODELS =====
+
+class ModelTemplate(models.Model):
+    """Pre-defined financial model templates"""
+    TEMPLATE_TYPES = [
+        ('dcf', 'Discounted Cash Flow'),
+        ('comparable', 'Comparable Companies'),
+        ('merger', 'Merger & Acquisition'),
+        ('lbo', 'Leveraged Buyout'),
+        ('real_estate', 'Real Estate'),
+        ('venture', 'Venture Capital'),
+        ('distressed', 'Distressed Assets'),
+    ]
+
+    name = models.CharField(max_length=255)
+    template_type = models.CharField(max_length=50, choices=TEMPLATE_TYPES)
+    description = models.TextField()
+    industry = models.CharField(max_length=100, blank=True)
+    version = models.CharField(max_length=20, default='1.0')
+    is_active = models.BooleanField(default=True)
+    default_assumptions = models.JSONField(default=dict)
+    calculation_logic = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_template_type_display()})"
+
+
+class FinancialModel(models.Model):
+    """Core financial model instance"""
+    MODEL_TYPES = [
+        ('dcf', 'DCF'),
+        ('comparable', 'Comparable'),
+        ('merger', 'Merger'),
+        ('lbo', 'LBO'),
+        ('real_estate', 'Real Estate'),
+        ('venture', 'Venture'),
+        ('distressed', 'Distressed'),
+    ]
+
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('calculating', 'Calculating'),
+        ('completed', 'Completed'),
+        ('error', 'Error'),
+    ]
+
+    # Basic info
+    name = models.CharField(max_length=255)
+    model_type = models.CharField(max_length=50, choices=MODEL_TYPES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+
+    # Relationships
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='financial_models')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True)
+    template = models.ForeignKey(ModelTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Model data
+    input_data = models.JSONField(default=dict)
+    assumptions = models.JSONField(default=dict)
+    results = models.JSONField(default=dict)
+    metadata = models.JSONField(default=dict)
+
+    # Financial metrics
+    enterprise_value = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    equity_value = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    irr = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    moic = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    calculated_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_model_type_display()})"
+
+
+class Scenario(models.Model):
+    """Scenario analysis for financial models"""
+    SCENARIO_TYPES = [
+        ('best', 'Best Case'),
+        ('base', 'Base Case'),
+        ('worst', 'Worst Case'),
+        ('custom', 'Custom'),
+    ]
+
+    name = models.CharField(max_length=255)
+    scenario_type = models.CharField(max_length=20, choices=SCENARIO_TYPES)
+    financial_model = models.ForeignKey(FinancialModel, on_delete=models.CASCADE, related_name='scenarios')
+
+    # Scenario parameters
+    assumptions_override = models.JSONField(default=dict)
+    results = models.JSONField(default=dict)
+
+    # Key metrics
+    enterprise_value = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    irr = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    probability = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.financial_model.name}"
+
+
+class SensitivityAnalysis(models.Model):
+    """Sensitivity analysis for key variables"""
+    financial_model = models.ForeignKey(FinancialModel, on_delete=models.CASCADE, related_name='sensitivity_analyses')
+
+    variable_name = models.CharField(max_length=100)
+    base_value = models.DecimalField(max_digits=15, decimal_places=4)
+    range_min = models.DecimalField(max_digits=15, decimal_places=4)
+    range_max = models.DecimalField(max_digits=15, decimal_places=4)
+    steps = models.IntegerField(default=10)
+
+    results = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Sensitivity: {self.variable_name} - {self.financial_model.name}"
+
+
+class AIInsight(models.Model):
+    """AI-generated insights and recommendations"""
+    INSIGHT_TYPES = [
+        ('pattern', 'Pattern Recognition'),
+        ('anomaly', 'Anomaly Detection'),
+        ('trend', 'Trend Analysis'),
+        ('benchmark', 'Benchmarking'),
+        ('recommendation', 'Recommendation'),
+        ('risk', 'Risk Assessment'),
+    ]
+
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ]
+
+    financial_model = models.ForeignKey(FinancialModel, on_delete=models.CASCADE, related_name='ai_insights')
+    insight_type = models.CharField(max_length=50, choices=INSIGHT_TYPES)
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
+
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    confidence_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    supporting_data = models.JSONField(default=dict)
+    recommendations = models.JSONField(default=dict)
+
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_insight_type_display()}: {self.title}"
+
+
+class CustomKPI(models.Model):
+    """Custom Key Performance Indicators"""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='custom_kpis')
+    name = models.CharField(max_length=255)
+    formula = models.TextField()  # Formula expression
+    description = models.TextField(blank=True)
+    unit = models.CharField(max_length=50, blank=True)
+    target_value = models.DecimalField(max_digits=15, decimal_places=4, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.organization.name})"
+
+
+class KPICalculation(models.Model):
+    """Calculated KPI values over time"""
+    kpi = models.ForeignKey(CustomKPI, on_delete=models.CASCADE, related_name='calculations')
+    financial_model = models.ForeignKey(FinancialModel, on_delete=models.CASCADE, related_name='kpi_calculations')
+
+    value = models.DecimalField(max_digits=15, decimal_places=4)
+    status = models.CharField(max_length=20, choices=[
+        ('on_target', 'On Target'),
+        ('warning', 'Warning'),
+        ('critical', 'Critical'),
+        ('normal', 'Normal'),
+    ], default='normal')
+
+    calculated_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-calculated_at']
+
+    def __str__(self):
+        return f"{self.kpi.name}: {self.value}"
+
+
+class Report(models.Model):
+    """Generated financial reports"""
+    REPORT_TYPES = [
+        ('executive', 'Executive Summary'),
+        ('detailed', 'Detailed Analysis'),
+        ('scenario', 'Scenario Analysis'),
+        ('compliance', 'Compliance Report'),
+        ('valuation', 'Valuation Report'),
+        ('custom', 'Custom Report'),
+    ]
+
+    EXPORT_FORMATS = [
+        ('pdf', 'PDF'),
+        ('html', 'HTML'),
+        ('json', 'JSON'),
+        ('csv', 'CSV'),
+        ('xlsx', 'Excel'),
+    ]
+
+    title = models.CharField(max_length=255)
+    report_type = models.CharField(max_length=50, choices=REPORT_TYPES)
+    financial_model = models.ForeignKey(FinancialModel, on_delete=models.CASCADE, related_name='reports')
+
+    # Report content
+    content = models.JSONField(default=dict)
+    summary = models.TextField(blank=True)
+    recommendations = models.JSONField(default=dict)
+
+    # Export options
+    export_format = models.CharField(max_length=10, choices=EXPORT_FORMATS, default='pdf')
+    file_path = models.FileField(upload_to='reports/', null=True, blank=True)
+
+    # Metadata
+    generated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    is_public = models.BooleanField(default=False)
+    version = models.CharField(max_length=20, default='1.0')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_report_type_display()})"
+
+
+class Consolidation(models.Model):
+    """Multi-entity financial consolidation"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('error', 'Error'),
+    ]
+
+    name = models.CharField(max_length=255)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='consolidations')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+
+    # Consolidation parameters
+    consolidation_date = models.DateField()
+    reporting_currency = models.CharField(max_length=3, default='USD')
+    include_minority_interest = models.BooleanField(default=True)
+    eliminate_intercompany = models.BooleanField(default=True)
+
+    # Results
+    consolidated_pnl = models.JSONField(default=dict)
+    consolidated_balance_sheet = models.JSONField(default=dict)
+    consolidated_cashflow = models.JSONField(default=dict)
+    adjustments = models.JSONField(default=dict)
+
+    # Key metrics
+    total_assets = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    total_liabilities = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    shareholders_equity = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Consolidation: {self.name} ({self.consolidation_date})"
+
+
+class ConsolidationEntity(models.Model):
+    """Entity included in consolidation"""
+    consolidation = models.ForeignKey(Consolidation, on_delete=models.CASCADE, related_name='entities')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE)
+    ownership_percentage = models.DecimalField(max_digits=7, decimal_places=4, default=100.0000)
+    acquisition_date = models.DateField(null=True, blank=True)
+    goodwill = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+
+    # Financial data for consolidation
+    pnl_data = models.JSONField(default=dict)
+    balance_sheet_data = models.JSONField(default=dict)
+    cashflow_data = models.JSONField(default=dict)
+
+    def __str__(self):
+        return f"{self.entity.name} ({self.ownership_percentage}%)"
+
+
+class TaxCalculation(models.Model):
+    """Tax calculations for different jurisdictions"""
+    CALCULATION_TYPES = [
+        ('corporate', 'Corporate Tax'),
+        ('personal', 'Personal Income Tax'),
+        ('vat', 'Value Added Tax'),
+        ('withholding', 'Withholding Tax'),
+        ('property', 'Property Tax'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='tax_calculations')
+    tax_year = models.IntegerField()
+    calculation_type = models.CharField(max_length=50, choices=CALCULATION_TYPES)
+    jurisdiction = models.CharField(max_length=100)
+
+    # Tax calculation inputs
+    taxable_income = models.DecimalField(max_digits=15, decimal_places=2)
+    tax_rate = models.DecimalField(max_digits=7, decimal_places=4)
+    deductions = models.JSONField(default=dict)
+    credits = models.JSONField(default=dict)
+
+    # Results
+    calculated_tax = models.DecimalField(max_digits=15, decimal_places=2)
+    effective_rate = models.DecimalField(max_digits=7, decimal_places=4)
+    breakdown = models.JSONField(default=dict)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('entity', 'tax_year', 'calculation_type', 'jurisdiction')
+
+    def __str__(self):
+        return f"{self.calculation_type} - {self.entity.name} ({self.tax_year})"

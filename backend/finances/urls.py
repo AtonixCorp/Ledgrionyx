@@ -1,6 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ExpenseViewSet, IncomeViewSet, BudgetViewSet
+from .views import (
+    ExpenseViewSet, IncomeViewSet, BudgetViewSet,
+    ModelTemplateViewSet, FinancialModelViewSet, ScenarioViewSet,
+    SensitivityAnalysisViewSet, AIInsightViewSet, CustomKPIViewSet,
+    KPICalculationViewSet, ReportViewSet, ConsolidationViewSet,
+    ConsolidationEntityViewSet, TaxCalculationViewSet
+)
 from .views import list_countries, get_country
 from .enterprise_views import (
     OrganizationViewSet, EntityViewSet, TeamMemberViewSet,
@@ -25,6 +31,19 @@ router.register(r'cashflow-forecasts', CashflowForecastViewSet, basename='cashfl
 router.register(r'roles', RoleViewSet, basename='role')
 router.register(r'permissions', PermissionViewSet, basename='permission')
 router.register(r'audit-logs', AuditLogViewSet, basename='audit-log')
+
+# Financial modeling endpoints
+router.register(r'model-templates', ModelTemplateViewSet, basename='model-template')
+router.register(r'financial-models', FinancialModelViewSet, basename='financial-model')
+router.register(r'scenarios', ScenarioViewSet, basename='scenario')
+router.register(r'sensitivity-analyses', SensitivityAnalysisViewSet, basename='sensitivity-analysis')
+router.register(r'ai-insights', AIInsightViewSet, basename='ai-insight')
+router.register(r'custom-kpis', CustomKPIViewSet, basename='custom-kpi')
+router.register(r'kpi-calculations', KPICalculationViewSet, basename='kpi-calculation')
+router.register(r'reports', ReportViewSet, basename='report')
+router.register(r'consolidations', ConsolidationViewSet, basename='consolidation')
+router.register(r'consolidation-entities', ConsolidationEntityViewSet, basename='consolidation-entity')
+router.register(r'tax-calculations', TaxCalculationViewSet, basename='tax-calculation')
 
 urlpatterns = [
     path('', include(router.urls)),

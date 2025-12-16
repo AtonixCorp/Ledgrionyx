@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFinance } from '../../context/FinanceContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { 
     totalIncome, 
     totalExpenses, 
@@ -103,6 +105,36 @@ const Dashboard = () => {
             </select>
           </div>
         )}
+      </div>
+      
+      {/* Quick Access Navigation Cards */}
+      <div className="grid-3 quick-access-cards">
+        <div className="card nav-card dashboard-card" onClick={() => navigate('/dashboard')}>
+          <div className="nav-icon">📊</div>
+          <div className="nav-content">
+            <h3>Dashboard</h3>
+            <p>Real-time overview</p>
+          </div>
+          <div className="nav-arrow">→</div>
+        </div>
+        
+        <div className="card nav-card expenses-card" onClick={() => navigate('/expenses')}>
+          <div className="nav-icon">💸</div>
+          <div className="nav-content">
+            <h3>Expenses</h3>
+            <p>Track spending</p>
+          </div>
+          <div className="nav-arrow">→</div>
+        </div>
+        
+        <div className="card nav-card budgets-card" onClick={() => navigate('/budget')}>
+          <div className="nav-icon">🎯</div>
+          <div className="nav-content">
+            <h3>Budgets</h3>
+            <p>Set limits</p>
+          </div>
+          <div className="nav-arrow">→</div>
+        </div>
       </div>
       
       {/* Health Score (if available) */}

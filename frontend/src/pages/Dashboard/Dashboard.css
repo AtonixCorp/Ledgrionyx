@@ -465,3 +465,89 @@
   font-style: italic;
   margin: 0.5rem 0 0 0;
 }
+
+/* Quick Access Navigation Cards */
+.quick-access-cards {
+  margin-bottom: 2rem;
+}
+
+.nav-card {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+.nav-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nav-card:hover::before {
+  opacity: 1;
+}
+
+.nav-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.nav-content {
+  flex: 1;
+}
+
+.nav-content h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.nav-content p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.nav-arrow {
+  font-size: 1.5rem;
+  color: #bdc3c7;
+  transition: all 0.3s ease;
+  margin-left: 1rem;
+}
+
+.nav-card:hover .nav-arrow {
+  color: #667eea;
+  transform: translateX(4px);
+}
+
+/* Specific card colors */
+.dashboard-card .nav-icon {
+  color: #667eea;
+}
+
+.expenses-card .nav-icon {
+  color: #e74c3c;
+}
+
+.budgets-card .nav-icon {
+  color: #2ecc71;
+}

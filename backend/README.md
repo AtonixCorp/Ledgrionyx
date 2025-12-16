@@ -1,111 +1,228 @@
-# Atonix Capital Backend
+# AI Financial Modeling Integration System - Backend
 
-Django REST API backend for the Atonix Capital application.
+## Overview
+
+This is the Django REST API backend for the AI Financial Modeling Integration System. It provides enterprise-grade financial analysis capabilities with AI-driven insights, multi-tenant architecture, and comprehensive compliance features.
 
 ## Features
 
-- RESTful API endpoints for expenses, income, and budgets
-- CRUD operations for all financial data
-- CORS enabled for frontend integration
-- SQLite database (easily switchable to PostgreSQL/MySQL)
+### 🏗️ System Architecture
+- **6-Layer Architecture**: Core calculations, input processing, AI interpretation, advanced analytics, scenarios, and enterprise features
+- **Multi-Tenant Support**: Complete data isolation with role-based access control
+- **Audit Trail**: Comprehensive change tracking with compliance verification
+- **Real-time Processing**: High-performance calculation engines
 
-## Setup
+### 💰 Financial Modeling
+- **DCF Analysis**: Discounted Cash Flow with terminal value calculations
+- **Comparable Companies**: Market-based valuation multiples
+- **Merger Analysis**: M&A modeling with synergies and financing
+- **40+ Country Tax Library**: Comprehensive international tax calculations
+- **Multi-currency Support**: Real-time currency conversion
+
+### 🤖 AI & Analytics
+- **Pattern Recognition**: Automated financial pattern detection
+- **Anomaly Detection**: Statistical outlier identification
+- **Predictive Analytics**: Trend forecasting with confidence intervals
+- **Custom KPIs**: Formula-based key performance indicators
+- **Benchmarking**: Industry peer comparison
+
+### 🎯 Scenario Planning
+- **Best/Base/Worst Cases**: Multi-scenario analysis
+- **Sensitivity Testing**: Tornado diagrams and what-if analysis
+- **Monte Carlo Simulation**: Probabilistic modeling
+- **Risk Assessment**: Scenario-based risk quantification
+
+### 🏢 Enterprise Features
+- **Consolidation Engine**: Multi-entity financial consolidation
+- **Intercompany Eliminations**: Automatic IC transaction removal
+- **Minority Interest**: Ownership-based MI calculations
+- **Compliance Verification**: GAAP/IFRS/SOX compliance checking
+
+## Quick Start
 
 ### Prerequisites
-
-- Python 3.8 or higher
-- pip
+- Python 3.8+
+- Django 4.2+
+- Virtual environment
 
 ### Installation
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+1. **Clone and navigate to backend directory:**
+   ```bash
+   cd backend/
+   ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+2. **Create virtual environment:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-3. Run migrations:
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-4. Create a superuser (optional):
-```bash
-python manage.py createsuperuser
-```
+4. **Run migrations:**
+   ```bash
+   python manage.py migrate
+   ```
 
-5. Run the development server:
-```bash
-python manage.py runserver
-```
+5. **Start development server:**
+   ```bash
+   python manage.py runserver
+   ```
 
-The API will be available at [http://localhost:8000](http://localhost:8000)
+6. **Access the application:**
+   - **Landing Page**: http://localhost:8000/
+   - **API Root**: http://localhost:8000/api/
+   - **Admin Panel**: http://localhost:8000/admin/
 
 ## API Endpoints
 
-### Expenses
-- `GET /api/expenses/` - List all expenses
-- `POST /api/expenses/` - Create new expense
-- `GET /api/expenses/{id}/` - Get expense details
-- `PUT /api/expenses/{id}/` - Update expense
-- `DELETE /api/expenses/{id}/` - Delete expense
+### Core APIs
+- `GET /` - Landing page with system overview
+- `GET /api/` - API root with available endpoints
+- `GET /admin/` - Django admin panel
 
-### Income
-- `GET /api/income/` - List all income
-- `POST /api/income/` - Create new income
-- `GET /api/income/{id}/` - Get income details
-- `PUT /api/income/{id}/` - Update income
-- `DELETE /api/income/{id}/` - Delete income
+### Financial Modeling
+- `POST /api/models/calculate/` - Run financial model calculations
+- `GET /api/models/{id}/` - Retrieve model results
+- `GET /api/tax/countries/` - List supported tax jurisdictions
+- `GET /api/tax/countries/{code}/` - Get country-specific tax data
 
-### Budgets
-- `GET /api/budgets/` - List all budgets
-- `POST /api/budgets/` - Create new budget
-- `GET /api/budgets/{id}/` - Get budget details
-- `PUT /api/budgets/{id}/` - Update budget
-- `DELETE /api/budgets/{id}/` - Delete budget
+### AI & Analytics
+- `POST /api/ai/insights/` - Generate AI-driven insights
+- `POST /api/analytics/kpis/` - Calculate custom KPIs
+- `POST /api/analytics/trends/` - Perform trend analysis
+- `POST /api/analytics/benchmark/` - Industry benchmarking
 
-## Project Structure
+### Scenario Planning
+- `POST /api/scenarios/` - Generate scenario analysis
+- `POST /api/sensitivity/` - Run sensitivity testing
+- `GET /api/scenarios/{id}/` - Retrieve scenario results
 
+### Enterprise Features
+- `GET /api/organizations/` - Multi-tenant organization management
+- `GET /api/audit-logs/` - Audit trail and compliance logs
+- `POST /api/consolidation/` - Multi-entity consolidation
+- `GET /api/compliance/` - Compliance verification
+
+### Reporting
+- `POST /api/reports/` - Generate financial reports
+- `GET /api/reports/{id}/` - Retrieve report
+- `POST /api/export/` - Export data (JSON/CSV/PDF)
+
+## Data Models
+
+### Core Models
+- **Organization**: Multi-tenant organization structure
+- **Entity**: Business entities for consolidation
+- **TeamMember**: User management with roles
+- **Expense/Income/Budget**: Personal finance tracking
+
+### Enterprise Models
+- **TaxExposure**: Tax liability tracking
+- **ComplianceDeadline**: Regulatory deadline management
+- **CashflowForecast**: Cash flow projections
+- **AuditLog**: Complete audit trail
+
+## Authentication & Security
+
+### Multi-Tenant Architecture
+- **Data Isolation**: Row-level security by tenant
+- **Role-Based Access**: Admin, Analyst, Editor, Viewer roles
+- **Resource Quotas**: Configurable limits per tenant
+- **API Key Management**: Secure API access
+
+### Compliance & Audit
+- **GAAP/IFRS/SOX**: Regulatory compliance verification
+- **Change Tracking**: All data modifications logged
+- **Data Lineage**: Complete source-to-use traceability
+- **Retention Policies**: 7-year audit retention
+
+## Development
+
+### Project Structure
 ```
 backend/
-├── finance_api/        # Django project settings
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── finances/           # Main app
+├── finance_api/          # Main Django project
+│   ├── settings.py      # Django settings
+│   ├── urls.py         # URL configuration
+│   └── wsgi.py         # WSGI application
+├── finances/            # Main app
 │   ├── models.py       # Database models
-│   ├── serializers.py  # DRF serializers
 │   ├── views.py        # API views
-│   └── urls.py         # URL routing
-├── manage.py
-└── requirements.txt
+│   ├── serializers.py  # DRF serializers
+│   ├── urls.py         # App URLs
+│   └── enterprise_views.py  # Enterprise features
+├── templates/           # Django templates
+│   └── landing_page.html
+├── data/               # Static data files
+│   └── tax/
+│       └── countries.json
+├── manage.py           # Django management script
+└── requirements.txt    # Python dependencies
 ```
 
-## Database Models
+### Key Technologies
+- **Django 4.2**: Web framework
+- **Django REST Framework**: API development
+- **SQLite**: Development database
+- **CORS Headers**: Cross-origin support
+- **JSON**: Data interchange format
 
-### Expense
-- description (CharField)
-- amount (DecimalField)
-- category (CharField)
-- date (DateField)
+## Deployment
 
-### Income
-- source (CharField)
-- amount (DecimalField)
-- date (DateField)
+### Production Setup
+1. **Database**: Configure PostgreSQL
+2. **Static Files**: Set up CDN/static file serving
+3. **Security**: Configure HTTPS and security headers
+4. **Monitoring**: Set up logging and monitoring
+5. **Scaling**: Configure load balancing and caching
 
-### Budget
-- category (CharField)
-- limit (DecimalField)
-- spent (DecimalField)
-- color (CharField)
+### Docker Deployment
+```dockerfile
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+RUN python manage.py collectstatic --noinput
+EXPOSE 8000
+CMD ["gunicorn", "finance_api.wsgi:application", "--bind", "0.0.0.0:8000"]
+```
+
+## Testing
+
+### Run Tests
+```bash
+python manage.py test
+```
+
+### API Testing
+```bash
+# Test health endpoint
+curl http://localhost:8000/api/health/
+
+# Test tax countries
+curl http://localhost:8000/api/tax/countries/
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make changes with tests
+4. Submit pull request
 
 ## License
 
-MIT License
+© 2025 Atonix Capital. All rights reserved.
+
+## Support
+
+For support and questions:
+- **Documentation**: See inline code documentation
+- **API Docs**: Available at `/api/docs/` when running
+- **Issues**: Create GitHub issues for bugs/features

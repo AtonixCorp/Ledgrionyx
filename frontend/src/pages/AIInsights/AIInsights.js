@@ -1,43 +1,64 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { aiFinanceService } from '../../services/aiFinanceService';
 import { FaBrain, FaMoneyBillWave, FaChartLine, FaShieldAlt, FaFileInvoiceDollar, FaCheckCircle, FaExclamationTriangle, FaBell } from 'react-icons/fa';
 import './AIInsights.css';
 
 const AIInsights = () => {
-  const { transactions, mockPortfolio } = useFinance();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { aiInsights, loadAIInsights, loading, transactions, mockPortfolio } = useFinance();
+
   const [cashflowPrediction, setCashflowPrediction] = useState(null);
   const [riskAnalysis, setRiskAnalysis] = useState(null);
   const [fraudDetection, setFraudDetection] = useState(null);
   const [taxEstimate, setTaxEstimate] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [localLoading, setLocalLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate AI processing
-    setTimeout(() => {
-      const currentBalance = 45250;
-      
-      setCashflowPrediction(
-        aiFinanceService.predictCashflow(transactions, currentBalance)
-      );
-      
-      setRiskAnalysis(
-        aiFinanceService.analyzeInvestmentRisk(mockPortfolio)
-      );
-      
-      setFraudDetection(
-        aiFinanceService.detectFraudPatterns(transactions.slice(0, 15))
-      );
-      
-      setTaxEstimate(
-        aiFinanceService.estimateTaxes(transactions, { country: 'US' })
-      );
-      
-      setLoading(false);
-    }, 1500);
-  }, [transactions, mockPortfolio]);
+    const loadData = async () => {
+      try {
+        // Load AI insights from backend
+        await loadAIInsights();
 
-  if (loading) {
+        // Keep local AI analysis for additional insights
+        const currentBalance = 45250;
+
+        setCashflowPrediction(
+          aiFinanceService.predictCashflow(transactions, currentBalance)
+        );
+
+        setRiskAnalysis(
+          aiFinanceService.analyzeInvestmentRisk(mockPortfolio)
+        );
+
+        setFraudDetection(
+          aiFinanceService.detectFraudPatterns(transactions.slice(0, 15))
+        );
+
+        setTaxEstimate(
+          aiFinanceService.estimateTaxes(transactions, { country: 'US' })
+        );
+
+      } catch (err) {
+        console.error('Error loading AI insights:', err);
+      } finally {
+        setLocalLoading(false);
+      }
+    };
+
+    loadData();
+  }, [loadAIInsights, transactions, mockPortfolio]);
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
+
+  if (loading || localLoading) {
     return (
       <div className="ai-insights-page">
         <div className="loading-container">
@@ -56,6 +77,42 @@ const AIInsights = () => {
         <h1><FaBrain /> AI Financial Intelligence</h1>
         <p>Advanced AI-powered insights for smarter financial decisions</p>
       </div>
+
+      {/* Backend AI Insights */}
+      {aiInsights && aiInsights.length > 0 && (
+        <div className="backend-insights-section">
+          <h2>🤖 Model-Specific AI Insights</h2>
+          <div className="backend-insights-grid">
+            {aiInsights.slice(0, 6).map((insight) => (
+              <div key={insight.id} className={`backend-insight-card priority-${insight.priority}`}>
+                <div className="insight-header">
+                  <h3>{insight.title}</h3>
+                  <span className={`priority-badge priority-${insight.priority}`}>
+                    {insight.priority}
+                  </span>
+                </div>
+                <p className="insight-description">{insight.description}</p>
+                <div className="insight-meta">
+                  <span className="insight-type">{insight.insight_type}</span>
+                  <span className="confidence">
+                    {insight.confidence_score ? `${insight.confidence_score}%` : 'N/A'}
+                  </span>
+                </div>
+                {insight.recommendations && (
+                  <div className="insight-recommendations">
+                    <strong>💡 Recommendations:</strong>
+                    <ul>
+                      {Object.entries(insight.recommendations).map(([key, value]) => (
+                        <li key={key}>{value}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="insights-grid">
         {/* Cashflow Predictor */}

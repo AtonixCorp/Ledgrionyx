@@ -3,10 +3,19 @@ import calculationEngine from '../services/calculation/calculationEngine';
 import validationService from '../services/calculation/validationService';
 import monthlyAnalysisService from '../services/calculation/monthlyAnalysisService';
 import taxCalculatorService from '../services/taxCalculatorService';
+import {
+  expensesAPI, incomeAPI, budgetsAPI, taxAPI,
+  modelTemplatesAPI, financialModelsAPI, scenariosAPI,
+  sensitivityAnalysisAPI, aiInsightsAPI, customKPIsAPI,
+  kpiCalculationsAPI, reportsAPI, consolidationsAPI,
+  taxCalculationsAPI, complianceDeadlinesAPI, cashflowForecastsAPI,
+  organizationsAPI, entitiesAPI, teamMembersAPI, rolesAPI,
+  permissionsAPI, auditLogsAPI, taxExposuresAPI
+} from '../services/api';
 
 const FinanceContext = createContext();
 
-// Mock data for demonstration
+// Mock data for demonstration (will be replaced with API calls)
 const initialExpenses = [
   { id: 1, description: 'Grocery Shopping', amount: 150.50, category: 'Food', date: '2025-12-10', type: 'expense' },
   { id: 2, description: 'Electric Bill', amount: 85.00, category: 'Utilities', date: '2025-12-08', type: 'expense' },
@@ -47,6 +56,33 @@ export const FinanceProvider = ({ children }) => {
   const [expenses, setExpenses] = useState(initialExpenses);
   const [income, setIncome] = useState(initialIncome);
   const [budgets, setBudgets] = useState(initialBudgets);
+
+  // Financial Modeling States
+  const [models, setModels] = useState([]);
+  const [currentModel, setCurrentModel] = useState(null);
+  const [modelTemplates, setModelTemplates] = useState([]);
+  const [scenarios, setScenarios] = useState([]);
+  const [sensitivityAnalyses, setSensitivityAnalyses] = useState([]);
+  const [aiInsights, setAiInsights] = useState([]);
+  const [customKPIs, setCustomKPIs] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [consolidations, setConsolidations] = useState([]);
+  const [taxCalculations, setTaxCalculations] = useState([]);
+  const [complianceDeadlines, setComplianceDeadlines] = useState([]);
+  const [cashflowForecasts, setCashflowForecasts] = useState([]);
+
+  // Enterprise States
+  const [organizations, setOrganizations] = useState([]);
+  const [entities, setEntities] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [permissions, setPermissions] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [taxExposures, setTaxExposures] = useState([]);
+
+  // Loading and Error States
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
   // User Settings
   const [userCountry, setUserCountry] = useState('United States');
@@ -317,8 +353,140 @@ export const FinanceProvider = ({ children }) => {
   const taxAmount = financialSummary ? financialSummary.tax.amount :
     calculationEngine.calculateTax(totalIncome, userTaxRate);
   
+  // ==================== API INTEGRATION FUNCTIONS ====================
+
+  // Financial Modeling APIs
+  const loadModelTemplates = async () => {
+    try {
+      setLoading(true);
+      const response = await modelTemplatesAPI.getAll();
+      setModelTemplates(response.data.results || response.data);
+    } catch (err) {
+      setError('Failed to load model templates');
+      console.error('Error loading model templates:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadFinancialModels = async () => {
+    try {
+      setLoading(true);
+      const response = await financialModelsAPI.getAll();
+      setModels(response.data.results || response.data);
+    } catch (err) {
+      setError('Failed to load financial models');
+      console.error('Error loading financial models:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createFinancialModel = async (modelData) => {
+    try {
+      setLoading(true);
+      const response = await financialModelsAPI.create(modelData);
+      setModels(prev => [...prev, response.data]);
+      return response.data;
+    } catch (err) {
+      setError('Failed to create financial model');
+      console.error('Error creating financial model:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateFinancialModel = async (modelId) => {
+    try {
+      setLoading(true);
+      const response = await financialModelsAPI.calculate(modelId);
+      // Update the model in the list
+      setModels(prev => prev.map(model =>
+        model.id === modelId ? response.data : model
+      ));
+      return response.data;
+    } catch (err) {
+      setError('Failed to calculate financial model');
+      console.error('Error calculating financial model:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadScenarios = async (modelId = null) => {
+    try {
+      setLoading(true);
+      const response = await scenariosAPI.getAll();
+      let scenarios = response.data.results || response.data;
+      if (modelId) {
+        scenarios = scenarios.filter(s => s.financial_model === modelId);
+      }
+      setScenarios(scenarios);
+    } catch (err) {
+      setError('Failed to load scenarios');
+      console.error('Error loading scenarios:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAIInsights = async () => {
+    try {
+      setLoading(true);
+      const response = await aiInsightsAPI.getAll();
+      setAiInsights(response.data.results || response.data);
+    } catch (err) {
+      setError('Failed to load AI insights');
+      console.error('Error loading AI insights:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadReports = async () => {
+    try {
+      setLoading(true);
+      const response = await reportsAPI.getAll();
+      setReports(response.data.results || response.data);
+    } catch (err) {
+      setError('Failed to load reports');
+      console.error('Error loading reports:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Enterprise APIs
+  const loadOrganizations = async () => {
+    try {
+      setLoading(true);
+      const response = await organizationsAPI.getAll();
+      setOrganizations(response.data.results || response.data);
+    } catch (err) {
+      setError('Failed to load organizations');
+      console.error('Error loading organizations:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadEntities = async () => {
+    try {
+      setLoading(true);
+      const response = await entitiesAPI.getAll();
+      setEntities(response.data.results || response.data);
+    } catch (err) {
+      setError('Failed to load entities');
+      console.error('Error loading entities:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ==================== TAX MANAGEMENT ====================
-  
+
   const updateUserCountry = (country) => {
     setUserCountry(country);
     // Get tax rate for country
@@ -327,7 +495,7 @@ export const FinanceProvider = ({ children }) => {
       setUserTaxRate(taxInfo.rate); // Default to corporate rate
     }
   };
-  
+
   const updateUserTaxRate = (rate) => {
     const validation = validationService.validateTaxRate(rate, userCountry);
     if (!validation.isValid) {
@@ -348,7 +516,34 @@ export const FinanceProvider = ({ children }) => {
     budgets,
     transactions,
     mockPortfolio,
-    
+
+    // Financial Modeling Data
+    models,
+    currentModel,
+    modelTemplates,
+    scenarios,
+    sensitivityAnalyses,
+    aiInsights,
+    customKPIs,
+    reports,
+    consolidations,
+    taxCalculations,
+    complianceDeadlines,
+    cashflowForecasts,
+
+    // Enterprise Data
+    organizations,
+    entities,
+    teamMembers,
+    roles,
+    permissions,
+    auditLogs,
+    taxExposures,
+
+    // Loading and Error States
+    loading,
+    error,
+
     // CRUD Operations
     addExpense,
     deleteExpense,
@@ -359,14 +554,27 @@ export const FinanceProvider = ({ children }) => {
     addBudget,
     updateBudget,
     deleteBudget,
-    
+
+    // Financial Modeling Operations
+    loadModelTemplates,
+    loadFinancialModels,
+    createFinancialModel,
+    calculateFinancialModel,
+    loadScenarios,
+    loadAIInsights,
+    loadReports,
+
+    // Enterprise Operations
+    loadOrganizations,
+    loadEntities,
+
     // Calculated Values (from engine)
     totalIncome,
     totalExpenses,
     balance,
     netIncome,
     taxAmount,
-    
+
     // Financial Summary (comprehensive)
     financialSummary,
     validationResults,
