@@ -22,8 +22,6 @@ const GlobalTax = () => {
     r => countries.some(c => c.region === r)
   );
 
-  const sortedCountries = [...countries].sort((a, b) => a.name.localeCompare(b.name));
-
   const filtered = countries
     .filter(c => (regionFilter ? c.region === regionFilter : true))
     .filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.code.toLowerCase().includes(query.toLowerCase()));
