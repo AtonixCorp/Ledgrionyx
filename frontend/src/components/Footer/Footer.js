@@ -1,0 +1,81 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FaTwitter, FaFacebookF, FaLinkedinIn, FaGithub } from 'react-icons/fa';
+import AtonixLogo from '../Logo/AtonixLogo';
+import './Footer.css';
+
+const Footer = () => {
+  return (
+    <footer className="app-footer">
+      <div className="container">
+        <div className="footer-top">
+          <div className="footer-section footer-brand">
+            <div className="footer-logo">
+              <AtonixLogo size="extra-small" />
+              <span>Atonix Capital</span>
+            </div>
+            <p className="footer-tagline">
+              Atonix Capital envisions a world where financial power is no longer constrained by geography, 
+              institutions, or legacy systems. We are building a platform that empowers individuals and 
+              enterprises with sovereign financial intelligence.
+            </p>
+            <div className="footer-social">
+              <a href="https://twitter.com/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <FaTwitter />
+              </a>
+              <a href="https://facebook.com/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <FaFacebookF />
+              </a>
+              <a href="https://linkedin.com/company/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <FaLinkedinIn />
+              </a>
+              <a href="https://github.com/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <FaGithub />
+              </a>
+            </div>
+          </div>
+
+          <div className="footer-section">
+            <h4>Product</h4>
+            <div className="footer-links">
+              <Link to="/features">Features</Link>
+              <Link to="/pricing">Pricing</Link>
+              <Link to="/product">Platform</Link>
+            </div>
+          </div>
+
+          <div className="footer-section">
+            <h4>Resources</h4>
+            <div className="footer-links">
+              <Link to="/help-center">Help Center</Link>
+              <Link to="/support">Support</Link>
+              <Link to="/about">About Us</Link>
+            </div>
+          </div>
+
+          <div className="footer-section">
+            <h4>Legal</h4>
+            <div className="footer-links">
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/contact">Contact</Link>
+              <a href="/global-tax" target="_blank" rel="noopener noreferrer">Global Tax</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>&copy; 2025 Atonix Capital. All rights reserved.</p>
+          <div className="footer-bottom-links">
+            <Link to="/privacy">Privacy</Link>
+            <span className="separator">•</span>
+            <Link to="/contact">Terms</Link>
+            <span className="separator">•</span>
+            <a href="/global-tax" target="_blank" rel="noopener noreferrer">Tax Information</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

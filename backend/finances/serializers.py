@@ -5,7 +5,8 @@ from .models import (
     TeamMember, TaxExposure, ComplianceDeadline, CashflowForecast, AuditLog,
     ModelTemplate, FinancialModel, Scenario, SensitivityAnalysis, AIInsight,
     CustomKPI, KPICalculation, Report, Consolidation, ConsolidationEntity,
-    TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE
+    TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
+    EntityDepartment, EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument
 )
 
 
@@ -337,4 +338,77 @@ class CashflowForecastSerializer(serializers.ModelSerializer):
     class Meta:
         model = CashflowForecast
         fields = ['id', 'entity', 'entity_name', 'forecast_type', 'forecast_date', 'period_months', 'historical_data', 'forecast_data', 'assumptions', 'total_forecast', 'growth_rate', 'confidence_level', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ Entity-Specific Serializers ============
+
+class EntityDepartmentSerializer(serializers.ModelSerializer):
+    head_name = serializers.ReadOnlyField(source='head_of_department.full_name')
+    staff_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EntityDepartment
+        fields = ['id', 'entity', 'name', 'code', 'description', 'head_of_department', 'head_name', 'budget', 'currency', 'staff_count', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+    def get_staff_count(self, obj):
+        return obj.staff.count()
+
+
+class EntityRoleSerializer(serializers.ModelSerializer):
+    department_name = serializers.ReadOnlyField(source='department.name')
+    permissions = PermissionSerializer(many=True, read_only=True)
+    permission_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Permission.objects.all(),
+        source='permissions',
+        many=True,
+        write_only=True
+    )
+    staff_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EntityRole
+        fields = ['id', 'entity', 'name', 'code', 'department', 'department_name', 'description', 'salary_range_min', 'salary_range_max', 'currency', 'permissions', 'permission_ids', 'staff_count', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+    def get_staff_count(self, obj):
+        return obj.staff.count()
+
+
+class EntityStaffSerializer(serializers.ModelSerializer):
+    user_email = serializers.ReadOnlyField(source='user.email')
+    department_name = serializers.ReadOnlyField(source='department.name')
+    role_name = serializers.ReadOnlyField(source='role.name')
+    manager_name = serializers.ReadOnlyField(source='manager.full_name')
+    full_name = serializers.ReadOnlyField()
+
+    class Meta:
+        model = EntityStaff
+        fields = ['id', 'entity', 'user', 'user_email', 'employee_id', 'first_name', 'last_name', 'full_name', 'email', 'phone', 'department', 'department_name', 'role', 'role_name', 'employment_type', 'status', 'hire_date', 'termination_date', 'salary', 'currency', 'manager', 'manager_name', 'address', 'emergency_contact', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class BankAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankAccount
+        fields = ['id', 'entity', 'account_name', 'account_number', 'bank_name', 'account_type', 'currency', 'iban', 'swift_code', 'routing_number', 'balance', 'available_balance', 'is_active', 'last_synced', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class WalletSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wallet
+        fields = ['id', 'entity', 'name', 'wallet_type', 'currency', 'balance', 'provider', 'account_id', 'is_active', 'last_synced', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ComplianceDocumentSerializer(serializers.ModelSerializer):
+    responsible_user_name = serializers.ReadOnlyField(source='responsible_user.get_full_name')
+    days_until_expiry = serializers.ReadOnlyField()
+    is_expiring_soon = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ComplianceDocument
+        fields = ['id', 'entity', 'document_type', 'title', 'document_number', 'issuing_authority', 'issue_date', 'expiry_date', 'renewal_date', 'status', 'file_path', 'notes', 'reminder_days', 'responsible_user', 'responsible_user_name', 'days_until_expiry', 'is_expiring_soon', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']

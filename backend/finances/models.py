@@ -115,6 +115,229 @@ class Entity(models.Model):
     def __str__(self):
         return f"{self.name} ({self.country})"
 
+    def create_default_structure(self):
+        """Create default departments, roles, and categories for new entity"""
+        from django.utils import timezone
+
+        # Default departments
+        default_departments = [
+            {'name': 'Human Resources', 'code': f'HR_{self.id}', 'description': 'Human Resources and Personnel Management'},
+            {'name': 'Finance', 'code': f'FIN_{self.id}', 'description': 'Financial Operations and Accounting'},
+            {'name': 'Operations', 'code': f'OPS_{self.id}', 'description': 'Business Operations'},
+            {'name': 'IT', 'code': f'IT_{self.id}', 'description': 'Information Technology'},
+            {'name': 'Legal', 'code': f'LEGAL_{self.id}', 'description': 'Legal and Compliance'},
+        ]
+
+        departments = {}
+        for dept_data in default_departments:
+            dept, created = EntityDepartment.objects.get_or_create(
+                entity=self,
+                code=dept_data['code'],
+                defaults=dept_data
+            )
+            departments[dept_data['name']] = dept
+
+        # Default roles
+        default_roles = [
+            {'name': 'CEO', 'code': f'CEO_{self.id}', 'department': departments.get('Operations'), 'description': 'Chief Executive Officer'},
+            {'name': 'CFO', 'code': f'CFO_{self.id}', 'department': departments.get('Finance'), 'description': 'Chief Financial Officer'},
+            {'name': 'HR Manager', 'code': f'HRM_{self.id}', 'department': departments.get('Human Resources'), 'description': 'Human Resources Manager'},
+            {'name': 'Finance Manager', 'code': f'FM_{self.id}', 'department': departments.get('Finance'), 'description': 'Finance Manager'},
+            {'name': 'Operations Manager', 'code': f'OM_{self.id}', 'department': departments.get('Operations'), 'description': 'Operations Manager'},
+            {'name': 'IT Manager', 'code': f'ITM_{self.id}', 'department': departments.get('IT'), 'description': 'IT Manager'},
+            {'name': 'Accountant', 'code': f'ACC_{self.id}', 'department': departments.get('Finance'), 'description': 'Accountant'},
+            {'name': 'HR Assistant', 'code': f'HRA_{self.id}', 'department': departments.get('Human Resources'), 'description': 'HR Assistant'},
+        ]
+
+        roles = {}
+        for role_data in default_roles:
+            role, created = EntityRole.objects.get_or_create(
+                entity=self,
+                code=role_data['code'],
+                defaults=role_data
+            )
+            roles[role_data['name']] = role
+
+        # Default expense categories
+        default_expense_categories = [
+            'Office Supplies', 'Travel', 'Marketing', 'Utilities', 'Rent', 'Insurance',
+            'Professional Services', 'Equipment', 'Software', 'Training', 'Meals', 'Transportation'
+        ]
+
+        # Create empty budgets for each category
+        for category in default_expense_categories:
+            Budget.objects.get_or_create(
+                entity=self,
+                category=category,
+                defaults={
+                    'limit': 0,
+                    'currency': self.local_currency,
+                }
+            )
+
+        # Default income categories/sources
+        default_income_sources = [
+            'Product Sales', 'Service Revenue', 'Consulting', 'Investment Income', 'Grants', 'Other'
+        ]
+
+        # Create sample income records (empty)
+        for source in default_income_sources:
+            Income.objects.get_or_create(
+                entity=self,
+                source=source,
+                date=timezone.now().date(),
+                defaults={
+                    'amount': 0,
+                    'currency': self.local_currency,
+                    'income_type': 'business'
+                }
+            )
+
+        return {
+            'departments': departments,
+            'roles': roles,
+            'expense_categories': default_expense_categories,
+            'income_sources': default_income_sources
+        }
+
+
+class EntityDepartment(models.Model):
+    """Departments within an entity"""
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='departments')
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, unique=True)
+    description = models.TextField(blank=True)
+    head_of_department = models.ForeignKey('EntityStaff', on_delete=models.SET_NULL, null=True, blank=True, related_name='headed_departments')
+    budget = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='USD')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'code')
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} - {self.entity.name}"
+
+
+class BankAccount(models.Model):
+    """Bank accounts for entities"""
+    ACCOUNT_TYPE_CHOICES = [
+        ('checking', 'Checking'),
+        ('savings', 'Savings'),
+        ('business', 'Business'),
+        ('investment', 'Investment'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='bank_accounts')
+    account_name = models.CharField(max_length=255)
+    account_number = models.CharField(max_length=100)  # Masked for security
+    bank_name = models.CharField(max_length=255)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, default='checking')
+    currency = models.CharField(max_length=3, default='USD')
+    iban = models.CharField(max_length=34, blank=True)
+    swift_code = models.CharField(max_length=11, blank=True)
+    routing_number = models.CharField(max_length=9, blank=True)
+    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    available_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
+    last_synced = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['bank_name', 'account_name']
+
+    def __str__(self):
+        return f"{self.account_name} - {self.bank_name} ({self.entity.name})"
+
+
+class Wallet(models.Model):
+    """Digital/cash wallets for entities"""
+    WALLET_TYPE_CHOICES = [
+        ('cash', 'Cash'),
+        ('digital', 'Digital Wallet'),
+        ('crypto', 'Cryptocurrency'),
+        ('petty_cash', 'Petty Cash'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='wallets')
+    name = models.CharField(max_length=255)
+    wallet_type = models.CharField(max_length=20, choices=WALLET_TYPE_CHOICES, default='cash')
+    currency = models.CharField(max_length=3, default='USD')
+    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    provider = models.CharField(max_length=255, blank=True)  # e.g., PayPal, Venmo, Cash App
+    account_id = models.CharField(max_length=255, blank=True)  # Masked account/wallet ID
+    is_active = models.BooleanField(default=True)
+    last_synced = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['wallet_type', 'name']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_wallet_type_display()}) - {self.entity.name}"
+
+
+class ComplianceDocument(models.Model):
+    """Legal and compliance documents with expiry tracking"""
+    DOCUMENT_TYPE_CHOICES = [
+        ('license', 'Business License'),
+        ('registration', 'Company Registration'),
+        ('tax_certificate', 'Tax Certificate'),
+        ('insurance', 'Insurance Policy'),
+        ('permit', 'Permit'),
+        ('contract', 'Contract'),
+        ('certificate', 'Certificate'),
+        ('other', 'Other'),
+    ]
+
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('expired', 'Expired'),
+        ('expiring_soon', 'Expiring Soon'),
+        ('renewed', 'Renewed'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='compliance_documents')
+    document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPE_CHOICES)
+    title = models.CharField(max_length=255)
+    document_number = models.CharField(max_length=100, blank=True)
+    issuing_authority = models.CharField(max_length=255)
+    issue_date = models.DateField()
+    expiry_date = models.DateField()
+    renewal_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    file_path = models.FileField(upload_to='compliance_documents/', null=True, blank=True)
+    notes = models.TextField(blank=True)
+    reminder_days = models.IntegerField(default=30)  # Days before expiry to send reminder
+    responsible_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='compliance_documents')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['expiry_date']
+
+    def __str__(self):
+        return f"{self.title} - {self.entity.name} ({self.expiry_date})"
+
+    @property
+    def days_until_expiry(self):
+        from django.utils import timezone
+        if self.expiry_date:
+            return (self.expiry_date - timezone.now().date()).days
+        return None
+
+    @property
+    def is_expiring_soon(self):
+        days = self.days_until_expiry
+        return days is not None and days <= self.reminder_days
+
 
 class Permission(models.Model):
     """Define granular permissions for roles"""
@@ -158,6 +381,78 @@ class Permission(models.Model):
 
     def __str__(self):
         return self.get_code_display()
+
+
+class EntityRole(models.Model):
+    """Roles within an entity"""
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='roles')
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=50, unique=True)
+    department = models.ForeignKey(EntityDepartment, on_delete=models.SET_NULL, null=True, blank=True, related_name='roles')
+    description = models.TextField(blank=True)
+    salary_range_min = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    salary_range_max = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='USD')
+    permissions = models.ManyToManyField(Permission, blank=True, related_name='entity_roles')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'code')
+        ordering = ['department__name', 'name']
+
+    def __str__(self):
+        return f"{self.name} - {self.entity.name}"
+
+
+class EntityStaff(models.Model):
+    """Staff profiles within an entity"""
+    EMPLOYMENT_TYPE_CHOICES = [
+        ('full_time', 'Full Time'),
+        ('part_time', 'Part Time'),
+        ('contract', 'Contract'),
+        ('consultant', 'Consultant'),
+    ]
+
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('terminated', 'Terminated'),
+        ('on_leave', 'On Leave'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='staff')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='entity_staff_profile')
+    employee_id = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    department = models.ForeignKey(EntityDepartment, on_delete=models.SET_NULL, null=True, blank=True, related_name='staff')
+    role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='staff')
+    employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_TYPE_CHOICES, default='full_time')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    hire_date = models.DateField()
+    termination_date = models.DateField(null=True, blank=True)
+    salary = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='USD')
+    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='direct_reports')
+    address = models.TextField(blank=True)
+    emergency_contact = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['last_name', 'first_name']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} - {self.entity.name}"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Role(models.Model):
@@ -448,6 +743,7 @@ class AuditLog(models.Model):
     ]
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='audit_logs')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, null=True, blank=True, related_name='audit_logs')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     model_name = models.CharField(max_length=100)  # Model that was changed
@@ -460,7 +756,8 @@ class AuditLog(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.action} {self.model_name} by {self.user} on {self.created_at}"
+        scope = f"Entity: {self.entity.name}" if self.entity else f"Organization: {self.organization.name}"
+        return f"{self.action} {self.model_name} by {self.user} on {self.created_at} [{scope}]"
 
 
 # ===== FINANCIAL MODELING MODELS =====

@@ -11,7 +11,9 @@ from .views import list_countries, get_country
 from .enterprise_views import (
     OrganizationViewSet, EntityViewSet, TeamMemberViewSet,
     TaxExposureViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
-    RoleViewSet, PermissionViewSet, AuditLogViewSet
+    RoleViewSet, PermissionViewSet, AuditLogViewSet,
+    EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
+    BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet
 )
 
 router = DefaultRouter()
@@ -31,6 +33,14 @@ router.register(r'cashflow-forecasts', CashflowForecastViewSet, basename='cashfl
 router.register(r'roles', RoleViewSet, basename='role')
 router.register(r'permissions', PermissionViewSet, basename='permission')
 router.register(r'audit-logs', AuditLogViewSet, basename='audit-log')
+
+# Entity-specific endpoints
+router.register(r'entity-departments', EntityDepartmentViewSet, basename='entity-department')
+router.register(r'entity-roles', EntityRoleViewSet, basename='entity-role')
+router.register(r'entity-staff', EntityStaffViewSet, basename='entity-staff')
+router.register(r'bank-accounts', BankAccountViewSet, basename='bank-account')
+router.register(r'wallets', WalletViewSet, basename='wallet')
+router.register(r'compliance-documents', ComplianceDocumentViewSet, basename='compliance-document')
 
 # Financial modeling endpoints
 router.register(r'model-templates', ModelTemplateViewSet, basename='model-template')

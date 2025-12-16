@@ -11,13 +11,16 @@ from datetime import datetime, timedelta
 
 from .models import (
     Organization, Entity, TeamMember, Role, Permission, TaxExposure,
-    ComplianceDeadline, CashflowForecast, AuditLog
+    ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
+    EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument
 )
 from .serializers import (
     OrganizationSerializer, EntitySerializer, EntityDetailSerializer,
     TeamMemberSerializer, RoleSerializer, PermissionSerializer,
     TaxExposureSerializer, ComplianceDeadlineSerializer,
-    CashflowForecastSerializer, AuditLogSerializer, OrgOverviewSerializer
+    CashflowForecastSerializer, AuditLogSerializer, OrgOverviewSerializer,
+    EntityDepartmentSerializer, EntityRoleSerializer, EntityStaffSerializer,
+    BankAccountSerializer, WalletSerializer, ComplianceDocumentSerializer
 )
 from .permissions import PermissionChecker
 
@@ -104,7 +107,10 @@ class EntityViewSet(viewsets.ModelViewSet):
         """Create entity for organization"""
         org_id = self.request.data.get('organization_id')
         organization = get_object_or_404(Organization, id=org_id, owner=self.request.user)
-        serializer.save(organization=organization)
+        entity = serializer.save(organization=organization)
+        
+        # Create default structure for the new entity
+        entity.create_default_structure()
 
     @action(detail=True, methods=['get'])
     def hierarchy(self, request, pk=None):
@@ -265,3 +271,119 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Return audit logs for user's organizations"""
         return AuditLog.objects.filter(organization__owner=self.request.user)
+
+
+# ============ Entity-Specific ViewSets ============
+
+class EntityDepartmentViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing entity departments"""
+    serializer_class = EntityDepartmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return departments for user's entities"""
+        return EntityDepartment.objects.filter(entity__organization__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        """Create department for entity"""
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class EntityRoleViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing entity roles"""
+    serializer_class = EntityRoleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return roles for user's entities"""
+        return EntityRole.objects.filter(entity__organization__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        """Create role for entity"""
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class EntityStaffViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing entity staff"""
+    serializer_class = EntityStaffSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return staff for user's entities"""
+        return EntityStaff.objects.filter(entity__organization__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        """Create staff member for entity"""
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class BankAccountViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing bank accounts"""
+    serializer_class = BankAccountSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return bank accounts for user's entities"""
+        return BankAccount.objects.filter(entity__organization__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        """Create bank account for entity"""
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class WalletViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing wallets"""
+    serializer_class = WalletSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return wallets for user's entities"""
+        return Wallet.objects.filter(entity__organization__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        """Create wallet for entity"""
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class ComplianceDocumentViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing compliance documents"""
+    serializer_class = ComplianceDocumentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return compliance documents for user's entities"""
+        return ComplianceDocument.objects.filter(entity__organization__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        """Create compliance document for entity"""
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+    @action(detail=False, methods=['get'])
+    def expiring_soon(self, request):
+        """Get documents expiring soon"""
+        entity_id = request.query_params.get('entity_id')
+        if not entity_id:
+            return Response({'error': 'entity_id required'}, status=400)
+            
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=request.user)
+        
+        documents = ComplianceDocument.objects.filter(
+            entity=entity,
+            expiry_date__isnull=False
+        ).exclude(status='expired')
+        
+        expiring_soon = [doc for doc in documents if doc.is_expiring_soon]
+        serializer = self.get_serializer(expiring_soon, many=True)
+        return Response(serializer.data)

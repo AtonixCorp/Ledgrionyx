@@ -713,6 +713,290 @@ export const EnterpriseProvider = ({ children }) => {
     }
   }, []);
 
+  // ============ Entity-Specific API Functions ============
+
+  /**
+   * Fetch entity departments
+   */
+  const fetchEntityDepartments = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(`/api/entity-departments/?entity=${entityId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity departments:', err);
+    }
+    return [];
+  }, []);
+
+  /**
+   * Fetch entity roles
+   */
+  const fetchEntityRoles = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(`/api/entity-roles/?entity=${entityId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity roles:', err);
+    }
+    return [];
+  }, []);
+
+  /**
+   * Fetch entity staff
+   */
+  const fetchEntityStaff = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(`/api/entity-staff/?entity=${entityId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity staff:', err);
+    }
+    return [];
+  }, []);
+
+  /**
+   * Fetch entity bank accounts
+   */
+  const fetchEntityBankAccounts = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(`/api/bank-accounts/?entity=${entityId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity bank accounts:', err);
+    }
+    return [];
+  }, []);
+
+  /**
+   * Fetch entity wallets
+   */
+  const fetchEntityWallets = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(`/api/wallets/?entity=${entityId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity wallets:', err);
+    }
+    return [];
+  }, []);
+
+  /**
+   * Fetch entity compliance documents
+   */
+  const fetchEntityComplianceDocuments = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(`/api/compliance-documents/?entity=${entityId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity compliance documents:', err);
+    }
+    return [];
+  }, []);
+
+  /**
+   * Create entity department
+   */
+  const createEntityDepartment = useCallback(async (departmentData) => {
+    try {
+      const response = await fetch('/api/entity-departments/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(departmentData),
+      });
+
+      if (response.ok) {
+        const newDepartment = await response.json();
+        return newDepartment;
+      } else {
+        throw new Error('Failed to create entity department');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    }
+  }, []);
+
+  /**
+   * Create entity role
+   */
+  const createEntityRole = useCallback(async (roleData) => {
+    try {
+      const response = await fetch('/api/entity-roles/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(roleData),
+      });
+
+      if (response.ok) {
+        const newRole = await response.json();
+        return newRole;
+      } else {
+        throw new Error('Failed to create entity role');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    }
+  }, []);
+
+  /**
+   * Create entity staff
+   */
+  const createEntityStaff = useCallback(async (staffData) => {
+    try {
+      const response = await fetch('/api/entity-staff/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(staffData),
+      });
+
+      if (response.ok) {
+        const newStaff = await response.json();
+        return newStaff;
+      } else {
+        throw new Error('Failed to create entity staff');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    }
+  }, []);
+
+  /**
+   * Create bank account
+   */
+  const createBankAccount = useCallback(async (accountData) => {
+    try {
+      const response = await fetch('/api/bank-accounts/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(accountData),
+      });
+
+      if (response.ok) {
+        const newAccount = await response.json();
+        return newAccount;
+      } else {
+        throw new Error('Failed to create bank account');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    }
+  }, []);
+
+  /**
+   * Create wallet
+   */
+  const createWallet = useCallback(async (walletData) => {
+    try {
+      const response = await fetch('/api/wallets/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(walletData),
+      });
+
+      if (response.ok) {
+        const newWallet = await response.json();
+        return newWallet;
+      } else {
+        throw new Error('Failed to create wallet');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    }
+  }, []);
+
+  /**
+   * Create compliance document
+   */
+  const createComplianceDocument = useCallback(async (documentData) => {
+    try {
+      const response = await fetch('/api/compliance-documents/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(documentData),
+      });
+
+      if (response.ok) {
+        const newDocument = await response.json();
+        return newDocument;
+      } else {
+        throw new Error('Failed to create compliance document');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    }
+  }, []);
+
   const value = {
     // State
     organizations,
@@ -756,6 +1040,20 @@ export const EnterpriseProvider = ({ children }) => {
     createEntityExpense,
     createEntityIncome,
     createEntityBudget,
+
+    // Entity-specific management methods
+    fetchEntityDepartments,
+    fetchEntityRoles,
+    fetchEntityStaff,
+    fetchEntityBankAccounts,
+    fetchEntityWallets,
+    fetchEntityComplianceDocuments,
+    createEntityDepartment,
+    createEntityRole,
+    createEntityStaff,
+    createBankAccount,
+    createWallet,
+    createComplianceDocument,
 
     // Setters
     setCurrentOrganization,

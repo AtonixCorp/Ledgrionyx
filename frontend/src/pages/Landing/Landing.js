@@ -1,24 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaWallet, FaChartBar, FaChartLine, FaGlobe, FaLightbulb, FaShieldAlt, FaRocket, FaCheckCircle } from 'react-icons/fa';
-import AtonixLogo from '../../components/Logo/AtonixLogo';
+import { FaChartBar, FaChartLine, FaGlobe, FaLightbulb, FaShieldAlt, FaRocket, FaCheckCircle, FaUser, FaBuilding, FaNetworkWired, FaCogs, FaSearch, FaLock, FaMoneyBillWave, FaDollarSign, FaChartArea, FaBrain, FaProjectDiagram } from 'react-icons/fa';
+import Header from '../../components/Header/Header';
+import Footer from '../../components/Footer/Footer';
 import './Landing.css';
 
 const Landing = () => {
   return (
     <div className="landing-page">
-      <nav className="landing-nav">
-        <div className="landing-nav-content">
-          <div className="landing-logo-wrapper">
-            <AtonixLogo size="small" />
-            <span className="logo-text">Atonix Capital</span>
-          </div>
-          <div className="landing-nav-links">
-            <Link to="/login" className="btn-outline">Login</Link>
-            <Link to="/register" className="btn-primary">Get Started</Link>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <section className="hero-section">
         <div className="hero-content">
@@ -75,13 +65,16 @@ const Landing = () => {
 
       <section className="about-section">
         <div className="about-container">
-          <h2 className="section-title">About Atonix Capital</h2>
+          <div className="section-header">
+            <h2 className="section-title">About Atonix Capital</h2>
+            <p className="section-subtitle">Redefining Financial Power Through Innovation</p>
+          </div>
+          
           <div className="about-intro">
             <p className="about-lead">
               Atonix Capital is a next-generation financial platform built to redefine how individuals, 
               businesses, and nations interact with money. Designed at the intersection of sovereign 
-              infrastructure, intelligent finance, and multi-asset innovation, Atonix Capital empowers 
-              users with tools that transcend traditional banking.
+              infrastructure, intelligent finance, and multi-asset innovation.
             </p>
           </div>
           
@@ -94,6 +87,7 @@ const Landing = () => {
           </div>
 
           <div className="about-content">
+            <h3>Platform Excellence</h3>
             <p>
               Atonix Capital integrates modern fintech, AI-driven insights, and advanced security 
               architecture to create a financial ecosystem that is fast, transparent, and globally 
@@ -106,18 +100,17 @@ const Landing = () => {
       </section>
 
       <section className="differentiators-section">
-        <h2 className="section-title">What Makes Atonix Capital Different</h2>
-        <p className="section-subtitle">
-          Atonix Capital is not just a wallet or banking app — it is a sovereign financial engine.
-        </p>
+        <div className="section-header">
+          <h2 className="section-title">What Makes Us Different</h2>
+        </div>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">🧠</div>
+            <div className="feature-icon"><FaBrain /></div>
             <h3>AI-Powered Intelligence</h3>
             <p>Advanced algorithms that predict, analyze, and guide your financial decisions in real-time</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🌐</div>
+            <div className="feature-icon"><FaProjectDiagram /></div>
             <h3>Multi-Asset Support</h3>
             <p>Seamlessly manage fiat, crypto, stablecoins, and tokenized assets in one unified platform</p>
           </div>
@@ -152,29 +145,32 @@ const Landing = () => {
 
       <section className="vision-section">
         <div className="vision-container">
-          <h2 className="section-title">Our Vision</h2>
+          <div className="section-header">
+            <h2 className="section-title">Our Vision</h2>
+            <p className="section-subtitle">Building the Future of Financial Freedom</p>
+          </div>
           <p className="vision-intro">
             Atonix Capital envisions a world where financial power is no longer constrained by 
             geography, institutions, or legacy systems. We are building a platform that empowers:
           </p>
           <div className="vision-grid">
             <div className="vision-card">
-              <div className="vision-icon">👤</div>
+              <div className="vision-icon"><FaUser /></div>
               <h3>Individuals</h3>
               <p>Seeking financial stability, growth, and independence</p>
             </div>
             <div className="vision-card">
-              <div className="vision-icon">🏢</div>
+              <div className="vision-icon"><FaBuilding /></div>
               <h3>Businesses</h3>
               <p>Requiring secure, scalable financial operations and infrastructure</p>
             </div>
             <div className="vision-card">
-              <div className="vision-icon">🌍</div>
+              <div className="vision-icon"><FaNetworkWired /></div>
               <h3>Nations & Communities</h3>
               <p>Striving for digital independence and economic sovereignty</p>
             </div>
             <div className="vision-card">
-              <div className="vision-icon">🚀</div>
+              <div className="vision-icon"><FaRocket /></div>
               <h3>Innovators</h3>
               <p>Exploring the convergence of finance, AI, and emerging technologies</p>
             </div>
@@ -190,28 +186,31 @@ const Landing = () => {
 
       <section className="promise-section">
         <div className="promise-container">
-          <h2 className="section-title">Our Promise</h2>
+          <div className="section-header">
+            <h2 className="section-title">Our Promise</h2>
+            <p className="section-subtitle">Committed to Your Financial Success</p>
+          </div>
           <p className="promise-intro">
             To every user, partner, and stakeholder, Atonix Capital delivers:
           </p>
           <div className="promise-grid">
             <div className="promise-card">
-              <div className="promise-icon">🛡️</div>
+              <div className="promise-icon"><FaShieldAlt /></div>
               <h3>Security Without Compromise</h3>
               <p>Your assets and data protected by institutional-grade security protocols</p>
             </div>
             <div className="promise-card">
-              <div className="promise-icon">⚙️</div>
+              <div className="promise-icon"><FaCogs /></div>
               <h3>Innovation Without Complexity</h3>
               <p>Cutting-edge technology made intuitive and accessible for everyone</p>
             </div>
             <div className="promise-card">
-              <div className="promise-icon">🌍</div>
+              <div className="promise-icon"><FaGlobe /></div>
               <h3>Growth Without Borders</h3>
               <p>Expand your wealth globally without geographical or regulatory limitations</p>
             </div>
             <div className="promise-card">
-              <div className="promise-icon">🔍</div>
+              <div className="promise-icon"><FaSearch /></div>
               <h3>Transparency Without Exception</h3>
               <p>Complete visibility into your finances, transactions, and platform operations</p>
             </div>
@@ -227,35 +226,38 @@ const Landing = () => {
       </section>
 
       <section className="features-section">
-        <h2 className="section-title">Comprehensive Financial Management</h2>
+        <div className="section-header">
+          <h2 className="section-title">Comprehensive Financial Management</h2>
+          <p className="section-subtitle">Everything You Need in One Platform</p>
+        </div>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">📊</div>
+            <div className="feature-icon"><FaChartBar /></div>
             <h3>Visual Dashboard</h3>
             <p>Complete financial overview with interactive charts and real-time analytics</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">💸</div>
+            <div className="feature-icon"><FaMoneyBillWave /></div>
             <h3>Expense Tracking</h3>
             <p>Intelligent expense categorization and tracking across all accounts</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">💵</div>
+            <div className="feature-icon"><FaDollarSign /></div>
             <h3>Income Management</h3>
             <p>Monitor multiple income streams from diverse sources and asset classes</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">📈</div>
+            <div className="feature-icon"><FaChartLine /></div>
             <h3>Budget Planning</h3>
             <p>Dynamic budget allocation with smart alerts and optimization suggestions</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">📉</div>
+            <div className="feature-icon"><FaChartArea /></div>
             <h3>Advanced Analytics</h3>
             <p>Deep insights into spending patterns, trends, and financial health metrics</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🔒</div>
+            <div className="feature-icon"><FaLock /></div>
             <h3>Bank-Grade Security</h3>
             <p>End-to-end encryption with multi-layer security architecture</p>
           </div>
@@ -272,31 +274,7 @@ const Landing = () => {
         </div>
       </section>
 
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-logo">
-            <h3>💰 Atonix Capital</h3>
-            <p>Sovereign Financial Intelligence</p>
-          </div>
-          <div className="footer-links">
-            <div className="footer-column">
-              <h4>Product</h4>
-              <a href="#features">Features</a>
-              <a href="#pricing">Pricing</a>
-              <a href="#about">About</a>
-            </div>
-            <div className="footer-column">
-              <h4>Support</h4>
-              <a href="#help">Help Center</a>
-              <a href="#contact">Contact</a>
-              <a href="#privacy">Privacy</a>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2025 Atonix Capital. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

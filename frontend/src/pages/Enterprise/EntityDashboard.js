@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
-import { FaGlobe, FaArrowLeft, FaChartBar, FaMoneyBillWave, FaHandHoldingUsd, FaWallet } from 'react-icons/fa';
+import { FaGlobe } from 'react-icons/fa';
 import './EntityDashboard.css';
 
 const EntityDashboard = () => {
@@ -13,6 +13,12 @@ const EntityDashboard = () => {
     fetchEntityExpenses,
     fetchEntityIncome,
     fetchEntityBudgets,
+    fetchEntityDepartments,
+    fetchEntityRoles,
+    fetchEntityStaff,
+    fetchEntityBankAccounts,
+    fetchEntityWallets,
+    fetchEntityComplianceDocuments,
     hasPermission,
     PERMISSIONS
   } = useEnterprise();
@@ -21,6 +27,12 @@ const EntityDashboard = () => {
   const [expenses, setExpenses] = useState([]);
   const [income, setIncome] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [wallets, setWallets] = useState([]);
+  const [complianceDocuments, setComplianceDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -43,13 +55,30 @@ const EntityDashboard = () => {
         setExpenses(entityExpenses);
         setIncome(entityIncome);
         setBudgets(entityBudgets);
+
+        // Load entity management data
+        const [entityDepartments, entityRoles, entityStaff, entityBankAccounts, entityWallets, entityComplianceDocs] = await Promise.all([
+          fetchEntityDepartments(entityId),
+          fetchEntityRoles(entityId),
+          fetchEntityStaff(entityId),
+          fetchEntityBankAccounts(entityId),
+          fetchEntityWallets(entityId),
+          fetchEntityComplianceDocuments(entityId)
+        ]);
+
+        setDepartments(entityDepartments);
+        setRoles(entityRoles);
+        setStaff(entityStaff);
+        setBankAccounts(entityBankAccounts);
+        setWallets(entityWallets);
+        setComplianceDocuments(entityComplianceDocs);
       }
 
       setLoading(false);
     };
 
     loadEntityData();
-  }, [entityId, entities, fetchEntityExpenses, fetchEntityIncome, fetchEntityBudgets]);
+  }, [entityId, entities, fetchEntityExpenses, fetchEntityIncome, fetchEntityBudgets, fetchEntityDepartments, fetchEntityRoles, fetchEntityStaff, fetchEntityBankAccounts, fetchEntityWallets, fetchEntityComplianceDocuments]);
 
   if (!hasPermission(PERMISSIONS.VIEW_ENTITIES)) {
     return <div className="permission-denied">You don't have permission to view entity dashboards.</div>;
@@ -136,6 +165,24 @@ const EntityDashboard = () => {
           onClick={() => setActiveTab('budgets')}
         >
           Budgets ({budgets.length})
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
+          onClick={() => setActiveTab('staff')}
+        >
+          Staff & HR ({staff.length})
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'structure' ? 'active' : ''}`}
+          onClick={() => setActiveTab('structure')}
+        >
+          Company Structure
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
+          onClick={() => setActiveTab('financial')}
+        >
+          Financial Tracking
         </button>
       </div>
 
@@ -312,6 +359,236 @@ const EntityDashboard = () => {
               </tbody>
             </table>
             {budgets.length === 0 && <p className="no-data">No budgets set for this entity</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Staff & HR Tab */}
+      {activeTab === 'staff' && (
+        <div className="tab-content">
+          <div className="staff-grid">
+            {/* Departments Section */}
+            <div className="staff-section">
+              <h3>Departments ({departments.length})</h3>
+              <div className="departments-list">
+                {departments.map(dept => (
+                  <div key={dept.id} className="department-card">
+                    <h4>{dept.name}</h4>
+                    <p>{dept.description}</p>
+                    <div className="dept-stats">
+                      <span>{dept.staff_count} staff</span>
+                      {dept.budget && <span>Budget: ${dept.budget}</span>}
+                    </div>
+                  </div>
+                ))}
+                {departments.length === 0 && <p className="no-data">No departments created</p>}
+              </div>
+            </div>
+
+            {/* Roles Section */}
+            <div className="staff-section">
+              <h3>Roles ({roles.length})</h3>
+              <div className="roles-list">
+                {roles.map(role => (
+                  <div key={role.id} className="role-card">
+                    <h4>{role.name}</h4>
+                    <p>{role.description}</p>
+                    <div className="role-stats">
+                      <span>{role.staff_count} staff</span>
+                      {role.department_name && <span>{role.department_name}</span>}
+                    </div>
+                  </div>
+                ))}
+                {roles.length === 0 && <p className="no-data">No roles defined</p>}
+              </div>
+            </div>
+
+            {/* Staff Section */}
+            <div className="staff-section">
+              <h3>Staff Directory</h3>
+              <div className="data-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Department</th>
+                      <th>Status</th>
+                      <th>Hire Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {staff.map(member => (
+                      <tr key={member.id}>
+                        <td>{member.full_name}</td>
+                        <td>{member.role_name}</td>
+                        <td>{member.department_name}</td>
+                        <td>
+                          <span className={`status-badge ${member.status}`}>
+                            {member.status}
+                          </span>
+                        </td>
+                        <td>{new Date(member.hire_date).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {staff.length === 0 && <p className="no-data">No staff members added</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Company Structure Tab */}
+      {activeTab === 'structure' && (
+        <div className="tab-content">
+          <div className="structure-grid">
+            {/* Bank Accounts Section */}
+            <div className="structure-section">
+              <h3>Bank Accounts ({bankAccounts.length})</h3>
+              <div className="accounts-list">
+                {bankAccounts.map(account => (
+                  <div key={account.id} className="account-card">
+                    <h4>{account.account_name}</h4>
+                    <p>{account.bank_name} - {account.account_type}</p>
+                    <div className="account-balance">
+                      <span className="balance">${account.balance.toFixed(2)}</span>
+                      <span className="currency">{account.currency}</span>
+                    </div>
+                  </div>
+                ))}
+                {bankAccounts.length === 0 && <p className="no-data">No bank accounts added</p>}
+              </div>
+            </div>
+
+            {/* Wallets Section */}
+            <div className="structure-section">
+              <h3>Wallets ({wallets.length})</h3>
+              <div className="wallets-list">
+                {wallets.map(wallet => (
+                  <div key={wallet.id} className="wallet-card">
+                    <h4>{wallet.name}</h4>
+                    <p>{wallet.get_wallet_type_display} - {wallet.provider || 'N/A'}</p>
+                    <div className="wallet-balance">
+                      <span className="balance">${wallet.balance.toFixed(2)}</span>
+                      <span className="currency">{wallet.currency}</span>
+                    </div>
+                  </div>
+                ))}
+                {wallets.length === 0 && <p className="no-data">No wallets added</p>}
+              </div>
+            </div>
+
+            {/* Compliance Documents Section */}
+            <div className="structure-section">
+              <h3>Compliance Documents ({complianceDocuments.length})</h3>
+              <div className="documents-list">
+                {complianceDocuments.map(doc => (
+                  <div key={doc.id} className={`document-card ${doc.is_expiring_soon ? 'expiring' : ''}`}>
+                    <h4>{doc.title}</h4>
+                    <p>{doc.document_type} - {doc.issuing_authority}</p>
+                    <div className="document-dates">
+                      <span>Expires: {new Date(doc.expiry_date).toLocaleDateString()}</span>
+                      {doc.days_until_expiry !== null && (
+                        <span className={doc.days_until_expiry <= 30 ? 'urgent' : ''}>
+                          {doc.days_until_expiry} days left
+                        </span>
+                      )}
+                    </div>
+                    <span className={`status-badge ${doc.status}`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                ))}
+                {complianceDocuments.length === 0 && <p className="no-data">No compliance documents added</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Financial Tracking Tab */}
+      {activeTab === 'financial' && (
+        <div className="tab-content">
+          <div className="financial-grid">
+            {/* Profit & Loss Summary */}
+            <div className="financial-section">
+              <h3>Profit & Loss Summary</h3>
+              <div className="pnl-cards">
+                <div className="pnl-card">
+                  <h4>Total Revenue</h4>
+                  <p className="amount positive">${totalIncome.toFixed(2)}</p>
+                </div>
+                <div className="pnl-card">
+                  <h4>Total Expenses</h4>
+                  <p className="amount negative">${totalExpenses.toFixed(2)}</p>
+                </div>
+                <div className={`pnl-card ${netIncome >= 0 ? 'profit' : 'loss'}`}>
+                  <h4>Net Profit/Loss</h4>
+                  <p className="amount">${netIncome.toFixed(2)}</p>
+                </div>
+                <div className="pnl-card">
+                  <h4>Profit Margin</h4>
+                  <p className="percentage">
+                    {totalIncome > 0 ? ((netIncome / totalIncome) * 100).toFixed(1) : 0}%
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Cash Position */}
+            <div className="financial-section">
+              <h3>Cash Position</h3>
+              <div className="cash-position">
+                <div className="cash-accounts">
+                  <h4>Bank Accounts</h4>
+                  {bankAccounts.map(account => (
+                    <div key={account.id} className="cash-item">
+                      <span>{account.account_name}</span>
+                      <span className="amount">${account.balance.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="cash-accounts">
+                  <h4>Wallets</h4>
+                  {wallets.map(wallet => (
+                    <div key={wallet.id} className="cash-item">
+                      <span>{wallet.name}</span>
+                      <span className="amount">${wallet.balance.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="total-cash">
+                  <h4>Total Cash Position</h4>
+                  <p className="amount large">
+                    ${(bankAccounts.reduce((sum, acc) => sum + parseFloat(acc.balance), 0) + 
+                       wallets.reduce((sum, w) => sum + parseFloat(w.balance), 0)).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Monthly Summary */}
+            <div className="financial-section">
+              <h3>Monthly Summary</h3>
+              <div className="monthly-summary">
+                <div className="summary-item">
+                  <span>Average Monthly Income</span>
+                  <span className="amount">${(totalIncome / 12).toFixed(2)}</span>
+                </div>
+                <div className="summary-item">
+                  <span>Average Monthly Expenses</span>
+                  <span className="amount">${(totalExpenses / 12).toFixed(2)}</span>
+                </div>
+                <div className="summary-item">
+                  <span>Staff Payroll Total</span>
+                  <span className="amount">
+                    ${staff.filter(s => s.status === 'active').reduce((sum, s) => sum + (parseFloat(s.salary) || 0), 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -29,6 +29,15 @@ import EnterpriseRiskExposure from './pages/Enterprise/EnterpriseRiskExposure';
 import EnterpriseReports from './pages/Enterprise/EnterpriseReports';
 import EnterpriseTeam from './pages/Enterprise/EnterpriseTeam';
 import EnterpriseSettings from './pages/EnterpriseSettings/EnterpriseSettings';
+// Import the new pages
+import Product from './pages/Product/Product';
+import Features from './pages/Features/Features';
+import Pricing from './pages/Pricing/Pricing';
+import About from './pages/About/About';
+import Support from './pages/Support/Support';
+import HelpCenter from './pages/HelpCenter/HelpCenter';
+import Contact from './pages/Contact/Contact';
+import Privacy from './pages/Privacy/Privacy';
 import './App.css';
 
 // Component for account-type based routing
@@ -66,6 +75,16 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              
+              {/* Website Pages */}
+              <Route path="/product" element={<Product />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/help-center" element={<HelpCenter />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<Privacy />} />
 
             {/* Protected Routes */}
             <Route path="/dashboard" element={

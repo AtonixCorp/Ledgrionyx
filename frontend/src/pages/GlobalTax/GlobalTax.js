@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaChartBar, FaSearch } from 'react-icons/fa';
+import { FaChartBar, FaSearch, FaClipboardList, FaLandmark, FaBuilding, FaUser, FaCoins, FaBook, FaLink, FaBolt } from 'react-icons/fa';
 import { taxAPI } from '../../services/api';
 import './GlobalTax.css';
 import localCountries from '../../data/tax/countries.json';
@@ -102,7 +102,7 @@ const GlobalTax = () => {
             <div className="tax-details-wrapper">
               {!selected ? (
                 <div className="empty-panel">
-                  <div className="empty-icon">📋</div>
+                  <div className="empty-icon"><FaClipboardList /></div>
                   <h3>Select a Jurisdiction</h3>
                   <p>Choose a country from the list to view comprehensive tax information</p>
                 </div>
@@ -119,7 +119,7 @@ const GlobalTax = () => {
 
                   {/* Tax Authority */}
                   <div className="section-card authority-card">
-                    <h4 className="section-title">🏛️ Tax Authority</h4>
+                    <h4 className="section-title"><FaLandmark /> Tax Authority</h4>
                     <div className="authority-info">
                       <div className="info-row">
                         <span className="label">Official Name:</span>
@@ -144,19 +144,19 @@ const GlobalTax = () => {
                     <div className="summaries-grid">
                       {selected.links?.corporate_tax_summary && (
                         <a href={selected.links.corporate_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
-                          <span className="icon">🏢</span>
+                          <span className="icon"><FaBuilding /></span>
                           <span>Corporate Tax</span>
                         </a>
                       )}
                       {selected.links?.personal_income_tax_summary && (
                         <a href={selected.links.personal_income_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
-                          <span className="icon">👤</span>
+                          <span className="icon"><FaUser /></span>
                           <span>Personal Tax</span>
                         </a>
                       )}
                       {selected.links?.vat_or_indirect_tax_summary && (
                         <a href={selected.links.vat_or_indirect_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
-                          <span className="icon">💰</span>
+                          <span className="icon"><FaCoins /></span>
                           <span>VAT / GST</span>
                         </a>
                       )}
@@ -165,11 +165,11 @@ const GlobalTax = () => {
 
                   {/* Global References */}
                   <div className="section-card references-card">
-                    <h4 className="section-title">📚 Expert References</h4>
+                    <h4 className="section-title">Expert References</h4>
                     <div className="references-list">
                       {selected.links?.global_references?.map((r, i) => (
                         <a key={i} href={r.url} target="_blank" rel="noreferrer" className="reference-link">
-                          <span className="ref-icon">🔗</span>
+                          <span className="ref-icon"><FaLink /></span>
                           <span>{r.label}</span>
                         </a>
                       ))}
@@ -179,7 +179,7 @@ const GlobalTax = () => {
                   {/* Actions */}
                   {selected.supported_tasks && selected.supported_tasks.length > 0 && (
                     <div className="section-card actions-card">
-                      <h4 className="section-title">⚡ Quick Actions</h4>
+                      <h4 className="section-title">Quick Actions</h4>
                       <div className="actions-grid">
                         {selected.supported_tasks?.includes('open_tax_payment_portal') && selected.tax_authority?.payment_portal && (
                           <a
