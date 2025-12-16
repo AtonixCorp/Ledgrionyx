@@ -514,7 +514,7 @@ export const compareWithPreviousMonth = ({
 
 // ==================== EXPORT ====================
 
-export default {
+const monthlyAnalysisService = {
   // Date utilities
   getCurrentMonth,
   getMonthBounds,
@@ -552,3 +552,5 @@ export default {
   // Trends
   compareWithPreviousMonth
 };
+
+export default monthlyAnalysisService;

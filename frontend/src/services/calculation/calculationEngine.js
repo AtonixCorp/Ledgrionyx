@@ -441,7 +441,7 @@ export const validateFinancialData = (data) => {
 
 // ==================== EXPORT ALL ====================
 
-export default {
+const calculationEngine = {
   // Core math
   round,
   add,
@@ -488,3 +488,5 @@ export default {
   // Validation
   validateFinancialData
 };
+
+export default calculationEngine;

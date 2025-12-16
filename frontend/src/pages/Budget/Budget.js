@@ -9,7 +9,6 @@ const Budget = () => {
     deleteBudget,
     expenses,
     financialSummary,
-    validationResults,
     calculationEngine
   } = useFinance();
   const [showForm, setShowForm] = useState(false);
@@ -46,18 +45,11 @@ const Budget = () => {
     return calculationEngine.calculateTotalExpenses(categoryExpenses);
   };
 
-  const getPercentage = (spent, limit) => {
-    return Math.min(calculationEngine.percentageOf(spent, limit), 100);
-  };
-
   const getStatusColor = (percentage) => {
     if (percentage >= 90) return '#e74c3c';
     if (percentage >= 70) return '#f39c12';
     return '#2ecc71';
   };
-
-  // Get budget utilization from financial summary
-  const budgetUtilization = financialSummary?.budget.utilization || [];
 
   return (
     <div className="page-container">

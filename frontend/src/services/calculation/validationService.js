@@ -444,7 +444,7 @@ export const validateAllFinancialData = (data) => {
 
 // ==================== EXPORT ====================
 
-export default {
+const validationService = {
   validateTaxRate,
   validateTaxCalculation,
   validateIncome,
@@ -456,3 +456,5 @@ export default {
   detectAnomalies,
   validateAllFinancialData
 };
+
+export default validationService;

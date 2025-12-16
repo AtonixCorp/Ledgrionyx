@@ -65,6 +65,7 @@ export const FinanceProvider = ({ children }) => {
   const [validationResults, setValidationResults] = useState(null);
   
   // Recalculate everything when data changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     recalculateAll();
     updateAvailableMonths();

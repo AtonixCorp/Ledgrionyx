@@ -18,7 +18,7 @@ const Income = () => {
     amount: '',
     date: new Date().toISOString().split('T')[0]
   });
-  const [validationWarnings, setValidationWarnings] = useState([]);
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,7 +33,6 @@ const Income = () => {
         amount: '',
         date: new Date().toISOString().split('T')[0]
       });
-      setValidationWarnings([]);
       setShowForm(false);
     }
   };

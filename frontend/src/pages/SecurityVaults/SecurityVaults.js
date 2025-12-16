@@ -6,6 +6,7 @@ const SecurityVaults = () => {
   const [activeTab, setActiveTab] = useState('security');
   const [geoLockEnabled, setGeoLockEnabled] = useState(false);
   const [decoyModeEnabled, setDecoyModeEnabled] = useState(false);
+  const [selectedVault, setSelectedVault] = useState(null);
 
   const securityFeatures = [
     {

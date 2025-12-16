@@ -3,10 +3,10 @@ import { FaTrophy, FaFire, FaMedal, FaMoneyBillWave, FaChartBar, FaRocket, FaRob
 import './Achievements.css';
 
 const Achievements = () => {
-  const [currentLevel, setCurrentLevel] = useState(7);
-  const [currentXP, setCurrentXP] = useState(3850);
-  const [xpToNextLevel, setXpToNextLevel] = useState(5000);
-  const [streak, setStreak] = useState(23);
+  const [currentLevel] = useState(7);
+  const [currentXP] = useState(3850);
+  const [xpToNextLevel] = useState(5000);
+  const [streak] = useState(23);
 
   const badges = [
     { id: 1, name: 'First Deposit', icon: <FaMoneyBillWave />, earned: true, date: '2025-11-01', xp: 100 },
