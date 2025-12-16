@@ -1,26 +1,12 @@
-.account-type-selector-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-}
-
-.selector-content {
-  background: white;
-  border-radius: 20px;
-  padding: 60px 40px;
-  max-width: 1100px;
+.account-type-selector-content {
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.6s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
-@keyframes slideUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -29,84 +15,132 @@
 }
 
 .selector-title {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   color: #1f2937;
-  margin-bottom: 10px;
+  margin-bottom: 0.5rem;
   text-align: center;
   font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .selector-subtitle {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #6b7280;
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 2.5rem;
+  font-weight: 400;
 }
 
 .account-type-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 40px;
+  gap: 2rem;
+  margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {
   .account-type-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 1.5rem;
   }
 
   .selector-title {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 
-  .selector-content {
-    padding: 40px 20px;
+  .selector-subtitle {
+    margin-bottom: 2rem;
   }
 }
 
+/* Card Styling - Bigger and More Spacious */
 .account-type-card {
   position: relative;
-  padding: 40px;
   border: 2px solid #e5e7eb;
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  background: #f9fafb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  min-height: 550px;
 }
 
 .account-type-card:hover {
   border-color: #d1d5db;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
 }
 
 .account-type-card.selected {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #667eea;
-  color: white;
+  border-color: transparent;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+  transform: translateY(-8px);
 }
 
-.account-type-card.selected h3,
-.account-type-card.selected .description,
-.account-type-card.selected .cta-text {
-  color: white;
+.personal-card.selected {
+  background: linear-gradient(135deg, #667eea 0%, #5a67d8 100%);
 }
 
-.account-type-card.selected .features li {
-  color: rgba(255, 255, 255, 0.95);
+.enterprise-card.selected {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
+/* Card Header */
+.card-header {
+  position: relative;
+  padding: 3rem 2rem 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.selected-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.personal-card.selected .selected-badge {
+  color: #667eea;
+}
+
+.enterprise-card.selected .selected-badge {
+  color: #f5576c;
+}
+
+/* Icon Container - Bigger */
 .icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100px;
   height: 100px;
-  margin: 0 auto 20px;
   border-radius: 50%;
   transition: all 0.3s ease;
+  font-size: 2.5rem;
 }
 
 .personal-icon {
@@ -120,84 +154,242 @@
 }
 
 .account-type-card.selected .icon-container {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  transform: scale(0.95);
+  color: white;
 }
 
-.account-type-card h3 {
-  font-size: 1.5rem;
-  margin: 15px 0 10px;
+/* Card Content - More Spacious */
+.card-content {
+  flex: 1;
+  padding: 2rem;
+  text-align: center;
+}
+
+.card-content h3 {
+  font-size: 1.8rem;
+  margin: 0 0 0.75rem;
   color: #1f2937;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.account-type-card .description {
-  font-size: 0.95rem;
-  color: #6b7280;
-  margin-bottom: 25px;
+.account-type-card.selected h3 {
+  color: white;
 }
 
-.features {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 20px 0;
-  text-align: left;
+.badge-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-bottom: 1.25rem;
+  margin-top: 0;
 }
 
-.features li {
-  color: #4b5563;
-  padding: 8px 0;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-}
-
-.features li:before {
-  content: "✓";
-  margin-right: 10px;
-  font-weight: bold;
+.personal-card .badge-label {
+  background: rgba(102, 126, 234, 0.12);
   color: #667eea;
 }
 
-.account-type-card.selected .features li:before {
-  color: rgba(255, 255, 255, 0.8);
+.enterprise-card .badge-label {
+  background: rgba(245, 87, 108, 0.12);
+  color: #f5576c;
 }
 
-.cta-text {
-  display: inline-block;
-  background: #667eea;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-top: 15px;
-  transition: all 0.3s ease;
-}
-
-.account-type-card:hover .cta-text {
-  background: #5a67d8;
-}
-
-.account-type-card.selected .cta-text {
+.account-type-card.selected .badge-label {
   background: rgba(255, 255, 255, 0.25);
   color: white;
 }
 
+.card-description {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0 0 2rem;
+  line-height: 1.6;
+}
+
+.account-type-card.selected .card-description {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Features List - Better Spacing */
+.features-list {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.account-type-card.selected .feature-item {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-radius: 50%;
+}
+
+.personal-card .feature-icon {
+  background: rgba(102, 126, 234, 0.15);
+  color: #667eea;
+}
+
+.enterprise-card .feature-icon {
+  background: rgba(245, 87, 108, 0.15);
+  color: #f5576c;
+}
+
+.account-type-card.selected .feature-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Card Footer */
+.card-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.account-type-card.selected .card-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.select-btn {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f3f4f6;
+  color: #1f2937;
+  letter-spacing: 0.3px;
+}
+
+.personal-card .select-btn:hover:not(.active) {
+  background: rgba(102, 126, 234, 0.12);
+  color: #667eea;
+  border-bottom: 3px solid #667eea;
+}
+
+.enterprise-card .select-btn:hover:not(.active) {
+  background: rgba(245, 87, 108, 0.12);
+  color: #f5576c;
+  border-bottom: 3px solid #f5576c;
+}
+
+.select-btn.active {
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.personal-card .select-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.enterprise-card .select-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.select-btn:active {
+  transform: scale(0.98);
+}
+
+/* Selector Note */
 .selector-note {
-  background: #fef3c7;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
   border-left: 4px solid #f59e0b;
-  padding: 15px 20px;
-  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  border-radius: 10px;
   color: #92400e;
   text-align: center;
   font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .selector-note p {
   margin: 0;
+  font-weight: 500;
 }
 
 .selector-note strong {
   color: #b45309;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .account-type-card {
+    min-height: 520px;
+  }
+
+  .card-content h3 {
+    font-size: 1.6rem;
+  }
+
+  .icon-container {
+    width: 90px;
+    height: 90px;
+  }
+}
+
+@media (max-width: 768px) {
+  .account-type-card {
+    min-height: auto;
+  }
+
+  .card-header {
+    padding: 2rem 1.5rem 1rem;
+  }
+
+  .card-content {
+    padding: 1.5rem;
+  }
+
+  .card-footer {
+    padding: 1rem 1.5rem;
+  }
+
+  .card-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .icon-container {
+    width: 80px;
+    height: 80px;
+  }
+
+  .features-list {
+    gap: 0.75rem;
+  }
+
+  .feature-item {
+    gap: 0.75rem;
+    font-size: 0.9rem;
+  }
 }

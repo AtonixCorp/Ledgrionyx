@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import AtonixLogo from '../../components/Logo/AtonixLogo';
 import './Login.css';
 
 const Login = () => {
@@ -37,7 +38,10 @@ const Login = () => {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <Link to="/" className="auth-logo">💰 Atonix Capital</Link>
+          <Link to="/" className="auth-logo-link">
+            <AtonixLogo size="small" />
+            <span>Atonix Capital</span>
+          </Link>
         </div>
 
         <div className="auth-card">

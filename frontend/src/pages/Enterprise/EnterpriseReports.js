@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaFileAlt, FaDownload, FaCalendar } from 'react-fontawesome-icons';
+import { FaFileAlt, FaDownload, FaCalendar } from 'react-icons/fa';
 import './EnterpriseReports.css';
 
 const EnterpriseReports = () => {

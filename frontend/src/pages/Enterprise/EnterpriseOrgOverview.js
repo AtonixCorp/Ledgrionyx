@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useEnterprise } from '../context/EnterpriseContext';
+import { useEnterprise } from '../../context/EnterpriseContext';
 import './EnterpriseOrgOverview.css';
 import { FaArrowUp, FaArrowDown, FaGlobe, FaBuilding, FaExclamationTriangle } from 'react-icons/fa';
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaWallet, FaChartBar, FaChartLine, FaGlobe, FaLightbulb, FaShieldAlt, FaRocket, FaCheckCircle } from 'react-icons/fa';
+import AtonixLogo from '../../components/Logo/AtonixLogo';
 import './Landing.css';
 
 const Landing = () => {
@@ -8,7 +9,10 @@ const Landing = () => {
     <div className="landing-page">
       <nav className="landing-nav">
         <div className="landing-nav-content">
-          <h1 className="landing-logo"><FaWallet className="nav-icon" /> Atonix Capital</h1>
+          <div className="landing-logo-wrapper">
+            <AtonixLogo size="small" />
+            <span className="logo-text">Atonix Capital</span>
+          </div>
           <div className="landing-nav-links">
             <Link to="/login" className="btn-outline">Login</Link>
             <Link to="/register" className="btn-primary">Get Started</Link>

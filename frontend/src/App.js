@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
+import { EnterpriseProvider } from './context/EnterpriseContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout/Layout';
 import Landing from './pages/Landing/Landing';
@@ -19,23 +20,50 @@ import Achievements from './pages/Achievements/Achievements';
 import TaxCalculator from './pages/TaxCalculator/TaxCalculator';
 import GlobalTax from './pages/GlobalTax/GlobalTax';
 import FinancialSettings from './pages/FinancialSettings/FinancialSettings';
+import EnterpriseOrgOverview from './pages/Enterprise/EnterpriseOrgOverview';
+import EnterpriseEntities from './pages/Enterprise/EnterpriseEntities';
+import EnterpriseTaxCompliance from './pages/Enterprise/EnterpriseTaxCompliance';
+import EnterpriseCashflow from './pages/Enterprise/EnterpriseCashflow';
+import EnterpriseRiskExposure from './pages/Enterprise/EnterpriseRiskExposure';
+import EnterpriseReports from './pages/Enterprise/EnterpriseReports';
+import EnterpriseTeam from './pages/Enterprise/EnterpriseTeam';
 import './App.css';
+
+// Component for account-type based routing
+const AccountTypeRoute = ({ children, requiredType }) => {
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const userAccountType = user?.account_type;
+
+  if (requiredType === 'personal' && userAccountType === 'enterprise') {
+    return <Navigate to="/app/enterprise/org-overview" replace />;
+  }
+
+  if (requiredType === 'enterprise' && userAccountType === 'personal') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
 
 function App() {
   return (
     <AuthProvider>
       <FinanceProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+        <EnterpriseProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
             {/* Protected Routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Layout><Dashboard /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><Dashboard /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/expenses" element={
@@ -89,10 +117,62 @@ function App() {
                 <Layout><FinancialSettings /></Layout>
               </ProtectedRoute>
             } />
+
+            {/* Enterprise Routes */}
+            <Route path="/app/enterprise/org-overview" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseOrgOverview /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/enterprise/entities" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseEntities /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/enterprise/tax-compliance" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseTaxCompliance /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/enterprise/cashflow" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseCashflow /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/enterprise/risk-exposure" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseRiskExposure /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/enterprise/reports" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseReports /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/enterprise/team" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseTeam /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
           </Routes>
         </Router>
-      </FinanceProvider>
-    </AuthProvider>
+      </EnterpriseProvider>
+    </FinanceProvider>
+  </AuthProvider>
   );
 }
 

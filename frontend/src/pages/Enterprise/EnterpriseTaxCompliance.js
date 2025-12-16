@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaCalendar, FaCheckCircle, FaExclamationCircle, FaTimesCircle, FaFileExport } from 'react-fontawesome-icons';
+import { FaCalendar, FaCheckCircle, FaExclamationCircle, FaTimesCircle, FaFileExport } from 'react-icons/fa';
 import './EnterpriseTaxCompliance.css';
 
 const EnterpriseTaxCompliance = () => {

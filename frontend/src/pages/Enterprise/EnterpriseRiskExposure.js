@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaExclamationTriangle, FaChartBar, FaMap, FaBell } from 'react-fontawesome-icons';
+import { FaExclamationTriangle, FaChartBar, FaMap, FaBell } from 'react-icons/fa';
 import './EnterpriseRiskExposure.css';
 
 const EnterpriseRiskExposure = () => {

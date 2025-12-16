@@ -25,6 +25,26 @@
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+.auth-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  justify-content: center;
+}
+
+.auth-logo-link .atonix-logo {
+  width: 60px;
+  height: 60px;
+}
+
+.auth-logo-link span {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 .auth-card {
   background: white;
   border-radius: 16px;

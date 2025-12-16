@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useEnterprise } from '../context/EnterpriseContext';
+import { useEnterprise } from '../../context/EnterpriseContext';
 import './EnterpriseEntities.css';
 import { FaPlus, FaEdit, FaTrash, FaGlobe, FaBuilding, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 

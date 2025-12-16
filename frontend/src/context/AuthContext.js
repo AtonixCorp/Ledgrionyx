@@ -2,6 +2,17 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+// Detect account type based on email domain
+const detectAccountType = (email) => {
+  const personalDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'aol.com', 'protonmail.com', 'icloud.com'];
+  const domain = email.split('@')[1]?.toLowerCase();
+  
+  if (personalDomains.includes(domain)) {
+    return 'personal';
+  }
+  return 'enterprise';
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,25 +40,28 @@ export const AuthProvider = ({ children }) => {
         password: 'password',
         country: 'Nigeria',
         phone: '+234 801 234 5678',
-        avatar: 'J'
+        avatar: 'J',
+        account_type: 'enterprise'
       },
       {
         id: 2,
         name: 'Jane Smith',
-        email: 'demo@demo.com',
+        email: 'jane@gmail.com',
         password: 'demo123',
         country: 'Kenya',
         phone: '+254 712 345 678',
-        avatar: 'J'
+        avatar: 'J',
+        account_type: 'personal'
       },
       {
         id: 3,
         name: 'Admin User',
-        email: 'admin@admin.com',
+        email: 'admin@company.com',
         password: 'admin123',
         country: 'South Africa',
         phone: '+27 82 123 4567',
-        avatar: 'A'
+        avatar: 'A',
+        account_type: 'enterprise'
       }
     ];
 
@@ -63,11 +77,13 @@ export const AuthProvider = ({ children }) => {
     }
 
     // If no match, accept any email/password (for flexibility)
+    const accountType = detectAccountType(email);
     const mockUser = {
       id: Date.now(),
       name: email.split('@')[0],
       email: email,
-      avatar: email.charAt(0).toUpperCase()
+      avatar: email.charAt(0).toUpperCase(),
+      account_type: accountType
     };
 
     setUser(mockUser);
@@ -76,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     return { success: true, user: mockUser };
   };
 
-  const register = (name, email, password, country, phone) => {
+  const register = (name, email, password, country, phone, account_type) => {
     // Mock registration - in production, this would call the backend API
     const mockUser = {
       id: Date.now(),
@@ -84,7 +100,8 @@ export const AuthProvider = ({ children }) => {
       email: email,
       country: country,
       phone: phone,
-      avatar: name.charAt(0).toUpperCase()
+      avatar: name.charAt(0).toUpperCase(),
+      account_type: account_type || detectAccountType(email)
     };
 
     setUser(mockUser);
