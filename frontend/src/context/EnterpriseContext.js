@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 
 const EnterpriseContext = createContext();
@@ -83,6 +83,172 @@ export const EnterpriseProvider = ({ children }) => {
     ASSIGN_ROLES: 'assign_roles',
   };
 
+  // Mock enterprise data for testing
+  const mockOrganizations = [
+    {
+      id: 1,
+      name: 'Atonix Capital',
+      slug: 'atonix-capital',
+      industry: 'Financial Services',
+      country: 'Nigeria',
+      headquarters: 'Lagos, Nigeria',
+      founded_year: 2023,
+      employees_count: 50,
+      status: 'active'
+    }
+  ];
+
+  const mockOrgOverview = {
+    total_assets: 15000000,
+    total_liabilities: 5000000,
+    net_position: 10000000,
+    total_tax_exposure: 2500000,
+    active_jurisdictions: 12,
+    active_entities: 5,
+    pending_tax_returns: 2,
+    missing_data_entities: 1,
+    tax_exposure_by_country: {
+      // Africa - West
+      'Nigeria': 1500000,
+      'Ghana': 450000,
+      'Senegal': 280000,
+      
+      // Africa - East
+      'Kenya': 700000,
+      'Tanzania': 320000,
+      'Uganda': 180000,
+      
+      // Africa - Southern
+      'South Africa': 300000,
+      'Botswana': 120000,
+      
+      // Europe
+      'United Kingdom': 850000,
+      'Germany': 620000,
+      'Switzerland': 340000,
+      
+      // North America
+      'United States': 1200000,
+      'Canada': 480000,
+      
+      // Asia Pacific
+      'Singapore': 550000,
+      'Hong Kong': 420000,
+      'India': 380000,
+      'Australia': 290000,
+      'United Arab Emirates': 180000,
+    }
+  };
+
+  const mockEntities = [
+    {
+      id: 1,
+      name: 'Atonix Capital Limited',
+      type: 'Limited Company',
+      country: 'Nigeria',
+      status: 'Active',
+      tax_id: 'TIN123456789',
+      incorporation_date: '2023-01-15'
+    },
+    {
+      id: 2,
+      name: 'Atonix East Africa',
+      type: 'Limited Company',
+      country: 'Kenya',
+      status: 'Active',
+      tax_id: 'KE123456789',
+      incorporation_date: '2023-06-20'
+    },
+    {
+      id: 3,
+      name: 'Atonix Southern Africa',
+      type: 'Limited Company',
+      country: 'South Africa',
+      status: 'Active',
+      tax_id: 'ZA123456789',
+      incorporation_date: '2023-09-10'
+    },
+    {
+      id: 4,
+      name: 'Atonix Advisory',
+      type: 'Partnership',
+      country: 'Nigeria',
+      status: 'Active',
+      tax_id: 'TIN987654321',
+      incorporation_date: '2023-03-01'
+    },
+    {
+      id: 5,
+      name: 'Atonix Investments',
+      type: 'Trust',
+      country: 'Nigeria',
+      status: 'Pending',
+      tax_id: 'TIN555555555',
+      incorporation_date: '2024-01-01'
+    }
+  ];
+
+  const mockTeamMembers = [
+    {
+      id: 1,
+      user_name: 'Enterprise Admin',
+      user_email: 'admin@atonixcapital.com',
+      role_code: ROLES.ORG_OWNER,
+      role_name: 'Organization Owner',
+      status: 'active'
+    },
+    {
+      id: 2,
+      user_name: 'CFO',
+      user_email: 'cfo@atonixcapital.com',
+      role_code: ROLES.CFO,
+      role_name: 'Chief Financial Officer',
+      status: 'active'
+    },
+    {
+      id: 3,
+      user_name: 'Tax Analyst',
+      user_email: 'analyst@atonixcapital.com',
+      role_code: ROLES.FINANCE_ANALYST,
+      role_name: 'Finance Analyst',
+      status: 'active'
+    }
+  ];
+
+  const mockTaxExposures = [
+    { country: 'Nigeria', total_exposure: 1500000, entities: 2, rate: 30 },
+    { country: 'Kenya', total_exposure: 700000, entities: 1, rate: 37.5 },
+    { country: 'South Africa', total_exposure: 300000, entities: 1, rate: 28 }
+  ];
+
+  const mockComplianceDeadlines = [
+    { id: 1, country: 'Nigeria', type: 'Corporate Tax Return', dueDate: '2025-04-15', status: 'upcoming', entity: 'Atonix Capital Limited' },
+    { id: 2, country: 'Nigeria', type: 'Payroll Tax', dueDate: '2025-01-31', status: 'due_soon', entity: 'Atonix Capital Limited' },
+    { id: 3, country: 'Kenya', type: 'VAT Return', dueDate: '2025-01-20', status: 'due_soon', entity: 'Atonix East Africa' },
+    { id: 4, country: 'South Africa', type: 'Corporate Tax', dueDate: '2025-06-30', status: 'upcoming', entity: 'Atonix Southern Africa' },
+    { id: 5, country: 'Nigeria', type: 'Annual Return', dueDate: '2025-03-31', status: 'upcoming', entity: 'Atonix Advisory' }
+  ];
+
+  /**
+   * Initialize enterprise data for user
+   */
+  useEffect(() => {
+    if (user && user.account_type === 'enterprise') {
+      // Set default user role to ORG_OWNER for testing
+      setCurrentUserRole(ROLES.ORG_OWNER);
+      
+      // Initialize with mock data
+      setOrganizations(mockOrganizations);
+      setCurrentOrganization(mockOrganizations[0]);
+      setOrgOverview(mockOrgOverview);
+      setEntities(mockEntities);
+      setTeamMembers(mockTeamMembers);
+      
+      console.log('Enterprise user initialized:', user);
+      console.log('Current user role set to:', ROLES.ORG_OWNER);
+    }
+  }, [user]);
+
   /**
    * Fetch organizations for current user
    */
@@ -125,9 +291,14 @@ export const EnterpriseProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setOrgOverview(data);
+      } else {
+        // Use mock data as fallback
+        setOrgOverview(mockOrgOverview);
       }
     } catch (err) {
-      console.error('Failed to fetch overview:', err);
+      console.error('Failed to fetch org overview, using mock data:', err);
+      // Use mock data as fallback
+      setOrgOverview(mockOrgOverview);
     }
   }, []);
 
@@ -145,9 +316,14 @@ export const EnterpriseProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setEntities(Array.isArray(data) ? data : data.results || []);
+      } else {
+        // Use mock data as fallback
+        setEntities(mockEntities);
       }
     } catch (err) {
-      console.error('Failed to fetch entities:', err);
+      console.error('Failed to fetch entities, using mock data:', err);
+      // Use mock data as fallback
+      setEntities(mockEntities);
     }
   }, []);
 
@@ -173,9 +349,14 @@ export const EnterpriseProvider = ({ children }) => {
         if (currentMember) {
           setCurrentUserRole(currentMember.role_code);
         }
+      } else {
+        // Use mock data as fallback
+        setTeamMembers(mockTeamMembers);
       }
     } catch (err) {
-      console.error('Failed to fetch team members:', err);
+      console.error('Failed to fetch team members, using mock data:', err);
+      // Use mock data as fallback
+      setTeamMembers(mockTeamMembers);
     }
   }, [user]);
 
@@ -233,9 +414,14 @@ export const EnterpriseProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setCashflowData(Array.isArray(data) ? data : data.results || []);
+      } else {
+        // Use empty array as fallback for cashflow (pages handle their own mock data)
+        setCashflowData([]);
       }
     } catch (err) {
-      console.error('Failed to fetch cashflow data:', err);
+      console.error('Failed to fetch cashflow data, using empty array:', err);
+      // Use empty array as fallback for cashflow (pages handle their own mock data)
+      setCashflowData([]);
     }
   }, []);
 

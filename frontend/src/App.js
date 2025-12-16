@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { EnterpriseProvider } from './context/EnterpriseContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -27,19 +27,27 @@ import EnterpriseCashflow from './pages/Enterprise/EnterpriseCashflow';
 import EnterpriseRiskExposure from './pages/Enterprise/EnterpriseRiskExposure';
 import EnterpriseReports from './pages/Enterprise/EnterpriseReports';
 import EnterpriseTeam from './pages/Enterprise/EnterpriseTeam';
+import EnterpriseSettings from './pages/EnterpriseSettings/EnterpriseSettings';
 import './App.css';
 
 // Component for account-type based routing
 const AccountTypeRoute = ({ children, requiredType }) => {
+  // Try to get user from multiple sources
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
-  const userAccountType = user?.account_type;
+  let userAccountType = user?.account_type;
 
-  if (requiredType === 'personal' && userAccountType === 'enterprise') {
+  // If no account type is set, default to 'personal' for backward compatibility
+  const accountType = userAccountType || 'personal';
+
+  // Debug logging
+  console.log(`AccountTypeRoute - Required: ${requiredType}, User Account Type: ${accountType}, User:`, user);
+
+  if (requiredType === 'personal' && accountType === 'enterprise') {
     return <Navigate to="/app/enterprise/org-overview" replace />;
   }
 
-  if (requiredType === 'enterprise' && userAccountType === 'personal') {
+  if (requiredType === 'enterprise' && accountType === 'personal') {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -68,53 +76,73 @@ function App() {
             } />
             <Route path="/expenses" element={
               <ProtectedRoute>
-                <Layout><Expenses /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><Expenses /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/income" element={
               <ProtectedRoute>
-                <Layout><Income /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><Income /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/budget" element={
               <ProtectedRoute>
-                <Layout><Budget /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><Budget /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/analytics" element={
               <ProtectedRoute>
-                <Layout><Analytics /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><Analytics /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/ai-insights" element={
               <ProtectedRoute>
-                <Layout><AIInsights /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><AIInsights /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/financial-dna" element={
               <ProtectedRoute>
-                <Layout><FinancialDNA /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><FinancialDNA /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/security-vaults" element={
               <ProtectedRoute>
-                <Layout><SecurityVaults /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><SecurityVaults /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/achievements" element={
               <ProtectedRoute>
-                <Layout><Achievements /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><Achievements /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/tax-calculator" element={
               <ProtectedRoute>
-                <Layout><TaxCalculator /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><TaxCalculator /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
             <Route path="/global-tax" element={<GlobalTax />} />
             <Route path="/settings" element={
               <ProtectedRoute>
-                <Layout><FinancialSettings /></Layout>
+                <AccountTypeRoute requiredType="personal">
+                  <Layout><FinancialSettings /></Layout>
+                </AccountTypeRoute>
               </ProtectedRoute>
             } />
 
@@ -165,6 +193,13 @@ function App() {
               <ProtectedRoute>
                 <AccountTypeRoute requiredType="enterprise">
                   <Layout><EnterpriseTeam /></Layout>
+                </AccountTypeRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/enterprise/settings" element={
+              <ProtectedRoute>
+                <AccountTypeRoute requiredType="enterprise">
+                  <Layout><EnterpriseSettings /></Layout>
                 </AccountTypeRoute>
               </ProtectedRoute>
             } />

@@ -22,8 +22,21 @@ export const AuthProvider = ({ children }) => {
     // Check if user is already logged in (from localStorage)
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        // Ensure account_type is always set (default to 'personal' for backward compatibility)
+        if (!parsedUser.account_type) {
+          parsedUser.account_type = detectAccountType(parsedUser.email);
+          localStorage.setItem('user', JSON.stringify(parsedUser));
+          console.log('Updated stored user with account_type:', parsedUser);
+        }
+        setUser(parsedUser);
+        setIsAuthenticated(true);
+        console.log('Loaded user from localStorage:', parsedUser);
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('user');
+      }
     }
     setLoading(false);
   }, []);
@@ -61,6 +74,26 @@ export const AuthProvider = ({ children }) => {
         country: 'South Africa',
         phone: '+27 82 123 4567',
         avatar: 'A',
+        account_type: 'enterprise'
+      },
+      {
+        id: 4,
+        name: 'Admin',
+        email: 'admin@admin.com',
+        password: 'admin',
+        country: 'United States',
+        phone: '+1 555 000 0000',
+        avatar: 'A',
+        account_type: 'personal'
+      },
+      {
+        id: 5,
+        name: 'Enterprise Admin',
+        email: 'admin@atonixcapital.com',
+        password: 'enterprise123',
+        country: 'Nigeria',
+        phone: '+234 702 345 6789',
+        avatar: 'E',
         account_type: 'enterprise'
       }
     ];

@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import './EnterpriseOrgOverview.css';
-import { FaArrowUp, FaArrowDown, FaGlobe, FaBuilding, FaExclamationTriangle } from 'react-icons/fa';
+import { FaArrowUp, FaArrowDown, FaGlobe, FaBuilding, FaExclamationTriangle, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
 
 const EnterpriseOrgOverview = () => {
+  const navigate = useNavigate();
   const { currentOrganization, orgOverview, fetchOrgOverview, hasPermission, PERMISSIONS } = useEnterprise();
 
   useEffect(() => {
@@ -32,8 +34,18 @@ const EnterpriseOrgOverview = () => {
     tax_exposure_by_country = {}
   } = orgOverview;
 
+  const handleNavigate = (path) => {
+    navigate(path);
+  };
+
   return (
     <div className="org-overview-container">
+      {/* Header */}
+      <div className="overview-header">
+        <h1>Organization Overview</h1>
+        <p>Executive summary of your organization's financial and tax position</p>
+      </div>
+
       {/* Executive Summary */}
       <section className="executive-summary">
         <h2 className="section-title">Executive Summary</h2>
@@ -109,13 +121,14 @@ const EnterpriseOrgOverview = () => {
           
           {missing_data_entities === 0 && pending_tax_returns === 0 && (
             <div className="status-item healthy">
-              <span>✓ All systems operational</span>
+              <FaCheckCircle className="status-icon" />
+              <span>All systems operational</span>
             </div>
           )}
         </div>
       </section>
 
-      {/* Tax Exposure Heatmap */}
+      {/* Tax Exposure by Country */}
       <section className="tax-heatmap">
         <h3 className="section-title">Tax Exposure by Country</h3>
         
@@ -142,27 +155,58 @@ const EnterpriseOrgOverview = () => {
         </div>
       </section>
 
-      {/* Quick Links */}
-      <section className="quick-links">
+      {/* Quick Actions */}
+      <section className="quick-actions">
         <h3 className="section-title">Quick Actions</h3>
         
-        <div className="links-grid">
-          <a href="/enterprise/entities" className="quick-link">
-            <span className="link-icon">🏢</span>
-            <span className="link-text">View All Entities</span>
-          </a>
-          <a href="/enterprise/tax-compliance" className="quick-link">
-            <span className="link-icon">📋</span>
-            <span className="link-text">Tax Compliance</span>
-          </a>
-          <a href="/enterprise/team" className="quick-link">
-            <span className="link-icon">👥</span>
-            <span className="link-text">Manage Team</span>
-          </a>
-          <a href="/enterprise/reports" className="quick-link">
-            <span className="link-icon">📊</span>
-            <span className="link-text">View Reports</span>
-          </a>
+        <div className="actions-grid">
+          <button 
+            className="action-button entities"
+            onClick={() => handleNavigate('/app/enterprise/entities')}
+          >
+            <div className="action-icon">🏢</div>
+            <div className="action-content">
+              <h4>View All Entities</h4>
+              <p>Manage and monitor all legal entities</p>
+            </div>
+            <FaArrowRight className="action-arrow" />
+          </button>
+
+          <button 
+            className="action-button compliance"
+            onClick={() => handleNavigate('/app/enterprise/tax-compliance')}
+          >
+            <div className="action-icon">📋</div>
+            <div className="action-content">
+              <h4>Tax Compliance</h4>
+              <p>Track deadlines and obligations</p>
+            </div>
+            <FaArrowRight className="action-arrow" />
+          </button>
+
+          <button 
+            className="action-button team"
+            onClick={() => handleNavigate('/app/enterprise/team')}
+          >
+            <div className="action-icon">👥</div>
+            <div className="action-content">
+              <h4>Manage Team</h4>
+              <p>Control access and permissions</p>
+            </div>
+            <FaArrowRight className="action-arrow" />
+          </button>
+
+          <button 
+            className="action-button reports"
+            onClick={() => handleNavigate('/app/enterprise/reports')}
+          >
+            <div className="action-icon">📊</div>
+            <div className="action-content">
+              <h4>View Reports</h4>
+              <p>Generate and export reports</p>
+            </div>
+            <FaArrowRight className="action-arrow" />
+          </button>
         </div>
       </section>
     </div>

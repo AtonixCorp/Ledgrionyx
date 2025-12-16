@@ -1,12 +1,13 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FaChartPie, FaMoneyBillWave, FaHandHoldingUsd, FaChartLine, FaChartBar, FaBrain, FaDna, FaShieldAlt, FaTrophy, FaCalculator, FaSignOutAlt, FaMoneyBill } from 'react-icons/fa';
+import { FaHome, FaMoneyBillWave, FaHandHoldingUsd, FaChartLine, FaChartBar, FaBrain, FaDna, FaShieldAlt, FaTrophy, FaCalculator, FaSignOutAlt, FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog, FaExclamationTriangle } from 'react-icons/fa';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isEnterprise = user?.account_type === 'enterprise';
 
   const handleLogout = () => {
     logout();
@@ -21,66 +22,109 @@ const Layout = ({ children }) => {
         </div>
         
         <ul className="nav-menu">
-          <li>
-            <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaChartPie /></span>
-              Dashboard
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/expenses" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaMoneyBillWave /></span>
-              Expenses
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/income" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaHandHoldingUsd /></span>
-              Income
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/budget" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaChartLine /></span>
-              Budget
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/analytics" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaChartBar /></span>
-              Analytics
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/ai-insights" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaBrain /></span>
-              AI Insights
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/financial-dna" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaDna /></span>
-              Financial DNA
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/security-vaults" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaShieldAlt /></span>
-              Security & Vaults
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/achievements" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaTrophy /></span>
-              Achievements
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/tax-calculator" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaCalculator /></span>
-              Tax Calculator
-            </NavLink>
-          </li>
+          {/* PERSONAL NAVIGATION */}
+          {!isEnterprise && (
+            <>
+              <li>
+                <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaHome /></span>
+                  Home
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/income" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaHandHoldingUsd /></span>
+                  My Countries
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/tax-calculator" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaCalculator /></span>
+                  Tax & Returns
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/budget" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaChartLine /></span>
+                  Cashflow & Budgets
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/expenses" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaMoneyBillWave /></span>
+                  Assets & Liabilities
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/ai-insights" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaBrain /></span>
+                  Insights & Alerts
+                </NavLink>
+              </li>
+              <li className="nav-divider"></li>
+              <li>
+                <NavLink to="/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaCog /></span>
+                  Settings
+                </NavLink>
+              </li>
+            </>
+          )}
+
+          {/* ENTERPRISE NAVIGATION */}
+          {isEnterprise && (
+            <>
+              <li>
+                <NavLink to="/app/enterprise/org-overview" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaChartBar /></span>
+                  Org Overview
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/app/enterprise/entities" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaBuilding /></span>
+                  Entities & Countries
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/app/enterprise/tax-compliance" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaCheckCircle /></span>
+                  Tax & Compliance
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/app/enterprise/cashflow" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaChartLine /></span>
+                  Cashflow & Treasury
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/app/enterprise/risk-exposure" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaExclamationTriangle /></span>
+                  Risk & Exposure
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/app/enterprise/reports" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaFileExport /></span>
+                  Reports & Exports
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/app/enterprise/team" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaUsers /></span>
+                  Team & Permissions
+                </NavLink>
+              </li>
+              <li className="nav-divider"></li>
+              <li>
+                <NavLink to="/app/enterprise/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaCog /></span>
+                  Settings & Integrations
+                </NavLink>
+              </li>
+            </>
+          )}
         </ul>
 
         <div className="sidebar-footer">

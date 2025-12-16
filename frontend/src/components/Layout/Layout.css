@@ -55,6 +55,13 @@
   border-right: 4px solid white;
 }
 
+.nav-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 0.75rem 1.5rem;
+  list-style: none;
+}
+
 .nav-icon {
   margin-right: 0.75rem;
   font-size: 1.2rem;
