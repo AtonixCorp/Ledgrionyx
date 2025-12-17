@@ -1,0 +1,237 @@
+import React, { useEffect, useState } from 'react';
+import { useEnterprise } from '../../context/EnterpriseContext';
+import { FaCalendar, FaCheckCircle, FaExclamationCircle, FaTimesCircle, FaFileExport } from 'react-icons/fa';
+import './EnterpriseTaxCompliance.css';
+
+const EnterpriseTaxCompliance = () => {
+  const { currentOrganization } = useEnterprise();
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [complianceData, setComplianceData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Mock data - replace with API call
+  useEffect(() => {
+    if (currentOrganization) {
+      setLoading(true);
+      // TODO: Call API endpoint /api/compliance-deadlines/?organization_id=currentOrganization.id
+      const mockDeadlines = [
+        { id: 1, country: 'US', type: 'Federal Tax Return', dueDate: '2025-04-15', status: 'upcoming', entity: 'Entity A' },
+        { id: 2, country: 'US', type: 'Payroll Tax', dueDate: '2025-01-31', status: 'due_soon', entity: 'Entity A' },
+        { id: 3, country: 'UK', type: 'VAT Return', dueDate: '2025-01-20', status: 'overdue', entity: 'Entity B' },
+        { id: 4, country: 'CA', type: 'Corporate Tax', dueDate: '2025-06-30', status: 'upcoming', entity: 'Entity C' },
+        { id: 5, country: 'AU', type: 'Tax Return', dueDate: '2025-10-31', status: 'upcoming', entity: 'Entity D' },
+        { id: 6, country: 'DE', type: 'VAT Declaration', dueDate: '2025-02-10', status: 'due_soon', entity: 'Entity E' },
+      ];
+      setComplianceData(mockDeadlines);
+      setLoading(false);
+    }
+  }, [currentOrganization]);
+
+  // Get status badge color
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'done': return '#10b981';
+      case 'upcoming': return '#3b82f6';
+      case 'due_soon': return '#f59e0b';
+      case 'overdue': return '#ef4444';
+      default: return '#6b7280';
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch(status) {
+      case 'done': return '✓ Done';
+      case 'upcoming': return '◯ Upcoming';
+      case 'due_soon': return '⚠ Due Soon';
+      case 'overdue': return '✗ Overdue';
+      default: return status;
+    }
+  };
+
+  // Group by country for list view
+  const groupByCountry = () => {
+    const grouped = {};
+    complianceData.forEach(item => {
+      if (!grouped[item.country]) {
+        grouped[item.country] = [];
+      }
+      grouped[item.country].push(item);
+    });
+    return grouped;
+  };
+
+  const countryGroups = groupByCountry();
+
+  // Status summary
+  const statusCounts = {
+    done: complianceData.filter(d => d.status === 'done').length,
+    upcoming: complianceData.filter(d => d.status === 'upcoming').length,
+    due_soon: complianceData.filter(d => d.status === 'due_soon').length,
+    overdue: complianceData.filter(d => d.status === 'overdue').length,
+  };
+
+  const handleExport = () => {
+    // TODO: Implement CSV/PDF export
+    console.log('Exporting compliance data...');
+  };
+
+  return (
+    <div className="tax-compliance-container">
+      {/* Header */}
+      <div className="compliance-header">
+        <div className="header-left">
+          <h1><FaCalendar /> Tax Compliance Calendar</h1>
+          <p>{currentOrganization?.name || 'Organization'} - {complianceData.length} obligations tracked</p>
+        </div>
+        <div className="header-actions">
+          <button className="btn-secondary" onClick={() => setViewMode(viewMode === 'list' ? 'calendar' : 'list')}>
+            {viewMode === 'list' ? 'Calendar View' : 'List View'}
+          </button>
+          <button className="btn-primary" onClick={handleExport}>
+            <FaFileExport /> Export
+          </button>
+        </div>
+      </div>
+
+      {/* Status Summary Strip */}
+      <div className="status-summary">
+        <div className="status-card done">
+          <div className="status-number">{statusCounts.done}</div>
+          <div className="status-label">Done</div>
+        </div>
+        <div className="status-card upcoming">
+          <div className="status-number">{statusCounts.upcoming}</div>
+          <div className="status-label">Upcoming</div>
+        </div>
+        <div className="status-card due_soon">
+          <div className="status-number">{statusCounts.due_soon}</div>
+          <div className="status-label">Due Soon</div>
+        </div>
+        <div className="status-card overdue">
+          <div className="status-number">{statusCounts.overdue}</div>
+          <div className="status-label">Overdue</div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      {loading ? (
+        <div className="loading">Loading compliance data...</div>
+      ) : viewMode === 'list' ? (
+        // List View
+        <div className="compliance-list-view">
+          {Object.keys(countryGroups).sort().map(country => (
+            <div key={country} className="country-section">
+              <div className="country-header">
+                <h2>{country}</h2>
+                <span className="obligation-count">{countryGroups[country].length} obligations</span>
+              </div>
+
+              <div className="obligations-table">
+                <div className="table-header">
+                  <div className="col-type">Type</div>
+                  <div className="col-entity">Entity</div>
+                  <div className="col-due">Due Date</div>
+                  <div className="col-status">Status</div>
+                  <div className="col-action">Action</div>
+                </div>
+
+                {countryGroups[country].map(deadline => (
+                  <div key={deadline.id} className="table-row">
+                    <div className="col-type">{deadline.type}</div>
+                    <div className="col-entity">{deadline.entity}</div>
+                    <div className="col-due">{new Date(deadline.dueDate).toLocaleDateString()}</div>
+                    <div className="col-status">
+                      <span className="status-badge" style={{backgroundColor: getStatusColor(deadline.status)}}>
+                        {getStatusLabel(deadline.status)}
+                      </span>
+                    </div>
+                    <div className="col-action">
+                      <button className="btn-link">Mark Done</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Calendar View
+        <div className="compliance-calendar-view">
+          <div className="calendar-header">
+            <button onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1))}>←</button>
+            <h2>{selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+            <button onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1))}>→</button>
+          </div>
+
+          <div className="calendar-grid">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="calendar-day-header">{day}</div>
+            ))}
+
+            {/* Calendar days with events */}
+            {Array.from({ length: 35 }, (_, i) => {
+              const date = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), i - (new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1).getDay()) + 1);
+              const isCurrentMonth = date.getMonth() === selectedMonth.getMonth();
+              const eventsForDay = complianceData.filter(d => {
+                const deadlineDate = new Date(d.dueDate);
+                return deadlineDate.getDate() === date.getDate() && 
+                       deadlineDate.getMonth() === date.getMonth() &&
+                       deadlineDate.getFullYear() === date.getFullYear();
+              });
+
+              return (
+                <div key={i} className={`calendar-day ${!isCurrentMonth ? 'other-month' : ''}`}>
+                  <div className="day-number">{date.getDate()}</div>
+                  {eventsForDay.map(event => (
+                    <div key={event.id} className="day-event" style={{backgroundColor: getStatusColor(event.status)}}>
+                      {event.type.slice(0, 3)}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Country Status Cards */}
+      <div className="country-status-section">
+        <h2>Country Status Overview</h2>
+        <div className="country-cards">
+          {Object.keys(countryGroups).sort().map(country => {
+            const countryDeadlines = countryGroups[country];
+            const overdueCount = countryDeadlines.filter(d => d.status === 'overdue').length;
+            const dueSoonCount = countryDeadlines.filter(d => d.status === 'due_soon').length;
+            const doneCount = countryDeadlines.filter(d => d.status === 'done').length;
+
+            return (
+              <div key={country} className="country-card">
+                <div className="card-header">
+                  <h3>{country}</h3>
+                  <div className={`status-light ${overdueCount > 0 ? 'red' : dueSoonCount > 0 ? 'amber' : 'green'}`}></div>
+                </div>
+                <div className="card-stats">
+                  <div className="stat">
+                    <span className="stat-label">Done:</span>
+                    <span className="stat-value green">{doneCount}</span>
+                  </div>
+                  <div className="stat">
+                    <span className="stat-label">Due Soon:</span>
+                    <span className="stat-value amber">{dueSoonCount}</span>
+                  </div>
+                  <div className="stat">
+                    <span className="stat-label">Overdue:</span>
+                    <span className="stat-value red">{overdueCount}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EnterpriseTaxCompliance;

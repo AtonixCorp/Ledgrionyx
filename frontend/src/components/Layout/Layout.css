@@ -179,6 +179,7 @@
   flex: 1;
   background-color: #f5f7fa;
   min-height: 100vh;
+  padding-top: 0;
 }
 
 @media (max-width: 768px) {

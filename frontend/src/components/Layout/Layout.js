@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FaHome, FaMoneyBillWave, FaHandHoldingUsd, FaChartLine, FaChartBar, FaBrain, FaDna, FaShieldAlt, FaTrophy, FaCalculator, FaSignOutAlt, FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog, FaExclamationTriangle } from 'react-icons/fa';
+import { FaHome, FaMoneyBillWave, FaHandHoldingUsd, FaChartLine, FaChartBar, FaBrain, FaDna, FaShieldAlt, FaTrophy, FaCalculator, FaSignOutAlt, FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog, FaExclamationTriangle, FaSync } from 'react-icons/fa';
 import './Layout.css';
 
 const Layout = ({ children }) => {
@@ -87,15 +87,15 @@ const Layout = ({ children }) => {
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/app/enterprise/tax-compliance" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaCheckCircle /></span>
-                  Tax & Compliance
-                </NavLink>
-              </li>
-              <li>
                 <NavLink to="/app/enterprise/cashflow" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                   <span className="nav-icon"><FaChartLine /></span>
                   Cashflow & Treasury
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/app/enterprise/tax-compliance" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <span className="nav-icon"><FaCheckCircle /></span>
+                  Tax & Compliance
                 </NavLink>
               </li>
               <li>
@@ -144,6 +144,7 @@ const Layout = ({ children }) => {
           </button>
         </div>
       </nav>
+
       <main className="main-content">
         {children}
       </main>
