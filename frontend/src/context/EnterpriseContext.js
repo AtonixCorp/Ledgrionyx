@@ -533,11 +533,14 @@ export const EnterpriseProvider = ({ children }) => {
         setEntities([...entities, newEntity]);
         return newEntity;
       } else {
-        throw new Error('Failed to create entity');
+        const errorData = await response.json();
+        const errorMessage = errorData.detail || errorData.message || 'Failed to create entity';
+        throw new Error(errorMessage);
       }
     } catch (err) {
       setError(err.message);
-      console.error(err);
+      console.error('Entity creation error:', err);
+      throw err; // Re-throw so the component can handle it
     }
   }, [entities]);
 

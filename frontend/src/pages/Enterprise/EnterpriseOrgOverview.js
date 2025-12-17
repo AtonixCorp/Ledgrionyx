@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import './EnterpriseOrgOverview.css';
-import { FaArrowUp, FaArrowDown, FaGlobe, FaBuilding, FaExclamationTriangle, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
+import { FaArrowUp, FaArrowDown, FaGlobe, FaBuilding, FaExclamationTriangle, FaCheckCircle, FaArrowRight, FaClipboardList, FaUsers, FaChartBar } from 'react-icons/fa';
 
 const EnterpriseOrgOverview = () => {
   const navigate = useNavigate();
@@ -164,7 +164,7 @@ const EnterpriseOrgOverview = () => {
             className="action-button entities"
             onClick={() => handleNavigate('/app/enterprise/entities')}
           >
-            <div className="action-icon">🏢</div>
+            <div className="action-icon"><FaBuilding /></div>
             <div className="action-content">
               <h4>View All Entities</h4>
               <p>Manage and monitor all legal entities</p>
@@ -176,7 +176,7 @@ const EnterpriseOrgOverview = () => {
             className="action-button compliance"
             onClick={() => handleNavigate('/app/enterprise/tax-compliance')}
           >
-            <div className="action-icon">📋</div>
+            <div className="action-icon"><FaClipboardList /></div>
             <div className="action-content">
               <h4>Tax Compliance</h4>
               <p>Track deadlines and obligations</p>
@@ -188,7 +188,7 @@ const EnterpriseOrgOverview = () => {
             className="action-button team"
             onClick={() => handleNavigate('/app/enterprise/team')}
           >
-            <div className="action-icon">👥</div>
+            <div className="action-icon"><FaUsers /></div>
             <div className="action-content">
               <h4>Manage Team</h4>
               <p>Control access and permissions</p>
@@ -200,7 +200,7 @@ const EnterpriseOrgOverview = () => {
             className="action-button reports"
             onClick={() => handleNavigate('/app/enterprise/reports')}
           >
-            <div className="action-icon">📊</div>
+            <div className="action-icon"><FaChartBar /></div>
             <div className="action-content">
               <h4>View Reports</h4>
               <p>Generate and export reports</p>
