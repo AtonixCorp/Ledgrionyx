@@ -1262,6 +1262,108 @@ export const EnterpriseProvider = ({ children }) => {
   }, []);
 
   /**
+   * Fetch cashflow treasury dashboard data
+   */
+  const fetchCashflowTreasuryDashboard = useCallback(async (entityId, filters = {}) => {
+    try {
+      const params = new URLSearchParams({ entity_id: entityId, ...filters });
+      const response = await fetch(`http://localhost:8000/api/cashflow-treasury/dashboard/?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (response.ok) {
+        return await response.json();
+      } else {
+        throw new Error('Failed to fetch cashflow treasury data');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      return null;
+    }
+  }, []);
+
+  /**
+   * Execute internal transfer
+   */
+  const executeInternalTransfer = useCallback(async (transferData) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/cashflow-treasury/transfer/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(transferData),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      } else {
+        throw new Error('Failed to execute transfer');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      return null;
+    }
+  }, []);
+
+  /**
+   * Execute FX conversion
+   */
+  const executeFXConversion = useCallback(async (conversionData) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/cashflow-treasury/fx_conversion/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(conversionData),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      } else {
+        throw new Error('Failed to execute FX conversion');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      return null;
+    }
+  }, []);
+
+  /**
+   * Execute investment allocation
+   */
+  const executeInvestmentAllocation = useCallback(async (allocationData) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/cashflow-treasury/investment_allocation/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(allocationData),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      } else {
+        throw new Error('Failed to execute investment allocation');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      return null;
+    }
+  }, []);
+
+  /**
    * Fetch audit logs for entity
    */
   const fetchBookkeepingAuditLogs = useCallback(async (entityId) => {
@@ -1280,7 +1382,7 @@ export const EnterpriseProvider = ({ children }) => {
     } catch (err) {
       setError(err.message);
       console.error(err);
-      return [];
+      return null;
     }
   }, []);
 
@@ -1354,6 +1456,10 @@ export const EnterpriseProvider = ({ children }) => {
     deleteTransaction,
     fetchBookkeepingSummary,
     fetchBookkeepingAuditLogs,
+    fetchCashflowTreasuryDashboard,
+    executeInternalTransfer,
+    executeFXConversion,
+    executeInvestmentAllocation,
 
     // Setters
     setCurrentOrganization,

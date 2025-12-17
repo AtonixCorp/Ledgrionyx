@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import './EnterpriseOrgOverview.css';
-import { FaArrowUp, FaArrowDown, FaGlobe, FaBuilding, FaExclamationTriangle, FaCheckCircle, FaArrowRight, FaClipboardList, FaUsers, FaChartBar } from 'react-icons/fa';
+import { FaArrowUp, FaArrowDown, FaGlobe, FaBuilding, FaArrowRight, FaClipboardList, FaUsers, FaChartBar } from 'react-icons/fa';
 
 const EnterpriseOrgOverview = () => {
   const navigate = useNavigate();
@@ -28,10 +28,7 @@ const EnterpriseOrgOverview = () => {
     net_position = 0,
     total_tax_exposure = 0,
     active_jurisdictions = 0,
-    active_entities = 0,
-    pending_tax_returns = 0,
-    missing_data_entities = 0,
-    tax_exposure_by_country = {}
+    active_entities = 0
   } = orgOverview;
 
   const handleNavigate = (path) => {
@@ -75,7 +72,7 @@ const EnterpriseOrgOverview = () => {
             <div className="metric-value">
               ${Number(total_tax_exposure).toLocaleString('en-US', { maximumFractionDigits: 0 })}
             </div>
-            <div className="metric-badge">{pending_tax_returns} returns pending</div>
+            <div className="metric-badge">2 returns pending</div>
           </div>
 
           {/* Jurisdictions Card */}
@@ -100,58 +97,88 @@ const EnterpriseOrgOverview = () => {
         </div>
       </section>
 
-      {/* Status Indicators */}
-      <section className="status-indicators">
-        <h3 className="section-title">Organization Status</h3>
-        
-        <div className="status-strip">
-          {pending_tax_returns > 0 && (
-            <div className="status-item warning">
-              <FaExclamationTriangle className="status-icon" />
-              <span>{pending_tax_returns} tax returns due this month</span>
-            </div>
-          )}
-          
-          {missing_data_entities > 0 && (
-            <div className="status-item alert">
-              <FaExclamationTriangle className="status-icon" />
-              <span>{missing_data_entities} entities with missing data</span>
-            </div>
-          )}
-          
-          {missing_data_entities === 0 && pending_tax_returns === 0 && (
-            <div className="status-item healthy">
-              <FaCheckCircle className="status-icon" />
-              <span>All systems operational</span>
-            </div>
-          )}
-        </div>
-      </section>
+      {/* Active Financial Positions */}
+      <section className="active-positions">
+        <h3 className="section-title">Active Financial Positions</h3>
 
-      {/* Tax Exposure by Country */}
-      <section className="tax-heatmap">
-        <h3 className="section-title">Tax Exposure by Country</h3>
-        
-        <div className="heatmap-grid">
-          {Object.entries(tax_exposure_by_country).map(([country, amount]) => {
-            const max = Math.max(...Object.values(tax_exposure_by_country));
-            const intensity = max > 0 ? (amount / max) : 0;
-            const heatmapColor = `rgba(220, 38, 38, ${0.2 + intensity * 0.8})`;
-            
-            return (
-              <div
-                key={country}
-                className="heatmap-cell"
-                style={{ backgroundColor: heatmapColor }}
-                title={`${country}: $${Number(amount).toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
-              >
-                <div className="cell-content">
-                  <div className="cell-country">{country}</div>
-                  <div className="cell-amount">${Number(amount).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="positions-grid">
+          {/* Cash Positions */}
+          <div className="position-card cash">
+            <div className="position-header">
+              <div className="position-icon">💰</div>
+              <h4>Cash & Equivalents</h4>
+            </div>
+            <div className="position-value">$2,450,000</div>
+            <div className="position-details">
+              <span>4 active accounts</span>
+              <span>3 currencies</span>
+            </div>
+          </div>
+
+          {/* Investment Positions */}
+          <div className="position-card investments">
+            <div className="position-header">
+              <div className="position-icon">📈</div>
+              <h4>Investments</h4>
+            </div>
+            <div className="position-value">$8,750,000</div>
+            <div className="position-details">
+              <span>12 holdings</span>
+              <span>5 asset classes</span>
+            </div>
+          </div>
+
+          {/* Real Estate Positions */}
+          <div className="position-card real-estate">
+            <div className="position-header">
+              <div className="position-icon">🏢</div>
+              <h4>Real Estate</h4>
+            </div>
+            <div className="position-value">$15,200,000</div>
+            <div className="position-details">
+              <span>8 properties</span>
+              <span>4 countries</span>
+            </div>
+          </div>
+
+          {/* Crypto Positions */}
+          <div className="position-card crypto">
+            <div className="position-header">
+              <div className="position-icon">₿</div>
+              <h4>Cryptocurrency</h4>
+            </div>
+            <div className="position-value">$1,850,000</div>
+            <div className="position-details">
+              <span>6 assets</span>
+              <span>24h: +2.4%</span>
+            </div>
+          </div>
+
+          {/* Derivatives Positions */}
+          <div className="position-card derivatives">
+            <div className="position-header">
+              <div className="position-icon">📊</div>
+              <h4>Derivatives</h4>
+            </div>
+            <div className="position-value">$3,100,000</div>
+            <div className="position-details">
+              <span>15 contracts</span>
+              <span>7 counterparties</span>
+            </div>
+          </div>
+
+          {/* Private Equity */}
+          <div className="position-card private-equity">
+            <div className="position-header">
+              <div className="position-icon">🏛️</div>
+              <h4>Private Equity</h4>
+            </div>
+            <div className="position-value">$12,500,000</div>
+            <div className="position-details">
+              <span>5 investments</span>
+              <span>3 funds</span>
+            </div>
+          </div>
         </div>
       </section>
 

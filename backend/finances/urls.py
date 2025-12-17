@@ -14,7 +14,8 @@ from .enterprise_views import (
     RoleViewSet, PermissionViewSet, AuditLogViewSet,
     EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
     BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet,
-    BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet
+    BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet,
+    CashflowTreasuryViewSet
 )
 
 router = DefaultRouter()
@@ -48,6 +49,9 @@ router.register(r'bookkeeping-categories', BookkeepingCategoryViewSet, basename=
 router.register(r'bookkeeping-accounts', BookkeepingAccountViewSet, basename='bookkeeping-account')
 router.register(r'transactions', TransactionViewSet, basename='transaction')
 router.register(r'bookkeeping-audit-logs', BookkeepingAuditLogViewSet, basename='bookkeeping-audit-log')
+
+# Cashflow & Treasury endpoints
+router.register(r'cashflow-treasury', CashflowTreasuryViewSet, basename='cashflow-treasury')
 
 # Financial modeling endpoints
 router.register(r'model-templates', ModelTemplateViewSet, basename='model-template')

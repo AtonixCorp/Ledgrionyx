@@ -114,13 +114,18 @@ const EnterpriseCashflow = () => {
             <div className="banks-grid">
               {Object.entries(cashflowData.by_bank || {}).map(([bank, currencies]) => {
                 const bankTotal = Object.values(currencies).reduce((a, b) => a + b, 0);
+                // Get top 2 currencies by amount (excluding zero amounts)
+                const topCurrencies = Object.entries(currencies)
+                  .filter(([_, amount]) => amount > 0)
+                  .sort(([,a], [,b]) => b - a)
+                  .slice(0, 2);
                 return (
                   <div key={bank} className="bank-card">
                     <h3>{bank}</h3>
                     <div className="bank-total">{formatCurrency(bankTotal, 'USD')}</div>
                     <div className="currencies">
-                      {Object.entries(currencies).map(([currency, amount]) => (
-                        amount > 0 && <div key={currency} className="currency-line">
+                      {topCurrencies.map(([currency, amount]) => (
+                        <div key={currency} className="currency-line">
                           <span>{currency}:</span>
                           <span className="amount">{formatCurrency(amount, currency)}</span>
                         </div>
@@ -138,13 +143,18 @@ const EnterpriseCashflow = () => {
             <div className="entities-grid">
               {Object.entries(cashflowData.by_entity || {}).map(([entity, currencies]) => {
                 const entityTotal = Object.values(currencies).reduce((a, b) => a + b, 0);
+                // Get top 2 currencies by amount (excluding zero amounts)
+                const topCurrencies = Object.entries(currencies)
+                  .filter(([_, amount]) => amount > 0)
+                  .sort(([,a], [,b]) => b - a)
+                  .slice(0, 2);
                 return (
                   <div key={entity} className="entity-card">
                     <h3>{entity}</h3>
                     <div className="entity-total">{formatCurrency(entityTotal, 'USD')}</div>
                     <div className="breakdown">
-                      {Object.entries(currencies).map(([currency, amount]) => (
-                        amount > 0 && <div key={currency} className="breakdown-item">
+                      {topCurrencies.map(([currency, amount]) => (
+                        <div key={currency} className="breakdown-item">
                           <span className="currency">{currency}</span>
                           <span className="amount">{formatCurrency(amount, currency)}</span>
                         </div>

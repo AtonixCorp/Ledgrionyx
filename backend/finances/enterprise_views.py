@@ -637,3 +637,177 @@ class BookkeepingAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
         if entity_id:
             return BookkeepingAuditLog.objects.filter(entity_id=entity_id)
         return BookkeepingAuditLog.objects.all()
+
+
+class CashflowTreasuryViewSet(viewsets.ViewSet):
+    """ViewSet for cashflow and treasury data"""
+    permission_classes = []  # Temporarily disabled for mock auth
+
+    @action(detail=False, methods=['get'])
+    def dashboard(self, request):
+        """Get comprehensive cashflow and treasury dashboard data"""
+        entity_id = request.query_params.get('entity_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        currency = request.query_params.get('currency', 'USD')
+
+        if not entity_id:
+            return Response({'error': 'entity_id required'}, status=400)
+
+        # Mock data - in production, this would aggregate from multiple sources
+        dashboard_data = {
+            'kpis': {
+                'cashOnHand': 2456789.45,
+                'netCashflow': 156789.23,
+                'liquidityRatio': 1.45,
+                'burnRate': -45678.90,
+                'runway': 54  # days
+            },
+            'cashflowTimeline': {
+                'monthly': [
+                    {'month': 'Jan', 'inflows': 450000, 'outflows': 380000, 'forecast': 420000},
+                    {'month': 'Feb', 'inflows': 480000, 'outflows': 395000, 'forecast': 435000},
+                    {'month': 'Mar', 'inflows': 520000, 'outflows': 410000, 'forecast': 450000},
+                    {'month': 'Apr', 'inflows': 495000, 'outflows': 425000, 'forecast': 465000},
+                    {'month': 'May', 'inflows': 535000, 'outflows': 440000, 'forecast': 480000},
+                    {'month': 'Jun', 'inflows': 510000, 'outflows': 455000, 'forecast': 495000}
+                ]
+            },
+            'bankAccounts': [
+                {
+                    'id': 1,
+                    'name': 'Main Operating Account',
+                    'bank': 'Chase',
+                    'balance': 1250000.00,
+                    'currency': 'USD',
+                    'type': 'operational'
+                },
+                {
+                    'id': 2,
+                    'name': 'Reserve Account',
+                    'bank': 'Wells Fargo',
+                    'balance': 850000.00,
+                    'currency': 'USD',
+                    'type': 'reserve'
+                },
+                {
+                    'id': 3,
+                    'name': 'Investment Account',
+                    'bank': 'Goldman Sachs',
+                    'balance': 356789.45,
+                    'currency': 'USD',
+                    'type': 'investment'
+                }
+            ],
+            'accountsPayable': {
+                'upcoming': [
+                    {
+                        'id': 1,
+                        'vendor': 'Microsoft',
+                        'amount': 45000.00,
+                        'dueDate': '2025-01-15',
+                        'status': 'pending',
+                        'risk': 'low'
+                    },
+                    {
+                        'id': 2,
+                        'vendor': 'AWS',
+                        'amount': 28500.00,
+                        'dueDate': '2025-01-18',
+                        'status': 'pending',
+                        'risk': 'medium'
+                    }
+                ],
+                'overdue': [
+                    {
+                        'id': 3,
+                        'vendor': 'Consulting LLC',
+                        'amount': 75000.00,
+                        'dueDate': '2024-12-28',
+                        'status': 'overdue',
+                        'risk': 'high'
+                    }
+                ]
+            },
+            'accountsReceivable': {
+                'expected': [
+                    {
+                        'id': 1,
+                        'customer': 'Tech Corp',
+                        'amount': 125000.00,
+                        'dueDate': '2025-01-10',
+                        'status': 'pending',
+                        'reliability': 'high'
+                    },
+                    {
+                        'id': 2,
+                        'customer': 'Startup Inc',
+                        'amount': 87500.00,
+                        'dueDate': '2025-01-15',
+                        'status': 'pending',
+                        'reliability': 'medium'
+                    }
+                ],
+                'aging': {
+                    'current': 245000.00,
+                    '1-30': 156000.00,
+                    '31-60': 89000.00,
+                    '61-90': 45000.00,
+                    '90+': 23000.00
+                }
+            },
+            'insights': [
+                {
+                    'type': 'warning',
+                    'message': 'Cash runway decreased by 12% this month',
+                    'impact': 'high'
+                },
+                {
+                    'type': 'info',
+                    'message': 'AI detected seasonal cashflow pattern - Q4 typically 15% higher',
+                    'impact': 'medium'
+                },
+                {
+                    'type': 'success',
+                    'message': 'Payment optimization saved $12,500 in fees',
+                    'impact': 'low'
+                }
+            ],
+            'alerts': [
+                {
+                    'type': 'critical',
+                    'message': 'Liquidity ratio below 1.2 threshold',
+                    'priority': 'high'
+                },
+                {
+                    'type': 'warning',
+                    'message': 'Large transaction pending approval: $250,000',
+                    'priority': 'medium'
+                },
+                {
+                    'type': 'info',
+                    'message': 'FX exposure increased 8% this week',
+                    'priority': 'low'
+                }
+            ]
+        }
+
+        return Response(dashboard_data)
+
+    @action(detail=False, methods=['post'])
+    def transfer(self, request):
+        """Execute internal transfer between accounts"""
+        # Mock implementation - in production, this would integrate with banking APIs
+        return Response({'status': 'success', 'message': 'Transfer initiated'})
+
+    @action(detail=False, methods=['post'])
+    def fx_conversion(self, request):
+        """Execute FX conversion"""
+        # Mock implementation
+        return Response({'status': 'success', 'message': 'FX conversion executed'})
+
+    @action(detail=False, methods=['post'])
+    def investment_allocation(self, request):
+        """Allocate funds to investment"""
+        # Mock implementation
+        return Response({'status': 'success', 'message': 'Investment allocation completed'})

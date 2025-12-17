@@ -267,6 +267,12 @@ const EntityDashboard = () => {
                 <p>Full accounting</p>
                 <span className="card-arrow">→</span>
               </div>
+              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/cashflow-treasury`)}>
+                <div className="card-icon treasury">💰</div>
+                <h4>Cashflow & Treasury</h4>
+                <p>Real-time visibility</p>
+                <span className="card-arrow">→</span>
+              </div>
               <div className="quick-access-card" onClick={() => setActiveTab('staff')}>
                 <div className="card-icon staff">👥</div>
                 <h4>Staff & HR</h4>
@@ -742,30 +748,62 @@ const EntityDashboard = () => {
             <div className="section-info">
               <h3>📚 Bookkeeping Module</h3>
               <p>Track all financial transactions, manage accounts, categories, and generate reports.</p>
-              <button 
+              <button
                 className="setup-btn"
                 onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}
               >
                 Open Bookkeeping Dashboard
               </button>
             </div>
-            
+
             <div className="features-grid">
-              <div className="feature-card">
-                <h4>💰 Transaction Management</h4>
+              <div
+                className="feature-card clickable"
+                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/transactions`)}
+              >
+                <div className="feature-icon">💰</div>
+                <h4>Transaction Management</h4>
                 <p>Record income and expenses with detailed categorization</p>
+                <div className="feature-action">
+                  <span>Manage Transactions</span>
+                  <span className="arrow">→</span>
+                </div>
               </div>
-              <div className="feature-card">
-                <h4>📊 Financial Reports</h4>
+              <div
+                className="feature-card clickable"
+                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}
+              >
+                <div className="feature-icon">📊</div>
+                <h4>Financial Reports</h4>
                 <p>P&L statements, cashflow, and category breakdowns</p>
+                <div className="feature-action">
+                  <span>View Reports</span>
+                  <span className="arrow">→</span>
+                </div>
               </div>
-              <div className="feature-card">
-                <h4>🏦 Account Tracking</h4>
+              <div
+                className="feature-card clickable"
+                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/accounts`)}
+              >
+                <div className="feature-icon">🏦</div>
+                <h4>Account Tracking</h4>
                 <p>Monitor bank accounts, wallets, and cash balances</p>
+                <div className="feature-action">
+                  <span>Manage Accounts</span>
+                  <span className="arrow">→</span>
+                </div>
               </div>
-              <div className="feature-card">
-                <h4>📝 Audit Logs</h4>
-                <p>Complete history of all bookkeeping activities</p>
+              <div
+                className="feature-card clickable"
+                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/categories`)}
+              >
+                <div className="feature-icon">📝</div>
+                <h4>Categories & Audit</h4>
+                <p>Manage categories and view audit logs</p>
+                <div className="feature-action">
+                  <span>View Details</span>
+                  <span className="arrow">→</span>
+                </div>
               </div>
             </div>
           </div>
