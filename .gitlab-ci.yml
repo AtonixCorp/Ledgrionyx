@@ -1,0 +1,28 @@
+stages:
+  - test
+  - build
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  NODE_ENV: test
+
+backend-test:
+  stage: test
+  image: python:3.10-slim
+  before_script:
+    - cd backend
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - python manage.py test
+
+frontend-build:
+  stage: build
+  image: node:20-alpine
+  before_script:
+    - cd frontend
+    - npm install
+  script:
+    - npm run build
