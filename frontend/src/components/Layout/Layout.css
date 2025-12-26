@@ -65,6 +65,16 @@
   letter-spacing: -0.5px;
 }
 
+.sidebar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
 .nav-menu {
   list-style: none;
   flex: 1;

@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.utils import timezone
 from .models import (
     Expense, Income, Budget, ModelTemplate, FinancialModel, Scenario,
     SensitivityAnalysis, AIInsight, CustomKPI, KPICalculation, Report,
@@ -19,6 +21,8 @@ from rest_framework.decorators import api_view
 from django.http import JsonResponse, Http404
 import json
 import os
+import csv
+from io import BytesIO
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'tax')
 COUNTRIES_FILE = os.path.join(DATA_DIR, 'countries.json')
@@ -422,20 +426,144 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def generate(self, request, pk=None):
-        """Generate report"""
+        """Generate a structured report payload from the financial model.
+
+        This populates the Report.content, summary and recommendations fields
+        based on the associated FinancialModel's stored results and metrics.
+        """
         report = self.get_object()
-        # TODO: Implement report generation logic
-        report.content = {'message': 'Report generated successfully'}
+        financial_model = report.financial_model
+
+        metrics = {
+            'enterprise_value': financial_model.enterprise_value,
+            'equity_value': financial_model.equity_value,
+            'irr': financial_model.irr,
+            'moic': financial_model.moic,
+        }
+
+        content = {
+            'model_name': financial_model.name,
+            'model_type': financial_model.model_type,
+            'status': financial_model.status,
+            'metrics': {k: (str(v) if v is not None else None) for k, v in metrics.items()},
+            'results': financial_model.results or {},
+            'generated_at': timezone.now().isoformat(),
+        }
+
+        # Very simple narrative summary and recommendations
+        irr = financial_model.irr or 0
+        if irr and irr >= 0.20:
+            recommendation = 'Strong return profile; consider prioritizing this opportunity.'
+        elif irr and irr >= 0.10:
+            recommendation = 'Attractive return; proceed with standard risk review.'
+        elif irr and irr > 0:
+            recommendation = 'Modest return; ensure strategic fit before proceeding.'
+        else:
+            recommendation = 'Return profile is weak or unavailable; investigate drivers before proceeding.'
+
+        report.content = content
+        report.summary = f"Automated summary for model '{financial_model.name}' with IRR {metrics['irr']} and enterprise value {metrics['enterprise_value']}."
+        report.recommendations = {
+            'primary': recommendation,
+            'notes': ['This narrative is auto-generated from stored model metrics.'],
+        }
+        report.generated_by = request.user if getattr(request, 'user', None) and request.user.is_authenticated else None
         report.save()
+
         serializer = self.get_serializer(report)
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
-        """Download report file"""
+        """Download the report in the requested export format.
+
+        Currently supports JSON and CSV responses generated on the fly.
+        """
         report = self.get_object()
-        # TODO: Implement file download logic
-        return Response({'message': 'Download functionality not implemented yet'})
+
+        # Ensure content exists
+        if not report.content:
+            return Response({'error': 'Report has no generated content. Please call the generate action first.'}, status=400)
+
+        export_format = (report.export_format or 'json').lower()
+
+        if export_format == 'json':
+            return Response(report.content)
+
+        if export_format in ('csv', 'xlsx'):
+            # Basic CSV export that can be opened in Excel
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="report_{report.id}.csv"'
+
+            writer = csv.writer(response)
+            writer.writerow(['Title', 'Model Name', 'Model Type', 'IRR', 'MOIC', 'Enterprise Value', 'Equity Value'])
+
+            content = report.content or {}
+            metrics = content.get('metrics', {})
+            writer.writerow([
+                report.title,
+                content.get('model_name'),
+                content.get('model_type'),
+                metrics.get('irr'),
+                metrics.get('moic'),
+                metrics.get('enterprise_value'),
+                metrics.get('equity_value'),
+            ])
+
+            return response
+
+        if export_format == 'pdf':
+            # Simple PDF export using reportlab
+            try:
+                from reportlab.lib.pagesizes import A4
+                from reportlab.pdfgen import canvas
+            except ImportError:
+                return Response({'error': 'PDF export is not available (reportlab not installed).'}, status=500)
+
+            buffer = BytesIO()
+            p = canvas.Canvas(buffer, pagesize=A4)
+            width, height = A4
+
+            y = height - 50
+            p.setFont("Helvetica-Bold", 14)
+            p.drawString(50, y, report.title)
+            y -= 25
+
+            content = report.content or {}
+            metrics = content.get('metrics', {})
+            model_name = content.get('model_name', '')
+            model_type = content.get('model_type', '')
+
+            p.setFont("Helvetica", 11)
+            lines = [
+                f"Model: {model_name} ({model_type})",
+                f"IRR: {metrics.get('irr')}",
+                f"MOIC: {metrics.get('moic')}",
+                f"Enterprise Value: {metrics.get('enterprise_value')}",
+                f"Equity Value: {metrics.get('equity_value')}",
+                "",
+                "Summary:",
+                report.summary or "(no summary)",
+            ]
+
+            for line in lines:
+                if y < 50:
+                    p.showPage()
+                    y = height - 50
+                    p.setFont("Helvetica", 11)
+                p.drawString(50, y, str(line))
+                y -= 18
+
+            p.showPage()
+            p.save()
+
+            buffer.seek(0)
+            pdf_response = HttpResponse(buffer, content_type='application/pdf')
+            pdf_response['Content-Disposition'] = f'attachment; filename="report_{report.id}.pdf"'
+            return pdf_response
+
+        # Fallback for unsupported formats
+        return Response({'error': f'Export format "{export_format}" is not supported yet.'}, status=400)
 
 
 class ConsolidationViewSet(viewsets.ModelViewSet):

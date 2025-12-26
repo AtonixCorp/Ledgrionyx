@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinance } from '../../context/FinanceContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   const { 
     totalIncome, 
     totalExpenses, 
@@ -66,9 +68,9 @@ const Dashboard = () => {
   const COLORS = ['#e74c3c', '#3498db', '#9b59b6', '#f39c12', '#2ecc71', '#1abc9c'];
 
   return (
-    <div className="page-container">
+    <div className="page-container" key={language}>
       <div className="dashboard-header">
-        <h1 className="page-title">Financial Dashboard</h1>
+        <h1 className="page-title">{t('dashboard.title')}</h1>
         
         {/* View Mode Toggle */}
         <div className="view-toggle">
@@ -76,13 +78,13 @@ const Dashboard = () => {
             className={`toggle-btn ${viewMode === 'monthly' ? 'active' : ''}`}
             onClick={() => setViewMode('monthly')}
           >
-            📅 Monthly View
+            {t('dashboard.monthlyView')}
           </button>
           <button 
             className={`toggle-btn ${viewMode === 'all-time' ? 'active' : ''}`}
             onClick={() => setViewMode('all-time')}
           >
-            📊 All-Time
+            {t('dashboard.allTime')}
           </button>
         </div>
         
@@ -173,7 +175,7 @@ const Dashboard = () => {
           <div className="summary-icon">💵</div>
           <div className="summary-content">
             <h3>
-              {viewMode === 'monthly' ? 'Monthly' : 'Total'} Income
+              {viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.income')}
               {viewMode === 'monthly' && monthlySummary?.trends?.comparison && (
                 <span className={`trend ${monthlySummary.trends.comparison.incomeChange >= 0 ? 'up' : 'down'}`}>
                   {monthlySummary.trends.comparison.incomeChange >= 0 ? '↑' : '↓'}
@@ -192,7 +194,7 @@ const Dashboard = () => {
           <div className="summary-icon">💸</div>
           <div className="summary-content">
             <h3>
-              {viewMode === 'monthly' ? 'Monthly' : 'Total'} Expenses
+              {viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.expenses')}
               {viewMode === 'monthly' && monthlySummary?.trends?.comparison && (
                 <span className={`trend ${monthlySummary.trends.comparison.expenseChange >= 0 ? 'down' : 'up'}`}>
                   {monthlySummary.trends.comparison.expenseChange >= 0 ? '↑' : '↓'}
@@ -210,7 +212,7 @@ const Dashboard = () => {
         <div className="card summary-card tax">
           <div className="summary-icon">🏛️</div>
           <div className="summary-content">
-            <h3>{viewMode === 'monthly' ? 'Monthly' : 'Total'} Tax</h3>
+            <h3>{viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.tax')}</h3>
             <p className="summary-amount">${displayData.tax.toFixed(2)}</p>
             {financialSummary?.tax && (
               <p className="summary-detail">{financialSummary.tax.rate.toFixed(1)}% rate</p>
@@ -221,7 +223,7 @@ const Dashboard = () => {
         <div className={`card summary-card ${displayData.balance >= 0 ? 'balance-positive' : 'balance-negative'}`}>
           <div className="summary-icon">💰</div>
           <div className="summary-content">
-            <h3>{viewMode === 'monthly' ? 'Monthly' : 'Net'} Balance</h3>
+            <h3>{viewMode === 'monthly' ? 'Monthly' : 'Net'} {t('labels.balance')}</h3>
             <p className="summary-amount">${displayData.balance.toFixed(2)}</p>
             {viewMode === 'monthly' && monthlySummary?.budgetAnalysis && (
               <p className="summary-detail">
@@ -292,8 +294,8 @@ const Dashboard = () => {
                   <YAxis />
                   <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
                   <Legend />
-                  <Bar dataKey="spent" fill="#e74c3c" name="Spent" />
-                  <Bar dataKey="budget" fill="#2ecc71" name="Budget" />
+                  <Bar dataKey="spent" fill="#e74c3c" name={t('labels.spent')} />
+                  <Bar dataKey="budget" fill="#2ecc71" name={t('labels.budget')} />
                 </BarChart>
               </ResponsiveContainer>
               
@@ -301,12 +303,12 @@ const Dashboard = () => {
                 <div className="budget-status">
                   <p>
                     <strong>Status:</strong> {(monthlySummary.budgetAnalysis.totalRemaining || 0) >= 0 ? '✅' : '⚠️'}
-                    {' '}{(monthlySummary.budgetAnalysis.totalRemaining || 0) >= 0 ? 'Under' : 'Over'} budget by 
+                    {' '}{(monthlySummary.budgetAnalysis.totalRemaining || 0) >= 0 ? 'Under' : 'Over'} {t('labels.budget')} by 
                     ${Math.abs(monthlySummary.budgetAnalysis.totalRemaining || 0).toFixed(2)}
                   </p>
                   {Array.isArray(monthlySummary.budgetAnalysis.overBudgetCategories) && monthlySummary.budgetAnalysis.overBudgetCategories.length > 0 && (
                     <div className="warning-box">
-                      <strong>⚠️ Over Budget:</strong>
+                      <strong>⚠️ {t('labels.overBudget')}:</strong>
                       <ul>
                         {monthlySummary.budgetAnalysis.overBudgetCategories.map((cat, idx) => (
                           <li key={idx}>{cat.category} (${ (cat.over || 0).toFixed(2)} over)</li>

@@ -14,7 +14,7 @@ from .models import (
     ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
-    RecurringTransaction, TaskRequest
+    RecurringTransaction, TaskRequest, FixedAsset, AccrualEntry
 )
 from .serializers import (
     OrganizationSerializer, EntitySerializer, EntityDetailSerializer,
@@ -627,6 +627,106 @@ class TransactionViewSet(viewsets.ModelViewSet):
             'monthly_trend': list(monthly_data)
         })
 
+    @action(detail=False, methods=['get'])
+    def anomalies(self, request):
+        """Detect basic anomalies in transaction amounts for an entity.
+
+        Flags transactions whose absolute amount is far from the mean
+        (simple z-score over the entity's transactions in a period).
+
+        Query params:
+        - entity_id (required)
+        - lookback_days (optional, default 180)
+        - z_threshold (optional, default 3.0)
+        """
+        from math import sqrt
+
+        entity_id = request.query_params.get('entity_id')
+        if not entity_id:
+            return Response({'error': 'entity_id required'}, status=400)
+
+        lookback_days = int(request.query_params.get('lookback_days', 180))
+        z_threshold = float(request.query_params.get('z_threshold', 3.0))
+
+        from datetime import datetime, timedelta
+        cutoff = datetime.now().date() - timedelta(days=lookback_days)
+
+        qs = Transaction.objects.filter(entity_id=entity_id, date__gte=cutoff)
+        amounts = [abs(float(t.amount)) for t in qs]
+
+        if len(amounts) < 5:
+            return Response({'message': 'Not enough data to perform anomaly detection.', 'count': len(amounts)})
+
+        mean = sum(amounts) / len(amounts)
+        variance = sum((x - mean) ** 2 for x in amounts) / len(amounts)
+        std = sqrt(variance) if variance > 0 else 0
+
+        if std == 0:
+            return Response({'message': 'No variability detected; all amounts are similar.', 'count': len(amounts)})
+
+        flagged = []
+        for t in qs:
+            amt = abs(float(t.amount))
+            z = (amt - mean) / std
+            if abs(z) >= z_threshold:
+                flagged.append({
+                    'id': t.id,
+                    'date': t.date,
+                    'amount': float(t.amount),
+                    'type': t.type,
+                    'category': t.category.name,
+                    'account': t.account.name,
+                    'z_score': round(z, 2),
+                    'reason': 'Amount is an outlier compared to recent history.'
+                })
+
+        return Response({
+            'entity_id': int(entity_id),
+            'lookback_days': lookback_days,
+            'mean_amount': round(mean, 2),
+            'std_amount': round(std, 2),
+            'threshold': z_threshold,
+            'flagged_count': len(flagged),
+            'flagged_transactions': flagged,
+        })
+
+    @action(detail=False, methods=['post'])
+    def import_external(self, request):
+        """Bulk-import transactions from external sources (e.g. bank feeds).
+
+        Expects a JSON payload of the form:
+
+        {
+          "transactions": [
+            {"entity": 1, "account": 2, "type": "income", ...},
+            ...
+          ]
+        }
+
+        Each item is validated using the normal TransactionSerializer,
+        including duplicate detection, and created if valid.
+        """
+        transactions_data = request.data.get('transactions')
+        if not isinstance(transactions_data, list):
+            return Response({'error': 'transactions must be a list'}, status=400)
+
+        created_ids = []
+        errors = []
+
+        for index, item in enumerate(transactions_data):
+            serializer = self.get_serializer(data=item)
+            serializer.context['request'] = request
+            if serializer.is_valid():
+                transaction = serializer.save(
+                    created_by=request.user if hasattr(request, 'user') and getattr(request.user, 'is_authenticated', False) else None
+                )
+                created_ids.append(transaction.id)
+            else:
+                errors.append({'index': index, 'errors': serializer.errors})
+
+        status_code = 201 if created_ids else 400
+        return Response({'created_ids': created_ids, 'errors': errors}, status=status_code)
+
 
 class BookkeepingAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for bookkeeping audit logs (read-only)"""
@@ -639,6 +739,229 @@ class BookkeepingAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
         if entity_id:
             return BookkeepingAuditLog.objects.filter(entity_id=entity_id)
         return BookkeepingAuditLog.objects.all()
+
+
+class FinancialStatementsViewSet(viewsets.ViewSet):
+    """ViewSet for generating Balance Sheet, Income Statement, and Cash Flow Statement"""
+
+    @action(detail=False, methods=['get'])
+    def balance_sheet(self, request):
+        """Generate balance sheet for an entity as of a specific date"""
+        entity_id = request.query_params.get('entity_id')
+        as_of_date = request.query_params.get('as_of_date')
+        
+        if not entity_id:
+            return Response({'error': 'entity_id required'}, status=400)
+        
+        from datetime import datetime
+        if as_of_date:
+            try:
+                as_of = datetime.strptime(as_of_date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'Invalid date format (use YYYY-MM-DD)'}, status=400)
+        else:
+            as_of = datetime.now().date()
+        
+        try:
+            entity = Entity.objects.get(pk=entity_id)
+        except Entity.DoesNotExist:
+            return Response({'error': 'Entity not found'}, status=404)
+        
+        # Get all transactions up to the as_of date
+        transactions = Transaction.objects.filter(entity=entity, date__lte=as_of)
+        
+        # Calculate assets (bank accounts + wallets + receivables)
+        current_assets = {}
+        for account in entity.bookkeeping_accounts.filter(type__in=['bank', 'cash']):
+            txns = transactions.filter(account=account)
+            balance = account.balance
+            current_assets[account.name] = float(balance)
+        
+        total_current_assets = sum(current_assets.values())
+        
+        # Fixed assets (at book value)
+        fixed_assets = {}
+        for asset in entity.fixed_assets.filter(is_active=True):
+            book_val = float(asset.cost - asset.accumulated_depreciation)
+            fixed_assets[asset.name] = book_val
+        
+        total_fixed_assets = sum(fixed_assets.values())
+        total_assets = total_current_assets + total_fixed_assets
+        
+        # Liabilities (placeholder: could extend to track payables)
+        total_liabilities = 0
+        
+        # Equity (Assets - Liabilities)
+        total_equity = total_assets - total_liabilities
+        
+        return Response({
+            'entity_id': int(entity_id),
+            'as_of_date': str(as_of),
+            'assets': {
+                'current_assets': current_assets,
+                'total_current_assets': total_current_assets,
+                'fixed_assets': fixed_assets,
+                'total_fixed_assets': total_fixed_assets,
+                'total_assets': total_assets,
+            },
+            'liabilities': {
+                'total_liabilities': total_liabilities,
+            },
+            'equity': {
+                'total_equity': total_equity,
+            },
+            'check': f"Assets ({total_assets}) = Liabilities ({total_liabilities}) + Equity ({total_equity})"
+        })
+
+    @action(detail=False, methods=['get'])
+    def income_statement(self, request):
+        """Generate income statement (P&L) for a period"""
+        entity_id = request.query_params.get('entity_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if not entity_id:
+            return Response({'error': 'entity_id required'}, status=400)
+        
+        from datetime import datetime, timedelta
+        if end_date:
+            try:
+                end = datetime.strptime(end_date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'Invalid end_date format (use YYYY-MM-DD)'}, status=400)
+        else:
+            end = datetime.now().date()
+        
+        if start_date:
+            try:
+                start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'Invalid start_date format (use YYYY-MM-DD)'}, status=400)
+        else:
+            start = end - timedelta(days=365)
+        
+        try:
+            entity = Entity.objects.get(pk=entity_id)
+        except Entity.DoesNotExist:
+            return Response({'error': 'Entity not found'}, status=404)
+        
+        # Get all transactions in the period
+        txns = Transaction.objects.filter(entity=entity, date__gte=start, date__lte=end)
+        
+        # Revenue (Income)
+        from django.db.models import Sum
+        revenue = txns.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Expenses
+        expenses = txns.filter(type='expense').aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Add depreciation expense (for the period)
+        months = (end.year - start.year) * 12 + (end.month - start.month) + 1
+        depreciation_expense = 0
+        for asset in entity.fixed_assets.filter(is_active=True):
+            annual_deprec = asset.calculate_depreciation()
+            depreciation_expense += float(annual_deprec) * (months / 12.0)
+        
+        # Add accrual expenses for the period
+        accrual_expenses = entity.accrual_entries.filter(
+            accrual_type='expense',
+            accrual_date__gte=start,
+            accrual_date__lte=end
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Accrual revenue
+        accrual_revenue = entity.accrual_entries.filter(
+            accrual_type='revenue',
+            accrual_date__gte=start,
+            accrual_date__lte=end
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        total_revenue = float(revenue) + float(accrual_revenue)
+        total_expenses = float(expenses) + depreciation_expense + float(accrual_expenses)
+        net_income = total_revenue - total_expenses
+        
+        return Response({
+            'entity_id': int(entity_id),
+            'period': f"{start} to {end}",
+            'revenue': {
+                'operating_revenue': float(revenue),
+                'accrual_revenue': float(accrual_revenue),
+                'total_revenue': total_revenue,
+            },
+            'expenses': {
+                'operating_expenses': float(expenses),
+                'depreciation_expense': round(depreciation_expense, 2),
+                'accrual_expenses': float(accrual_expenses),
+                'total_expenses': total_expenses,
+            },
+            'net_income': round(net_income, 2),
+        })
+
+    @action(detail=False, methods=['get'])
+    def cash_flow_statement(self, request):
+        """Generate cash flow statement (simplified: only transaction-based)"""
+        entity_id = request.query_params.get('entity_id')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if not entity_id:
+            return Response({'error': 'entity_id required'}, status=400)
+        
+        from datetime import datetime, timedelta
+        if end_date:
+            try:
+                end = datetime.strptime(end_date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'Invalid end_date format (use YYYY-MM-DD)'}, status=400)
+        else:
+            end = datetime.now().date()
+        
+        if start_date:
+            try:
+                start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'Invalid start_date format (use YYYY-MM-DD)'}, status=400)
+        else:
+            start = end - timedelta(days=365)
+        
+        try:
+            entity = Entity.objects.get(pk=entity_id)
+        except Entity.DoesNotExist:
+            return Response({'error': 'Entity not found'}, status=404)
+        
+        # Get all transactions in the period
+        from django.db.models import Sum
+        txns = Transaction.objects.filter(entity=entity, date__gte=start, date__lte=end)
+        
+        # Operating activities (net income simplified from transactions)
+        net_cash_from_operations = txns.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
+        net_cash_from_operations -= (txns.filter(type='expense').aggregate(total=Sum('amount'))['total'] or 0)
+        
+        # Investing activities (fixed asset purchases, simplified)
+        investing_outflows = 0
+        for asset in entity.fixed_assets.filter(purchase_date__gte=start, purchase_date__lte=end):
+            investing_outflows += float(asset.cost)
+        
+        # Financing activities (not yet implemented; placeholder)
+        net_cash_from_financing = 0
+        
+        net_change_in_cash = float(net_cash_from_operations) - investing_outflows + net_cash_from_financing
+        
+        return Response({
+            'entity_id': int(entity_id),
+            'period': f"{start} to {end}",
+            'operating_activities': {
+                'net_cash_from_operations': round(float(net_cash_from_operations), 2),
+            },
+            'investing_activities': {
+                'fixed_asset_purchases': -investing_outflows,
+                'net_cash_from_investing': -investing_outflows,
+            },
+            'financing_activities': {
+                'net_cash_from_financing': net_cash_from_financing,
+            },
+            'net_change_in_cash': round(net_change_in_cash, 2),
+        })
 
 
 class CashflowTreasuryViewSet(viewsets.ViewSet):

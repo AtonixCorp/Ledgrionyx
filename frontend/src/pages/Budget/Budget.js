@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './Budget.css';
 
 const Budget = () => {
+  const { t, language } = useLanguage();
   const { 
     budgets, 
     addBudget, 
@@ -52,7 +54,7 @@ const Budget = () => {
   };
 
   return (
-    <div className="page-container">
+    <div className="page-container" key={language}>
       <div className="page-header">
         <h1 className="page-title">Budget Management</h1>
         <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
@@ -178,12 +180,12 @@ const Budget = () => {
 
                 {utilization.isOverBudget && (
                   <div className="budget-warning">
-                    ⚠️ Over budget by ${Math.abs(remaining).toFixed(2)}!
+                    ⚠️ {t('labels.overBudget')} ${Math.abs(remaining).toFixed(2)}!
                   </div>
                 )}
                 {!utilization.isOverBudget && percentage >= 90 && (
                   <div className="budget-warning">
-                    ⚠️ Approaching budget limit!
+                    ⚠️ {t('labels.approachingLimit')}!
                   </div>
                 )}
               </div>

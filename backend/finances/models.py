@@ -1535,3 +1535,62 @@ class BookkeepingAuditLog(models.Model):
     
     def __str__(self):
         return f"{self.get_action_display()} - {self.user} - {self.timestamp}"
+
+
+class FixedAsset(models.Model):
+    """Fixed assets with depreciation tracking"""
+    DEPRECIATION_METHODS = [
+        ('straight_line', 'Straight-Line'),
+        ('declining_balance', 'Declining Balance'),
+        ('units_of_production', 'Units of Production'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fixed_assets')
+    name = models.CharField(max_length=255)
+    asset_type = models.CharField(max_length=100)  # e.g. "Equipment", "Building"
+    purchase_date = models.DateField()
+    cost = models.DecimalField(max_digits=15, decimal_places=2)
+    salvage_value = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    useful_life_years = models.IntegerField()  # Useful life in years
+    depreciation_method = models.CharField(max_length=20, choices=DEPRECIATION_METHODS, default='straight_line')
+    accumulated_depreciation = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    book_value = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.asset_type}"
+
+    def calculate_depreciation(self):
+        """Calculate annual depreciation amount"""
+        if self.depreciation_method == 'straight_line':
+            return (self.cost - self.salvage_value) / self.useful_life_years
+        return 0
+
+
+class AccrualEntry(models.Model):
+    """Accrual entries for expenses/revenues recognized but not yet paid"""
+    ACCRUAL_TYPES = [
+        ('revenue', 'Revenue Accrual'),
+        ('expense', 'Expense Accrual'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='accrual_entries')
+    accrual_type = models.CharField(max_length=20, choices=ACCRUAL_TYPES)
+    description = models.CharField(max_length=255)
+    category = models.ForeignKey(BookkeepingCategory, on_delete=models.PROTECT, related_name='accruals')
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    accrual_date = models.DateField()
+    settlement_date = models.DateField(null=True, blank=True)
+    is_settled = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-accrual_date']
+
+    def __str__(self):
+        return f"{self.get_accrual_type_display()}: {self.description}"

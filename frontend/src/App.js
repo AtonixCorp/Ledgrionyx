@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { EnterpriseProvider } from './context/EnterpriseContext';
+import { LanguageProvider } from './context/LanguageContext';
+import { AccessibilityProvider } from './context/AccessibilityContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout/Layout';
 import Landing from './pages/Landing/Landing';
@@ -76,10 +78,12 @@ const AccountTypeRoute = ({ children, requiredType }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <FinanceProvider>
-        <EnterpriseProvider>
-          <Router>
+    <AccessibilityProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <FinanceProvider>
+            <EnterpriseProvider>
+              <Router>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Landing />} />
@@ -311,10 +315,12 @@ function App() {
               </ProtectedRoute>
             } />
           </Routes>
-        </Router>
-      </EnterpriseProvider>
-    </FinanceProvider>
-  </AuthProvider>
+            </Router>
+          </EnterpriseProvider>
+        </FinanceProvider>
+      </AuthProvider>
+    </LanguageProvider>
+    </AccessibilityProvider>
   );
 }
 

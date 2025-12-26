@@ -460,6 +460,47 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ['id', 'entity', 'type', 'category', 'category_name', 'account', 'account_name', 'amount', 'currency', 'payment_method', 'description', 'reference_number', 'date', 'attachment_url', 'staff_member', 'staff_member_name', 'created_by', 'created_by_name', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+
+    def validate(self, attrs):
+        """Basic duplicate-protection for transactions.
+
+        Prevents creating an identical transaction for the same entity,
+        account, amount and date with the same reference or description.
+        """
+        from .models import Transaction  # local import to avoid circulars
+
+        entity = attrs.get('entity')
+        account = attrs.get('account')
+        amount = attrs.get('amount')
+        date = attrs.get('date')
+        description = (attrs.get('description') or '').strip()
+        reference_number = (attrs.get('reference_number') or '').strip()
+
+        if entity and account and amount is not None and date:
+            qs = Transaction.objects.filter(
+                entity=entity,
+                account=account,
+                amount=amount,
+                date=date,
+            )
+
+            if reference_number:
+                qs = qs.filter(reference_number__iexact=reference_number)
+            elif description:
+                qs = qs.filter(description__iexact=description)
+
+            # When updating, ignore the current instance
+            if self.instance is not None:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            if qs.exists():
+                raise serializers.ValidationError({
+                    'non_field_errors': [
+                        'A similar transaction already exists for this account and date. Please confirm this is not a duplicate.'
+                    ]
+                })
+
+        return attrs
     
     def get_staff_member_name(self, obj):
         return obj.staff_member.full_name if obj.staff_member else None
