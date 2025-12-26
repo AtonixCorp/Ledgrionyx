@@ -729,6 +729,43 @@ class TaxExposure(models.Model):
         return f"{self.tax_type} - {self.country} ({self.period_start} to {self.period_end})"
 
 
+class TaxProfile(models.Model):
+    """Tax profile per entity and country/jurisdiction.
+
+    Stores the tax rule configuration and compliance state used by the Tax & Compliance UI.
+    """
+
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('pending', 'Pending'),
+        ('inactive', 'Inactive'),
+    ]
+
+    RESIDENCY_STATUS_CHOICES = [
+        ('detected', 'Detected'),
+        ('confirmed', 'Confirmed'),
+        ('pending', 'Pending'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='tax_profiles')
+    country = models.CharField(max_length=100)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    tax_rules = models.JSONField(default=dict, blank=True)
+    auto_update = models.BooleanField(default=True)
+    residency_status = models.CharField(max_length=20, choices=RESIDENCY_STATUS_CHOICES, default='detected')
+    compliance_score = models.IntegerField(default=0)
+    last_rule_update = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'country')
+        ordering = ['country', '-updated_at']
+
+    def __str__(self):
+        return f"TaxProfile {self.country} - {self.entity.name}"
+
+
 class ComplianceDeadline(models.Model):
     """Track compliance deadlines for entities"""
     DEADLINE_TYPE_CHOICES = [

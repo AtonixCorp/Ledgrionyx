@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
     Expense, Income, Budget, UserProfile, Organization, Entity, Role, Permission,
-    TeamMember, TaxExposure, ComplianceDeadline, CashflowForecast, AuditLog,
+    TeamMember, TaxExposure, TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog,
     ModelTemplate, FinancialModel, Scenario, SensitivityAnalysis, AIInsight,
     CustomKPI, KPICalculation, Report, Consolidation, ConsolidationEntity,
     TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
@@ -166,6 +166,15 @@ class CashflowForecastSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
 
+class TaxProfileSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+
+    class Meta:
+        model = TaxProfile
+        fields = ['id', 'entity', 'entity_name', 'country', 'status', 'tax_rules', 'auto_update', 'residency_status', 'compliance_score', 'last_rule_update', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
 class AuditLogSerializer(serializers.ModelSerializer):
     user_name = serializers.ReadOnlyField(source='user.get_full_name')
 
@@ -326,24 +335,6 @@ class TaxCalculationSerializer(serializers.ModelSerializer):
         model = TaxCalculation
         fields = ['id', 'entity', 'entity_name', 'tax_year', 'calculation_type', 'jurisdiction', 'taxable_income', 'tax_rate', 'deductions', 'credits', 'calculated_tax', 'effective_rate', 'breakdown', 'created_at']
         read_only_fields = ['created_at']
-
-
-class ComplianceDeadlineSerializer(serializers.ModelSerializer):
-    entity_name = serializers.ReadOnlyField(source='entity.name')
-
-    class Meta:
-        model = ComplianceDeadline
-        fields = ['id', 'entity', 'entity_name', 'deadline_type', 'description', 'due_date', 'status', 'jurisdiction', 'responsible_person', 'notes', 'reminder_days', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
-
-
-class CashflowForecastSerializer(serializers.ModelSerializer):
-    entity_name = serializers.ReadOnlyField(source='entity.name')
-
-    class Meta:
-        model = CashflowForecast
-        fields = ['id', 'entity', 'entity_name', 'forecast_type', 'forecast_date', 'period_months', 'historical_data', 'forecast_data', 'assumptions', 'total_forecast', 'growth_rate', 'confidence_level', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
 
 
 # ============ Entity-Specific Serializers ============

@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404
@@ -25,6 +25,7 @@ import json
 import os
 import csv
 from io import BytesIO
+from decimal import Decimal
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'tax')
 COUNTRIES_FILE = os.path.join(DATA_DIR, 'countries.json')
@@ -605,11 +606,85 @@ class TaxCalculationViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing tax calculations
     """
-    queryset = TaxCalculation.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = TaxCalculationSerializer
+
+    def get_queryset(self):
+        qs = TaxCalculation.objects.filter(entity__organization__owner=self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity') or self.request.data.get('entity_id')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
 
     @action(detail=False, methods=['post'])
     def calculate(self, request):
         """Calculate tax for given parameters"""
-        # TODO: Implement tax calculation logic
-        return Response({'message': 'Tax calculation completed'})
+        entity_id = request.data.get('entity') or request.data.get('entity_id')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=request.user)
+
+        tax_year = int(request.data.get('tax_year'))
+        calculation_type = request.data.get('calculation_type')
+        jurisdiction = request.data.get('jurisdiction')
+
+        taxable_income = Decimal(str(request.data.get('taxable_income', '0')))
+        raw_rate = Decimal(str(request.data.get('tax_rate', '0')))
+        rate = raw_rate / Decimal('100') if raw_rate > 1 else raw_rate
+
+        deductions = request.data.get('deductions') or {}
+        credits = request.data.get('credits') or {}
+
+        def _sum_numeric(d):
+            total = Decimal('0')
+            if isinstance(d, dict):
+                for v in d.values():
+                    try:
+                        total += Decimal(str(v))
+                    except Exception:
+                        continue
+            return total
+
+        deductions_total = _sum_numeric(deductions)
+        credits_total = _sum_numeric(credits)
+
+        adjusted_income = taxable_income - deductions_total
+        if adjusted_income < 0:
+            adjusted_income = Decimal('0')
+
+        calculated_tax = (adjusted_income * rate) - credits_total
+        if calculated_tax < 0:
+            calculated_tax = Decimal('0')
+
+        effective_rate = Decimal('0')
+        if taxable_income > 0:
+            effective_rate = calculated_tax / taxable_income
+
+        breakdown = {
+            'taxable_income': str(taxable_income),
+            'deductions_total': str(deductions_total),
+            'credits_total': str(credits_total),
+            'adjusted_income': str(adjusted_income),
+            'rate_used': str(rate),
+        }
+
+        obj, _created = TaxCalculation.objects.update_or_create(
+            entity=entity,
+            tax_year=tax_year,
+            calculation_type=calculation_type,
+            jurisdiction=jurisdiction,
+            defaults={
+                'taxable_income': taxable_income,
+                'tax_rate': rate,
+                'deductions': deductions,
+                'credits': credits,
+                'calculated_tax': calculated_tax,
+                'effective_rate': effective_rate,
+                'breakdown': breakdown,
+            },
+        )
+
+        return Response(self.get_serializer(obj).data)

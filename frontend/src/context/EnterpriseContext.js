@@ -711,10 +711,8 @@ export const EnterpriseProvider = ({ children }) => {
   const fetchEntityBankAccounts = useCallback(async (entityId) => {
     if (!entityId) return [];
     try {
-      const response = await fetch(`/api/bank-accounts/?entity=${entityId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+      const response = await fetch(apiUrl(`/api/bank-accounts/?entity=${entityId}`), {
+        headers: buildAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -724,7 +722,7 @@ export const EnterpriseProvider = ({ children }) => {
       console.error('Failed to fetch entity bank accounts:', err);
     }
     return [];
-  }, []);
+  }, [apiUrl, buildAuthHeaders]);
 
   /**
    * Fetch entity wallets
@@ -732,10 +730,8 @@ export const EnterpriseProvider = ({ children }) => {
   const fetchEntityWallets = useCallback(async (entityId) => {
     if (!entityId) return [];
     try {
-      const response = await fetch(`/api/wallets/?entity=${entityId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+      const response = await fetch(apiUrl(`/api/wallets/?entity=${entityId}`), {
+        headers: buildAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -745,7 +741,7 @@ export const EnterpriseProvider = ({ children }) => {
       console.error('Failed to fetch entity wallets:', err);
     }
     return [];
-  }, []);
+  }, [apiUrl, buildAuthHeaders]);
 
   /**
    * Fetch entity compliance documents
@@ -753,10 +749,8 @@ export const EnterpriseProvider = ({ children }) => {
   const fetchEntityComplianceDocuments = useCallback(async (entityId) => {
     if (!entityId) return [];
     try {
-      const response = await fetch(`/api/compliance-documents/?entity=${entityId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+      const response = await fetch(apiUrl(`/api/compliance-documents/?entity_id=${entityId}`), {
+        headers: buildAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -766,7 +760,163 @@ export const EnterpriseProvider = ({ children }) => {
       console.error('Failed to fetch entity compliance documents:', err);
     }
     return [];
-  }, []);
+  }, [apiUrl, buildAuthHeaders]);
+
+  // ==========================================================================
+  // TAX & COMPLIANCE (ENTITY-SCOPED)
+  // ==========================================================================
+
+  const fetchEntityTaxProfiles = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(apiUrl(`/api/tax-profiles/?entity_id=${entityId}`), {
+        headers: buildAuthHeaders(),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity tax profiles:', err);
+    }
+    return [];
+  }, [apiUrl, buildAuthHeaders]);
+
+  const createTaxProfile = useCallback(async (profileData) => {
+    try {
+      const response = await fetch(apiUrl('/api/tax-profiles/'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildAuthHeaders(),
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+
+      let details = 'Failed to create tax profile';
+      try {
+        const data = await response.json();
+        details = data?.detail || JSON.stringify(data);
+      } catch {
+        // ignore
+      }
+      throw new Error(details);
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      throw err;
+    }
+  }, [apiUrl, buildAuthHeaders]);
+
+  const fetchEntityTaxExposures = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(apiUrl(`/api/tax-exposures/?entity_id=${entityId}`), {
+        headers: buildAuthHeaders(),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity tax exposures:', err);
+    }
+    return [];
+  }, [apiUrl, buildAuthHeaders]);
+
+  const fetchEntityComplianceDeadlines = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(apiUrl(`/api/compliance-deadlines/?entity_id=${entityId}`), {
+        headers: buildAuthHeaders(),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity compliance deadlines:', err);
+    }
+    return [];
+  }, [apiUrl, buildAuthHeaders]);
+
+  const createComplianceDeadline = useCallback(async (deadlineData) => {
+    try {
+      const response = await fetch(apiUrl('/api/compliance-deadlines/'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildAuthHeaders(),
+        },
+        body: JSON.stringify(deadlineData),
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+      let details = 'Failed to create compliance deadline';
+      try {
+        const data = await response.json();
+        details = data?.detail || JSON.stringify(data);
+      } catch {
+        // ignore
+      }
+      throw new Error(details);
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      throw err;
+    }
+  }, [apiUrl, buildAuthHeaders]);
+
+  const fetchEntityTaxCalculations = useCallback(async (entityId) => {
+    if (!entityId) return [];
+    try {
+      const response = await fetch(apiUrl(`/api/tax-calculations/?entity_id=${entityId}`), {
+        headers: buildAuthHeaders(),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.results || [];
+      }
+    } catch (err) {
+      console.error('Failed to fetch entity tax calculations:', err);
+    }
+    return [];
+  }, [apiUrl, buildAuthHeaders]);
+
+  const calculateTax = useCallback(async (calculationPayload) => {
+    try {
+      const response = await fetch(apiUrl('/api/tax-calculations/calculate/'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildAuthHeaders(),
+        },
+        body: JSON.stringify(calculationPayload),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+
+      let details = 'Tax calculation failed';
+      try {
+        const data = await response.json();
+        details = data?.detail || JSON.stringify(data);
+      } catch {
+        // ignore
+      }
+      throw new Error(details);
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      throw err;
+    }
+  }, [apiUrl, buildAuthHeaders]);
 
   /**
    * Create entity department
@@ -1343,6 +1493,13 @@ export const EnterpriseProvider = ({ children }) => {
     fetchEntityBankAccounts,
     fetchEntityWallets,
     fetchEntityComplianceDocuments,
+    fetchEntityTaxProfiles,
+    createTaxProfile,
+    fetchEntityTaxExposures,
+    fetchEntityComplianceDeadlines,
+    createComplianceDeadline,
+    fetchEntityTaxCalculations,
+    calculateTax,
     createEntityDepartment,
     createEntityRole,
     createEntityStaff,

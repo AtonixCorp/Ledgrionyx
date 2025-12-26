@@ -10,7 +10,7 @@ from .views import (
 from .views import list_countries, get_country
 from .enterprise_views import (
     OrganizationViewSet, EntityViewSet, TeamMemberViewSet,
-    TaxExposureViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
+    TaxExposureViewSet, TaxProfileViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
     RoleViewSet, PermissionViewSet, AuditLogViewSet,
     EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
     BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet,
@@ -30,6 +30,7 @@ router.register(r'organizations', OrganizationViewSet, basename='organization')
 router.register(r'entities', EntityViewSet, basename='entity')
 router.register(r'team-members', TeamMemberViewSet, basename='team-member')
 router.register(r'tax-exposures', TaxExposureViewSet, basename='tax-exposure')
+router.register(r'tax-profiles', TaxProfileViewSet, basename='tax-profile')
 router.register(r'compliance-deadlines', ComplianceDeadlineViewSet, basename='compliance-deadline')
 router.register(r'cashflow-forecasts', CashflowForecastViewSet, basename='cashflow-forecast')
 router.register(r'roles', RoleViewSet, basename='role')

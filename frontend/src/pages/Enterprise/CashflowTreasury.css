@@ -3,7 +3,7 @@
 
 .cashflow-treasury-dashboard {
   padding: 24px;
-  background: #F8FAFC;
+  background: transparent;
   min-height: 100vh;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #0B1A2A;
@@ -922,8 +922,8 @@
 /* Dark Mode Support (Optional) */
 @media (prefers-color-scheme: dark) {
   .cashflow-treasury-dashboard {
-    background: #0B1A2A;
-    color: #F1F5F9;
+    background: transparent;
+    color: #0B1A2A;
   }
 
   .kpi-card,
@@ -935,14 +935,14 @@
   .insights-card,
   .alerts-card,
   .operations-card {
-    background: #1A1A1A;
-    border: 1px solid #374151;
+    background: white;
+    border: 1px solid #E5E7EB;
   }
 
   .kpi-value,
   .amount,
   .balance-amount {
-    color: #F1F5F9;
+    color: #0B1A2A;
   }
 
   .kpi-label,
@@ -951,7 +951,7 @@
   .payment-date,
   .inflow-date,
   .aging-label {
-    color: #9CA3AF;
+    color: #6B7280;
   }
 
   .account-name,

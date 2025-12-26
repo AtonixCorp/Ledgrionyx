@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from .models import (
     Organization, Entity, TeamMember, Role, Permission, TaxExposure,
-    ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
+    TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
     RecurringTransaction, TaskRequest, FixedAsset, AccrualEntry
@@ -23,7 +23,7 @@ from .models import (
 from .serializers import (
     OrganizationSerializer, EntitySerializer, EntityDetailSerializer,
     TeamMemberSerializer, RoleSerializer, PermissionSerializer,
-    TaxExposureSerializer, ComplianceDeadlineSerializer,
+    TaxExposureSerializer, TaxProfileSerializer, ComplianceDeadlineSerializer,
     CashflowForecastSerializer, AuditLogSerializer, OrgOverviewSerializer,
     EntityDepartmentSerializer, EntityRoleSerializer, EntityStaffSerializer,
     BankAccountSerializer, WalletSerializer, ComplianceDocumentSerializer,
@@ -290,6 +290,19 @@ class EntityViewSet(viewsets.ModelViewSet):
             entity = serializer.save(organization=organization)
             # Create default structure for the new entity
             entity.create_default_structure()
+
+            # Create a default tax profile for the entity country
+            TaxProfile.objects.get_or_create(
+                entity=entity,
+                country=entity.country,
+                defaults={
+                    'status': 'active',
+                    'compliance_score': 0,
+                    'tax_rules': {},
+                    'auto_update': True,
+                    'residency_status': 'detected',
+                },
+            )
         except IntegrityError as e:
             raise ValidationError({
                 'detail': f"An entity with the name '{self.request.data.get('name')}' already exists in {self.request.data.get('country')} for this organization."
@@ -326,7 +339,29 @@ class TaxExposureViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return tax exposures for user's organizations"""
-        return TaxExposure.objects.filter(entity__organization__owner=self.request.user)
+        qs = TaxExposure.objects.filter(entity__organization__owner=self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+
+class TaxProfileViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing entity tax profiles"""
+    serializer_class = TaxProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = TaxProfile.objects.filter(entity__organization__owner=self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity') or self.request.data.get('entity_id')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
 
     @action(detail=False, methods=['get'])
     def by_country(self, request):
@@ -357,7 +392,11 @@ class ComplianceDeadlineViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return compliance deadlines for user's organizations"""
-        return ComplianceDeadline.objects.filter(entity__organization__owner=self.request.user)
+        qs = ComplianceDeadline.objects.filter(entity__organization__owner=self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
 
     @action(detail=False, methods=['get'])
     def upcoming(self, request):
@@ -545,7 +584,11 @@ class ComplianceDocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return compliance documents for user's entities"""
-        return ComplianceDocument.objects.filter(entity__organization__owner=self.request.user)
+        qs = ComplianceDocument.objects.filter(entity__organization__owner=self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
 
     def perform_create(self, serializer):
         """Create compliance document for entity"""

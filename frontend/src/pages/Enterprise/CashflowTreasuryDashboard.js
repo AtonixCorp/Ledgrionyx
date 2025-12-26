@@ -36,12 +36,39 @@ const CashflowTreasuryDashboard = () => {
       },
       bankAccounts: [],
       accountsPayable: { upcoming: [], overdue: [] },
-      accountsReceivable: { expected: [], aging: {} },
+      accountsReceivable: { expected: [], aging: { current: 0, '1-30': 0, '31-60': 0, '61-90': 0, '90+': 0 } },
       insights: [],
       alerts: [],
     }),
     []
   );
+
+  const timelineItems = useMemo(() => {
+    const timeline = dashboardData?.cashflowTimeline || {};
+    const items = timeline[timelineView];
+    return Array.isArray(items) ? items : [];
+  }, [dashboardData, timelineView]);
+
+  const chartMax = useMemo(() => {
+    const values = timelineItems.flatMap((item) => [
+      Number(item?.inflows || 0),
+      Number(item?.outflows || 0),
+      Number(item?.forecast || 0),
+    ]);
+    const max = values.length ? Math.max(...values) : 0;
+    return max > 0 ? max : 1;
+  }, [timelineItems]);
+
+  const arAging = useMemo(() => {
+    const aging = dashboardData?.accountsReceivable?.aging;
+    return {
+      current: Number(aging?.current || 0),
+      '1-30': Number(aging?.['1-30'] || 0),
+      '31-60': Number(aging?.['31-60'] || 0),
+      '61-90': Number(aging?.['61-90'] || 0),
+      '90+': Number(aging?.['90+'] || 0),
+    };
+  }, [dashboardData]);
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -162,7 +189,7 @@ const CashflowTreasuryDashboard = () => {
           <div className="kpi-content">
             <p className="kpi-label">Cash on Hand</p>
             <h2 className="kpi-value">{formatCurrency(dashboardData.kpis.cashOnHand)}</h2>
-            <p className="kpi-change positive">+2.3% from last month</p>
+            <p className="kpi-change neutral">—</p>
           </div>
         </div>
 
@@ -173,7 +200,7 @@ const CashflowTreasuryDashboard = () => {
           <div className="kpi-content">
             <p className="kpi-label">Net Cashflow</p>
             <h2 className="kpi-value">{formatCurrency(dashboardData.kpis.netCashflow)}</h2>
-            <p className="kpi-change positive">+8.7% from last period</p>
+            <p className="kpi-change neutral">—</p>
           </div>
         </div>
 
@@ -184,7 +211,7 @@ const CashflowTreasuryDashboard = () => {
           <div className="kpi-content">
             <p className="kpi-label">Liquidity Ratio</p>
             <h2 className="kpi-value">{dashboardData.kpis.liquidityRatio.toFixed(2)}</h2>
-            <p className="kpi-change neutral">Target: 1.5</p>
+            <p className="kpi-change neutral">—</p>
           </div>
         </div>
 
@@ -195,7 +222,7 @@ const CashflowTreasuryDashboard = () => {
           <div className="kpi-content">
             <p className="kpi-label">Monthly Burn Rate</p>
             <h2 className="kpi-value">{formatCurrency(dashboardData.kpis.burnRate)}</h2>
-            <p className="kpi-change negative">+5.2% from last month</p>
+            <p className="kpi-change neutral">—</p>
           </div>
         </div>
 
@@ -206,7 +233,7 @@ const CashflowTreasuryDashboard = () => {
           <div className="kpi-content">
             <p className="kpi-label">Runway</p>
             <h2 className="kpi-value">{dashboardData.kpis.runway} days</h2>
-            <p className="kpi-change warning">-12% from last month</p>
+            <p className="kpi-change neutral">—</p>
           </div>
         </div>
       </div>
@@ -255,28 +282,32 @@ const CashflowTreasuryDashboard = () => {
             </div>
 
             <div className="chart-bars">
-              {dashboardData.cashflowTimeline.monthly.map((item, index) => (
+                {timelineItems.length === 0 ? (
+                  <div className="loading">No cashflow data for this period.</div>
+                ) : (
+                  timelineItems.map((item, index) => (
                 <div key={index} className="chart-bar-group">
                   <div className="bar-container">
                     <div
                       className="bar inflows"
-                      style={{ height: `${(item.inflows / 600000) * 100}%` }}
+                        style={{ height: `${(Number(item.inflows || 0) / chartMax) * 100}%` }}
                       title={`Inflows: ${formatCurrency(item.inflows)}`}
                     ></div>
                     <div
                       className="bar outflows"
-                      style={{ height: `${(item.outflows / 600000) * 100}%` }}
+                        style={{ height: `${(Number(item.outflows || 0) / chartMax) * 100}%` }}
                       title={`Outflows: ${formatCurrency(item.outflows)}`}
                     ></div>
                   </div>
                   <div
                     className="bar forecast"
-                    style={{ height: `${(item.forecast / 600000) * 100}%` }}
+                      style={{ height: `${(Number(item.forecast || 0) / chartMax) * 100}%` }}
                     title={`Forecast: ${formatCurrency(item.forecast)}`}
                   ></div>
-                  <span className="bar-label">{item.month}</span>
+                    <span className="bar-label">{item.month || item.week || item.day || ''}</span>
                 </div>
-              ))}
+                  ))
+                )}
             </div>
           </div>
         </div>
@@ -292,19 +323,23 @@ const CashflowTreasuryDashboard = () => {
           </div>
 
           <div className="accounts-list">
-            {dashboardData.bankAccounts.map(account => (
-              <div key={account.id} className="account-item">
-                <div className="account-info">
-                  <div className="account-name">{account.name}</div>
-                  <div className="account-bank">{account.bank}</div>
-                  <div className={`account-type ${account.type}`}>{account.type}</div>
+            {dashboardData.bankAccounts.length === 0 ? (
+              <div className="loading">No bank accounts yet for this entity.</div>
+            ) : (
+              dashboardData.bankAccounts.map(account => (
+                <div key={account.id} className="account-item">
+                  <div className="account-info">
+                    <div className="account-name">{account.name}</div>
+                    <div className="account-bank">{account.bank}</div>
+                    <div className={`account-type ${account.type}`}>{account.type}</div>
+                  </div>
+                  <div className="account-balance">
+                    <div className="balance-amount">{formatCurrency(account.balance, account.currency)}</div>
+                    <div className="balance-currency">{account.currency}</div>
+                  </div>
                 </div>
-                <div className="account-balance">
-                  <div className="balance-amount">{formatCurrency(account.balance, account.currency)}</div>
-                  <div className="balance-currency">{account.currency}</div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -329,14 +364,7 @@ const CashflowTreasuryDashboard = () => {
           </div>
 
           <div className="heatmap-grid">
-            {/* Mock heatmap - in real implementation, this would be dynamic */}
-            <div className="heatmap-day high">Mon</div>
-            <div className="heatmap-day high">Tue</div>
-            <div className="heatmap-day medium">Wed</div>
-            <div className="heatmap-day medium">Thu</div>
-            <div className="heatmap-day low">Fri</div>
-            <div className="heatmap-day high">Sat</div>
-            <div className="heatmap-day high">Sun</div>
+            <div className="loading">Liquidity heatmap is not available yet.</div>
           </div>
         </div>
       </div>
@@ -354,36 +382,44 @@ const CashflowTreasuryDashboard = () => {
             <div className="ap-section">
               <h4>Upcoming Payments</h4>
               <div className="payment-list">
-                {dashboardData.accountsPayable.upcoming.map(payment => (
-                  <div key={payment.id} className="payment-item">
-                    <div className="payment-info">
-                      <div className="vendor-name">{payment.vendor}</div>
-                      <div className="payment-date">Due: {formatDate(payment.dueDate)}</div>
+                {dashboardData.accountsPayable.upcoming.length === 0 ? (
+                  <div className="loading">No upcoming payments.</div>
+                ) : (
+                  dashboardData.accountsPayable.upcoming.map(payment => (
+                    <div key={payment.id} className="payment-item">
+                      <div className="payment-info">
+                        <div className="vendor-name">{payment.vendor}</div>
+                        <div className="payment-date">Due: {formatDate(payment.dueDate)}</div>
+                      </div>
+                      <div className="payment-amount">
+                        <div className="amount">{formatCurrency(payment.amount)}</div>
+                        <div className={`risk-badge ${payment.risk}`}>{payment.risk} risk</div>
+                      </div>
                     </div>
-                    <div className="payment-amount">
-                      <div className="amount">{formatCurrency(payment.amount)}</div>
-                      <div className={`risk-badge ${payment.risk}`}>{payment.risk} risk</div>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
             <div className="ap-section">
               <h4>Overdue ({dashboardData.accountsPayable.overdue.length})</h4>
               <div className="overdue-list">
-                {dashboardData.accountsPayable.overdue.map(payment => (
-                  <div key={payment.id} className="overdue-item">
-                    <div className="payment-info">
-                      <div className="vendor-name">{payment.vendor}</div>
-                      <div className="payment-date overdue">Overdue: {formatDate(payment.dueDate)}</div>
+                {dashboardData.accountsPayable.overdue.length === 0 ? (
+                  <div className="loading">No overdue payments.</div>
+                ) : (
+                  dashboardData.accountsPayable.overdue.map(payment => (
+                    <div key={payment.id} className="overdue-item">
+                      <div className="payment-info">
+                        <div className="vendor-name">{payment.vendor}</div>
+                        <div className="payment-date overdue">Overdue: {formatDate(payment.dueDate)}</div>
+                      </div>
+                      <div className="payment-amount">
+                        <div className="amount overdue">{formatCurrency(payment.amount)}</div>
+                        <div className={`risk-badge ${payment.risk}`}>{payment.risk} risk</div>
+                      </div>
                     </div>
-                    <div className="payment-amount">
-                      <div className="amount overdue">{formatCurrency(payment.amount)}</div>
-                      <div className={`risk-badge ${payment.risk}`}>{payment.risk} risk</div>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -400,18 +436,22 @@ const CashflowTreasuryDashboard = () => {
             <div className="ar-section">
               <h4>Expected Inflows</h4>
               <div className="inflow-list">
-                {dashboardData.accountsReceivable.expected.map(inflow => (
-                  <div key={inflow.id} className="inflow-item">
-                    <div className="customer-info">
-                      <div className="customer-name">{inflow.customer}</div>
-                      <div className="inflow-date">Expected: {formatDate(inflow.dueDate)}</div>
+                {dashboardData.accountsReceivable.expected.length === 0 ? (
+                  <div className="loading">No expected inflows.</div>
+                ) : (
+                  dashboardData.accountsReceivable.expected.map(inflow => (
+                    <div key={inflow.id} className="inflow-item">
+                      <div className="customer-info">
+                        <div className="customer-name">{inflow.customer}</div>
+                        <div className="inflow-date">Expected: {formatDate(inflow.dueDate)}</div>
+                      </div>
+                      <div className="inflow-amount">
+                        <div className="amount">{formatCurrency(inflow.amount)}</div>
+                        <div className={`reliability-badge ${inflow.reliability}`}>{inflow.reliability}</div>
+                      </div>
                     </div>
-                    <div className="inflow-amount">
-                      <div className="amount">{formatCurrency(inflow.amount)}</div>
-                      <div className={`reliability-badge ${inflow.reliability}`}>{inflow.reliability}</div>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
@@ -420,23 +460,23 @@ const CashflowTreasuryDashboard = () => {
               <div className="aging-breakdown">
                 <div className="aging-item">
                   <span className="aging-label">Current</span>
-                  <span className="aging-amount">{formatCurrency(dashboardData.accountsReceivable.aging.current)}</span>
+                  <span className="aging-amount">{formatCurrency(arAging.current)}</span>
                 </div>
                 <div className="aging-item">
                   <span className="aging-label">1-30 days</span>
-                  <span className="aging-amount">{formatCurrency(dashboardData.accountsReceivable.aging['1-30'])}</span>
+                  <span className="aging-amount">{formatCurrency(arAging['1-30'])}</span>
                 </div>
                 <div className="aging-item">
                   <span className="aging-label">31-60 days</span>
-                  <span className="aging-amount">{formatCurrency(dashboardData.accountsReceivable.aging['31-60'])}</span>
+                  <span className="aging-amount">{formatCurrency(arAging['31-60'])}</span>
                 </div>
                 <div className="aging-item">
                   <span className="aging-label">61-90 days</span>
-                  <span className="aging-amount">{formatCurrency(dashboardData.accountsReceivable.aging['61-90'])}</span>
+                  <span className="aging-amount">{formatCurrency(arAging['61-90'])}</span>
                 </div>
                 <div className="aging-item">
                   <span className="aging-label">90+ days</span>
-                  <span className="aging-amount overdue">{formatCurrency(dashboardData.accountsReceivable.aging['90+'])}</span>
+                  <span className="aging-amount overdue">{formatCurrency(arAging['90+'])}</span>
                 </div>
               </div>
             </div>
