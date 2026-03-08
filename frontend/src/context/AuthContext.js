@@ -2,17 +2,6 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 
 const AuthContext = createContext();
 
-// Detect account type based on email domain
-const detectAccountType = (email) => {
-  const personalDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'aol.com', 'protonmail.com', 'icloud.com'];
-  const domain = email.split('@')[1]?.toLowerCase();
-  
-  if (personalDomains.includes(domain)) {
-    return 'personal';
-  }
-  return 'enterprise';
-};
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -62,7 +51,7 @@ export const AuthProvider = ({ children }) => {
           name: me.username || me.email?.split('@')[0] || 'User',
           email: me.email,
           avatar: (me.username || me.email || 'U').charAt(0).toUpperCase(),
-          account_type: me.account_type || detectAccountType(me.email || ''),
+          account_type: me.account_type || 'enterprise',
           country: me.country || '',
           phone: me.phone || '',
         };
@@ -125,7 +114,7 @@ export const AuthProvider = ({ children }) => {
         name: me.username || me.email?.split('@')[0] || 'User',
         email: me.email,
         avatar: (me.username || me.email || 'U').charAt(0).toUpperCase(),
-        account_type: me.account_type || detectAccountType(me.email || ''),
+        account_type: me.account_type || 'enterprise',
         country: me.country || '',
         phone: me.phone || '',
       };
@@ -176,7 +165,7 @@ export const AuthProvider = ({ children }) => {
         name: name || data.user?.username || email?.split('@')[0] || 'User',
         email: data.user?.email || email,
         avatar: ((name || data.user?.username || email || 'U').charAt(0) || 'U').toUpperCase(),
-        account_type: data.user?.account_type || account_type || detectAccountType(email || ''),
+        account_type: data.user?.account_type || account_type || 'enterprise',
         country: data.user?.country || country,
         phone: data.user?.phone || phone,
       };

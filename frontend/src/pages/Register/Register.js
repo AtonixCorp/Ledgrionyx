@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { countries } from '../../utils/countries';
-import AccountTypeSelector from '../../components/AccountTypeSelector';
 import AtonixLogo from '../../components/Logo/AtonixLogo';
 import './Register.css';
 
 const Register = () => {
-  const [step, setStep] = useState(1); // 1: email → 2: account type → 3: details
+  const [step, setStep] = useState(1); // 1: email → 2: details
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,20 +15,12 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [country, setCountry] = useState('US');
   const [phone, setPhone] = useState('');
-  const [accountType, setAccountType] = useState(null);
   const [orgName, setOrgName] = useState('');
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const selectedCountry = countries.find(c => c.code === country);
-
-  // Detect account type based on email domain
-  const detectAccountType = (emailAddress) => {
-    const personalDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'aol.com', 'protonmail.com', 'icloud.com'];
-    const domain = emailAddress.split('@')[1]?.toLowerCase();
-    return personalDomains.includes(domain) ? 'personal' : 'enterprise';
-  };
 
   // Step 1: Email validation
   const handleEmailSubmit = (e) => {
@@ -46,30 +37,16 @@ const Register = () => {
       return;
     }
 
-    // Auto-detect account type and move to confirmation step
-    const detectedType = detectAccountType(email);
-    setAccountType(detectedType);
     setStep(2);
   };
 
-  // Step 2: Account type confirmation
-  const handleAccountTypeSelect = (type) => {
-    setAccountType(type);
-    setStep(3);
-  };
-
-  // Step 3: Details submission
+  // Step 2: Details submission
   const handleDetailsSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!name || !password || !confirmPassword || !country || !phone) {
+    if (!name || !password || !confirmPassword || !country || !phone || !orgName) {
       setError('Please fill in all fields');
-      return;
-    }
-
-    if (accountType === 'enterprise' && !orgName) {
-      setError('Please enter your organization name');
       return;
     }
 
@@ -88,14 +65,9 @@ const Register = () => {
       return;
     }
 
-    const result = await register(name, email, password, country, phone, accountType, orgName);
+    const result = await register(name, email, password, country, phone, 'enterprise', orgName);
     if (result.success) {
-      // Redirect based on account type
-      if (accountType === 'enterprise') {
-        navigate('/app/enterprise/org-overview');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/app/enterprise/org-overview');
     } else {
       setError(result.error || 'Registration failed. Please try again.');
     }
@@ -117,29 +89,25 @@ const Register = () => {
             <div className="step-indicator">
               <div className="step-dot active"></div>
               <div className="step-dot"></div>
-              <div className="step-dot"></div>
             </div>
 
-            <h1>Create Account</h1>
-            <p className="auth-subtitle">Step 1 of 3 - Enter your email</p>
+            <h1>Create Enterprise Account</h1>
+            <p className="auth-subtitle">Step 1 of 2 - Enter your business email</p>
 
             {error && <div className="auth-error">{error}</div>}
 
             <form onSubmit={handleEmailSubmit} className="auth-form">
               <div className="form-group">
-                <label htmlFor="email">Email Address</label>
+                <label htmlFor="email">Business Email Address</label>
                 <input
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder="you@yourcompany.com"
                   autoComplete="email"
                   autoFocus
                 />
-                <p className="email-hint">
-                  💡 We'll detect if you're using a personal or business email
-                </p>
               </div>
 
               <button type="submit" className="btn-primary btn-full">
@@ -156,52 +124,7 @@ const Register = () => {
     );
   }
 
-  // Step 2: Account Type Selection (Full Page)
-  if (step === 2) {
-    return (
-      <div className="auth-page account-type-page">
-        <div className="auth-header">
-          <Link to="/" className="auth-logo-link">
-            <AtonixLogo size="small" />
-            <span>Atonix Capital</span>
-          </Link>
-        </div>
-
-        <div className="account-type-full-container">
-          <div className="account-type-header">
-            <h1>Choose Your Account Type</h1>
-            <p className="account-type-email">Email: <strong>{email}</strong></p>
-            <p className="account-type-detected">We detected your email as <strong>{accountType === 'enterprise' ? '🏢 Business/Enterprise' : '👤 Personal'}</strong></p>
-          </div>
-
-          {error && <div className="auth-error">{error}</div>}
-
-          <div className="account-type-selector-wrapper-full">
-            <AccountTypeSelector onSelect={handleAccountTypeSelect} />
-          </div>
-
-          <div className="account-type-navigation">
-            <button 
-              type="button" 
-              className="btn-secondary"
-              onClick={() => {
-                setStep(1);
-                setError('');
-              }}
-            >
-              ← Back to email
-            </button>
-            
-            <div className="auth-footer">
-              <p>Already have an account? <Link to="/login">Sign in</Link></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 3: Details Entry
+  // Step 2: Details Entry
   return (
     <div className="auth-page">
       <div className="auth-container">
@@ -215,14 +138,11 @@ const Register = () => {
         <div className="auth-card">
           <div className="step-indicator">
             <div className="step-dot completed"></div>
-            <div className="step-dot completed"></div>
             <div className="step-dot active"></div>
           </div>
 
           <h1>Complete Your Profile</h1>
-          <p className="auth-subtitle">
-            Step 3 of 3 - {accountType === 'enterprise' ? '🏢 Business Account' : '👤 Personal Account'}
-          </p>
+          <p className="auth-subtitle">Step 2 of 2 - Enterprise Account</p>
 
           {error && <div className="auth-error">{error}</div>}
 
@@ -240,18 +160,16 @@ const Register = () => {
               />
             </div>
 
-            {accountType === 'enterprise' && (
-              <div className="form-group">
-                <label htmlFor="orgName">Organization Name</label>
-                <input
-                  type="text"
-                  id="orgName"
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="Your Company Name"
-                />
-              </div>
-            )}
+            <div className="form-group">
+              <label htmlFor="orgName">Organization Name</label>
+              <input
+                type="text"
+                id="orgName"
+                value={orgName}
+                onChange={(e) => setOrgName(e.target.value)}
+                placeholder="Your Company Name"
+              />
+            </div>
 
             <div className="form-group">
               <label htmlFor="country">Country</label>
@@ -337,23 +255,19 @@ const Register = () => {
             </button>
           </form>
 
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn-link"
             onClick={() => {
-              setStep(2);
+              setStep(1);
               setError('');
             }}
           >
-            ← Back to account type
+            ← Back to email
           </button>
 
           <div className="auth-footer">
             <p>Already have an account? <Link to="/login">Sign in</Link></p>
-          </div>
-
-          <div className="demo-notice">
-            <p>💡 <strong>Demo Mode:</strong> Select any country and enter any phone number</p>
           </div>
         </div>
       </div>

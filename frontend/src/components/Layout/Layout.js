@@ -4,14 +4,13 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaHome, FaMoneyBillWave, FaHandHoldingUsd, FaChartLine, FaChartBar, FaBrain, FaCalculator, FaSignOutAlt, FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog, FaExclamationTriangle, FaBars, FaTimes } from 'react-icons/fa';
+import { FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog, FaExclamationTriangle, FaChartLine, FaChartBar, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const isEnterprise = user?.account_type === 'enterprise';
   const { entities } = useEnterprise();
   const firstEntity = (entities && entities.length > 0) ? entities[0] : null;
   const bookkeepingPath = firstEntity ? `/enterprise/entity/${firstEntity.id}/bookkeeping` : '/app/enterprise/entities';
@@ -49,115 +48,56 @@ const Layout = ({ children }) => {
         </div>
         
         <ul className="nav-menu" role="navigation" aria-label="Main navigation">
-          {/* PERSONAL NAVIGATION */}
-          {!isEnterprise && (
-            <>
-              <li>
-                <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} aria-label={t('nav.home')}>
-                  <span className="nav-icon" aria-hidden="true"><FaHome /></span>
-                  {!sidebarMinimized && t('nav.home')}
-                </NavLink>
-              </li>
-                <li>
-                  <NavLink to={bookkeepingPath} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                    <span className="nav-icon"><FaMoneyBillWave /></span>
-                    {!sidebarMinimized && t('nav.bookkeeping')}
-                  </NavLink>
-                </li>
-              <li>
-                <NavLink to="/income" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaHandHoldingUsd /></span>
-                  {!sidebarMinimized && t('nav.myIncome')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/tax-calculator" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaCalculator /></span>
-                  {!sidebarMinimized && t('nav.taxReturns')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/budget" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaChartLine /></span>
-                  {!sidebarMinimized && t('nav.cashflowBudgets')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/expenses" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaMoneyBillWave /></span>
-                  {!sidebarMinimized && t('nav.assetsLiabilities')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/ai-insights" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaBrain /></span>
-                  {!sidebarMinimized && t('nav.insightsAlerts')}
-                </NavLink>
-              </li>
-              <li className="nav-divider"></li>
-              <li>
-                <NavLink to="/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaCog /></span>
-                  {!sidebarMinimized && t('nav.settings')}
-                </NavLink>
-              </li>
-            </>
-          )}
-
           {/* ENTERPRISE NAVIGATION */}
-          {isEnterprise && (
-            <>
-              <li>
-                <NavLink to="/app/enterprise/org-overview" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaChartBar /></span>
-                  {!sidebarMinimized && t('nav.orgOverview')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/app/enterprise/entities" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaBuilding /></span>
-                  {!sidebarMinimized && t('nav.entitiesCountries')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/app/enterprise/cashflow" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaChartLine /></span>
-                  {!sidebarMinimized && t('nav.cashflowTreasury')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/app/enterprise/tax-compliance" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaCheckCircle /></span>
-                  {!sidebarMinimized && t('nav.taxCompliance')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/app/enterprise/risk-exposure" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaExclamationTriangle /></span>
-                  {!sidebarMinimized && t('nav.riskExposure')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/app/enterprise/reports" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaFileExport /></span>
-                  {!sidebarMinimized && t('nav.reportsExports')}
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/app/enterprise/team" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaUsers /></span>
-                  {!sidebarMinimized && t('nav.teamPermissions')}
-                </NavLink>
-              </li>
-              <li className="nav-divider"></li>
-              <li>
-                <NavLink to="/app/enterprise/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                  <span className="nav-icon"><FaCog /></span>
-                  {!sidebarMinimized && t('nav.enterpriseSettings')}
-                </NavLink>
-              </li>
-            </>
-          )}
+          <li>
+            <NavLink to="/app/enterprise/org-overview" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaChartBar /></span>
+              {!sidebarMinimized && t('nav.orgOverview')}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/enterprise/entities" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaBuilding /></span>
+              {!sidebarMinimized && t('nav.entitiesCountries')}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/enterprise/cashflow" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaChartLine /></span>
+              {!sidebarMinimized && t('nav.cashflowTreasury')}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/enterprise/tax-compliance" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaCheckCircle /></span>
+              {!sidebarMinimized && t('nav.taxCompliance')}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/enterprise/risk-exposure" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaExclamationTriangle /></span>
+              {!sidebarMinimized && t('nav.riskExposure')}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/enterprise/reports" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaFileExport /></span>
+              {!sidebarMinimized && t('nav.reportsExports')}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/enterprise/team" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaUsers /></span>
+              {!sidebarMinimized && t('nav.teamPermissions')}
+            </NavLink>
+          </li>
+          <li className="nav-divider"></li>
+          <li>
+            <NavLink to="/app/enterprise/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaCog /></span>
+              {!sidebarMinimized && t('nav.enterpriseSettings')}
+            </NavLink>
+          </li>
         </ul>
 
         <div className="sidebar-footer">

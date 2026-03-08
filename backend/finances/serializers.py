@@ -8,7 +8,25 @@ from .models import (
     TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
     EntityDepartment, EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
-    RecurringTransaction, TaskRequest
+    RecurringTransaction, TaskRequest,
+    # Core GL/COA models
+    ChartOfAccounts, GeneralLedger, JournalEntry, RecurringJournalTemplate, LedgerPeriod,
+    # AR models
+    Customer, Invoice, InvoiceLineItem, CreditNote, Payment,
+    # AP models
+    Vendor, PurchaseOrder, Bill, BillPayment,
+    # Inventory models
+    InventoryItem, InventoryTransaction, InventoryCostOfGoodsSold,
+    # Reconciliation models
+    BankReconciliation,
+    # Revenue Recognition models
+    DeferredRevenue, RevenueRecognitionSchedule,
+    # Period Close models
+    PeriodCloseChecklist, PeriodCloseItem,
+    # FX models
+    ExchangeRate, FXGainLoss,
+    # Notification models
+    Notification, NotificationPreference
 )
 
 
@@ -560,3 +578,249 @@ class TaskRequestSerializer(serializers.ModelSerializer):
 
     def get_created_by_name(self, obj):
         return obj.created_by.get_full_name() if obj.created_by else None
+
+
+# ============ COA & GL Serializers ============
+
+class ChartOfAccountsSerializer(serializers.ModelSerializer):
+    parent_account_name = serializers.ReadOnlyField(source='parent_account.account_name')
+
+    class Meta:
+        model = ChartOfAccounts
+        fields = ['id', 'entity', 'account_code', 'account_name', 'account_type', 'parent_account', 'parent_account_name', 'currency', 'description', 'cost_center', 'status', 'opening_balance', 'current_balance', 'created_at', 'updated_at']
+        read_only_fields = ['current_balance', 'created_at', 'updated_at']
+
+
+class GeneralLedgerSerializer(serializers.ModelSerializer):
+    debit_account_code = serializers.ReadOnlyField(source='debit_account.account_code')
+    credit_account_code = serializers.ReadOnlyField(source='credit_account.account_code')
+
+    class Meta:
+        model = GeneralLedger
+        fields = ['id', 'entity', 'debit_account', 'debit_account_code', 'credit_account', 'credit_account_code', 'debit_amount', 'credit_amount', 'description', 'reference_number', 'posting_date', 'journal_entry', 'posting_status', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class JournalEntrySerializer(serializers.ModelSerializer):
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
+
+    class Meta:
+        model = JournalEntry
+        fields = ['id', 'entity', 'entry_type', 'reference_number', 'description', 'posting_date', 'memo', 'status', 'created_by', 'created_by_name', 'approved_by', 'approved_by_name', 'approved_at', 'is_recurring', 'recurring_template', 'reversing_entry', 'original_entry', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'approved_at']
+
+
+class RecurringJournalTemplateSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+
+    class Meta:
+        model = RecurringJournalTemplate
+        fields = ['id', 'entity', 'name', 'description', 'frequency', 'next_posting_date', 'end_date', 'is_active', 'journal_lines', 'created_by', 'created_by_name', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class LedgerPeriodSerializer(serializers.ModelSerializer):
+    closed_by_name = serializers.ReadOnlyField(source='closed_by.get_full_name')
+
+    class Meta:
+        model = LedgerPeriod
+        fields = ['id', 'entity', 'period_name', 'start_date', 'end_date', 'status', 'no_posting_after', 'created_at', 'closed_at', 'closed_by', 'closed_by_name']
+        read_only_fields = ['created_at', 'closed_at']
+
+
+# ============ AR Serializers ============
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ['id', 'entity', 'customer_code', 'customer_name', 'email', 'phone', 'address', 'city', 'country', 'postal_code', 'contact_person', 'tax_id', 'payment_terms', 'currency', 'credit_limit', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class InvoiceLineItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceLineItem
+        fields = ['id', 'invoice', 'description', 'quantity', 'unit_price', 'tax_rate', 'line_amount']
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    customer_name = serializers.ReadOnlyField(source='customer.customer_name')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+    line_items = InvoiceLineItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Invoice
+        fields = ['id', 'entity', 'customer', 'customer_name', 'invoice_number', 'invoice_date', 'due_date', 'subtotal', 'tax_amount', 'total_amount', 'paid_amount', 'outstanding_amount', 'currency', 'status', 'description', 'notes', 'created_by', 'created_by_name', 'line_items', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'outstanding_amount']
+
+
+class CreditNoteSerializer(serializers.ModelSerializer):
+    customer_name = serializers.ReadOnlyField(source='customer.customer_name')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+
+    class Meta:
+        model = CreditNote
+        fields = ['id', 'entity', 'invoice', 'customer', 'customer_name', 'credit_note_number', 'credit_date', 'reason', 'total_amount', 'currency', 'status', 'created_by', 'created_by_name', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    customer_name = serializers.ReadOnlyField(source='customer.customer_name')
+    invoice_number = serializers.ReadOnlyField(source='invoice.invoice_number')
+
+    class Meta:
+        model = Payment
+        fields = ['id', 'entity', 'invoice', 'invoice_number', 'customer', 'customer_name', 'payment_date', 'amount', 'payment_method', 'reference_number', 'created_at']
+        read_only_fields = ['created_at']
+
+
+# ============ AP Serializers ============
+
+class VendorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vendor
+        fields = ['id', 'entity', 'vendor_code', 'vendor_name', 'email', 'phone', 'address', 'city', 'country', 'postal_code', 'contact_person', 'tax_id', 'payment_terms', 'currency', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class PurchaseOrderSerializer(serializers.ModelSerializer):
+    vendor_name = serializers.ReadOnlyField(source='vendor.vendor_name')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+
+    class Meta:
+        model = PurchaseOrder
+        fields = ['id', 'entity', 'vendor', 'vendor_name', 'po_number', 'po_date', 'expected_delivery_date', 'subtotal', 'tax_amount', 'total_amount', 'currency', 'status', 'created_by', 'created_by_name', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class BillSerializer(serializers.ModelSerializer):
+    vendor_name = serializers.ReadOnlyField(source='vendor.vendor_name')
+    po_number = serializers.ReadOnlyField(source='purchase_order.po_number')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+
+    class Meta:
+        model = Bill
+        fields = ['id', 'entity', 'vendor', 'vendor_name', 'purchase_order', 'po_number', 'bill_number', 'bill_date', 'due_date', 'subtotal', 'tax_amount', 'total_amount', 'paid_amount', 'outstanding_amount', 'currency', 'status', 'description', 'notes', 'created_by', 'created_by_name', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'outstanding_amount']
+
+
+class BillPaymentSerializer(serializers.ModelSerializer):
+    vendor_name = serializers.ReadOnlyField(source='vendor.vendor_name')
+    bill_number = serializers.ReadOnlyField(source='bill.bill_number')
+
+    class Meta:
+        model = BillPayment
+        fields = ['id', 'entity', 'bill', 'bill_number', 'vendor', 'vendor_name', 'payment_date', 'amount', 'payment_method', 'reference_number', 'created_at']
+        read_only_fields = ['created_at']
+
+
+# ============ Inventory Serializers ============
+
+class InventoryItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryItem
+        fields = ['id', 'entity', 'sku', 'item_name', 'item_code', 'description', 'category', 'unit_of_measure', 'quantity_on_hand', 'reorder_level', 'reorder_quantity', 'unit_cost', 'valuation_method', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class InventoryTransactionSerializer(serializers.ModelSerializer):
+    inventory_item_sku = serializers.ReadOnlyField(source='inventory_item.sku')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+
+    class Meta:
+        model = InventoryTransaction
+        fields = ['id', 'entity', 'inventory_item', 'inventory_item_sku', 'transaction_type', 'transaction_date', 'quantity_before', 'quantity', 'quantity_after', 'unit_cost', 'total_cost', 'reference_number', 'notes', 'created_by', 'created_by_name', 'created_at']
+        read_only_fields = ['created_at', 'quantity_after']
+
+
+class InventoryCostOfGoodsSoldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryCostOfGoodsSold
+        fields = ['id', 'entity', 'period_start', 'period_end', 'opening_inventory', 'purchases', 'closing_inventory', 'cogs', 'created_at']
+        read_only_fields = ['created_at', 'cogs']
+
+
+# ============ Reconciliation Serializers ============
+
+class BankReconciliationSerializer(serializers.ModelSerializer):
+    bank_account_name = serializers.ReadOnlyField(source='bank_account.account_name')
+    reconciled_by_name = serializers.ReadOnlyField(source='reconciled_by.get_full_name')
+
+    class Meta:
+        model = BankReconciliation
+        fields = ['id', 'entity', 'bank_account', 'bank_account_name', 'reconciliation_date', 'bank_statement_balance', 'book_balance', 'status', 'variance', 'notes', 'reconciled_by', 'reconciled_by_name', 'reconciled_at', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'variance']
+
+
+# ============ Revenue Recognition Serializers ============
+
+class RevenueRecognitionScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RevenueRecognitionSchedule
+        fields = ['id', 'deferred_revenue', 'recognition_period_start', 'recognition_period_end', 'recognition_date', 'amount_to_recognize', 'is_recognized', 'recognized_date']
+
+
+class DeferredRevenueSerializer(serializers.ModelSerializer):
+    customer_name = serializers.ReadOnlyField(source='customer.customer_name')
+    recognition_schedule = RevenueRecognitionScheduleSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = DeferredRevenue
+        fields = ['id', 'entity', 'customer', 'customer_name', 'contract_number', 'contract_start_date', 'contract_end_date', 'total_amount', 'currency', 'recognized_amount', 'remaining_amount', 'status', 'description', 'recognition_schedule', 'created_at']
+        read_only_fields = ['created_at', 'recognized_amount', 'remaining_amount']
+
+
+# ============ Period Close Serializers ============
+
+class PeriodCloseItemSerializer(serializers.ModelSerializer):
+    responsible_user_name = serializers.ReadOnlyField(source='responsible_user.get_full_name')
+
+    class Meta:
+        model = PeriodCloseItem
+        fields = ['id', 'checklist', 'task_name', 'description', 'sequence', 'status', 'responsible_user', 'responsible_user_name', 'completed_at']
+
+
+class PeriodCloseChecklistSerializer(serializers.ModelSerializer):
+    items = PeriodCloseItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PeriodCloseChecklist
+        fields = ['id', 'entity', 'period', 'status', 'created_at', 'started_at', 'completed_at', 'items']
+        read_only_fields = ['created_at']
+
+
+# ============ FX Serializers ============
+
+class ExchangeRateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExchangeRate
+        fields = ['id', 'from_currency', 'to_currency', 'rate', 'rate_date', 'source', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class FXGainLossSerializer(serializers.ModelSerializer):
+    transaction_reference = serializers.ReadOnlyField(source='transaction.description')
+
+    class Meta:
+        model = FXGainLoss
+        fields = ['id', 'entity', 'transaction', 'transaction_reference', 'from_currency', 'to_currency', 'original_amount', 'original_rate', 'original_value', 'current_rate', 'current_value', 'gain_loss_amount', 'gain_type', 'transaction_date', 'created_at']
+        read_only_fields = ['created_at']
+
+
+# ============ Notification Serializers ============
+
+class NotificationSerializer(serializers.ModelSerializer):
+    related_entity_name = serializers.ReadOnlyField(source='related_entity.name')
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'organization', 'notification_type', 'priority', 'status', 'title', 'message', 'related_entity', 'related_entity_name', 'related_content_type', 'related_object_id', 'action_url', 'read_at', 'sent_at']
+        read_only_fields = ['sent_at']
+
+
+class NotificationPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationPreference
+        fields = ['id', 'user', 'email_budget_alerts', 'email_deadline_reminders', 'email_payment_due', 'email_approval_requests', 'sms_budget_alerts', 'sms_deadline_reminders', 'sms_payment_due', 'in_app_all', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']

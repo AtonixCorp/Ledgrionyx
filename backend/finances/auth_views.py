@@ -21,7 +21,7 @@ class RegisterView(APIView):
         email = (payload.get("email") or "").strip().lower()
         password = payload.get("password") or ""
         username = (payload.get("username") or email).strip()
-        account_type = (payload.get("account_type") or ACCOUNT_TYPE_PERSONAL).strip()
+        account_type = (payload.get("account_type") or ACCOUNT_TYPE_ENTERPRISE).strip()
         country = (payload.get("country") or "").strip()
         phone = (payload.get("phone") or "").strip()
         org_name = (payload.get("org_name") or "").strip()
@@ -45,7 +45,7 @@ class RegisterView(APIView):
         # Create profile so the frontend starts from real stored values (no mock).
         profile = UserProfile.objects.create(
             user=user,
-            account_type=account_type if account_type in [ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE] else ACCOUNT_TYPE_PERSONAL,
+            account_type=account_type if account_type in [ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE] else ACCOUNT_TYPE_ENTERPRISE,
             country=country,
             phone=phone,
         )

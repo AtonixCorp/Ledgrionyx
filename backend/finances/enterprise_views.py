@@ -18,7 +18,17 @@ from .models import (
     TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
-    RecurringTransaction, TaskRequest, FixedAsset, AccrualEntry
+    RecurringTransaction, TaskRequest, FixedAsset, AccrualEntry,
+    # New models
+    ChartOfAccounts, GeneralLedger, JournalEntry, RecurringJournalTemplate, LedgerPeriod,
+    Customer, Invoice, InvoiceLineItem, CreditNote, Payment,
+    Vendor, PurchaseOrder, Bill, BillPayment,
+    InventoryItem, InventoryTransaction, InventoryCostOfGoodsSold,
+    BankReconciliation,
+    DeferredRevenue, RevenueRecognitionSchedule,
+    PeriodCloseChecklist, PeriodCloseItem,
+    ExchangeRate, FXGainLoss,
+    Notification, NotificationPreference
 )
 from .serializers import (
     OrganizationSerializer, EntitySerializer, EntityDetailSerializer,
@@ -28,7 +38,18 @@ from .serializers import (
     EntityDepartmentSerializer, EntityRoleSerializer, EntityStaffSerializer,
     BankAccountSerializer, WalletSerializer, ComplianceDocumentSerializer,
     BookkeepingCategorySerializer, BookkeepingAccountSerializer, TransactionSerializer, BookkeepingAuditLogSerializer,
-    RecurringTransactionSerializer, TaskRequestSerializer
+    RecurringTransactionSerializer, TaskRequestSerializer,
+    # New serializers
+    ChartOfAccountsSerializer, GeneralLedgerSerializer, JournalEntrySerializer,
+    RecurringJournalTemplateSerializer, LedgerPeriodSerializer,
+    CustomerSerializer, InvoiceSerializer, InvoiceLineItemSerializer, CreditNoteSerializer, PaymentSerializer,
+    VendorSerializer, PurchaseOrderSerializer, BillSerializer, BillPaymentSerializer,
+    InventoryItemSerializer, InventoryTransactionSerializer, InventoryCostOfGoodsSoldSerializer,
+    BankReconciliationSerializer,
+    DeferredRevenueSerializer, RevenueRecognitionScheduleSerializer,
+    PeriodCloseChecklistSerializer, PeriodCloseItemSerializer,
+    ExchangeRateSerializer, FXGainLossSerializer,
+    NotificationSerializer, NotificationPreferenceSerializer
 )
 from .permissions import PermissionChecker
 
@@ -1443,3 +1464,613 @@ class TaskRequestViewSet(viewsets.ModelViewSet):
             'net_profit': float(income_total - expense_total),
             'by_category': by_category,
         }
+
+
+# ============================================================================
+# NEW FINANCIAL ACCOUNTING SYSTEM VIEWSETS (COA, GL, AR, AP, etc.)
+# ============================================================================
+
+class ChartOfAccountsViewSet(viewsets.ModelViewSet):
+    """ViewSet for Chart of Accounts management"""
+    serializer_class = ChartOfAccountsSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return COA for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = ChartOfAccounts.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class GeneralLedgerViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for viewing General Ledger"""
+    serializer_class = GeneralLedgerSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return GL entries for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = GeneralLedger.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+
+class JournalEntryViewSet(viewsets.ModelViewSet):
+    """ViewSet for Journal Entries (double-entry bookkeeping)"""
+    serializer_class = JournalEntrySerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return journal entries for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = JournalEntry.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity, created_by=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        """Approve a journal entry"""
+        journal_entry = self.get_object()
+        journal_entry.status = 'posted'
+        journal_entry.approved_by = request.user
+        journal_entry.approved_at = timezone.now()
+        journal_entry.save()
+        
+        serializer = self.get_serializer(journal_entry)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def reverse(self, request, pk=None):
+        """Create a reversal journal entry"""
+        original_entry = self.get_object()
+        
+        reversal = JournalEntry.objects.create(
+            entity=original_entry.entity,
+            entry_type='reversal',
+            reference_number=f"{original_entry.reference_number}-REV",
+            description=f"Reversal of {original_entry.reference_number}",
+            posting_date=timezone.now().date(),
+            status='draft',
+            created_by=request.user,
+            original_entry=original_entry
+        )
+        
+        original_entry.reversing_entry = reversal
+        original_entry.save()
+        
+        serializer = self.get_serializer(reversal)
+        return Response(serializer.data)
+
+
+class RecurringJournalTemplateViewSet(viewsets.ModelViewSet):
+    """ViewSet for Recurring Journal Entry Templates"""
+    serializer_class = RecurringJournalTemplateSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return templates for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = RecurringJournalTemplate.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity, created_by=self.request.user)
+
+
+class LedgerPeriodViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing accounting periods"""
+    serializer_class = LedgerPeriodSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return periods for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = LedgerPeriod.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+    
+    @action(detail=True, methods=['post'])
+    def close(self, request, pk=None):
+        """Close an accounting period"""
+        period = self.get_object()
+        period.status = 'closed'
+        period.closed_at = timezone.now()
+        period.closed_by = request.user
+        period.save()
+        
+        serializer = self.get_serializer(period)
+        return Response(serializer.data)
+
+
+# ============================================================================
+# ACCOUNTS RECEIVABLE (AR) VIEWSETS
+# ============================================================================
+
+class CustomerViewSet(viewsets.ModelViewSet):
+    """ViewSet for customer management"""
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return customers for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = Customer.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class InvoiceViewSet(viewsets.ModelViewSet):
+    """ViewSet for invoicing"""
+    serializer_class = InvoiceSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return invoices for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = Invoice.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity, created_by=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def post(self, request, pk=None):
+        """Post an invoice"""
+        invoice = self.get_object()
+        invoice.status = 'posted'
+        invoice.save()
+        serializer = self.get_serializer(invoice)
+        return Response(serializer.data)
+
+
+class CreditNoteViewSet(viewsets.ModelViewSet):
+    """ViewSet for credit notes"""
+    serializer_class = CreditNoteSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return credit notes for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = CreditNote.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity, created_by=self.request.user)
+
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    """ViewSet for customer payments"""
+    serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return payments for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = Payment.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        instance = serializer.save(entity=entity)
+        
+        # Update invoice paid amount
+        instance.invoice.paid_amount += instance.amount
+        instance.invoice.outstanding_amount = instance.invoice.total_amount - instance.invoice.paid_amount
+        if instance.invoice.outstanding_amount <= 0:
+            instance.invoice.status = 'paid'
+        else:
+            instance.invoice.status = 'partially_paid'
+        instance.invoice.save()
+
+
+# ============================================================================
+# ACCOUNTS PAYABLE (AP) VIEWSETS
+# ============================================================================
+
+class VendorViewSet(viewsets.ModelViewSet):
+    """ViewSet for vendor management"""
+    serializer_class = VendorSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return vendors for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = Vendor.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class PurchaseOrderViewSet(viewsets.ModelViewSet):
+    """ViewSet for purchase orders"""
+    serializer_class = PurchaseOrderSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return purchase orders for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = PurchaseOrder.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity, created_by=self.request.user)
+
+
+class BillViewSet(viewsets.ModelViewSet):
+    """ViewSet for supplier bills"""
+    serializer_class = BillSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return bills for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = Bill.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity, created_by=self.request.user)
+
+
+class BillPaymentViewSet(viewsets.ModelViewSet):
+    """ViewSet for bill payments"""
+    serializer_class = BillPaymentSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return bill payments for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = BillPayment.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        instance = serializer.save(entity=entity)
+        
+        # Update bill paid amount
+        instance.bill.paid_amount += instance.amount
+        instance.bill.outstanding_amount = instance.bill.total_amount - instance.bill.paid_amount
+        if instance.bill.outstanding_amount <= 0:
+            instance.bill.status = 'paid'
+        else:
+            instance.bill.status = 'partially_paid'
+        instance.bill.save()
+
+
+# ============================================================================
+# INVENTORY VIEWSETS
+# ============================================================================
+
+class InventoryItemViewSet(viewsets.ModelViewSet):
+    """ViewSet for inventory item management"""
+    serializer_class = InventoryItemSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return inventory items for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = InventoryItem.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class InventoryTransactionViewSet(viewsets.ModelViewSet):
+    """ViewSet for inventory transactions"""
+    serializer_class = InventoryTransactionSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return inventory transactions for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = InventoryTransaction.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        instance = serializer.save(entity=entity, created_by=self.request.user)
+        
+        # Update inventory quantity
+        item = instance.inventory_item
+        item.quantity_on_hand = instance.quantity_after
+        item.save()
+
+
+class InventoryCOGSViewSet(viewsets.ModelViewSet):
+    """ViewSet for COGS calculations"""
+    serializer_class = InventoryCostOfGoodsSoldSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return COGS for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = InventoryCostOfGoodsSold.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+# ============================================================================
+# RECONCILIATION VIEWSETS
+# ============================================================================
+
+class BankReconciliationViewSet(viewsets.ModelViewSet):
+    """ViewSet for bank reconciliation"""
+    serializer_class = BankReconciliationSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return bank reconciliations for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = BankReconciliation.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+    
+    @action(detail=True, methods=['post'])
+    def reconcile(self, request, pk=None):
+        """Mark reconciliation as complete"""
+        reconciliation = self.get_object()
+        reconciliation.status = 'reconciled'
+        reconciliation.reconciled_by = request.user
+        reconciliation.reconciled_at = timezone.now()
+        reconciliation.variance = abs(reconciliation.bank_statement_balance - reconciliation.book_balance)
+        reconciliation.save()
+        
+        serializer = self.get_serializer(reconciliation)
+        return Response(serializer.data)
+
+
+# ============================================================================
+# REVENUE RECOGNITION & DEFERRED REVENUE VIEWSETS
+# ============================================================================
+
+class DeferredRevenueViewSet(viewsets.ModelViewSet):
+    """ViewSet for deferred revenue management"""
+    serializer_class = DeferredRevenueSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return deferred revenues for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = DeferredRevenue.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class RevenueRecognitionScheduleViewSet(viewsets.ModelViewSet):
+    """ViewSet for revenue recognition schedules"""
+    serializer_class = RevenueRecognitionScheduleSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return revenue recognition schedules"""
+        return RevenueRecognitionSchedule.objects.filter(
+            deferred_revenue__entity__organization__owner=self.request.user
+        )
+    
+    @action(detail=True, methods=['post'])
+    def recognize(self, request, pk=None):
+        """Recognize revenue for this schedule period"""
+        schedule = self.get_object()
+        schedule.is_recognized = True
+        schedule.recognized_date = timezone.now()
+        schedule.save()
+        
+        # Update deferred revenue
+        deferred = schedule.deferred_revenue
+        deferred.recognized_amount += schedule.amount_to_recognize
+        deferred.remaining_amount = deferred.total_amount - deferred.recognized_amount
+        if deferred.remaining_amount <= 0:
+            deferred.status = 'recognized'
+        else:
+            deferred.status = 'recognizing'
+        deferred.save()
+        
+        serializer = self.get_serializer(schedule)
+        return Response(serializer.data)
+
+
+# ============================================================================
+# PERIOD CLOSE VIEWSETS
+# ============================================================================
+
+class PeriodCloseChecklistViewSet(viewsets.ModelViewSet):
+    """ViewSet for period close checklists"""
+    serializer_class = PeriodCloseChecklistSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return close checklists for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = PeriodCloseChecklist.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+class PeriodCloseItemViewSet(viewsets.ModelViewSet):
+    """ViewSet for period close items"""
+    serializer_class = PeriodCloseItemSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return close items for user's entities"""
+        return PeriodCloseItem.objects.filter(
+            checklist__entity__organization__owner=self.request.user
+        )
+
+
+# ============================================================================
+# FX & MULTI-CURRENCY VIEWSETS
+# ============================================================================
+
+class ExchangeRateViewSet(viewsets.ModelViewSet):
+    """ViewSet for exchange rates"""
+    serializer_class = ExchangeRateSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return exchange rates"""
+        return ExchangeRate.objects.all().order_by('-rate_date')
+
+
+class FXGainLossViewSet(viewsets.ModelViewSet):
+    """ViewSet for FX gains/losses"""
+    serializer_class = FXGainLossSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return FX gains/losses for user's entities"""
+        entity_id = self.request.query_params.get('entity_id')
+        qs = FXGainLoss.objects.filter(entity__organization__owner=self.request.user)
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+    
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        serializer.save(entity=entity)
+
+
+# ============================================================================
+# NOTIFICATION VIEWSETS
+# ============================================================================
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    """ViewSet for user notifications"""
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Return notifications for current user"""
+        return Notification.objects.filter(user=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def unread(self, request):
+        """Get unread notifications"""
+        notifications = Notification.objects.filter(
+            user=request.user,
+            status='unread'
+        ).order_by('-sent_at')
+        
+        serializer = self.get_serializer(notifications, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def mark_read(self, request, pk=None):
+        """Mark notification as read"""
+        notification = self.get_object()
+        notification.status = 'read'
+        notification.read_at = timezone.now()
+        notification.save()
+        
+        serializer = self.get_serializer(notification)
+        return Response(serializer.data)
+
+
+class NotificationPreferenceViewSet(viewsets.ViewSet):
+    """ViewSet for notification preferences"""
+    permission_classes = [IsAuthenticated]
+    serializer_class = NotificationPreferenceSerializer
+    
+    def list(self, request):
+        """Get user's notification preferences"""
+        prefs, _ = NotificationPreference.objects.get_or_create(user=request.user)
+        serializer = self.serializer_class(prefs)
+        return Response(serializer.data)
+    
+    def update(self, request, pk=None):
+        """Update notification preferences"""
+        prefs, _ = NotificationPreference.objects.get_or_create(user=request.user)
+        serializer = self.serializer_class(prefs, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)

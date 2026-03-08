@@ -242,4 +242,242 @@ export const taxExposuresAPI = {
   delete: (id) => api.delete(`/tax-exposures/${id}/`),
 };
 
+// ============ ACCOUNTING MODULE APIs ============
+
+// Chart of Accounts API
+export const chartOfAccountsAPI = {
+  getAll: (params) => api.get('/chart-of-accounts/', { params }),
+  getById: (id) => api.get(`/chart-of-accounts/${id}/`),
+  create: (data) => api.post('/chart-of-accounts/', data),
+  update: (id, data) => api.put(`/chart-of-accounts/${id}/`, data),
+  delete: (id) => api.delete(`/chart-of-accounts/${id}/`),
+};
+
+// General Ledger API
+export const generalLedgerAPI = {
+  getAll: (params) => api.get('/general-ledger/', { params }),
+  getById: (id) => api.get(`/general-ledger/${id}/`),
+};
+
+// Journal Entries API
+export const journalEntriesAPI = {
+  getAll: (params) => api.get('/journal-entries/', { params }),
+  getById: (id) => api.get(`/journal-entries/${id}/`),
+  create: (data) => api.post('/journal-entries/', data),
+  update: (id, data) => api.put(`/journal-entries/${id}/`, data),
+  delete: (id) => api.delete(`/journal-entries/${id}/`),
+  approve: (id) => api.post(`/journal-entries/${id}/approve/`),
+  reverse: (id) => api.post(`/journal-entries/${id}/reverse/`),
+};
+
+// Ledger Periods API
+export const ledgerPeriodsAPI = {
+  getAll: (params) => api.get('/ledger-periods/', { params }),
+  getById: (id) => api.get(`/ledger-periods/${id}/`),
+  create: (data) => api.post('/ledger-periods/', data),
+  update: (id, data) => api.put(`/ledger-periods/${id}/`, data),
+  close: (id) => api.post(`/ledger-periods/${id}/close/`),
+};
+
+// Recurring Journal Templates API
+export const recurringJournalTemplatesAPI = {
+  getAll: (params) => api.get('/recurring-journal-templates/', { params }),
+  getById: (id) => api.get(`/recurring-journal-templates/${id}/`),
+  create: (data) => api.post('/recurring-journal-templates/', data),
+  update: (id, data) => api.put(`/recurring-journal-templates/${id}/`, data),
+  delete: (id) => api.delete(`/recurring-journal-templates/${id}/`),
+};
+
+// ============ ACCOUNTS RECEIVABLE APIs ============
+
+// Customers API
+export const customersAPI = {
+  getAll: (params) => api.get('/customers/', { params }),
+  getById: (id) => api.get(`/customers/${id}/`),
+  create: (data) => api.post('/customers/', data),
+  update: (id, data) => api.put(`/customers/${id}/`, data),
+  delete: (id) => api.delete(`/customers/${id}/`),
+};
+
+// Invoices API
+export const invoicesAPI = {
+  getAll: (params) => api.get('/invoices/', { params }),
+  getById: (id) => api.get(`/invoices/${id}/`),
+  create: (data) => api.post('/invoices/', data),
+  update: (id, data) => api.put(`/invoices/${id}/`, data),
+  delete: (id) => api.delete(`/invoices/${id}/`),
+  post: (id) => api.post(`/invoices/${id}/post/`),
+};
+
+// Credit Notes API
+export const creditNotesAPI = {
+  getAll: (params) => api.get('/credit-notes/', { params }),
+  getById: (id) => api.get(`/credit-notes/${id}/`),
+  create: (data) => api.post('/credit-notes/', data),
+  update: (id, data) => api.put(`/credit-notes/${id}/`, data),
+  delete: (id) => api.delete(`/credit-notes/${id}/`),
+};
+
+// Payments API
+export const paymentsAPI = {
+  getAll: (params) => api.get('/payments/', { params }),
+  getById: (id) => api.get(`/payments/${id}/`),
+  create: (data) => api.post('/payments/', data),
+  update: (id, data) => api.put(`/payments/${id}/`, data),
+  delete: (id) => api.delete(`/payments/${id}/`),
+};
+
+// ============ ACCOUNTS PAYABLE APIs ============
+
+// Vendors API
+export const vendorsAPI = {
+  getAll: (params) => api.get('/vendors/', { params }),
+  getById: (id) => api.get(`/vendors/${id}/`),
+  create: (data) => api.post('/vendors/', data),
+  update: (id, data) => api.put(`/vendors/${id}/`, data),
+  delete: (id) => api.delete(`/vendors/${id}/`),
+};
+
+// Purchase Orders API
+export const purchaseOrdersAPI = {
+  getAll: (params) => api.get('/purchase-orders/', { params }),
+  getById: (id) => api.get(`/purchase-orders/${id}/`),
+  create: (data) => api.post('/purchase-orders/', data),
+  update: (id, data) => api.put(`/purchase-orders/${id}/`, data),
+  delete: (id) => api.delete(`/purchase-orders/${id}/`),
+};
+
+// Bills API
+export const billsAPI = {
+  getAll: (params) => api.get('/bills/', { params }),
+  getById: (id) => api.get(`/bills/${id}/`),
+  create: (data) => api.post('/bills/', data),
+  update: (id, data) => api.put(`/bills/${id}/`, data),
+  delete: (id) => api.delete(`/bills/${id}/`),
+};
+
+// Bill Payments API
+export const billPaymentsAPI = {
+  getAll: (params) => api.get('/bill-payments/', { params }),
+  getById: (id) => api.get(`/bill-payments/${id}/`),
+  create: (data) => api.post('/bill-payments/', data),
+  update: (id, data) => api.put(`/bill-payments/${id}/`, data),
+  delete: (id) => api.delete(`/bill-payments/${id}/`),
+};
+
+// ============ INVENTORY APIs ============
+
+// Inventory Items API
+export const inventoryItemsAPI = {
+  getAll: (params) => api.get('/inventory-items/', { params }),
+  getById: (id) => api.get(`/inventory-items/${id}/`),
+  create: (data) => api.post('/inventory-items/', data),
+  update: (id, data) => api.put(`/inventory-items/${id}/`, data),
+  delete: (id) => api.delete(`/inventory-items/${id}/`),
+};
+
+// Inventory Transactions API
+export const inventoryTransactionsAPI = {
+  getAll: (params) => api.get('/inventory-transactions/', { params }),
+  getById: (id) => api.get(`/inventory-transactions/${id}/`),
+  create: (data) => api.post('/inventory-transactions/', data),
+  update: (id, data) => api.put(`/inventory-transactions/${id}/`, data),
+  delete: (id) => api.delete(`/inventory-transactions/${id}/`),
+};
+
+// Inventory COGS API
+export const inventoryCOGSAPI = {
+  getAll: (params) => api.get('/inventory-cogs/', { params }),
+  getById: (id) => api.get(`/inventory-cogs/${id}/`),
+  create: (data) => api.post('/inventory-cogs/', data),
+};
+
+// ============ RECONCILIATION APIs ============
+
+// Bank Reconciliations API
+export const bankReconciliationsAPI = {
+  getAll: (params) => api.get('/bank-reconciliations/', { params }),
+  getById: (id) => api.get(`/bank-reconciliations/${id}/`),
+  create: (data) => api.post('/bank-reconciliations/', data),
+  update: (id, data) => api.put(`/bank-reconciliations/${id}/`, data),
+  delete: (id) => api.delete(`/bank-reconciliations/${id}/`),
+  reconcile: (id) => api.post(`/bank-reconciliations/${id}/reconcile/`),
+};
+
+// ============ REVENUE RECOGNITION APIs ============
+
+// Deferred Revenues API
+export const deferredRevenuesAPI = {
+  getAll: (params) => api.get('/deferred-revenues/', { params }),
+  getById: (id) => api.get(`/deferred-revenues/${id}/`),
+  create: (data) => api.post('/deferred-revenues/', data),
+  update: (id, data) => api.put(`/deferred-revenues/${id}/`, data),
+  delete: (id) => api.delete(`/deferred-revenues/${id}/`),
+};
+
+// Revenue Recognition Schedules API
+export const revenueRecognitionSchedulesAPI = {
+  getAll: (params) => api.get('/revenue-recognition-schedules/', { params }),
+  getById: (id) => api.get(`/revenue-recognition-schedules/${id}/`),
+  create: (data) => api.post('/revenue-recognition-schedules/', data),
+  recognize: (id) => api.post(`/revenue-recognition-schedules/${id}/recognize/`),
+};
+
+// ============ PERIOD CLOSE APIs ============
+
+// Period Close Checklists API
+export const periodCloseChecklistsAPI = {
+  getAll: (params) => api.get('/period-close-checklists/', { params }),
+  getById: (id) => api.get(`/period-close-checklists/${id}/`),
+  create: (data) => api.post('/period-close-checklists/', data),
+  update: (id, data) => api.put(`/period-close-checklists/${id}/`, data),
+  delete: (id) => api.delete(`/period-close-checklists/${id}/`),
+};
+
+// Period Close Items API
+export const periodCloseItemsAPI = {
+  getAll: (params) => api.get('/period-close-items/', { params }),
+  getById: (id) => api.get(`/period-close-items/${id}/`),
+  create: (data) => api.post('/period-close-items/', data),
+  update: (id, data) => api.put(`/period-close-items/${id}/`, data),
+  delete: (id) => api.delete(`/period-close-items/${id}/`),
+};
+
+// ============ FX & MULTI-CURRENCY APIs ============
+
+// Exchange Rates API
+export const exchangeRatesAPI = {
+  getAll: (params) => api.get('/exchange-rates/', { params }),
+  getById: (id) => api.get(`/exchange-rates/${id}/`),
+  create: (data) => api.post('/exchange-rates/', data),
+  update: (id, data) => api.put(`/exchange-rates/${id}/`, data),
+  delete: (id) => api.delete(`/exchange-rates/${id}/`),
+};
+
+// FX Gain/Loss API
+export const fxGainLossAPI = {
+  getAll: (params) => api.get('/fx-gainloss/', { params }),
+  getById: (id) => api.get(`/fx-gainloss/${id}/`),
+  create: (data) => api.post('/fx-gainloss/', data),
+  update: (id, data) => api.put(`/fx-gainloss/${id}/`, data),
+  delete: (id) => api.delete(`/fx-gainloss/${id}/`),
+};
+
+// ============ NOTIFICATIONS APIs ============
+
+// Notifications API
+export const notificationsAPI = {
+  getAll: (params) => api.get('/notifications/', { params }),
+  getUnread: () => api.get('/notifications/unread/'),
+  getById: (id) => api.get(`/notifications/${id}/`),
+  markRead: (id) => api.post(`/notifications/${id}/mark_read/`),
+  delete: (id) => api.delete(`/notifications/${id}/`),
+};
+
+// Notification Preferences API
+export const notificationPreferencesAPI = {
+  get: () => api.get('/notification-preferences/'),
+  update: (data) => api.post('/notification-preferences/', data),
+};
+
 export default api;

@@ -33,7 +33,7 @@ class UserProfile(models.Model):
     account_type = models.CharField(
         max_length=20,
         choices=ACCOUNT_TYPE_CHOICES,
-        default=ACCOUNT_TYPE_PERSONAL
+        default=ACCOUNT_TYPE_ENTERPRISE
     )
     country = models.CharField(max_length=100, blank=True)
     phone = models.CharField(max_length=20, blank=True)
@@ -1644,3 +1644,882 @@ class AccrualEntry(models.Model):
 
     def __str__(self):
         return f"{self.get_accrual_type_display()}: {self.description}"
+
+
+# ============================================================================
+# CHART OF ACCOUNTS (COA) & GENERAL LEDGER (GL) MODELS
+# ============================================================================
+
+class ChartOfAccounts(models.Model):
+    """Chart of Accounts - the backbone of the accounting system"""
+    ACCOUNT_TYPE_CHOICES = [
+        ('asset', 'Asset'),
+        ('liability', 'Liability'),
+        ('equity', 'Equity'),
+        ('revenue', 'Revenue'),
+        ('expense', 'Expense'),
+    ]
+
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('archived', 'Archived'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='chart_of_accounts')
+    account_code = models.CharField(max_length=20)  # e.g., "1000", "2100"
+    account_name = models.CharField(max_length=255)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES)
+    parent_account = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='sub_accounts')
+    currency = models.CharField(max_length=3, default='USD')
+    description = models.TextField(blank=True)
+    cost_center = models.CharField(max_length=100, blank=True)  # For departmental/cost center tracking
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    opening_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    current_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'account_code')
+        ordering = ['account_code']
+        verbose_name_plural = 'Chart of Accounts'
+
+    def __str__(self):
+        return f"{self.account_code} - {self.account_name}"
+
+
+class GeneralLedger(models.Model):
+    """General Ledger - master record of all financial activity with double-entry bookkeeping"""
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='general_ledger')
+    debit_account = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='debit_entries')
+    credit_account = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='credit_entries')
+    debit_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    credit_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    description = models.TextField()
+    reference_number = models.CharField(max_length=100)
+    posting_date = models.DateField()
+    journal_entry = models.ForeignKey('JournalEntry', on_delete=models.CASCADE, related_name='ledger_entries')
+    posting_status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('posted', 'Posted'), ('reversed', 'Reversed')], default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['posting_date', 'created_at']
+        indexes = [
+            models.Index(fields=['entity', 'posting_date']),
+            models.Index(fields=['posting_status']),
+        ]
+
+    def __str__(self):
+        return f"GL: {self.debit_account.account_code} DR {self.debit_amount} / {self.credit_account.account_code} CR {self.credit_amount}"
+
+
+class JournalEntry(models.Model):
+    """Journal Entries - all financial transactions recorded as double-entry journal entries"""
+    ENTRY_TYPE_CHOICES = [
+        ('manual', 'Manual Entry'),
+        ('automated', 'Automated Entry'),
+        ('reversal', 'Reversal Entry'),
+        ('adjusting', 'Adjusting Entry'),
+    ]
+
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('posted', 'Posted'),
+        ('reversed', 'Reversed'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='journal_entries')
+    entry_type = models.CharField(max_length=20, choices=ENTRY_TYPE_CHOICES, default='manual')
+    reference_number = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    posting_date = models.DateField()
+    memo = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+
+    # Approval workflow
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='journal_entries_created')
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='journal_entries_approved')
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    # Recurring journal template
+    is_recurring = models.BooleanField(default=False)
+    recurring_template = models.ForeignKey('RecurringJournalTemplate', on_delete=models.SET_NULL, null=True, blank=True, related_name='journal_entries')
+
+    # Reversal tracking
+    reversing_entry = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='reversed_by')
+    original_entry = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='reversal_entry')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['posting_date', '-created_at']
+        indexes = [
+            models.Index(fields=['entity', 'posting_date']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"{self.reference_number} - {self.description[:50]}"
+
+
+class RecurringJournalTemplate(models.Model):
+    """Recurring Journal Entry Templates - for automated periodic entries"""
+    FREQUENCY_CHOICES = [
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('yearly', 'Yearly'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='recurring_journal_templates')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
+    next_posting_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    # Template line items stored as JSON
+    journal_lines = models.JSONField(default=dict)  # [{debit_account_id, credit_account_id, amount}, ...]
+
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='recurring_journal_templates_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['next_posting_date']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_frequency_display()})"
+
+
+class LedgerPeriod(models.Model):
+    """Accounting periods - for period-based operations (opening, closing)"""
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('closed', 'Closed'),
+        ('pending_close', 'Pending Close'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='ledger_periods')
+    period_name = models.CharField(max_length=100)  # e.g., "January 2025", "Q1 2025"
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    no_posting_after = models.DateField(null=True, blank=True)  # Lock period after this date
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    closed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='ledger_periods_closed')
+
+    class Meta:
+        unique_together = ('entity', 'start_date', 'end_date')
+        ordering = ['start_date']
+
+    def __str__(self):
+        return f"{self.entity.name} - {self.period_name}"
+
+
+# ============================================================================
+# SALES & RECEIVABLES (AR) MODELS
+# ============================================================================
+
+class Customer(models.Model):
+    """Customer records for Accounts Receivable"""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('dormant', 'Dormant'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='customers')
+    customer_code = models.CharField(max_length=50, unique=True)
+    customer_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField()
+    city = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    
+    contact_person = models.CharField(max_length=255, blank=True)
+    tax_id = models.CharField(max_length=100, blank=True)  # Customer's tax ID
+    
+    payment_terms = models.IntegerField(default=30)  # Days
+    currency = models.CharField(max_length=3, default='USD')
+    credit_limit = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['customer_name']
+        unique_together = ('entity', 'customer_code')
+
+    def __str__(self):
+        return f"{self.customer_code} - {self.customer_name}"
+
+
+class Invoice(models.Model):
+    """Sales invoices for Accounts Receivable"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('posted', 'Posted'),
+        ('partially_paid', 'Partially Paid'),
+        ('paid', 'Paid'),
+        ('overdue', 'Overdue'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='invoices')
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='invoices')
+    
+    invoice_number = models.CharField(max_length=50, unique=True)
+    invoice_date = models.DateField()
+    due_date = models.DateField()
+    
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    outstanding_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    currency = models.CharField(max_length=3, default='USD')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='invoices_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'invoice_number')
+        ordering = ['-invoice_date']
+        indexes = [
+            models.Index(fields=['entity', 'status']),
+            models.Index(fields=['due_date']),
+        ]
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number}"
+
+
+class InvoiceLineItem(models.Model):
+    """Line items on an invoice"""
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='line_items')
+    description = models.CharField(max_length=255)
+    quantity = models.DecimalField(max_digits=15, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=15, decimal_places=2)
+    tax_rate = models.DecimalField(max_digits=7, decimal_places=4, default=0)
+    line_amount = models.DecimalField(max_digits=15, decimal_places=2)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.description} x {self.quantity}"
+
+
+class CreditNote(models.Model):
+    """Credit notes for reducing AR"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('posted', 'Posted'),
+        ('applied', 'Applied'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='credit_notes')
+    invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, null=True, blank=True, related_name='credit_notes')
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='credit_notes')
+    
+    credit_note_number = models.CharField(max_length=50, unique=True)
+    credit_date = models.DateField()
+    
+    reason = models.TextField()
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='credit_notes_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('entity', 'credit_note_number')
+        ordering = ['-credit_date']
+
+    def __str__(self):
+        return f"Credit Note {self.credit_note_number}"
+
+
+class Payment(models.Model):
+    """Customer payments for invoices"""
+    PAYMENT_METHOD_CHOICES = [
+        ('bank_transfer', 'Bank Transfer'),
+        ('credit_card', 'Credit Card'),
+        ('cash', 'Cash'),
+        ('cheque', 'Cheque'),
+        ('other', 'Other'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='payments')
+    invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name='payments')
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='payments')
+    
+    payment_date = models.DateField()
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    reference_number = models.CharField(max_length=100, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-payment_date']
+
+    def __str__(self):
+        return f"Payment - {self.amount} on {self.payment_date}"
+
+
+# ============================================================================
+# PURCHASES & PAYABLES (AP) MODELS
+# ============================================================================
+
+class Vendor(models.Model):
+    """Vendor records for Accounts Payable"""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('on_hold', 'On Hold'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='vendors')
+    vendor_code = models.CharField(max_length=50, unique=True)
+    vendor_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField()
+    city = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    
+    contact_person = models.CharField(max_length=255, blank=True)
+    tax_id = models.CharField(max_length=100, blank=True)
+    
+    payment_terms = models.IntegerField(default=30)  # Days
+    currency = models.CharField(max_length=3, default='USD')
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['vendor_name']
+        unique_together = ('entity', 'vendor_code')
+
+    def __str__(self):
+        return f"{self.vendor_code} - {self.vendor_name}"
+
+
+class PurchaseOrder(models.Model):
+    """Purchase orders for vendor management"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('posted', 'Posted'),
+        ('partially_received', 'Partially Received'),
+        ('received', 'Received'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='purchase_orders')
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='purchase_orders')
+    
+    po_number = models.CharField(max_length=50, unique=True)
+    po_date = models.DateField()
+    expected_delivery_date = models.DateField()
+    
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    currency = models.CharField(max_length=3, default='USD')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='purchase_orders_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'po_number')
+        ordering = ['-po_date']
+
+    def __str__(self):
+        return f"PO {self.po_number}"
+
+
+class Bill(models.Model):
+    """Supplier bills/invoices for Accounts Payable"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('posted', 'Posted'),
+        ('partially_paid', 'Partially Paid'),
+        ('paid', 'Paid'),
+        ('overdue', 'Overdue'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='bills')
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='bills')
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='bills')
+    
+    bill_number = models.CharField(max_length=50, unique=True)
+    bill_date = models.DateField()
+    due_date = models.DateField()
+    
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    outstanding_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    currency = models.CharField(max_length=3, default='USD')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='bills_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'bill_number')
+        ordering = ['-bill_date']
+        indexes = [
+            models.Index(fields=['entity', 'status']),
+            models.Index(fields=['due_date']),
+        ]
+
+    def __str__(self):
+        return f"Bill {self.bill_number}"
+
+
+class BillPayment(models.Model):
+    """Payments made to vendors for bills"""
+    PAYMENT_METHOD_CHOICES = [
+        ('bank_transfer', 'Bank Transfer'),
+        ('cheque', 'Cheque'),
+        ('cash', 'Cash'),
+        ('credit_card', 'Credit Card'),
+        ('other', 'Other'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='bill_payments')
+    bill = models.ForeignKey(Bill, on_delete=models.PROTECT, related_name='payments')
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='bill_payments')
+    
+    payment_date = models.DateField()
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    reference_number = models.CharField(max_length=100, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-payment_date']
+
+    def __str__(self):
+        return f"Bill Payment - {self.amount} on {self.payment_date}"
+
+
+# ============================================================================
+# INVENTORY ACCOUNTING MODELS
+# ============================================================================
+
+class InventoryItem(models.Model):
+    """Inventory SKU definitions"""
+    VALUATION_METHODS = [
+        ('fifo', 'FIFO'),
+        ('lifo', 'LIFO'),
+        ('weighted_avg', 'Weighted Average'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='inventory_items')
+    sku = models.CharField(max_length=100, unique=True)
+    item_name = models.CharField(max_length=255)
+    item_code = models.CharField(max_length=50, unique=True)
+    
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=100)
+    unit_of_measure = models.CharField(max_length=20)  # e.g., "pc", "kg", "L"
+    
+    quantity_on_hand = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    reorder_level = models.DecimalField(max_digits=15, decimal_places=2)
+    reorder_quantity = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    unit_cost = models.DecimalField(max_digits=15, decimal_places=2)
+    valuation_method = models.CharField(max_length=20, choices=VALUATION_METHODS, default='fifo')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['item_name']
+        unique_together = ('entity', 'sku')
+
+    def __str__(self):
+        return f"{self.sku} - {self.item_name}"
+
+
+class InventoryTransaction(models.Model):
+    """All inventory movements"""
+    TRANSACTION_TYPE_CHOICES = [
+        ('purchase', 'Purchase'),
+        ('sale', 'Sale'),
+        ('adjustment', 'Adjustment'),
+        ('return', 'Return'),
+        ('transfer', 'Transfer'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='inventory_transactions')
+    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.PROTECT, related_name='transactions')
+    
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES)
+    transaction_date = models.DateField()
+    
+    quantity_before = models.DecimalField(max_digits=15, decimal_places=2)
+    quantity = models.DecimalField(max_digits=15, decimal_places=2)  # Positive for IN, Negative for OUT
+    quantity_after = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    unit_cost = models.DecimalField(max_digits=15, decimal_places=2)
+    total_cost = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    reference_number = models.CharField(max_length=100, blank=True)  # Invoice, PO, etc.
+    notes = models.TextField(blank=True)
+    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='inventory_transactions_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-transaction_date']
+        indexes = [
+            models.Index(fields=['entity', 'transaction_date']),
+            models.Index(fields=['inventory_item']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - {self.inventory_item.sku} x {self.quantity}"
+
+
+class InventoryCostOfGoodsSold(models.Model):
+    """COGS calculation for inventory"""
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='inventory_cogs')
+    period_start = models.DateField()
+    period_end = models.DateField()
+    
+    opening_inventory = models.DecimalField(max_digits=15, decimal_places=2)
+    purchases = models.DecimalField(max_digits=15, decimal_places=2)
+    closing_inventory = models.DecimalField(max_digits=15, decimal_places=2)
+    cogs = models.DecimalField(max_digits=15, decimal_places=2)  # Opening + Purchases - Closing
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('entity', 'period_start', 'period_end')
+        ordering = ['-period_end']
+
+    def __str__(self):
+        return f"COGS {self.entity.name} - {self.period_start} to {self.period_end}"
+
+
+# ============================================================================
+# RECONCILIATION MODELS
+# ============================================================================
+
+class BankReconciliation(models.Model):
+    """Bank reconciliation"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('reconciled', 'Reconciled'),
+        ('unreconciled', 'Unreconciled'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='bank_reconciliations')
+    bank_account = models.ForeignKey(BankAccount, on_delete=models.PROTECT, related_name='reconciliations')
+    
+    reconciliation_date = models.DateField()
+    bank_statement_balance = models.DecimalField(max_digits=15, decimal_places=2)
+    book_balance = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    variance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    
+    notes = models.TextField(blank=True)
+    reconciled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='bank_reconciliations')
+    reconciled_at = models.DateTimeField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-reconciliation_date']
+        unique_together = ('entity', 'bank_account', 'reconciliation_date')
+
+    def __str__(self):
+        return f"Bank Reconciliation - {self.bank_account.account_name} ({self.reconciliation_date})"
+
+
+# ============================================================================
+# REVENUE RECOGNITION & DEFERRED REVENUE MODELS
+# ============================================================================
+
+class DeferredRevenue(models.Model):
+    """Deferred revenue for accrual accounting"""
+    STATUS_CHOICES = [
+        ('deferred', 'Deferred'),
+        ('recognizing', 'Recognizing'),
+        ('recognized', 'Fully Recognized'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='deferred_revenues')
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='deferred_revenues')
+    
+    contract_number = models.CharField(max_length=100)
+    contract_start_date = models.DateField()
+    contract_end_date = models.DateField()
+    
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    
+    recognized_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    remaining_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='deferred')
+    
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-contract_start_date']
+
+    def __str__(self):
+        return f"Deferred Revenue - {self.contract_number}"
+
+
+class RevenueRecognitionSchedule(models.Model):
+    """Schedule for recognizing deferred revenue"""
+    deferred_revenue = models.ForeignKey(DeferredRevenue, on_delete=models.CASCADE, related_name='recognition_schedule')
+    
+    recognition_period_start = models.DateField()
+    recognition_period_end = models.DateField()
+    recognition_date = models.DateField()
+    
+    amount_to_recognize = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    is_recognized = models.BooleanField(default=False)
+    recognized_date = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        unique_together = ('deferred_revenue', 'recognition_period_start')
+        ordering = ['recognition_date']
+
+    def __str__(self):
+        return f"Revenue Recognition - {self.deferred_revenue.contract_number} ({self.recognition_period_start})"
+
+
+# ============================================================================
+# PERIOD CLOSE & ADJUSTMENT MODELS
+# ============================================================================
+
+class PeriodCloseChecklist(models.Model):
+    """Checklist for period-end closing"""
+    STATUS_CHOICES = [
+        ('not_started', 'Not Started'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='close_checklists')
+    period = models.ForeignKey(LedgerPeriod, on_delete=models.CASCADE, related_name='close_checklist')
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('entity', 'period')
+
+    def __str__(self):
+        return f"Close Checklist - {self.entity.name} ({self.period.period_name})"
+
+
+class PeriodCloseItem(models.Model):
+    """Individual items in the close checklist"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+
+    checklist = models.ForeignKey(PeriodCloseChecklist, on_delete=models.CASCADE, related_name='items')
+    
+    task_name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    sequence = models.IntegerField()
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    responsible_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['sequence']
+
+    def __str__(self):
+        return f"{self.task_name}"
+
+
+# ============================================================================
+# MULTI-CURRENCY & FX MODELS
+# ============================================================================
+
+class ExchangeRate(models.Model):
+    """Historical and current exchange rates"""
+    from_currency = models.CharField(max_length=3)
+    to_currency = models.CharField(max_length=3)
+    rate = models.DecimalField(max_digits=15, decimal_places=6)
+    rate_date = models.DateField()
+    source = models.CharField(max_length=100, blank=True)  # e.g., "ECB", "Fed", "Manual"
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('from_currency', 'to_currency', 'rate_date')
+        ordering = ['-rate_date']
+
+    def __str__(self):
+        return f"{self.from_currency}/{self.to_currency} @ {self.rate} on {self.rate_date}"
+
+
+class FXGainLoss(models.Model):
+    """Realized and unrealized FX gains/losses"""
+    GAIN_TYPE_CHOICES = [
+        ('realized', 'Realized'),
+        ('unrealized', 'Unrealized'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='fx_gainloss')
+    
+    transaction = models.ForeignKey(Transaction, on_delete=models.PROTECT, null=True, blank=True, related_name='fx_gainloss')
+    
+    from_currency = models.CharField(max_length=3)
+    to_currency = models.CharField(max_length=3)
+    
+    original_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    original_rate = models.DecimalField(max_digits=15, decimal_places=6)
+    original_value = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    current_rate = models.DecimalField(max_digits=15, decimal_places=6)
+    current_value = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    gain_loss_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    gain_type = models.CharField(max_length=20, choices=GAIN_TYPE_CHOICES)
+    
+    transaction_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-transaction_date']
+
+    def __str__(self):
+        return f"FX {self.gain_type.title()} - {self.from_currency}/{self.to_currency}: {self.gain_loss_amount}"
+
+
+# ============================================================================
+# NOTIFICATION & ALERT MODELS
+# ============================================================================
+
+class Notification(models.Model):
+    """System notifications and alerts"""
+    NOTIFICATION_TYPE_CHOICES = [
+        ('budget_alert', 'Budget Alert'),
+        ('deadline_reminder', 'Deadline Reminder'),
+        ('payment_due', 'Payment Due'),
+        ('approval_request', 'Approval Request'),
+        ('error', 'Error Alert'),
+        ('system', 'System Message'),
+    ]
+
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ]
+
+    STATUS_CHOICES = [
+        ('unread', 'Unread'),
+        ('read', 'Read'),
+        ('archived', 'Archived'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='notifications')
+    
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPE_CHOICES)
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unread')
+    
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    
+    related_entity = models.ForeignKey(Entity, on_delete=models.SET_NULL, null=True, blank=True)
+    related_content_type = models.CharField(max_length=100, blank=True)  # e.g., "Invoice", "Bill"
+    related_object_id = models.CharField(max_length=100, blank=True)
+    
+    action_url = models.URLField(blank=True)
+    
+    read_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-sent_at']
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['organization', 'sent_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_notification_type_display()}: {self.title}"
+
+
+class NotificationPreference(models.Model):
+    """User notification preferences"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_preferences')
+    
+    email_budget_alerts = models.BooleanField(default=True)
+    email_deadline_reminders = models.BooleanField(default=True)
+    email_payment_due = models.BooleanField(default=True)
+    email_approval_requests = models.BooleanField(default=True)
+    
+    sms_budget_alerts = models.BooleanField(default=False)
+    sms_deadline_reminders = models.BooleanField(default=True)
+    sms_payment_due = models.BooleanField(default=True)
+    
+    in_app_all = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Notification preferences for {self.user.email}"

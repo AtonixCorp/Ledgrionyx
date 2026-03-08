@@ -15,7 +15,18 @@ from .enterprise_views import (
     EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
     BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet,
     BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet,
-    CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, FinancialStatementsViewSet
+    CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, FinancialStatementsViewSet,
+    # New viewsets
+    ChartOfAccountsViewSet, GeneralLedgerViewSet, JournalEntryViewSet,
+    RecurringJournalTemplateViewSet, LedgerPeriodViewSet,
+    CustomerViewSet, InvoiceViewSet, CreditNoteViewSet, PaymentViewSet,
+    VendorViewSet, PurchaseOrderViewSet, BillViewSet, BillPaymentViewSet,
+    InventoryItemViewSet, InventoryTransactionViewSet, InventoryCOGSViewSet,
+    BankReconciliationViewSet,
+    DeferredRevenueViewSet, RevenueRecognitionScheduleViewSet,
+    PeriodCloseChecklistViewSet, PeriodCloseItemViewSet,
+    ExchangeRateViewSet, FXGainLossViewSet,
+    NotificationViewSet, NotificationPreferenceViewSet
 )
 
 router = DefaultRouter()
@@ -73,6 +84,49 @@ router.register(r'reports', ReportViewSet, basename='report')
 router.register(r'consolidations', ConsolidationViewSet, basename='consolidation')
 router.register(r'consolidation-entities', ConsolidationEntityViewSet, basename='consolidation-entity')
 router.register(r'tax-calculations', TaxCalculationViewSet, basename='tax-calculation')
+
+# NEW: Chart of Accounts & General Ledger
+router.register(r'chart-of-accounts', ChartOfAccountsViewSet, basename='chart-of-accounts')
+router.register(r'general-ledger', GeneralLedgerViewSet, basename='general-ledger')
+router.register(r'journal-entries', JournalEntryViewSet, basename='journal-entry')
+router.register(r'recurring-journal-templates', RecurringJournalTemplateViewSet, basename='recurring-journal-template')
+router.register(r'ledger-periods', LedgerPeriodViewSet, basename='ledger-period')
+
+# NEW: Accounts Receivable (AR)
+router.register(r'customers', CustomerViewSet, basename='customer')
+router.register(r'invoices', InvoiceViewSet, basename='invoice')
+router.register(r'credit-notes', CreditNoteViewSet, basename='credit-note')
+router.register(r'payments', PaymentViewSet, basename='payment')
+
+# NEW: Accounts Payable (AP)
+router.register(r'vendors', VendorViewSet, basename='vendor')
+router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-order')
+router.register(r'bills', BillViewSet, basename='bill')
+router.register(r'bill-payments', BillPaymentViewSet, basename='bill-payment')
+
+# NEW: Inventory
+router.register(r'inventory-items', InventoryItemViewSet, basename='inventory-item')
+router.register(r'inventory-transactions', InventoryTransactionViewSet, basename='inventory-transaction')
+router.register(r'inventory-cogs', InventoryCOGSViewSet, basename='inventory-cogs')
+
+# NEW: Reconciliation
+router.register(r'bank-reconciliations', BankReconciliationViewSet, basename='bank-reconciliation')
+
+# NEW: Revenue Recognition & Deferred Revenue
+router.register(r'deferred-revenues', DeferredRevenueViewSet, basename='deferred-revenue')
+router.register(r'revenue-recognition-schedules', RevenueRecognitionScheduleViewSet, basename='revenue-recognition-schedule')
+
+# NEW: Period Close
+router.register(r'period-close-checklists', PeriodCloseChecklistViewSet, basename='period-close-checklist')
+router.register(r'period-close-items', PeriodCloseItemViewSet, basename='period-close-item')
+
+# NEW: FX & Multi-Currency
+router.register(r'exchange-rates', ExchangeRateViewSet, basename='exchange-rate')
+router.register(r'fx-gainloss', FXGainLossViewSet, basename='fx-gainloss')
+
+# NEW: Notifications
+router.register(r'notifications', NotificationViewSet, basename='notification')
+router.register(r'notification-preferences', NotificationPreferenceViewSet, basename='notification-preference')
 
 urlpatterns = [
     path('', include(router.urls)),
