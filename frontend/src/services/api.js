@@ -480,4 +480,211 @@ export const notificationPreferencesAPI = {
   update: (data) => api.post('/notification-preferences/', data),
 };
 
+// ============ CLIENT MANAGEMENT APIs ============
+
+// Clients API
+export const clientsAPI = {
+  getAll: (params) => api.get('/clients/', { params }),
+  getById: (id) => api.get(`/clients/${id}/`),
+  create: (data) => api.post('/clients/', data),
+  update: (id, data) => api.put(`/clients/${id}/`, data),
+  delete: (id) => api.delete(`/clients/${id}/`),
+};
+
+// Client Portals API
+export const clientPortalsAPI = {
+  getAll: () => api.get('/client-portals/'),
+  getById: (id) => api.get(`/client-portals/${id}/`),
+  create: (data) => api.post('/client-portals/', data),
+  update: (id, data) => api.put(`/client-portals/${id}/`, data),
+};
+
+// Client Messages API
+export const clientMessagesAPI = {
+  getAll: (params) => api.get('/client-messages/', { params }),
+  getById: (id) => api.get(`/client-messages/${id}/`),
+  create: (data) => api.post('/client-messages/', data),
+  update: (id, data) => api.put(`/client-messages/${id}/`, data),
+};
+
+// Client Documents API
+export const clientDocumentsAPI = {
+  getAll: (params) => api.get('/client-documents/', { params }),
+  getById: (id) => api.get(`/client-documents/${id}/`),
+  create: (data) => api.post('/client-documents/', data),
+  update: (id, data) => api.put(`/client-documents/${id}/`, data),
+  delete: (id) => api.delete(`/client-documents/${id}/`),
+};
+
+// Document Requests API
+export const documentRequestsAPI = {
+  getAll: (params) => api.get('/document-requests/', { params }),
+  getById: (id) => api.get(`/document-requests/${id}/`),
+  create: (data) => api.post('/document-requests/', data),
+  update: (id, data) => api.put(`/document-requests/${id}/`, data),
+  delete: (id) => api.delete(`/document-requests/${id}/`),
+};
+
+// Approval Requests API
+export const approvalRequestsAPI = {
+  getAll: (params) => api.get('/approval-requests/', { params }),
+  getById: (id) => api.get(`/approval-requests/${id}/`),
+  create: (data) => api.post('/approval-requests/', data),
+  update: (id, data) => api.put(`/approval-requests/${id}/`, data),
+};
+
+// Document Templates API
+export const documentTemplatesAPI = {
+  getAll: (params) => api.get('/document-templates/', { params }),
+  getById: (id) => api.get(`/document-templates/${id}/`),
+  create: (data) => api.post('/document-templates/', data),
+  update: (id, data) => api.put(`/document-templates/${id}/`, data),
+  delete: (id) => api.delete(`/document-templates/${id}/`),
+};
+
+// ============ LOAN MANAGEMENT APIs ============
+
+// Loans API
+export const loansAPI = {
+  getAll: (params) => api.get('/loans/', { params }),
+  getById: (id) => api.get(`/loans/${id}/`),
+  create: (data) => api.post('/loans/', data),
+  update: (id, data) => api.put(`/loans/${id}/`, data),
+  delete: (id) => api.delete(`/loans/${id}/`),
+};
+
+// Loan Payments API
+export const loanPaymentsAPI = {
+  getAll: (params) => api.get('/loan-payments/', { params }),
+  getById: (id) => api.get(`/loan-payments/${id}/`),
+  create: (data) => api.post('/loan-payments/', data),
+  update: (id, data) => api.put(`/loan-payments/${id}/`, data),
+};
+
+// ============ COMPLIANCE & KYC/AML APIs ============
+
+// KYC Profiles API
+export const kycProfilesAPI = {
+  getAll: (params) => api.get('/kyc-profiles/', { params }),
+  getById: (id) => api.get(`/kyc-profiles/${id}/`),
+  create: (data) => api.post('/kyc-profiles/', data),
+  update: (id, data) => api.put(`/kyc-profiles/${id}/`, data),
+  delete: (id) => api.delete(`/kyc-profiles/${id}/`),
+};
+
+// AML Transactions API
+export const amlTransactionsAPI = {
+  getAll: (params) => api.get('/aml-transactions/', { params }),
+  getById: (id) => api.get(`/aml-transactions/${id}/`),
+  create: (data) => api.post('/aml-transactions/', data),
+  update: (id, data) => api.put(`/aml-transactions/${id}/`, data),
+};
+
+// ============ BILLING & FIRM MANAGEMENT APIs ============
+
+// Firm Services API
+export const firmServicesAPI = {
+  getAll: (params) => api.get('/firm-services/', { params }),
+  getById: (id) => api.get(`/firm-services/${id}/`),
+  create: (data) => api.post('/firm-services/', data),
+  update: (id, data) => api.put(`/firm-services/${id}/`, data),
+  delete: (id) => api.delete(`/firm-services/${id}/`),
+};
+
+// Client Invoices API
+export const clientInvoicesAPI = {
+  getAll: (params) => api.get('/client-invoices/', { params }),
+  getById: (id) => api.get(`/client-invoices/${id}/`),
+  create: (data) => api.post('/client-invoices/', data),
+  update: (id, data) => api.put(`/client-invoices/${id}/`, data),
+  delete: (id) => api.delete(`/client-invoices/${id}/`),
+};
+
+// Client Invoice Line Items API
+export const clientInvoiceLineItemsAPI = {
+  getAll: (params) => api.get('/client-invoice-line-items/', { params }),
+  getById: (id) => api.get(`/client-invoice-line-items/${id}/`),
+  create: (data) => api.post('/client-invoice-line-items/', data),
+  update: (id, data) => api.put(`/client-invoice-line-items/${id}/`, data),
+  delete: (id) => api.delete(`/client-invoice-line-items/${id}/`),
+};
+
+// Client Subscriptions API
+export const clientSubscriptionsAPI = {
+  getAll: (params) => api.get('/client-subscriptions/', { params }),
+  getById: (id) => api.get(`/client-subscriptions/${id}/`),
+  create: (data) => api.post('/client-subscriptions/', data),
+  update: (id, data) => api.put(`/client-subscriptions/${id}/`, data),
+  delete: (id) => api.delete(`/client-subscriptions/${id}/`),
+};
+
+// ============ WHITE-LABELING APIs ============
+
+// White Label Branding API
+export const whiteLabelBrandingAPI = {
+  getAll: () => api.get('/white-label-branding/'),
+  getById: (id) => api.get(`/white-label-branding/${id}/`),
+  create: (data) => api.post('/white-label-branding/', data),
+  update: (id, data) => api.put(`/white-label-branding/${id}/`, data),
+};
+
+// ============ EMBEDDED BANKING & PAYMENTS APIs ============
+
+// Banking Integrations API
+export const bankingIntegrationsAPI = {
+  getAll: (params) => api.get('/banking-integrations/', { params }),
+  getById: (id) => api.get(`/banking-integrations/${id}/`),
+  create: (data) => api.post('/banking-integrations/', data),
+  update: (id, data) => api.put(`/banking-integrations/${id}/`, data),
+  delete: (id) => api.delete(`/banking-integrations/${id}/`),
+};
+
+// Banking Transactions API
+export const bankingTransactionsAPI = {
+  getAll: (params) => api.get('/banking-transactions/', { params }),
+  getById: (id) => api.get(`/banking-transactions/${id}/`),
+};
+
+// Embedded Payments API
+export const embeddedPaymentsAPI = {
+  getAll: (params) => api.get('/embedded-payments/', { params }),
+  getById: (id) => api.get(`/embedded-payments/${id}/`),
+  create: (data) => api.post('/embedded-payments/', data),
+  update: (id, data) => api.put(`/embedded-payments/${id}/`, data),
+};
+
+// ============ WORKFLOW AUTOMATION APIs ============
+
+// Automation Workflows API
+export const automationWorkflowsAPI = {
+  getAll: (params) => api.get('/automation-workflows/', { params }),
+  getById: (id) => api.get(`/automation-workflows/${id}/`),
+  create: (data) => api.post('/automation-workflows/', data),
+  update: (id, data) => api.put(`/automation-workflows/${id}/`, data),
+  delete: (id) => api.delete(`/automation-workflows/${id}/`),
+};
+
+// Automation Executions API
+export const automationExecutionsAPI = {
+  getAll: (params) => api.get('/automation-executions/', { params }),
+  getById: (id) => api.get(`/automation-executions/${id}/`),
+};
+
+// ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE APIs ============
+
+// Firm Metrics API
+export const firmMetricsAPI = {
+  getAll: (params) => api.get('/firm-metrics/', { params }),
+  getById: (id) => api.get(`/firm-metrics/${id}/`),
+};
+
+// Client Marketplace Integrations API
+export const clientMarketplaceIntegrationsAPI = {
+  getAll: (params) => api.get('/client-marketplace-integrations/', { params }),
+  getById: (id) => api.get(`/client-marketplace-integrations/${id}/`),
+  create: (data) => api.post('/client-marketplace-integrations/', data),
+  update: (id, data) => api.put(`/client-marketplace-integrations/${id}/`, data),
+  delete: (id) => api.delete(`/client-marketplace-integrations/${id}/`),
+};
+
 export default api;

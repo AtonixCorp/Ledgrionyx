@@ -4,7 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog, FaExclamationTriangle, FaChartLine, FaChartBar, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
+import {
+  FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog,
+  FaExclamationTriangle, FaChartLine, FaChartBar, FaSignOutAlt, FaBars, FaTimes,
+  FaSitemap, FaUsersCog, FaPalette, FaStore, FaPlug
+} from 'react-icons/fa';
 import './Layout.css';
 
 const Layout = ({ children }) => {
@@ -91,6 +95,41 @@ const Layout = ({ children }) => {
               {!sidebarMinimized && t('nav.teamPermissions')}
             </NavLink>
           </li>
+          <li className="nav-divider"></li>
+
+          {/* FIRM MANAGEMENT */}
+          {!sidebarMinimized && <li className="nav-section-label">FIRM</li>}
+          <li>
+            <NavLink to="/app/firm/dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaUsersCog /></span>
+              {!sidebarMinimized && 'Firm Dashboard'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/firm/white-label" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaPalette /></span>
+              {!sidebarMinimized && 'White-Label'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/firm/marketplace" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaStore /></span>
+              {!sidebarMinimized && 'Marketplace'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/firm/integrations" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaPlug /></span>
+              {!sidebarMinimized && 'API Integrations'}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/firm/enterprise-branches" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <span className="nav-icon"><FaSitemap /></span>
+              {!sidebarMinimized && 'Enterprise Branches'}
+            </NavLink>
+          </li>
+
           <li className="nav-divider"></li>
           <li>
             <NavLink to="/app/enterprise/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>

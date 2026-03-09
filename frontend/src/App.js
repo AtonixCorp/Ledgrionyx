@@ -30,6 +30,11 @@ import EnterpriseRiskExposure from './pages/Enterprise/EnterpriseRiskExposure';
 import EnterpriseReports from './pages/Enterprise/EnterpriseReports';
 import EnterpriseTeam from './pages/Enterprise/EnterpriseTeam';
 import EnterpriseSettings from './pages/EnterpriseSettings/EnterpriseSettings';
+import EnterpriseDashboard from './pages/Enterprise/EnterpriseDashboard';
+import FirmDashboard from './pages/Firm/FirmDashboard';
+import WhiteLabel from './pages/Firm/WhiteLabel';
+import Marketplace from './pages/Firm/Marketplace';
+import APIIntegrations from './pages/Firm/APIIntegrations';
 import ChartOfAccounts from './pages/Enterprise/Accounting/ChartOfAccounts';
 import GeneralLedger from './pages/Enterprise/Accounting/GeneralLedger';
 import JournalEntries from './pages/Enterprise/Accounting/JournalEntries';
@@ -228,6 +233,35 @@ function App() {
               <Route path="/app/enterprise/settings" element={
                 <ProtectedRoute>
                   <Layout><EnterpriseSettings /></Layout>
+                </ProtectedRoute>
+              } />
+
+              {/* Enterprise Multi-Branch Dashboard */}
+              <Route path="/app/firm/enterprise-branches" element={
+                <ProtectedRoute>
+                  <Layout><EnterpriseDashboard /></Layout>
+                </ProtectedRoute>
+              } />
+
+              {/* Firm Management Routes */}
+              <Route path="/app/firm/dashboard" element={
+                <ProtectedRoute>
+                  <Layout><FirmDashboard /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/firm/white-label" element={
+                <ProtectedRoute>
+                  <Layout><WhiteLabel /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/firm/marketplace" element={
+                <ProtectedRoute>
+                  <Layout><Marketplace /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/firm/integrations" element={
+                <ProtectedRoute>
+                  <Layout><APIIntegrations /></Layout>
                 </ProtectedRoute>
               } />
             </Routes>

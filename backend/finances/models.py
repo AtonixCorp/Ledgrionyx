@@ -2523,3 +2523,724 @@ class NotificationPreference(models.Model):
 
     def __str__(self):
         return f"Notification preferences for {self.user.email}"
+
+
+# ============ CLIENT MANAGEMENT FEATURES ============
+
+class Client(models.Model):
+    """Client profile for accounting firms"""
+    STATUS_CHOICES = [
+        ('prospect', 'Prospect'),
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('terminated', 'Terminated'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='clients')
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+    country = models.CharField(max_length=100)
+    industry = models.CharField(max_length=100, blank=True)
+    registration_number = models.CharField(max_length=100, blank=True)
+    tax_id = models.CharField(max_length=100, blank=True)
+    contact_person = models.CharField(max_length=255, blank=True)
+    contact_email = models.EmailField(blank=True)
+    contact_phone = models.CharField(max_length=20, blank=True)
+    website = models.URLField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='prospect')
+    assigned_accountant = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_clients')
+    monthly_fee = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    currency = models.CharField(max_length=3, default='USD')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('organization', 'email')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.organization.name}"
+
+
+class ClientPortal(models.Model):
+    """Portal access for clients"""
+    client = models.OneToOneField(Client, on_delete=models.CASCADE, related_name='portal')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='client_portal')
+    portal_slug = models.SlugField(unique=True)
+    is_active = models.BooleanField(default=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Portal: {self.client.name}"
+
+
+class ClientMessage(models.Model):
+    """Secure messaging between accountants and clients"""
+    MESSAGE_TYPE_CHOICES = [
+        ('message', 'Message'),
+        ('document_request', 'Document Request'),
+        ('approval_request', 'Approval Request'),
+    ]
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='messages')
+    from_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='sent_client_messages')
+    to_user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='received_client_messages')
+    message_type = models.CharField(max_length=20, choices=MESSAGE_TYPE_CHOICES, default='message')
+    subject = models.CharField(max_length=255)
+    content = models.TextField()
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+    is_urgent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.subject}"
+
+
+class ClientDocument(models.Model):
+    """Document management for clients"""
+    DOCUMENT_TYPE_CHOICES = [
+        ('invoice', 'Invoice'),
+        ('receipt', 'Receipt'),
+        ('statement', 'Statement'),
+        ('tax_document', 'Tax Document'),
+        ('form', 'Form'),
+        ('proof', 'Proof'),
+        ('other', 'Other'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('archived', 'Archived'),
+    ]
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='documents')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='client_documents')
+    document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPE_CHOICES)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    file_url = models.FileField(upload_to='client_documents/%Y/%m/%d/')
+    file_size = models.BigIntegerField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_documents')
+    review_notes = models.TextField(blank=True)
+    tags = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.client.name}"
+
+
+class DocumentRequest(models.Model):
+    """Request for documents from clients"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('expired', 'Expired'),
+    ]
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='document_requests')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    requested_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    document_type = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    due_date = models.DateField()
+    reminder_sent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-due_date', '-created_at']
+
+    def __str__(self):
+        return f"{self.document_type} - {self.client.name}"
+
+
+class ApprovalRequest(models.Model):
+    """Approval workflow for client data/transactions"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('expired', 'Expired'),
+    ]
+
+    TYPE_CHOICES = [
+        ('invoice', 'Invoice'),
+        ('payment', 'Payment'),
+        ('adjustment', 'Adjustment'),
+        ('refund', 'Refund'),
+        ('other', 'Other'),
+    ]
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='approval_requests')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    request_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    request_data = models.JSONField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    requested_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_requests')
+    rejection_reason = models.TextField(blank=True)
+    due_date = models.DateField()
+    email_sent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.request_type}: {self.client.name}"
+
+
+# ============ DOCUMENT MANAGEMENT ============
+
+class DocumentTemplate(models.Model):
+    """Reusable document templates"""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='document_templates')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    template_content = models.TextField()
+    category = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
+# ============ LOAN MANAGEMENT ============
+
+class Loan(models.Model):
+    """Loan tracking for entities"""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('paid_off', 'Paid Off'),
+        ('defaulted', 'Defaulted'),
+        ('refinanced', 'Refinanced'),
+    ]
+
+    LOAN_TYPE_CHOICES = [
+        ('term_loan', 'Term Loan'),
+        ('line_of_credit', 'Line of Credit'),
+        ('equipment', 'Equipment Financing'),
+        ('real_estate', 'Real Estate'),
+        ('other', 'Other'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='loans')
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    lender_name = models.CharField(max_length=255)
+    loan_type = models.CharField(max_length=50, choices=LOAN_TYPE_CHOICES)
+    loan_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    interest_rate = models.DecimalField(max_digits=6, decimal_places=3)
+    start_date = models.DateField()
+    maturity_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    principal_remaining = models.DecimalField(max_digits=15, decimal_places=2)
+    monthly_payment = models.DecimalField(max_digits=15, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.loan_type}: {self.lender_name}"
+
+
+class LoanPayment(models.Model):
+    """Loan repayment schedule and payments"""
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name='payments')
+    payment_number = models.IntegerField()
+    payment_date = models.DateField()
+    principal_paid = models.DecimalField(max_digits=15, decimal_places=2)
+    interest_paid = models.DecimalField(max_digits=15, decimal_places=2)
+    total_paid = models.DecimalField(max_digits=15, decimal_places=2)
+    principal_remaining = models.DecimalField(max_digits=15, decimal_places=2)
+    status = models.CharField(max_length=20, default='scheduled')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['payment_number']
+        unique_together = ('loan', 'payment_number')
+
+    def __str__(self):
+        return f"Payment {self.payment_number}: {self.loan.lender_name}"
+
+
+# ============ COMPLIANCE & KYC/AML ============
+
+class KYCProfile(models.Model):
+    """KYC (Know Your Customer) profile for clients/entities"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('verified', 'Verified'),
+        ('rejected', 'Rejected'),
+        ('expired', 'Expired'),
+    ]
+
+    entity = models.OneToOneField(Entity, on_delete=models.CASCADE, related_name='kyc_profile', null=True, blank=True)
+    client = models.OneToOneField(Client, on_delete=models.CASCADE, related_name='kyc_profile', null=True, blank=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    
+    # Basic KYC Data
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    beneficial_owners = models.JSONField(default=list, blank=True)
+    verification_date = models.DateField(null=True, blank=True)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    
+    # Documents
+    id_document_url = models.FileField(upload_to='kyc/id_documents/', blank=True)
+    proof_of_address_url = models.FileField(upload_to='kyc/proof_of_address/', blank=True)
+    business_registration_url = models.FileField(upload_to='kyc/business_registration/', blank=True)
+    
+    rejection_reason = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        if self.entity:
+            return f"KYC: {self.entity.name}"
+        return f"KYC: {self.client.name}"
+
+
+class AMLTransaction(models.Model):
+    """AML (Anti-Money Laundering) monitoring"""
+    RISK_LEVEL_CHOICES = [
+        ('low', 'Low Risk'),
+        ('medium', 'Medium Risk'),
+        ('high', 'High Risk'),
+        ('critical', 'Critical Risk'),
+    ]
+
+    STATUS_CHOICES = [
+        ('flagged', 'Flagged'),
+        ('investigating', 'Under Investigation'),
+        ('cleared', 'Cleared'),
+        ('reported', 'Reported'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='aml_transactions', null=True, blank=True)
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='aml_flags', null=True, blank=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3)
+    transaction_date = models.DateTimeField()
+    transaction_type = models.CharField(max_length=50)
+    
+    risk_level = models.CharField(max_length=20, choices=RISK_LEVEL_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='flagged')
+    
+    reason = models.TextField()
+    notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"AML Flag: {self.amount} {self.currency}"
+
+
+# ============ BILLING & FIRM MANAGEMENT ============
+
+class FirmService(models.Model):
+    """Services offered by accounting firm"""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='services')
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    billing_frequency = models.CharField(max_length=50, choices=[
+        ('one_time', 'One Time'),
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('annual', 'Annual'),
+    ])
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.organization.name}"
+
+
+class ClientInvoice(models.Model):
+    """Invoices sent to clients by accounting firm"""
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('sent', 'Sent'),
+        ('viewed', 'Viewed'),
+        ('paid', 'Paid'),
+        ('overdue', 'Overdue'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='invoices')
+    invoice_number = models.CharField(max_length=100, unique=True)
+    currency = models.CharField(max_length=3, default='USD')
+    
+    issue_date = models.DateField()
+    due_date = models.DateField()
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2)
+    tax_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    payment_received = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    payment_date = models.DateField(null=True, blank=True)
+    
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    
+    sent_at = models.DateTimeField(null=True, blank=True)
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-issue_date']
+        unique_together = ('organization', 'invoice_number')
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} - {self.client.name}"
+
+
+class ClientInvoiceLineItem(models.Model):
+    """Line items in client invoices"""
+    invoice = models.ForeignKey(ClientInvoice, on_delete=models.CASCADE, related_name='line_items')
+    service = models.ForeignKey(FirmService, on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.CharField(max_length=500)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)
+    unit_price = models.DecimalField(max_digits=15, decimal_places=2)
+    total_price = models.DecimalField(max_digits=15, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.description} - {self.invoice.invoice_number}"
+
+
+class ClientSubscription(models.Model):
+    """Recurring subscription for clients"""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('paused', 'Paused'),
+        ('cancelled', 'Cancelled'),
+        ('expired', 'Expired'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='subscriptions')
+    service = models.ForeignKey(FirmService, on_delete=models.PROTECT)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    next_billing_date = models.DateField()
+    
+    auto_renew = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.service.name} - {self.client.name}"
+
+
+# ============ WHITE-LABELING ============
+
+class WhiteLabelBranding(models.Model):
+    """White-label branding for accounting firms"""
+    organization = models.OneToOneField(Organization, on_delete=models.CASCADE, related_name='white_label_branding')
+    
+    primary_color = models.CharField(max_length=7, default='#667eea')
+    secondary_color = models.CharField(max_length=7, default='#764ba2')
+    accent_color = models.CharField(max_length=7, default='#f093fb')
+    
+    logo_url = models.FileField(upload_to='white_label/logos/', blank=True)
+    logo_light_url = models.FileField(upload_to='white_label/logos/', blank=True)
+    logo_dark_url = models.FileField(upload_to='white_label/logos/', blank=True)
+    
+    favicon_url = models.FileField(upload_to='white_label/favicons/', blank=True)
+    
+    custom_domain = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    
+    portal_name = models.CharField(max_length=255)
+    portal_description = models.TextField(blank=True)
+    
+    support_email = models.EmailField(blank=True)
+    support_phone = models.CharField(max_length=20, blank=True)
+    
+    font_family = models.CharField(max_length=100, default='Inter')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"White Label: {self.organization.name}"
+
+
+# ============ EMBEDDED BANKING & PAYMENTS ============
+
+class BankingIntegration(models.Model):
+    """Banking API integrations"""
+    INTEGRATION_TYPE_CHOICES = [
+        ('open_banking', 'Open Banking'),
+        ('payment_processor', 'Payment Processor'),
+        ('financial_data', 'Financial Data Aggregator'),
+        ('loan_provider', 'Loan Provider'),
+    ]
+
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('pending', 'Pending Activation'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='banking_integrations')
+    integration_type = models.CharField(max_length=50, choices=INTEGRATION_TYPE_CHOICES)
+    provider_name = models.CharField(max_length=255)
+    
+    api_key = models.CharField(max_length=500)
+    api_secret = models.CharField(max_length=500, blank=True)
+    webhook_url = models.URLField(blank=True)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    is_active = models.BooleanField(default=True)
+    
+    last_sync = models.DateTimeField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.provider_name} - {self.organization.name}"
+
+
+class BankingTransaction(models.Model):
+    """Real-time banking transactions from integrated banks"""
+    TRANSACTION_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='banking_transactions')
+    bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
+    
+    transaction_id = models.CharField(max_length=255, unique=True)
+    transaction_date = models.DateTimeField()
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3)
+    
+    description = models.CharField(max_length=500)
+    counterparty_name = models.CharField(max_length=255)
+    counterparty_account = models.CharField(max_length=100, blank=True)
+    
+    transaction_type = models.CharField(max_length=50)  # debit, credit, transfer, etc.
+    status = models.CharField(max_length=20, choices=TRANSACTION_STATUS_CHOICES)
+    
+    is_matched = models.BooleanField(default=False)
+    matched_transaction = models.ForeignKey(Transaction, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-transaction_date']
+
+    def __str__(self):
+        return f"{self.transaction_id}: {self.amount} {self.currency}"
+
+
+class EmbeddedPayment(models.Model):
+    """Embedded payment request for clients"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('authorized', 'Authorized'),
+        ('captured', 'Captured'),
+        ('refunded', 'Refunded'),
+        ('failed', 'Failed'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='embedded_payments')
+    invoice = models.ForeignKey(ClientInvoice, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    
+    payment_method = models.CharField(max_length=50)  # card, bank_transfer, etc.
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    payment_link = models.URLField(blank=True)
+    payment_ref = models.CharField(max_length=255, unique=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Payment {self.payment_ref}: {self.amount} {self.currency}"
+
+
+# ============ WORKFLOW AUTOMATION ============
+
+class AutomationWorkflow(models.Model):
+    """Automation workflow definitions"""
+    TRIGGER_TYPE_CHOICES = [
+        ('schedule', 'Schedule'),
+        ('event', 'Event'),
+        ('manual', 'Manual'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='automation_workflows')
+    entity = models.ForeignKey(Entity, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    
+    trigger_type = models.CharField(max_length=50, choices=TRIGGER_TYPE_CHOICES)
+    trigger_config = models.JSONField()  # Stores trigger details
+    
+    actions = models.JSONField()  # Stores list of actions
+    
+    is_active = models.BooleanField(default=True)
+    
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.organization.name}"
+
+
+class AutomationExecution(models.Model):
+    """Log of automation workflow executions"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('running', 'Running'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+
+    workflow = models.ForeignKey(AutomationWorkflow, on_delete=models.CASCADE, related_name='executions')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    triggered_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    execution_result = models.JSONField(blank=True, null=True)
+    error_message = models.TextField(blank=True)
+    
+    class Meta:
+        ordering = ['-triggered_at']
+
+    def __str__(self):
+        return f"{self.workflow.name}: {self.status}"
+
+
+# ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE ============
+
+class FirmMetric(models.Model):
+    """Key metrics for firm dashboard"""
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='firm_metrics')
+    
+    metric_name = models.CharField(max_length=255)
+    metric_key = models.SlugField()
+    
+    value = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    value_type = models.CharField(max_length=50)  # currency, percentage, count, etc.
+    
+    period = models.CharField(max_length=20)  # day, week, month, quarter, year
+    period_date = models.DateField()
+    
+    previous_value = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    change_percentage = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-period_date']
+        unique_together = ('organization', 'metric_key', 'period_date')
+
+    def __str__(self):
+        return f"{self.metric_name}: {self.value}"
+
+
+class ClientMarketplaceIntegration(models.Model):
+    """Third-party integrations/add-ons for clients"""
+    CATEGORY_CHOICES = [
+        ('integration', 'Integration'),
+        ('addon', 'Add-on'),
+        ('partner_service', 'Partner Service'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='integrations')
+    
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    provider = models.CharField(max_length=255)
+    
+    description = models.TextField(blank=True)
+    icon_url = models.URLField(blank=True)
+    
+    api_key = models.CharField(max_length=500, blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ('client', 'provider')
+
+    def __str__(self):
+        return f"{self.name} - {self.client.name}"

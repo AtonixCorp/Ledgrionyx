@@ -26,7 +26,13 @@ from .models import (
     # FX models
     ExchangeRate, FXGainLoss,
     # Notification models
-    Notification, NotificationPreference
+    Notification, NotificationPreference,
+    # NEW MODELS
+    Client, ClientPortal, ClientMessage, ClientDocument, DocumentRequest, ApprovalRequest,
+    DocumentTemplate, Loan, LoanPayment, KYCProfile, AMLTransaction, FirmService,
+    ClientInvoice, ClientInvoiceLineItem, ClientSubscription, WhiteLabelBranding,
+    BankingIntegration, BankingTransaction, EmbeddedPayment, AutomationWorkflow,
+    AutomationExecution, FirmMetric, ClientMarketplaceIntegration
 )
 
 
@@ -824,3 +830,187 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
         model = NotificationPreference
         fields = ['id', 'user', 'email_budget_alerts', 'email_deadline_reminders', 'email_payment_due', 'email_approval_requests', 'sms_budget_alerts', 'sms_deadline_reminders', 'sms_payment_due', 'in_app_all', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ CLIENT MANAGEMENT SERIALIZERS ============
+
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = ['id', 'organization', 'name', 'email', 'phone', 'address', 'country', 'industry', 'registration_number', 'tax_id', 'contact_person', 'contact_email', 'contact_phone', 'website', 'status', 'assigned_accountant', 'monthly_fee', 'currency', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ClientPortalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientPortal
+        fields = ['id', 'client', 'user', 'portal_slug', 'is_active', 'last_login', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ClientMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientMessage
+        fields = ['id', 'client', 'from_user', 'to_user', 'message_type', 'subject', 'content', 'is_read', 'read_at', 'is_urgent', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'read_at']
+
+
+class ClientDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientDocument
+        fields = ['id', 'client', 'organization', 'document_type', 'name', 'description', 'file_url', 'file_size', 'status', 'uploaded_by', 'reviewed_by', 'review_notes', 'tags', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'file_size']
+
+
+class DocumentRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentRequest
+        fields = ['id', 'client', 'organization', 'requested_by', 'document_type', 'description', 'status', 'due_date', 'reminder_sent', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ApprovalRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApprovalRequest
+        fields = ['id', 'client', 'organization', 'request_type', 'request_data', 'status', 'requested_by', 'approved_by', 'rejection_reason', 'due_date', 'email_sent', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ DOCUMENT MANAGEMENT SERIALIZERS ============
+
+class DocumentTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentTemplate
+        fields = ['id', 'organization', 'name', 'description', 'template_content', 'category', 'is_active', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ LOAN MANAGEMENT SERIALIZERS ============
+
+class LoanPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoanPayment
+        fields = ['id', 'loan', 'payment_number', 'payment_date', 'principal_paid', 'interest_paid', 'total_paid', 'principal_remaining', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class LoanSerializer(serializers.ModelSerializer):
+    payments = LoanPaymentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Loan
+        fields = ['id', 'entity', 'organization', 'lender_name', 'loan_type', 'loan_amount', 'currency', 'interest_rate', 'start_date', 'maturity_date', 'status', 'principal_remaining', 'monthly_payment', 'payments', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ COMPLIANCE & KYC/AML SERIALIZERS ============
+
+class KYCProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KYCProfile
+        fields = ['id', 'entity', 'client', 'organization', 'status', 'beneficial_owners', 'verification_date', 'verified_by', 'expiry_date', 'id_document_url', 'proof_of_address_url', 'business_registration_url', 'rejection_reason', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class AMLTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AMLTransaction
+        fields = ['id', 'entity', 'transaction', 'organization', 'amount', 'currency', 'transaction_date', 'transaction_type', 'risk_level', 'status', 'reason', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ BILLING & FIRM MANAGEMENT SERIALIZERS ============
+
+class FirmServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FirmService
+        fields = ['id', 'organization', 'name', 'description', 'price', 'currency', 'billing_frequency', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ClientInvoiceLineItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientInvoiceLineItem
+        fields = ['id', 'invoice', 'service', 'description', 'quantity', 'unit_price', 'total_price']
+
+
+class ClientInvoiceSerializer(serializers.ModelSerializer):
+    line_items = ClientInvoiceLineItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ClientInvoice
+        fields = ['id', 'organization', 'client', 'invoice_number', 'currency', 'issue_date', 'due_date', 'subtotal', 'tax_amount', 'total_amount', 'status', 'payment_received', 'payment_date', 'description', 'notes', 'sent_at', 'viewed_at', 'created_by', 'line_items', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ClientSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientSubscription
+        fields = ['id', 'organization', 'client', 'service', 'status', 'start_date', 'end_date', 'next_billing_date', 'auto_renew', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ WHITE-LABELING SERIALIZERS ============
+
+class WhiteLabelBrandingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WhiteLabelBranding
+        fields = ['id', 'organization', 'primary_color', 'secondary_color', 'accent_color', 'logo_url', 'logo_light_url', 'logo_dark_url', 'favicon_url', 'custom_domain', 'portal_name', 'portal_description', 'support_email', 'support_phone', 'font_family', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ EMBEDDED BANKING & PAYMENTS SERIALIZERS ============
+
+class BankingIntegrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankingIntegration
+        fields = ['id', 'organization', 'integration_type', 'provider_name', 'status', 'is_active', 'last_sync', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'api_key', 'api_secret']
+
+
+class BankingTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankingTransaction
+        fields = ['id', 'entity', 'bank_account', 'transaction_id', 'transaction_date', 'amount', 'currency', 'description', 'counterparty_name', 'counterparty_account', 'transaction_type', 'status', 'is_matched', 'matched_transaction', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class EmbeddedPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmbeddedPayment
+        fields = ['id', 'organization', 'client', 'invoice', 'amount', 'currency', 'payment_method', 'status', 'payment_link', 'payment_ref', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'payment_ref']
+
+
+# ============ WORKFLOW AUTOMATION SERIALIZERS ============
+
+class AutomationExecutionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AutomationExecution
+        fields = ['id', 'workflow', 'status', 'triggered_at', 'started_at', 'completed_at', 'execution_result', 'error_message']
+        read_only_fields = ['triggered_at', 'started_at', 'completed_at']
+
+
+class AutomationWorkflowSerializer(serializers.ModelSerializer):
+    executions = AutomationExecutionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = AutomationWorkflow
+        fields = ['id', 'organization', 'entity', 'name', 'description', 'trigger_type', 'trigger_config', 'actions', 'is_active', 'created_by', 'created_at', 'updated_at', 'executions']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+# ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE SERIALIZERS ============
+
+class FirmMetricSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FirmMetric
+        fields = ['id', 'organization', 'metric_name', 'metric_key', 'value', 'value_type', 'period', 'period_date', 'previous_value', 'change_percentage', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class ClientMarketplaceIntegrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientMarketplaceIntegration
+        fields = ['id', 'organization', 'client', 'name', 'category', 'provider', 'description', 'icon_url', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'api_key']

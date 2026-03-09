@@ -1,0 +1,436 @@
+import React, { useEffect, useState, useCallback } from 'react';
+import { useEnterprise } from '../../context/EnterpriseContext';
+import {
+  FaUsers, FaChartBar, FaTasks, FaUserTie, FaCheckCircle,
+  FaExclamationCircle, FaClock, FaFileInvoiceDollar, FaSearch,
+  FaSync, FaUserPlus, FaStar, FaBuilding
+} from 'react-icons/fa';
+import './FirmDashboard.css';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+
+const FirmDashboard = () => {
+  const { currentOrganization } = useEnterprise();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [clientSearch, setClientSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const fetchDashboard = useCallback(async () => {
+    if (!currentOrganization) return;
+    setLoading(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(
+        `${API_BASE}/organizations/${currentOrganization.id}/firm_dashboard/`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error('Failed to fetch firm dashboard');
+      const json = await res.json();
+      setData(json);
+    } catch (e) {
+      setError(e.message);
+      // Fallback demo data
+      setData({
+        clients: {
+          total: 42, active: 35, inactive: 5, prospects: 2,
+          recent: [
+            { id: 1, name: 'Meridian Holdings Ltd', status: 'active', email: 'contact@meridian.com', industry: 'Finance', created_at: '2026-02-15T00:00:00Z' },
+            { id: 2, name: 'Apex Retail Group', status: 'active', email: 'ops@apexretail.com', industry: 'Retail', created_at: '2026-02-10T00:00:00Z' },
+            { id: 3, name: 'Solaris Tech Inc.', status: 'prospect', email: 'cfo@solaristech.io', industry: 'Technology', created_at: '2026-02-05T00:00:00Z' },
+            { id: 4, name: 'BlueSky Logistics', status: 'active', email: 'finance@bluesky.co', industry: 'Logistics', created_at: '2026-01-28T00:00:00Z' },
+            { id: 5, name: 'Vertex Capital Partners', status: 'inactive', email: 'info@vertex.vc', industry: 'Investment', created_at: '2026-01-15T00:00:00Z' },
+          ]
+        },
+        workload: {
+          total: 128, pending: 45, in_progress: 38, completed: 40, overdue: 5,
+          by_entity: [
+            { entity__name: 'Main Entity US', count: 52 },
+            { entity__name: 'UK Subsidiary', count: 38 },
+            { entity__name: 'Dubai Branch', count: 24 },
+            { entity__name: 'Singapore Office', count: 14 },
+          ]
+        },
+        staff: {
+          total: 8,
+          performance: [
+            { id: 1, name: 'Sarah Johnson', email: 'sarah@firm.com', role: 'Senior Accountant', entity: 'Main Entity US', tasks_assigned: 12, tasks_completed: 8, is_active: true },
+            { id: 2, name: 'James Carter', email: 'james@firm.com', role: 'Tax Specialist', entity: 'UK Subsidiary', tasks_assigned: 9, tasks_completed: 6, is_active: true },
+            { id: 3, name: 'Priya Patel', email: 'priya@firm.com', role: 'Bookkeeper', entity: 'Main Entity US', tasks_assigned: 14, tasks_completed: 11, is_active: true },
+            { id: 4, name: 'Omar Hassan', email: 'omar@firm.com', role: 'Compliance Officer', entity: 'Dubai Branch', tasks_assigned: 7, tasks_completed: 5, is_active: true },
+            { id: 5, name: 'Anna Weber', email: 'anna@firm.com', role: 'Auditor', entity: 'UK Subsidiary', tasks_assigned: 6, tasks_completed: 4, is_active: true },
+          ]
+        },
+        billing: {
+          total_invoiced: 284750, total_paid: 231400, overdue_count: 3
+        }
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [currentOrganization]);
+
+  useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
+
+  const filteredClients = data?.clients?.recent?.filter(c =>
+    c.name.toLowerCase().includes(clientSearch.toLowerCase()) ||
+    c.industry?.toLowerCase().includes(clientSearch.toLowerCase())
+  ) || [];
+
+  const getStatusBadge = (status) => {
+    const map = {
+      active: 'badge-success', inactive: 'badge-secondary',
+      prospect: 'badge-warning', pending: 'badge-warning',
+      overdue: 'badge-danger'
+    };
+    return `badge ${map[status] || 'badge-secondary'}`;
+  };
+
+  const completionRate = (staff) => {
+    const total = staff.tasks_assigned + staff.tasks_completed;
+    if (!total) return 0;
+    return Math.round((staff.tasks_completed / total) * 100);
+  };
+
+  if (!currentOrganization) {
+    return (
+      <div className="firm-dashboard">
+        <div className="empty-state">
+          <FaBuilding size={48} />
+          <h2>No Organization Selected</h2>
+          <p>Please create or select an organization to view the Firm Dashboard.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="firm-dashboard">
+      {/* Header */}
+      <div className="fd-header">
+        <div className="fd-header-left">
+          <h1><FaChartBar /> Firm Dashboard</h1>
+          <p>{currentOrganization.name} &mdash; Command Center</p>
+        </div>
+        <button className="btn-refresh" onClick={fetchDashboard} disabled={loading}>
+          <FaSync className={loading ? 'spin' : ''} /> Refresh
+        </button>
+      </div>
+
+      {error && <div className="alert-warning"><FaExclamationCircle /> Demo mode: {error}</div>}
+
+      {/* KPI Strip */}
+      {data && (
+        <div className="fd-kpi-strip">
+          <div className="kpi-card kpi-blue">
+            <div className="kpi-icon"><FaUsers /></div>
+            <div className="kpi-body">
+              <div className="kpi-value">{data.clients.total}</div>
+              <div className="kpi-label">Total Clients</div>
+              <div className="kpi-sub">{data.clients.active} active · {data.clients.prospects} prospects</div>
+            </div>
+          </div>
+          <div className="kpi-card kpi-purple">
+            <div className="kpi-icon"><FaTasks /></div>
+            <div className="kpi-body">
+              <div className="kpi-value">{data.workload.total}</div>
+              <div className="kpi-label">Total Tasks</div>
+              <div className="kpi-sub">{data.workload.in_progress} in progress · {data.workload.overdue} overdue</div>
+            </div>
+          </div>
+          <div className="kpi-card kpi-green">
+            <div className="kpi-icon"><FaUserTie /></div>
+            <div className="kpi-body">
+              <div className="kpi-value">{data.staff.total}</div>
+              <div className="kpi-label">Staff Members</div>
+              <div className="kpi-sub">Across all entities</div>
+            </div>
+          </div>
+          <div className="kpi-card kpi-orange">
+            <div className="kpi-icon"><FaFileInvoiceDollar /></div>
+            <div className="kpi-body">
+              <div className="kpi-value">${(data.billing.total_invoiced / 1000).toFixed(0)}K</div>
+              <div className="kpi-label">Total Invoiced</div>
+              <div className="kpi-sub">${(data.billing.total_paid / 1000).toFixed(0)}K collected · {data.billing.overdue_count} overdue</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab Navigation */}
+      <div className="fd-tabs">
+        {[
+          { key: 'overview', label: 'Overview', icon: <FaChartBar /> },
+          { key: 'clients', label: 'All Clients', icon: <FaUsers /> },
+          { key: 'workload', label: 'Workload', icon: <FaTasks /> },
+          { key: 'staff', label: 'Staff Performance', icon: <FaUserTie /> },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            className={`fd-tab ${activeTab === tab.key ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.icon} {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {loading && <div className="fd-loading"><div className="spinner" /> Loading dashboard...</div>}
+
+      {!loading && data && (
+        <>
+          {/* ── OVERVIEW TAB ── */}
+          {activeTab === 'overview' && (
+            <div className="fd-grid">
+              {/* Workload summary donut-like bar */}
+              <div className="fd-card fd-workload-summary">
+                <h3><FaTasks /> Workload Overview</h3>
+                <div className="workload-bars">
+                  {[
+                    { label: 'Pending', value: data.workload.pending, color: '#f59e0b', total: data.workload.total },
+                    { label: 'In Progress', value: data.workload.in_progress, color: '#3b82f6', total: data.workload.total },
+                    { label: 'Completed', value: data.workload.completed, color: '#10b981', total: data.workload.total },
+                    { label: 'Overdue', value: data.workload.overdue, color: '#ef4444', total: data.workload.total },
+                  ].map(item => (
+                    <div className="workload-bar-row" key={item.label}>
+                      <span className="wb-label">{item.label}</span>
+                      <div className="wb-track">
+                        <div className="wb-fill" style={{
+                          width: `${item.total ? (item.value / item.total) * 100 : 0}%`,
+                          background: item.color
+                        }} />
+                      </div>
+                      <span className="wb-count">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="workload-by-entity">
+                  <h4>Tasks by Entity</h4>
+                  {data.workload.by_entity.map((row, i) => (
+                    <div className="entity-task-row" key={i}>
+                      <span>{row.entity__name || row['entity__name']}</span>
+                      <span className="entity-task-count">{row.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Clients */}
+              <div className="fd-card fd-recent-clients">
+                <h3><FaUsers /> Recent Clients</h3>
+                <div className="client-list">
+                  {data.clients.recent.slice(0, 5).map(client => (
+                    <div className="client-row" key={client.id}>
+                      <div className="client-avatar">{client.name[0]}</div>
+                      <div className="client-info">
+                        <div className="client-name">{client.name}</div>
+                        <div className="client-meta">{client.industry} · {client.email}</div>
+                      </div>
+                      <span className={getStatusBadge(client.status)}>{client.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Staff Top Performers */}
+              <div className="fd-card fd-staff-top">
+                <h3><FaStar /> Top Performers</h3>
+                <div className="staff-list">
+                  {[...data.staff.performance]
+                    .sort((a, b) => b.tasks_completed - a.tasks_completed)
+                    .slice(0, 5)
+                    .map(staff => (
+                      <div className="staff-row" key={staff.id}>
+                        <div className="staff-avatar">{staff.name[0]}</div>
+                        <div className="staff-info">
+                          <div className="staff-name">{staff.name}</div>
+                          <div className="staff-meta">{staff.role} &mdash; {staff.entity}</div>
+                        </div>
+                        <div className="staff-score">
+                          <div className="score-num">{completionRate(staff)}%</div>
+                          <div className="score-label">done</div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Billing */}
+              <div className="fd-card fd-billing">
+                <h3><FaFileInvoiceDollar /> Billing Summary</h3>
+                <div className="billing-metric">
+                  <span>Total Invoiced</span>
+                  <strong>${data.billing.total_invoiced.toLocaleString()}</strong>
+                </div>
+                <div className="billing-progress-track">
+                  <div className="billing-progress-fill" style={{
+                    width: `${data.billing.total_invoiced ? (data.billing.total_paid / data.billing.total_invoiced) * 100 : 0}%`
+                  }} />
+                </div>
+                <div className="billing-metric">
+                  <span>Collected</span>
+                  <strong className="text-success">${data.billing.total_paid.toLocaleString()}</strong>
+                </div>
+                <div className="billing-metric">
+                  <span>Outstanding</span>
+                  <strong className="text-warning">
+                    ${(data.billing.total_invoiced - data.billing.total_paid).toLocaleString()}
+                  </strong>
+                </div>
+                {data.billing.overdue_count > 0 && (
+                  <div className="billing-alert">
+                    <FaExclamationCircle /> {data.billing.overdue_count} overdue invoice(s)
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── CLIENTS TAB ── */}
+          {activeTab === 'clients' && (
+            <div className="fd-section">
+              <div className="fd-section-toolbar">
+                <div className="search-box">
+                  <FaSearch className="search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search clients..."
+                    value={clientSearch}
+                    onChange={e => setClientSearch(e.target.value)}
+                  />
+                </div>
+                <div className="client-status-pills">
+                  {[
+                    { label: 'All', count: data.clients.total },
+                    { label: 'Active', count: data.clients.active },
+                    { label: 'Prospects', count: data.clients.prospects },
+                    { label: 'Inactive', count: data.clients.inactive },
+                  ].map(p => (
+                    <span className="status-pill" key={p.label}>
+                      {p.label} <strong>{p.count}</strong>
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="clients-table-wrap">
+                <table className="fd-table">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Industry</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Added</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredClients.map(client => (
+                      <tr key={client.id}>
+                        <td>
+                          <div className="td-client">
+                            <div className="client-avatar sm">{client.name[0]}</div>
+                            <span>{client.name}</span>
+                          </div>
+                        </td>
+                        <td>{client.industry || '—'}</td>
+                        <td>{client.email}</td>
+                        <td><span className={getStatusBadge(client.status)}>{client.status}</span></td>
+                        <td>{client.created_at ? new Date(client.created_at).toLocaleDateString() : '—'}</td>
+                      </tr>
+                    ))}
+                    {filteredClients.length === 0 && (
+                      <tr><td colSpan={5} className="no-results">No clients match your search.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ── WORKLOAD TAB ── */}
+          {activeTab === 'workload' && (
+            <div className="fd-section">
+              <div className="workload-grid">
+                {[
+                  { label: 'Pending', value: data.workload.pending, color: '#f59e0b', icon: <FaClock /> },
+                  { label: 'In Progress', value: data.workload.in_progress, color: '#3b82f6', icon: <FaTasks /> },
+                  { label: 'Completed', value: data.workload.completed, color: '#10b981', icon: <FaCheckCircle /> },
+                  { label: 'Overdue', value: data.workload.overdue, color: '#ef4444', icon: <FaExclamationCircle /> },
+                ].map(item => (
+                  <div className="wl-stat-card" key={item.label} style={{ borderTop: `4px solid ${item.color}` }}>
+                    <div className="wl-icon" style={{ color: item.color }}>{item.icon}</div>
+                    <div className="wl-value">{item.value}</div>
+                    <div className="wl-label">{item.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="fd-card">
+                <h3>Task Distribution by Entity</h3>
+                {data.workload.by_entity.map((row, i) => {
+                  const pct = data.workload.total ? (row.count / data.workload.total) * 100 : 0;
+                  return (
+                    <div className="entity-dist-row" key={i}>
+                      <span className="ent-name">{row.entity__name || row['entity__name']}</span>
+                      <div className="ent-bar-track">
+                        <div className="ent-bar-fill" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="ent-count">{row.count} tasks ({pct.toFixed(0)}%)</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── STAFF PERFORMANCE TAB ── */}
+          {activeTab === 'staff' && (
+            <div className="fd-section">
+              <div className="staff-perf-grid">
+                {data.staff.performance.map(staff => {
+                  const rate = completionRate(staff);
+                  return (
+                    <div className="staff-perf-card" key={staff.id}>
+                      <div className="spc-header">
+                        <div className="spc-avatar">{staff.name[0]}</div>
+                        <div>
+                          <div className="spc-name">{staff.name}</div>
+                          <div className="spc-role">{staff.role}</div>
+                          <div className="spc-entity">{staff.entity}</div>
+                        </div>
+                        {staff.is_active
+                          ? <span className="badge badge-success ml-auto">Active</span>
+                          : <span className="badge badge-secondary ml-auto">Inactive</span>
+                        }
+                      </div>
+                      <div className="spc-metrics">
+                        <div className="spc-metric">
+                          <span>Assigned</span>
+                          <strong>{staff.tasks_assigned}</strong>
+                        </div>
+                        <div className="spc-metric">
+                          <span>Completed</span>
+                          <strong className="text-success">{staff.tasks_completed}</strong>
+                        </div>
+                        <div className="spc-metric">
+                          <span>Completion</span>
+                          <strong>{rate}%</strong>
+                        </div>
+                      </div>
+                      <div className="spc-progress-track">
+                        <div className="spc-progress-fill" style={{ width: `${rate}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default FirmDashboard;

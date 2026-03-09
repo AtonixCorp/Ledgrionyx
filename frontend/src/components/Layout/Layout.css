@@ -163,6 +163,16 @@
   list-style: none;
 }
 
+.nav-section-label {
+  padding: 8px 22px 4px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  list-style: none;
+}
+
 .nav-icon {
   margin-right: 12px;
   font-size: 0.9rem;

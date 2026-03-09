@@ -16,7 +16,7 @@ from .enterprise_views import (
     BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet,
     BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet,
     CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, FinancialStatementsViewSet,
-    # New viewsets
+    # New viewsets for Accounting module
     ChartOfAccountsViewSet, GeneralLedgerViewSet, JournalEntryViewSet,
     RecurringJournalTemplateViewSet, LedgerPeriodViewSet,
     CustomerViewSet, InvoiceViewSet, CreditNoteViewSet, PaymentViewSet,
@@ -26,7 +26,15 @@ from .enterprise_views import (
     DeferredRevenueViewSet, RevenueRecognitionScheduleViewSet,
     PeriodCloseChecklistViewSet, PeriodCloseItemViewSet,
     ExchangeRateViewSet, FXGainLossViewSet,
-    NotificationViewSet, NotificationPreferenceViewSet
+    NotificationViewSet, NotificationPreferenceViewSet,
+    # NEW VIEWSETS
+    ClientViewSet, ClientPortalViewSet, ClientMessageViewSet, ClientDocumentViewSet,
+    DocumentRequestViewSet, ApprovalRequestViewSet, DocumentTemplateViewSet, LoanViewSet,
+    LoanPaymentViewSet, KYCProfileViewSet, AMLTransactionViewSet, FirmServiceViewSet,
+    ClientInvoiceViewSet, ClientInvoiceLineItemViewSet, ClientSubscriptionViewSet,
+    WhiteLabelBrandingViewSet, BankingIntegrationViewSet, BankingTransactionViewSet,
+    EmbeddedPaymentViewSet, AutomationWorkflowViewSet, AutomationExecutionViewSet,
+    FirmMetricViewSet, ClientMarketplaceIntegrationViewSet
 )
 
 router = DefaultRouter()
@@ -127,6 +135,45 @@ router.register(r'fx-gainloss', FXGainLossViewSet, basename='fx-gainloss')
 # NEW: Notifications
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'notification-preferences', NotificationPreferenceViewSet, basename='notification-preference')
+
+# NEW: Client Management
+router.register(r'clients', ClientViewSet, basename='client')
+router.register(r'client-portals', ClientPortalViewSet, basename='client-portal')
+router.register(r'client-messages', ClientMessageViewSet, basename='client-message')
+router.register(r'client-documents', ClientDocumentViewSet, basename='client-document')
+router.register(r'document-requests', DocumentRequestViewSet, basename='document-request')
+router.register(r'approval-requests', ApprovalRequestViewSet, basename='approval-request')
+router.register(r'document-templates', DocumentTemplateViewSet, basename='document-template')
+
+# NEW: Loan Management
+router.register(r'loans', LoanViewSet, basename='loan')
+router.register(r'loan-payments', LoanPaymentViewSet, basename='loan-payment')
+
+# NEW: Compliance & KYC/AML
+router.register(r'kyc-profiles', KYCProfileViewSet, basename='kyc-profile')
+router.register(r'aml-transactions', AMLTransactionViewSet, basename='aml-transaction')
+
+# NEW: Billing & Firm Management
+router.register(r'firm-services', FirmServiceViewSet, basename='firm-service')
+router.register(r'client-invoices', ClientInvoiceViewSet, basename='client-invoice')
+router.register(r'client-invoice-line-items', ClientInvoiceLineItemViewSet, basename='client-invoice-line-item')
+router.register(r'client-subscriptions', ClientSubscriptionViewSet, basename='client-subscription')
+
+# NEW: White-Labeling
+router.register(r'white-label-branding', WhiteLabelBrandingViewSet, basename='white-label-branding')
+
+# NEW: Embedded Banking & Payments
+router.register(r'banking-integrations', BankingIntegrationViewSet, basename='banking-integration')
+router.register(r'banking-transactions', BankingTransactionViewSet, basename='banking-transaction')
+router.register(r'embedded-payments', EmbeddedPaymentViewSet, basename='embedded-payment')
+
+# NEW: Workflow Automation
+router.register(r'automation-workflows', AutomationWorkflowViewSet, basename='automation-workflow')
+router.register(r'automation-executions', AutomationExecutionViewSet, basename='automation-execution')
+
+# NEW: Firm Dashboard
+router.register(r'firm-metrics', FirmMetricViewSet, basename='firm-metric')
+router.register(r'client-marketplace-integrations', ClientMarketplaceIntegrationViewSet, basename='client-marketplace-integration')
 
 urlpatterns = [
     path('', include(router.urls)),

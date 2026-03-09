@@ -28,7 +28,13 @@ from .models import (
     DeferredRevenue, RevenueRecognitionSchedule,
     PeriodCloseChecklist, PeriodCloseItem,
     ExchangeRate, FXGainLoss,
-    Notification, NotificationPreference
+    Notification, NotificationPreference,
+    # NEW MODELS
+    Client, ClientPortal, ClientMessage, ClientDocument, DocumentRequest, ApprovalRequest,
+    DocumentTemplate, Loan, LoanPayment, KYCProfile, AMLTransaction, FirmService,
+    ClientInvoice, ClientInvoiceLineItem, ClientSubscription, WhiteLabelBranding,
+    BankingIntegration, BankingTransaction, EmbeddedPayment, AutomationWorkflow,
+    AutomationExecution, FirmMetric, ClientMarketplaceIntegration
 )
 from .serializers import (
     OrganizationSerializer, EntitySerializer, EntityDetailSerializer,
@@ -49,7 +55,15 @@ from .serializers import (
     DeferredRevenueSerializer, RevenueRecognitionScheduleSerializer,
     PeriodCloseChecklistSerializer, PeriodCloseItemSerializer,
     ExchangeRateSerializer, FXGainLossSerializer,
-    NotificationSerializer, NotificationPreferenceSerializer
+    NotificationSerializer, NotificationPreferenceSerializer,
+    # NEW SERIALIZERS
+    ClientSerializer, ClientPortalSerializer, ClientMessageSerializer, ClientDocumentSerializer,
+    DocumentRequestSerializer, ApprovalRequestSerializer, DocumentTemplateSerializer, LoanSerializer,
+    LoanPaymentSerializer, KYCProfileSerializer, AMLTransactionSerializer, FirmServiceSerializer,
+    ClientInvoiceSerializer, ClientInvoiceLineItemSerializer, ClientSubscriptionSerializer,
+    WhiteLabelBrandingSerializer, BankingIntegrationSerializer, BankingTransactionSerializer,
+    EmbeddedPaymentSerializer, AutomationWorkflowSerializer, AutomationExecutionSerializer,
+    FirmMetricSerializer, ClientMarketplaceIntegrationSerializer
 )
 from .permissions import PermissionChecker
 
@@ -121,6 +135,98 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
         serializer = OrgOverviewSerializer(overview_data)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['get'])
+    def firm_dashboard(self, request, pk=None):
+        """Comprehensive firm dashboard: clients, workload, staff performance"""
+        organization = self.get_object()
+        now = timezone.now()
+
+        # ── Clients ──────────────────────────────────────────────────────────
+        clients_qs = Client.objects.filter(organization=organization)
+        total_clients = clients_qs.count()
+        active_clients = clients_qs.filter(status='active').count()
+        inactive_clients = clients_qs.filter(status='inactive').count()
+        prospect_clients = clients_qs.filter(status='prospect').count()
+        recent_clients = list(
+            clients_qs.order_by('-created_at').values(
+                'id', 'name', 'status', 'email', 'industry', 'created_at'
+            )[:10]
+        )
+        for c in recent_clients:
+            if c.get('created_at'):
+                c['created_at'] = c['created_at'].isoformat()
+
+        # ── Workload ──────────────────────────────────────────────────────────
+        tasks_qs = TaskRequest.objects.filter(entity__organization=organization)
+        workload = {
+            'total': tasks_qs.count(),
+            'pending': tasks_qs.filter(status='pending').count(),
+            'in_progress': tasks_qs.filter(status='in_progress').count(),
+            'completed': tasks_qs.filter(status='completed').count(),
+            'overdue': tasks_qs.filter(
+                status__in=['pending', 'in_progress'],
+                due_date__lt=now.date()
+            ).count(),
+        }
+        # Tasks by entity
+        workload_by_entity = list(
+            tasks_qs.values('entity__name').annotate(count=Count('id')).order_by('-count')[:10]
+        )
+
+        # ── Staff Performance ─────────────────────────────────────────────────
+        staff_qs = EntityStaff.objects.filter(entity__organization=organization)
+        total_staff = staff_qs.count()
+        # tasks assigned per staff member
+        staff_performance = []
+        for staff in staff_qs.select_related('entity')[:20]:
+            assigned = TaskRequest.objects.filter(
+                entity=staff.entity,
+                assigned_to=staff.user if staff.user else None,
+                status__in=['pending', 'in_progress']
+            ).count()
+            completed = TaskRequest.objects.filter(
+                entity=staff.entity,
+                assigned_to=staff.user if staff.user else None,
+                status='completed'
+            ).count()
+            staff_performance.append({
+                'id': staff.id,
+                'name': staff.name or (staff.user.get_full_name() if staff.user else ''),
+                'email': staff.email or (staff.user.email if staff.user else ''),
+                'role': staff.role.name if staff.role else '',
+                'entity': staff.entity.name,
+                'tasks_assigned': assigned,
+                'tasks_completed': completed,
+                'is_active': staff.is_active,
+            })
+
+        # ── Billing summary ────────────────────────────────────────────────────
+        invoices_qs = ClientInvoice.objects.filter(organization=organization)
+        billing = {
+            'total_invoiced': float(invoices_qs.aggregate(t=Sum('total_amount'))['t'] or 0),
+            'total_paid': float(invoices_qs.filter(status='paid').aggregate(t=Sum('total_amount'))['t'] or 0),
+            'overdue_count': invoices_qs.filter(status='overdue').count(),
+        }
+
+        return Response({
+            'clients': {
+                'total': total_clients,
+                'active': active_clients,
+                'inactive': inactive_clients,
+                'prospects': prospect_clients,
+                'recent': recent_clients,
+            },
+            'workload': {
+                **workload,
+                'by_entity': workload_by_entity,
+            },
+            'staff': {
+                'total': total_staff,
+                'performance': staff_performance,
+            },
+            'billing': billing,
+        })
 
     @action(detail=True, methods=['get'])
     def risk_exposure(self, request, pk=None):
@@ -2074,3 +2180,288 @@ class NotificationPreferenceViewSet(viewsets.ViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
+
+
+# ============ CLIENT MANAGEMENT VIEWSETS ============
+
+class ClientViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing clients"""
+    serializer_class = ClientSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return Client.objects.filter(organization_id=org_id)
+        return Client.objects.all()
+
+
+class ClientPortalViewSet(viewsets.ModelViewSet):
+    """ViewSet for client portal management"""
+    serializer_class = ClientPortalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ClientPortal.objects.filter(user=self.request.user)
+
+
+class ClientMessageViewSet(viewsets.ModelViewSet):
+    """ViewSet for client messaging"""
+    serializer_class = ClientMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ClientMessage.objects.filter(Q(from_user=self.request.user) | Q(to_user=self.request.user))
+
+
+class ClientDocumentViewSet(viewsets.ModelViewSet):
+    """ViewSet for client documents"""
+    serializer_class = ClientDocumentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return ClientDocument.objects.filter(organization_id=org_id)
+        return ClientDocument.objects.all()
+
+
+class DocumentRequestViewSet(viewsets.ModelViewSet):
+    """ViewSet for document requests"""
+    serializer_class = DocumentRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return DocumentRequest.objects.filter(organization_id=org_id)
+        return DocumentRequest.objects.all()
+
+
+class ApprovalRequestViewSet(viewsets.ModelViewSet):
+    """ViewSet for approval requests"""
+    serializer_class = ApprovalRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return ApprovalRequest.objects.filter(organization_id=org_id)
+        return ApprovalRequest.objects.all()
+
+
+# ============ DOCUMENT TEMPLATE VIEWSETS ============
+
+class DocumentTemplateViewSet(viewsets.ModelViewSet):
+    """ViewSet for document templates"""
+    serializer_class = DocumentTemplateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return DocumentTemplate.objects.filter(organization_id=org_id)
+        return DocumentTemplate.objects.all()
+
+
+# ============ LOAN MANAGEMENT VIEWSETS ============
+
+class LoanViewSet(viewsets.ModelViewSet):
+    """ViewSet for loan management"""
+    serializer_class = LoanSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return Loan.objects.filter(organization_id=org_id)
+        return Loan.objects.all()
+
+
+class LoanPaymentViewSet(viewsets.ModelViewSet):
+    """ViewSet for loan payments"""
+    serializer_class = LoanPaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        loan_id = self.request.query_params.get('loan')
+        if loan_id:
+            return LoanPayment.objects.filter(loan_id=loan_id)
+        return LoanPayment.objects.all()
+
+
+# ============ COMPLIANCE & KYC/AML VIEWSETS ============
+
+class KYCProfileViewSet(viewsets.ModelViewSet):
+    """ViewSet for KYC profiles"""
+    serializer_class = KYCProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return KYCProfile.objects.filter(organization_id=org_id)
+        return KYCProfile.objects.all()
+
+
+class AMLTransactionViewSet(viewsets.ModelViewSet):
+    """ViewSet for AML transactions"""
+    serializer_class = AMLTransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return AMLTransaction.objects.filter(organization_id=org_id)
+        return AMLTransaction.objects.all()
+
+
+# ============ BILLING & FIRM MANAGEMENT VIEWSETS ============
+
+class FirmServiceViewSet(viewsets.ModelViewSet):
+    """ViewSet for firm services"""
+    serializer_class = FirmServiceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return FirmService.objects.filter(organization_id=org_id)
+        return FirmService.objects.all()
+
+
+class ClientInvoiceViewSet(viewsets.ModelViewSet):
+    """ViewSet for client invoices"""
+    serializer_class = ClientInvoiceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return ClientInvoice.objects.filter(organization_id=org_id)
+        return ClientInvoice.objects.all()
+
+
+class ClientInvoiceLineItemViewSet(viewsets.ModelViewSet):
+    """ViewSet for invoice line items"""
+    serializer_class = ClientInvoiceLineItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        invoice_id = self.request.query_params.get('invoice')
+        if invoice_id:
+            return ClientInvoiceLineItem.objects.filter(invoice_id=invoice_id)
+        return ClientInvoiceLineItem.objects.all()
+
+
+class ClientSubscriptionViewSet(viewsets.ModelViewSet):
+    """ViewSet for client subscriptions"""
+    serializer_class = ClientSubscriptionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return ClientSubscription.objects.filter(organization_id=org_id)
+        return ClientSubscription.objects.all()
+
+
+# ============ WHITE-LABELING VIEWSETS ============
+
+class WhiteLabelBrandingViewSet(viewsets.ModelViewSet):
+    """ViewSet for white-label branding"""
+    serializer_class = WhiteLabelBrandingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return WhiteLabelBranding.objects.filter(organization__owner=self.request.user)
+
+
+# ============ EMBEDDED BANKING & PAYMENTS VIEWSETS ============
+
+class BankingIntegrationViewSet(viewsets.ModelViewSet):
+    """ViewSet for banking integrations"""
+    serializer_class = BankingIntegrationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return BankingIntegration.objects.filter(organization_id=org_id)
+        return BankingIntegration.objects.all()
+
+
+class BankingTransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for banking transactions (read-only)"""
+    serializer_class = BankingTransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity')
+        if entity_id:
+            return BankingTransaction.objects.filter(entity_id=entity_id)
+        return BankingTransaction.objects.all()
+
+
+class EmbeddedPaymentViewSet(viewsets.ModelViewSet):
+    """ViewSet for embedded payments"""
+    serializer_class = EmbeddedPaymentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return EmbeddedPayment.objects.filter(organization_id=org_id)
+        return EmbeddedPayment.objects.all()
+
+
+# ============ WORKFLOW AUTOMATION VIEWSETS ============
+
+class AutomationWorkflowViewSet(viewsets.ModelViewSet):
+    """ViewSet for automation workflows"""
+    serializer_class = AutomationWorkflowSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return AutomationWorkflow.objects.filter(organization_id=org_id)
+        return AutomationWorkflow.objects.all()
+
+
+class AutomationExecutionViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for automation executions"""
+    serializer_class = AutomationExecutionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        workflow_id = self.request.query_params.get('workflow')
+        if workflow_id:
+            return AutomationExecution.objects.filter(workflow_id=workflow_id)
+        return AutomationExecution.objects.all()
+
+
+# ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE VIEWSETS ============
+
+class FirmMetricViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for firm metrics"""
+    serializer_class = FirmMetricSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return FirmMetric.objects.filter(organization_id=org_id)
+        return FirmMetric.objects.all()
+
+
+class ClientMarketplaceIntegrationViewSet(viewsets.ModelViewSet):
+    """ViewSet for client marketplace integrations"""
+    serializer_class = ClientMarketplaceIntegrationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        org_id = self.request.query_params.get('organization')
+        if org_id:
+            return ClientMarketplaceIntegration.objects.filter(organization_id=org_id)
+        return ClientMarketplaceIntegration.objects.all()
