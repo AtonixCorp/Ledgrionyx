@@ -1,5 +1,5 @@
 .org-overview-container {
-  padding: var(--space-2xl, 32px) 0;
+  padding: var(--card-padding, 24px);
   max-width: var(--content-max-width, 1400px);
   margin: 0 auto;
   min-width: 0;
