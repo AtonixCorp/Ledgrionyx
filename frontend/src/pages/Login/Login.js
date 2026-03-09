@@ -28,7 +28,7 @@ const Login = () => {
 
     const result = await login(email, password);
     if (result.success) {
-      navigate('/app/enterprise/org-overview');
+      navigate('/app/firm/enterprise-branches');
     } else {
       setError(result.error || 'Login failed. Please try again.');
     }

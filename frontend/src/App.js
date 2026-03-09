@@ -125,7 +125,7 @@ function App() {
               <Route path="/global-tax" element={<GlobalTax />} />
 
               {/* Redirect legacy personal routes to enterprise */}
-              <Route path="/dashboard" element={<Navigate to="/app/enterprise/org-overview" replace />} />
+              <Route path="/dashboard" element={<Navigate to="/app/firm/enterprise-branches" replace />} />
 
               {/* Enterprise Routes */}
               <Route path="/app/enterprise/org-overview" element={
