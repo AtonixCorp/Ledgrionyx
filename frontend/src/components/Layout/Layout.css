@@ -307,41 +307,40 @@
 }
 
 .layout .page-title {
-  color: var(--text);
-  font-weight: 600;
+  color: var(--atc-navy);
+  font-weight: 700;
   letter-spacing: -0.3px;
 }
 
 .layout .card {
   background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-  margin-bottom: 24px;
-  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  box-shadow: var(--card-shadow);
+  margin-bottom: var(--space-3);
+  transition: border-color 150ms ease;
 }
 
 .layout .card:hover {
-  border-color: rgba(201, 168, 106, 0.35);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.42);
+  border-color: rgba(30, 77, 143, 0.30);
 }
 
 .layout input,
 .layout select,
 .layout textarea {
-  background: rgba(11, 11, 13, 0.35);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 8px;
+  background: var(--atc-white);
+  border: 1px solid var(--atc-gray-300);
+  color: var(--atc-navy);
+  border-radius: var(--card-radius);
 }
 
 .layout input:focus,
 .layout select:focus,
 .layout textarea:focus {
   outline: none;
-  border-color: rgba(45, 140, 255, 0.8);
-  box-shadow: 0 0 0 3px rgba(45, 140, 255, 0.18);
+  border-color: var(--atc-blue);
+  box-shadow: 0 0 0 3px rgba(30, 77, 143, 0.15);
 }
 
 .main-content.sidebar-minimized {

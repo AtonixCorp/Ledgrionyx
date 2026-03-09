@@ -1,6 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaUsers, FaGlobe, FaShieldAlt, FaRocket, FaHandshake, FaAward } from 'react-icons/fa';
+import {
+  FaShieldAlt, FaGlobe, FaCheckCircle, FaBolt, FaEye,
+  FaBalanceScale, FaUsersCog, FaServer, FaBuilding, FaNetworkWired,
+  FaBrain, FaChartLine, FaFileAlt, FaStore, FaArrowRight, FaCogs,
+  FaLayerGroup, FaExchangeAlt
+} from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import './About.css';
@@ -10,218 +15,272 @@ const About = () => {
     <div className="about-page">
       <Header />
 
-      {/* Hero Section */}
+      {/* ── HERO ── */}
       <section className="about-hero">
+        <div className="about-hero-bg" />
         <div className="container">
-          <div className="hero-content">
-            <h1>About Atonix Capital</h1>
-            <p>Empowering financial freedom through innovative technology and expert guidance</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Mission Section */}
-      <section className="mission-section">
-        <div className="container">
-          <div className="mission-content">
-            <div className="mission-text">
-              <h2>Our Mission</h2>
-              <p>
-                At Atonix Capital, we believe that everyone deserves access to sophisticated financial tools
-                and expert guidance. Our mission is to democratize wealth management by combining cutting-edge
-                technology with personalized financial advice, making professional-grade financial services
-                accessible to individuals and businesses worldwide.
-              </p>
-              <p>
-                We are committed to transparency, security, and innovation, ensuring that our clients can
-                confidently navigate their financial journey with tools that adapt to their unique needs
-                and goals.
-              </p>
-            </div>
-            <div className="mission-stats">
-              <div className="stat-item">
-                <div className="stat-number">500K+</div>
-                <div className="stat-label">Active Users</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-number">$2.5B+</div>
-                <div className="stat-label">Assets Managed</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-number">207</div>
-                <div className="stat-label">Countries Served</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-number">99.9%</div>
-                <div className="stat-label">Uptime</div>
-              </div>
+          <div className="about-hero-inner">
+            <p className="about-eyebrow">The Financial Operating System</p>
+            <h1>ATC Capital</h1>
+            <p className="about-hero-sub">
+              Not an accounting tool. Not a bookkeeping app. Not a reporting dashboard.<br />
+              A unified Financial Operating System built for accounting firms, businesses,
+              and financial institutions.
+            </p>
+            <div className="about-hero-cta">
+              <Link to="/register" className="btn-primary btn-large">
+                Get Started <FaArrowRight style={{ marginLeft: '0.5rem', fontSize: '0.85em' }} />
+              </Link>
+              <Link to="/features" className="btn-outline-hero btn-large">
+                Explore Features
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Values Section */}
-      <section className="values-section">
+      {/* ── THE PROBLEM ── */}
+      <section className="about-problem-section">
         <div className="container">
-          <h2>Our Core Values</h2>
-          <div className="values-grid">
-            <div className="value-card">
-              <div className="value-icon">
-                <FaShieldAlt />
+          <div className="about-section-header">
+            <p className="about-eyebrow-dark">The Industry Problem</p>
+            <h2>Why Financial Operations Are Broken</h2>
+            <p className="about-section-sub">
+              Across industries, accounting firms and businesses face the same challenges — and they cost
+              firms their time, accuracy, clients, and growth.
+            </p>
+          </div>
+          <div className="problem-grid">
+            {[
+              'Too many disconnected tools',
+              'Manual processes that waste time',
+              'Outdated systems that slow operations',
+              'No real-time financial visibility',
+              'Poor collaboration between accountants and clients',
+              'Compliance burdens that grow every year',
+              'Banking systems that don\'t integrate with accounting',
+              'Reporting that is slow, inconsistent, or incomplete',
+            ].map((p) => (
+              <div className="problem-row" key={p}>
+                <span className="problem-x">✕</span>
+                <span>{p}</span>
               </div>
-              <h3>Security First</h3>
+            ))}
+          </div>
+          <div className="problem-resolve-banner">
+            ATC Capital exists to eliminate every one of these problems — permanently.
+          </div>
+        </div>
+      </section>
+
+      {/* ── SOLUTION ── */}
+      <section className="about-solution-section">
+        <div className="container">
+          <div className="solution-split">
+            <div className="solution-text">
+              <p className="about-eyebrow-purple">The Solution</p>
+              <h2>One Platform. All Financial Operations. Fully Connected.</h2>
               <p>
-                Your financial data and assets are protected by bank-level security measures,
-                including end-to-end encryption and multi-factor authentication.
+                ATC Capital is a unified financial-operations environment — a single platform where
+                accounting firms and businesses manage everything: financial data, accounting workflows,
+                client relationships, documents, compliance, reporting, automation, and banking integrations.
               </p>
+              <p className="solution-manifesto">
+                Everything in one place.<br />
+                Everything connected.<br />
+                Everything real-time.
+              </p>
+              <p>This is the new standard for financial operations.</p>
             </div>
-            <div className="value-card">
-              <div className="value-icon">
-                <FaRocket />
-              </div>
-              <h3>Innovation</h3>
-              <p>
-                We continuously push the boundaries of financial technology, integrating AI,
-                machine learning, and advanced analytics to provide superior insights.
-              </p>
-            </div>
-            <div className="value-card">
-              <div className="value-icon">
-                <FaHandshake />
-              </div>
-              <h3>Trust & Transparency</h3>
-              <p>
-                We believe in complete transparency with no hidden fees, clear pricing,
-                and honest communication about your financial health.
-              </p>
-            </div>
-            <div className="value-card">
-              <div className="value-icon">
-                <FaGlobe />
-              </div>
-              <h3>Global Reach</h3>
-              <p>
-                Our platform supports international markets and currencies, enabling
-                you to manage global investments from anywhere in the world.
-              </p>
-            </div>
-            <div className="value-card">
-              <div className="value-icon">
-                <FaUsers />
-              </div>
-              <h3>Personalized Service</h3>
-              <p>
-                Every client receives tailored advice and tools based on their unique
-                financial situation, goals, and risk tolerance.
-              </p>
-            </div>
-            <div className="value-card">
-              <div className="value-icon">
-                <FaAward />
-              </div>
-              <h3>Excellence</h3>
-              <p>
-                We strive for excellence in everything we do, from our technology
-                to our customer service, ensuring the best possible experience.
-              </p>
+            <div className="solution-cards">
+              {[
+                { icon: <FaLayerGroup />, label: 'Financial Data' },
+                { icon: <FaCogs />, label: 'Accounting Workflows' },
+                { icon: <FaUsersCog />, label: 'Client Relationships' },
+                { icon: <FaFileAlt />, label: 'Document Management' },
+                { icon: <FaBalanceScale />, label: 'Compliance' },
+                { icon: <FaChartLine />, label: 'Reporting' },
+                { icon: <FaBolt />, label: 'Automation' },
+                { icon: <FaExchangeAlt />, label: 'Banking Integration' },
+              ].map((c) => (
+                <div className="solution-chip" key={c.label}>
+                  <span className="solution-chip-icon">{c.icon}</span>
+                  <span>{c.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Story Section */}
-      <section className="story-section">
+      {/* ── CORE PILLARS ── */}
+      <section className="about-pillars-section">
         <div className="container">
-          <div className="story-content">
-            <div className="story-text">
-              <h2>Our Story</h2>
-              <p>
-                Founded in 2020, Atonix Capital emerged from a simple observation: traditional financial
-                services were inaccessible to most people. Our founders, a team of financial experts and
-                technology innovators, recognized that the financial industry was ripe for disruption.
-              </p>
-              <p>
-                What started as a small team with a big vision has grown into a global platform serving
-                hundreds of thousands of users across 207 countries. We've built a comprehensive suite
-                of financial tools that combines the expertise of seasoned financial advisors with the
-                power of modern technology.
-              </p>
-              <p>
-                Today, Atonix Capital continues to lead the way in democratizing access to sophisticated
-                financial services, making professional-grade tools available to everyone, everywhere.
-              </p>
-            </div>
-            <div className="story-image">
-              <div className="image-placeholder">
-                <FaGlobe size={64} />
-                <span>Global Impact</span>
+          <div className="about-section-header">
+            <p className="about-eyebrow-dark">Core Architecture</p>
+            <h2>Nine Foundational Pillars</h2>
+            <p className="about-section-sub">
+              Every decision, every feature, every line of code is anchored to these principles.
+              They define ATC Capital's identity and guide everything we build.
+            </p>
+          </div>
+          <div className="about-pillars-grid">
+            {[
+              { n: '01', icon: <FaShieldAlt />, title: 'Institutional-Grade Security', desc: 'Every component designed with enterprise-level protection at its core. No exceptions.' },
+              { n: '02', icon: <FaServer />, title: 'Multi-Tenant Architecture', desc: 'Each accounting firm receives its own fully isolated, secure, and independent environment.' },
+              { n: '03', icon: <FaBuilding />, title: 'Multi-Entity Support', desc: 'Manage multiple businesses under one umbrella without switching accounts or dashboards.' },
+              { n: '04', icon: <FaGlobe />, title: 'Multi-Currency Engine', desc: 'Global operations require global currency support. Built in, not bolted on.' },
+              { n: '05', icon: <FaNetworkWired />, title: 'API-Driven Integrations', desc: 'Seamless, secure connections to banks, payment processors, and financial data providers.' },
+              { n: '06', icon: <FaBolt />, title: 'Automation-Powered Workflows', desc: 'Every manual, repetitive task replaced with intelligent, rule-based automation.' },
+              { n: '07', icon: <FaEye />, title: 'Real-Time Financial Visibility', desc: 'Balances, transactions, and insights that update the moment they change.' },
+              { n: '08', icon: <FaBalanceScale />, title: 'Compliance-Aware Infrastructure', desc: 'KYC, KYB, AML, and immutable audit trails embedded at the platform core.' },
+              { n: '09', icon: <FaUsersCog />, title: 'Client Collaboration Tools', desc: 'Portals, messaging, approvals, and document sharing — unified in one seamless flow.' },
+            ].map((p) => (
+              <div className="about-pillar-card" key={p.n}>
+                <div className="about-pillar-num">{p.n}</div>
+                <div className="about-pillar-icon">{p.icon}</div>
+                <h3>{p.title}</h3>
+                <p>{p.desc}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── USER EXPERIENCE ── */}
+      <section className="about-ux-section">
+        <div className="container">
+          <div className="ux-split">
+            <div className="ux-text">
+              <p className="about-eyebrow-purple">The User Experience</p>
+              <h2>What ATC Capital Feels Like</h2>
+              <p>
+                When a user logs into ATC Capital, they must feel empowered, in control, supported,
+                efficient, confident, and secure. Every screen, every button, every workflow reflects this.
+              </p>
+              <div className="ux-qualities">
+                {[
+                  'A modern financial command center',
+                  'A professional, clean, elegant interface',
+                  'A system built for serious work',
+                  'A platform that respects the user\'s time',
+                ].map((q) => (
+                  <div className="ux-quality" key={q}>
+                    <FaCheckCircle className="ux-check" />
+                    <span>{q}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="ux-feelings">
+              <p className="ux-feelings-title">When you use ATC Capital, you feel:</p>
+              {['Empowered', 'In Control', 'Supported', 'Efficient', 'Confident', 'Secure'].map((f) => (
+                <div className="ux-feeling-chip" key={f}>{f}</div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="team-section">
+      {/* ── BRAND IDENTITY ── */}
+      <section className="about-brand-section">
         <div className="container">
-          <h2>Leadership Team</h2>
-          <div className="team-grid">
-            <div className="team-member">
-              <div className="member-avatar">
-                <FaUsers />
-              </div>
-              <h3>Sarah Chen</h3>
-              <p className="member-role">CEO & Co-Founder</p>
-              <p className="member-bio">
-                Former VP at Goldman Sachs with 15+ years in financial technology
-                and investment management.
-              </p>
+          <div className="about-section-header">
+            <p className="about-eyebrow-dark">Brand Identity</p>
+            <h2>Built on Seven Commitments</h2>
+          </div>
+          <div className="brand-values-row">
+            {['Precision', 'Security', 'Automation', 'Clarity', 'Professionalism', 'Scalability', 'Trust'].map((v) => (
+              <div className="brand-value-tile" key={v}>{v}</div>
+            ))}
+          </div>
+          <div className="brand-voice-grid">
+            <div className="brand-voice-card">
+              <h3>Brand Voice</h3>
+              <ul>
+                {['Confident', 'Clear', 'Professional', 'Modern', 'Authoritative', 'Vision-driven'].map((b) => (
+                  <li key={b}><FaCheckCircle /> {b}</li>
+                ))}
+              </ul>
             </div>
-            <div className="team-member">
-              <div className="member-avatar">
-                <FaUsers />
-              </div>
-              <h3>Michael Rodriguez</h3>
-              <p className="member-role">CTO & Co-Founder</p>
-              <p className="member-bio">
-                Technology leader with expertise in fintech, AI, and secure
-                financial systems architecture.
-              </p>
+            <div className="brand-promise-card">
+              <h3>Brand Promise</h3>
+              <blockquote>
+                "ATC Capital gives accounting firms the power, speed, and intelligence they need to
+                operate at the highest level."
+              </blockquote>
             </div>
-            <div className="team-member">
-              <div className="member-avatar">
-                <FaUsers />
-              </div>
-              <h3>Dr. Emily Watson</h3>
-              <p className="member-role">Chief Investment Officer</p>
-              <p className="member-bio">
-                PhD in Finance with 20+ years experience in portfolio management
-                and quantitative analysis.
-              </p>
-            </div>
-            <div className="team-member">
-              <div className="member-avatar">
-                <FaUsers />
-              </div>
-              <h3>David Kim</h3>
-              <p className="member-role">Head of Global Operations</p>
-              <p className="member-bio">
-                International business expert specializing in regulatory compliance
-                and global market expansion.
-              </p>
+            <div className="brand-taglines-card">
+              <h3>Brand Taglines</h3>
+              <ul>
+                {[
+                  'The Financial Operating System for Modern Accounting Firms.',
+                  'Where Accounting Meets Automation.',
+                  'Real-Time Finance. Real-Time Control.',
+                  'Built for Firms That Refuse to Fall Behind.',
+                  'Your Entire Financial World. Unified.',
+                ].map((t) => (
+                  <li key={t}><span className="tagline-dash">—</span> {t}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="about-cta">
+      {/* ── FUTURE VISION ── */}
+      <section className="about-future-section">
         <div className="container">
-          <h2>Join the Atonix Capital Community</h2>
-          <p>Start your journey towards financial freedom today</p>
-          <div className="cta-buttons">
-            <Link to="/register" className="btn-primary btn-large">Get Started Free</Link>
-            <Link to="/contact" className="btn-outline btn-large">Contact Us</Link>
+          <div className="future-inner">
+            <p className="about-eyebrow" style={{ color: 'rgba(255,255,255,0.6)' }}>Long-Term Vision</p>
+            <h2>The Future of ATC Capital</h2>
+            <p className="future-sub">
+              ATC Capital is not just a platform — it is a movement. A transformation.
+              A new standard for how the world manages financial operations.
+            </p>
+            <div className="future-grid">
+              {[
+                { icon: <FaGlobe />, label: 'Global Banking Integrations' },
+                { icon: <FaBrain />, label: 'AI-Driven Financial Forecasting' },
+                { icon: <FaBalanceScale />, label: 'Automated Compliance Engines' },
+                { icon: <FaFileAlt />, label: 'Full Tax Automation' },
+                { icon: <FaChartLine />, label: 'Enterprise-Grade Analytics' },
+                { icon: <FaNetworkWired />, label: 'Cross-Border Financial Intelligence' },
+                { icon: <FaStore />, label: 'Global Marketplace of Financial Tools' },
+              ].map((f) => (
+                <div className="future-item" key={f.label}>
+                  <div className="future-icon">{f.icon}</div>
+                  <span>{f.label}</span>
+                </div>
+              ))}
+            </div>
+            <p className="future-closing">
+              ATC Capital will become the platform that powers the world's financial operations.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="about-cta-section">
+        <div className="container">
+          <div className="about-cta-inner">
+            <h2>
+              This is ATC Capital.<br />
+              <span>The future of financial operations begins here.</span>
+            </h2>
+            <p>
+              Built for the future. Built for firms that demand excellence. Built for businesses
+              that want clarity. Built for financial institutions that require precision.
+            </p>
+            <div className="about-cta-buttons">
+              <Link to="/register" className="btn-primary btn-large">
+                Get Started Today <FaArrowRight style={{ marginLeft: '0.5rem', fontSize: '0.85em' }} />
+              </Link>
+              <Link to="/contact" className="btn-outline btn-large">
+                Talk to Us
+              </Link>
+            </div>
           </div>
         </div>
       </section>

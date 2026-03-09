@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import {
   FaStore, FaPlug, FaHandshake, FaPlusCircle, FaCheck,
-  FaSearch, FaFilter, FaStar, FaExternalLinkAlt, FaTimes,
+  FaSearch, FaStar, FaTimes,
   FaShieldAlt, FaChartLine, FaFileInvoice, FaCreditCard,
   FaUniversity, FaCalculator, FaUsers, FaBell, FaBoxOpen
 } from 'react-icons/fa';

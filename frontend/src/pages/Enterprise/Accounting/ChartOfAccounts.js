@@ -104,8 +104,6 @@ const ChartOfAccounts = () => {
 
   const formatCurrency = (v) => parseFloat(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
 
-  const getTypeInfo = (type) => ACCOUNT_TYPES.find(t => t.value === type) || {};
-
   const stats = ACCOUNT_TYPES.map(t => ({
     ...t,
     count: accounts.filter(a => a.account_type === t.value).length,

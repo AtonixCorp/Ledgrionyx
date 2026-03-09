@@ -4,7 +4,7 @@ import {
   FaFileAlt, FaPlus, FaCheckCircle, FaUndo, FaSearch,
   FaDownload, FaTimes, FaSave, FaClock, FaBan
 } from 'react-icons/fa';
-import { journalEntriesAPI, ledgerPeriodsAPI } from '../../../services/api';
+import { journalEntriesAPI } from '../../../services/api';
 import './Accounting.css';
 
 const STATUS_COLORS = { draft: '#ed8936', posted: '#48bb78', reversed: '#a0aec0' };
@@ -60,8 +60,6 @@ const JournalEntries = () => {
     if (!window.confirm('Create a reversal entry for this journal entry?')) return;
     try { await journalEntriesAPI.reverse(id); await load(); } catch (e) { alert(e.response?.data?.detail || 'Reverse failed'); }
   };
-
-  const fmt = (v) => parseFloat(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
 
   const stats = {
     total: entries.length,

@@ -3,7 +3,7 @@ import { useEnterprise } from '../../context/EnterpriseContext';
 import {
   FaUsers, FaChartBar, FaTasks, FaUserTie, FaCheckCircle,
   FaExclamationCircle, FaClock, FaFileInvoiceDollar, FaSearch,
-  FaSync, FaUserPlus, FaStar, FaBuilding
+  FaSync, FaStar, FaBuilding
 } from 'react-icons/fa';
 import './FirmDashboard.css';
 

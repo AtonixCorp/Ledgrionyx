@@ -1,6 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaChartBar, FaChartLine, FaGlobe, FaLightbulb, FaShieldAlt, FaRocket, FaCheckCircle, FaUser, FaBuilding, FaNetworkWired, FaCogs, FaSearch, FaLock, FaMoneyBillWave, FaDollarSign, FaChartArea, FaBrain, FaProjectDiagram } from 'react-icons/fa';
+import {
+  FaChartBar, FaGlobe, FaShieldAlt,
+  FaCheckCircle, FaBuilding, FaNetworkWired,
+  FaChartArea, FaBrain,
+  FaExchangeAlt, FaFileAlt, FaUsersCog, FaBolt, FaEye,
+  FaBalanceScale, FaStore, FaMobileAlt, FaServer, FaArrowRight
+} from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import './Landing.css';
@@ -11,266 +17,310 @@ const Landing = () => {
       <Header />
 
       <section className="hero-section">
+        {/* ── HERO ── */}
         <div className="hero-content">
+          <div className="hero-eyebrow">The Financial Operating System</div>
           <h1 className="hero-title">
-            Manage Your Finances<br />
-            <span className="hero-highlight">Smarter & Easier</span>
+            One Platform.<br />
+            <span className="hero-highlight">Every Financial Operation.</span>
           </h1>
           <p className="hero-description">
-            A next-generation financial platform built to redefine how individuals, businesses, 
-            and institutions interact with money. Experience sovereign-grade security, AI-powered 
-            intelligence, and borderless multi-asset management.
+            ATC Capital is not an accounting tool. It is not a bookkeeping app. It is a unified
+            Financial Operating System — built to transform how accounting firms, businesses, and
+            financial institutions manage data, automate workflows, and integrate modern banking.
           </p>
           <div className="hero-buttons">
             <Link to="/register" className="btn-primary btn-large">
-              Start Free Trial
+              Request Access <FaArrowRight className="btn-icon" />
             </Link>
             <Link to="/login" className="btn-outline btn-large">
               Sign In
             </Link>
           </div>
-          
+          <div className="hero-tagline-row">
+            <span className="hero-tag"><FaCheckCircle /> Real-Time Finance</span>
+            <span className="hero-tag"><FaCheckCircle /> Multi-Tenant Architecture</span>
+            <span className="hero-tag"><FaCheckCircle /> API-Driven Banking</span>
+          </div>
         </div>
         <div className="hero-image">
           <Link to="/dashboard" className="hero-card card-1" style={{ textDecoration: 'none' }}>
             <div className="card-icon"><FaChartBar /></div>
             <div className="card-content">
-              <h4>Dashboard</h4>
-              <p>Real-time overview</p>
+              <h4>Live Dashboard</h4>
+              <p>Real-time financial command center</p>
             </div>
           </Link>
           <Link to="/expenses" className="hero-card card-2" style={{ textDecoration: 'none' }}>
-            <div className="card-icon"><FaChartLine /></div>
+            <div className="card-icon"><FaExchangeAlt /></div>
             <div className="card-content">
-              <h4>Expenses</h4>
-              <p>Track spending</p>
+              <h4>Bank Reconciliation</h4>
+              <p>Auto-match, auto-post</p>
             </div>
           </Link>
           <Link to="/budget" className="hero-card card-3" style={{ textDecoration: 'none' }}>
-            <div className="card-icon"><FaChartBar /></div>
+            <div className="card-icon"><FaBalanceScale /></div>
             <div className="card-content">
-              <h4>Budgets</h4>
-              <p>Set limits</p>
+              <h4>General Ledger</h4>
+              <p>Multi-entity double-entry</p>
             </div>
           </Link>
           <Link to="/global-tax" className="hero-card card-4" style={{ textDecoration: 'none' }}>
             <div className="card-icon"><FaGlobe /></div>
             <div className="card-content">
-              <h4>Global Tax</h4>
-              <p>Directory & payment portals</p>
+              <h4>Global Compliance</h4>
+              <p>KYC · KYB · AML</p>
             </div>
           </Link>
         </div>
       </section>
 
-      <section className="about-section">
-        <div className="about-container">
+      {/* ── PROBLEM STRIP ── */}
+      <section className="problem-strip">
+        <div className="problem-strip-inner">
+          <p className="problem-label">The Industry Problem</p>
+          <div className="problem-items">
+            {[
+              'Disconnected Tools',
+              'Manual Processes',
+              'Zero Real-Time Visibility',
+              'Poor Client Collaboration',
+              'Ever-Growing Compliance Burden',
+              'Banking That Doesn\'t Integrate',
+            ].map((item) => (
+              <span key={item} className="problem-item">{item}</span>
+            ))}
+          </div>
+          <p className="problem-resolve">ATC Capital eliminates every one of these — permanently.</p>
+        </div>
+      </section>
+
+      {/* ── IDENTITY / PILLARS ── */}
+      <section className="pillars-section">
+        <div className="pillars-container">
           <div className="section-header">
-            <h2 className="section-title">About Atonix Capital</h2>
-            <p className="section-subtitle">Redefining Financial Power Through Innovation</p>
-          </div>
-          
-          <div className="about-intro">
-            <p className="about-lead">
-              Atonix Capital is a next-generation financial platform built to redefine how individuals, 
-              businesses, and nations interact with money. Designed at the intersection of sovereign 
-              infrastructure, intelligent finance, and multi-asset innovation.
+            <p className="section-eyebrow">Core Architecture</p>
+            <h2 className="section-title">Nine Pillars of a Financial Operating System</h2>
+            <p className="section-subtitle">
+              Every decision, every feature, every line of code is anchored to these foundational principles.
             </p>
           </div>
-          
-          <div className="mission-statement">
-            <h3>Our Mission</h3>
-            <p>
-              To provide individuals and institutions with complete control over their financial future — 
-              securely, intelligently, and without borders.
-            </p>
-          </div>
-
-          <div className="about-content">
-            <h3>Platform Excellence</h3>
-            <p>
-              Atonix Capital integrates modern fintech, AI-driven insights, and advanced security 
-              architecture to create a financial ecosystem that is fast, transparent, and globally 
-              accessible. Whether managing personal wealth, operating a business, or investing across 
-              multiple asset classes, users experience a platform engineered for clarity, precision, 
-              and sustained growth.
-            </p>
+          <div className="pillars-grid">
+            {[
+              { icon: <FaShieldAlt />, title: 'Institutional-Grade Security', desc: 'Every component is designed with enterprise-level protection at its core.' },
+              { icon: <FaServer />, title: 'Multi-Tenant Architecture', desc: 'Each accounting firm receives its own fully isolated, secure environment.' },
+              { icon: <FaBuilding />, title: 'Multi-Entity Support', desc: 'Manage multiple businesses under one unified umbrella without switching.' },
+              { icon: <FaGlobe />, title: 'Multi-Currency Engine', desc: 'Global operations demand global currency support — fully built in.' },
+              { icon: <FaNetworkWired />, title: 'API-Driven Integrations', desc: 'Seamless connections to banks, payment processors, and financial data providers.' },
+              { icon: <FaBolt />, title: 'Automation-Powered Workflows', desc: 'Replace every manual, repetitive task with intelligent, rule-based automation.' },
+              { icon: <FaEye />, title: 'Real-Time Financial Visibility', desc: 'Balances, transactions, and insights that update the moment they change.' },
+              { icon: <FaBalanceScale />, title: 'Compliance-Aware Infrastructure', desc: 'KYC, KYB, AML, and immutable audit trails are embedded at the platform level.' },
+              { icon: <FaUsersCog />, title: 'Client Collaboration Tools', desc: 'Portals, messaging, approvals, and document sharing — unified in one flow.' },
+            ].map((pillar, i) => (
+              <div className="pillar-card" key={i}>
+                <div className="pillar-number">0{i + 1}</div>
+                <div className="pillar-icon">{pillar.icon}</div>
+                <h3>{pillar.title}</h3>
+                <p>{pillar.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="differentiators-section">
-        <div className="section-header">
-          <h2 className="section-title">What Makes Us Different</h2>
-        </div>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon"><FaBrain /></div>
-            <h3>AI-Powered Intelligence</h3>
-            <p>Advanced algorithms that predict, analyze, and guide your financial decisions in real-time</p>
+      {/* ── FEATURE BLUEPRINT ── */}
+      <section className="blueprint-section">
+        <div className="blueprint-container">
+          <div className="section-header">
+            <p className="section-eyebrow">Full Feature Blueprint</p>
+            <h2 className="section-title">Everything Under One Roof</h2>
+            <p className="section-subtitle">
+              Seven interconnected modules that replace dozens of fragmented tools.
+            </p>
           </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaProjectDiagram /></div>
-            <h3>Multi-Asset Support</h3>
-            <p>Seamlessly manage fiat, crypto, stablecoins, and tokenized assets in one unified platform</p>
+          <div className="blueprint-grid">
+            <div className="blueprint-card bp-accent-1">
+              <div className="bp-icon"><FaChartBar /></div>
+              <h3>Core Accounting Engine</h3>
+              <ul>
+                <li><FaCheckCircle /> Multi-entity General Ledger</li>
+                <li><FaCheckCircle /> Chart of Accounts Templates</li>
+                <li><FaCheckCircle /> AI-Powered Automated Bookkeeping</li>
+                <li><FaCheckCircle /> Real-Time Bank Reconciliation</li>
+                <li><FaCheckCircle /> Balance Sheet · P&amp;L · Cash Flow</li>
+                <li><FaCheckCircle /> Immutable Audit Trail</li>
+              </ul>
+            </div>
+            <div className="blueprint-card bp-accent-2">
+              <div className="bp-icon"><FaExchangeAlt /></div>
+              <h3>Banking + Accounting Integration</h3>
+              <ul>
+                <li><FaCheckCircle /> Real-Time Banking Dashboard</li>
+                <li><FaCheckCircle /> Embedded Bill Pay &amp; Payroll</li>
+                <li><FaCheckCircle /> Loan Management &amp; Repayment Tracking</li>
+                <li><FaCheckCircle /> AML + KYC/KYB Compliance Monitoring</li>
+                <li><FaCheckCircle /> Secure API Bank Connections</li>
+                <li><FaCheckCircle /> Risk Scoring Engine</li>
+              </ul>
+            </div>
+            <div className="blueprint-card bp-accent-3">
+              <div className="bp-icon"><FaUsersCog /></div>
+              <h3>Client Management System</h3>
+              <ul>
+                <li><FaCheckCircle /> Full CRM with Financial History</li>
+                <li><FaCheckCircle /> Secure Client Portal &amp; Messaging</li>
+                <li><FaCheckCircle /> Task Management &amp; Deadlines</li>
+                <li><FaCheckCircle /> Document Upload &amp; Version Control</li>
+                <li><FaCheckCircle /> Digital Approvals Workflow</li>
+                <li><FaCheckCircle /> Multi-Client Oversight Dashboard</li>
+              </ul>
+            </div>
+            <div className="blueprint-card bp-accent-4">
+              <div className="bp-icon"><FaBolt /></div>
+              <h3>Automation Engine</h3>
+              <ul>
+                <li><FaCheckCircle /> Month-End &amp; Year-End Close Automation</li>
+                <li><FaCheckCircle /> Payroll Cycle &amp; Tax Reminder Workflows</li>
+                <li><FaCheckCircle /> AI Cash Flow Predictions</li>
+                <li><FaCheckCircle /> Expense Analysis &amp; Risk Alerts</li>
+                <li><FaCheckCircle /> Auto-Generated Financial Reports</li>
+                <li><FaCheckCircle /> KPI Dashboards on Demand</li>
+              </ul>
+            </div>
+            <div className="blueprint-card bp-accent-5">
+              <div className="bp-icon"><FaShieldAlt /></div>
+              <h3>Compliance &amp; Security</h3>
+              <ul>
+                <li><FaCheckCircle /> KYC / KYB Identity Verification</li>
+                <li><FaCheckCircle /> AML Transaction Monitoring</li>
+                <li><FaCheckCircle /> Suspicious Activity Alerting</li>
+                <li><FaCheckCircle /> Regulatory Report Generation</li>
+                <li><FaCheckCircle /> Role-Based Access Control (RBAC)</li>
+                <li><FaCheckCircle /> Admin · Accountant · Client · Auditor Roles</li>
+              </ul>
+            </div>
+            <div className="blueprint-card bp-accent-6">
+              <div className="bp-icon"><FaBuilding /></div>
+              <h3>Firm Operations Suite</h3>
+              <ul>
+                <li><FaCheckCircle /> Billing &amp; Subscription Management</li>
+                <li><FaCheckCircle /> Firm-Wide Staff &amp; Workload Dashboard</li>
+                <li><FaCheckCircle /> White-Label: Custom Domain &amp; Brand</li>
+                <li><FaCheckCircle /> Marketplace: Add-Ons &amp; Partner Services</li>
+                <li><FaCheckCircle /> Multi-Branch &amp; Multi-Region Support</li>
+                <li><FaCheckCircle /> Enterprise Analytics Suite</li>
+              </ul>
+            </div>
+            <div className="blueprint-card bp-accent-7">
+              <div className="bp-icon"><FaMobileAlt /></div>
+              <h3>Platform Infrastructure</h3>
+              <ul>
+                <li><FaCheckCircle /> Multi-Tenant Isolated Environments</li>
+                <li><FaCheckCircle /> Bank &amp; Payroll API Integrations</li>
+                <li><FaCheckCircle /> Tax Authority Connections</li>
+                <li><FaCheckCircle /> Mobile App: Approvals &amp; Alerts</li>
+                <li><FaCheckCircle /> 99.9% SLA Uptime Guarantee</li>
+                <li><FaCheckCircle /> Enterprise SSO &amp; Audit Compliance</li>
+              </ul>
+            </div>
           </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaShieldAlt /></div>
-            <h3>Sovereign-Grade Security</h3>
-            <p>Military-grade protection with geo-locks, time-locks, and multi-signature authorization</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaLightbulb /></div>
-            <h3>Smart Investment Vaults</h3>
-            <p>Diversified, automated wealth growth through intelligent portfolio management</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaCheckCircle /></div>
-            <h3>Business-Ready Tools</h3>
-            <p>Professional-grade invoicing, payroll automation, and corporate finance management</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaRocket /></div>
-            <h3>Borderless Network</h3>
-            <p>Global payment infrastructure built for speed, reliability, and zero-friction transactions</p>
-          </div>
-        </div>
-        <div className="core-principles">
-          <p>
-            Every feature is designed to deliver freedom, transparency, and control — 
-            the fundamental pillars of true financial sovereignty.
-          </p>
         </div>
       </section>
 
+      {/* ── VISION STATEMENT ── */}
       <section className="vision-section">
         <div className="vision-container">
           <div className="section-header">
-            <h2 className="section-title">Our Vision</h2>
-            <p className="section-subtitle">Building the Future of Financial Freedom</p>
+            <p className="section-eyebrow" style={{ color: 'rgba(255,255,255,0.7)' }}>Platform Vision</p>
+            <h2 className="section-title" style={{ color: '#fff' }}>
+              "One Platform. All Financial Operations. Fully Connected."
+            </h2>
           </div>
-          <p className="vision-intro">
-            Atonix Capital envisions a world where financial power is no longer constrained by 
-            geography, institutions, or legacy systems. We are building a platform that empowers:
-          </p>
-          <div className="vision-grid">
-            <div className="vision-card">
-              <div className="vision-icon"><FaUser /></div>
-              <h3>Individuals</h3>
-              <p>Seeking financial stability, growth, and independence</p>
-            </div>
-            <div className="vision-card">
-              <div className="vision-icon"><FaBuilding /></div>
-              <h3>Businesses</h3>
-              <p>Requiring secure, scalable financial operations and infrastructure</p>
-            </div>
-            <div className="vision-card">
-              <div className="vision-icon"><FaNetworkWired /></div>
-              <h3>Nations & Communities</h3>
-              <p>Striving for digital independence and economic sovereignty</p>
-            </div>
-            <div className="vision-card">
-              <div className="vision-icon"><FaRocket /></div>
-              <h3>Innovators</h3>
-              <p>Exploring the convergence of finance, AI, and emerging technologies</p>
-            </div>
+          <div className="vision-unified-list">
+            {[
+              'One Login', 'One Dashboard', 'One Financial Engine',
+              'One Reporting System', 'One Automation Layer', 'One Compliance Framework',
+              'One Client Portal', 'One Integration Hub',
+            ].map((item) => (
+              <div className="vision-unified-item" key={item}>
+                <FaCheckCircle className="vision-check" />
+                <span>{item}</span>
+              </div>
+            ))}
           </div>
-          <div className="vision-statement">
-            <p>
-              We believe the future of finance belongs to those who can adapt, innovate, and build 
-              with purpose — and Atonix Capital stands at the forefront of that transformation.
-            </p>
+          <div className="vision-closing">
+            ATC Capital replaces dozens of disconnected tools with a single, unified Financial Operating System.
           </div>
         </div>
       </section>
 
-      <section className="promise-section">
-        <div className="promise-container">
-          <div className="section-header">
-            <h2 className="section-title">Our Promise</h2>
-            <p className="section-subtitle">Committed to Your Financial Success</p>
-          </div>
-          <p className="promise-intro">
-            To every user, partner, and stakeholder, Atonix Capital delivers:
-          </p>
-          <div className="promise-grid">
-            <div className="promise-card">
-              <div className="promise-icon"><FaShieldAlt /></div>
-              <h3>Security Without Compromise</h3>
-              <p>Your assets and data protected by institutional-grade security protocols</p>
-            </div>
-            <div className="promise-card">
-              <div className="promise-icon"><FaCogs /></div>
-              <h3>Innovation Without Complexity</h3>
-              <p>Cutting-edge technology made intuitive and accessible for everyone</p>
-            </div>
-            <div className="promise-card">
-              <div className="promise-icon"><FaGlobe /></div>
-              <h3>Growth Without Borders</h3>
-              <p>Expand your wealth globally without geographical or regulatory limitations</p>
-            </div>
-            <div className="promise-card">
-              <div className="promise-icon"><FaSearch /></div>
-              <h3>Transparency Without Exception</h3>
-              <p>Complete visibility into your finances, transactions, and platform operations</p>
-            </div>
-          </div>
-          <div className="closing-statement">
-            <h3>More Than a Platform</h3>
-            <p>
-              Atonix Capital is more than a financial platform — it is a movement toward a smarter, 
-              stronger, and more sovereign financial world. Join us in reshaping the future of finance.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="features-section">
+      {/* ── BRAND PILLARS ── */}
+      <section className="brand-pillars-section">
         <div className="section-header">
-          <h2 className="section-title">Comprehensive Financial Management</h2>
-          <p className="section-subtitle">Everything You Need in One Platform</p>
+          <p className="section-eyebrow">Brand Identity</p>
+          <h2 className="section-title">Built on Seven Commitments</h2>
         </div>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon"><FaChartBar /></div>
-            <h3>Visual Dashboard</h3>
-            <p>Complete financial overview with interactive charts and real-time analytics</p>
+        <div className="brand-pillars-row">
+          {['Precision', 'Security', 'Automation', 'Clarity', 'Professionalism', 'Scalability', 'Trust'].map(
+            (p) => (
+              <div className="brand-pillar-chip" key={p}>{p}</div>
+            )
+          )}
+        </div>
+        <div className="brand-promise-block">
+          <blockquote>
+            "ATC Capital gives accounting firms the power, speed, and intelligence they need to
+            operate at the highest level."
+          </blockquote>
+        </div>
+      </section>
+
+      {/* ── FUTURE ROADMAP ── */}
+      <section className="roadmap-section">
+        <div className="roadmap-container">
+          <div className="section-header">
+            <p className="section-eyebrow">Long-Term Vision</p>
+            <h2 className="section-title">The Future of ATC Capital</h2>
+            <p className="section-subtitle">
+              ATC Capital is not just a platform — it is a movement. A transformation. A new standard.
+            </p>
           </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaMoneyBillWave /></div>
-            <h3>Expense Tracking</h3>
-            <p>Intelligent expense categorization and tracking across all accounts</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaDollarSign /></div>
-            <h3>Income Management</h3>
-            <p>Monitor multiple income streams from diverse sources and asset classes</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaChartLine /></div>
-            <h3>Budget Planning</h3>
-            <p>Dynamic budget allocation with smart alerts and optimization suggestions</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaChartArea /></div>
-            <h3>Advanced Analytics</h3>
-            <p>Deep insights into spending patterns, trends, and financial health metrics</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><FaLock /></div>
-            <h3>Bank-Grade Security</h3>
-            <p>End-to-end encryption with multi-layer security architecture</p>
+          <div className="roadmap-grid">
+            {[
+              { icon: <FaGlobe />, item: 'Global Banking Integrations' },
+              { icon: <FaBrain />, item: 'AI-Driven Financial Forecasting' },
+              { icon: <FaBalanceScale />, item: 'Automated Compliance Engines' },
+              { icon: <FaFileAlt />, item: 'Full Tax Automation' },
+              { icon: <FaChartArea />, item: 'Enterprise-Grade Analytics' },
+              { icon: <FaNetworkWired />, item: 'Cross-Border Financial Intelligence' },
+              { icon: <FaStore />, item: 'Global Marketplace of Financial Tools' },
+            ].map((r) => (
+              <div className="roadmap-item" key={r.item}>
+                <div className="roadmap-icon">{r.icon}</div>
+                <span>{r.item}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* ── CTA ── */}
       <section className="cta-section">
         <div className="cta-content">
-          <h2>Ready to Experience Financial Sovereignty?</h2>
-          <p>Join the movement toward smarter, more secure, and borderless financial management</p>
-          <Link to="/register" className="btn-primary btn-large">
-            Start Your Journey
-          </Link>
+          <p className="cta-eyebrow">The Future of Financial Operations</p>
+          <h2>Built for Firms That Refuse to Fall Behind.</h2>
+          <p>
+            ATC Capital is built for firms that demand excellence, businesses that want clarity,
+            and institutions that require precision. Your entire financial world — unified.
+          </p>
+          <div className="cta-buttons">
+            <Link to="/register" className="btn-primary btn-large">
+              Get Started Today <FaArrowRight className="btn-icon" />
+            </Link>
+            <Link to="/features" className="btn-outline-white btn-large">
+              Explore the Platform
+            </Link>
+          </div>
         </div>
       </section>
 

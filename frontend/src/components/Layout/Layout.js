@@ -2,14 +2,21 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import {
-  FaMoneyBill, FaBuilding, FaCheckCircle, FaFileExport, FaUsers, FaCog,
-  FaExclamationTriangle, FaChartLine, FaChartBar, FaSignOutAlt, FaBars, FaTimes,
-  FaSitemap, FaUsersCog, FaPalette, FaStore, FaPlug
+  FaChartBar, FaUniversity, FaExchangeAlt, FaCreditCard, FaArrowRight,
+  FaTools, FaLandmark, FaCog, FaLifeRing, FaSignOutAlt, FaBars, FaTimes,
+  FaChevronDown, FaUsers, FaFileAlt, FaShieldAlt, FaSitemap, FaBuilding,
+  FaChartLine, FaCheckCircle, FaUsersCog, FaPlug, FaStore, FaPalette,
+  FaExclamationTriangle, FaFileExport, FaTh
 } from 'react-icons/fa';
 import './Layout.css';
+
+const BANKING_MODES = [
+  { id: 'retail',   label: 'Retail',   short: 'R' },
+  { id: 'business', label: 'Business', short: 'B' },
+  { id: 'treasury', label: 'Treasury', short: 'T' },
+];
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -17,151 +24,189 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const { entities } = useEnterprise();
   const firstEntity = (entities && entities.length > 0) ? entities[0] : null;
-  const bookkeepingPath = firstEntity ? `/enterprise/entity/${firstEntity.id}/bookkeeping` : '/app/enterprise/entities';
+  const bookkeepingPath = firstEntity
+    ? `/enterprise/entity/${firstEntity.id}/bookkeeping`
+    : '/app/enterprise/entities';
+
   const [sidebarMinimized, setSidebarMinimized] = useState(false);
+  const [bankingMode, setBankingMode] = useState('business');
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
-  const toggleSidebar = () => {
-    setSidebarMinimized(!sidebarMinimized);
-  };
+  const toggleSidebar = () => setSidebarMinimized(!sidebarMinimized);
+
+  const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
+
+  // ── Navigation definitions per banking mode ──────────────────────────────
+  const coreNav = [
+    { to: '/app/enterprise/org-overview', icon: <FaChartBar />,     label: 'Dashboard' },
+    { to: '/app/enterprise/entities',     icon: <FaUniversity />,   label: 'Accounts' },
+    { to: '/app/enterprise/cashflow',     icon: <FaExchangeAlt />,  label: 'Payments' },
+    { to: '/app/enterprise/cards',        icon: <FaCreditCard />,   label: 'Cards' },
+    { to: '/app/enterprise/transfers',    icon: <FaArrowRight />,   label: 'Transfers' },
+  ];
+
+  const businessNav = [
+    { to: '/app/firm/dashboard',          icon: <FaUsersCog />,     label: 'Firm Dashboard' },
+    { to: '/app/enterprise/tax-compliance', icon: <FaCheckCircle />, label: 'Tax & Compliance' },
+    { to: '/app/enterprise/risk-exposure', icon: <FaExclamationTriangle />, label: 'Risk & Exposure' },
+    { to: '/app/enterprise/reports',      icon: <FaFileExport />,   label: 'Reports & Exports' },
+    { to: '/app/enterprise/team',         icon: <FaUsers />,        label: 'Team & Permissions' },
+  ];
+
+  const treasuryNav = [
+    { to: '/app/enterprise/cashflow',     icon: <FaLandmark />,     label: 'Treasury' },
+    { to: '/app/firm/integrations',       icon: <FaPlug />,         label: 'API Integrations' },
+    { to: '/app/firm/enterprise-branches', icon: <FaSitemap />,     label: 'Enterprise Branches' },
+    { to: '/app/firm/marketplace',        icon: <FaStore />,        label: 'Marketplace' },
+    { to: '/app/firm/white-label',        icon: <FaPalette />,      label: 'White-Label' },
+  ];
+
+  const bottomNav = [
+    { to: '/app/enterprise/settings',     icon: <FaCog />,          label: 'Settings' },
+    { to: '/support',                     icon: <FaLifeRing />,     label: 'Support' },
+  ];
+
+  const renderNavGroup = (items) =>
+    items.map(({ to, icon, label }) => (
+      <li key={to}>
+        <NavLink
+          to={to}
+          className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          title={sidebarMinimized ? label : undefined}
+        >
+          <span className="nav-icon">{icon}</span>
+          {!sidebarMinimized && <span className="nav-label">{label}</span>}
+        </NavLink>
+      </li>
+    ));
 
   return (
     <div className="layout">
-      <nav className={`sidebar ${sidebarMinimized ? 'minimized' : ''}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-header-content">
-            <h1 className="app-title"><FaMoneyBill /> {!sidebarMinimized && t('appName')}</h1>
-            <button 
-              className="sidebar-toggle" 
-              onClick={toggleSidebar} 
-              title={sidebarMinimized ? 'Expand Sidebar' : 'Minimize Sidebar'}
-              aria-label={sidebarMinimized ? 'Expand sidebar navigation' : 'Collapse sidebar navigation'}
+      {/* ── SIDEBAR ── */}
+      <nav className={`sidebar${sidebarMinimized ? ' minimized' : ''}`} aria-label="Main navigation">
+
+        {/* Brand Header */}
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-inner">
+            {!sidebarMinimized && (
+              <div className="brand-wordmark">
+                <span className="brand-atc">ATC</span>
+                <span className="brand-capital">Capital</span>
+              </div>
+            )}
+            {sidebarMinimized && <span className="brand-monogram">ATC</span>}
+            <button
+              className="sidebar-toggle"
+              onClick={toggleSidebar}
+              aria-label={sidebarMinimized ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {sidebarMinimized ? <FaBars /> : <FaTimes />}
             </button>
           </div>
-          {!sidebarMinimized && (
-            <div className="sidebar-controls">
-              <LanguageSelector />
+        </div>
+
+        {/* Banking Mode Switcher */}
+        <div className="mode-switcher">
+          {sidebarMinimized ? (
+            <div className="mode-switcher-mini">
+              {BANKING_MODES.map((m) => (
+                <button
+                  key={m.id}
+                  className={`mode-btn-mini${bankingMode === m.id ? ' active' : ''}`}
+                  onClick={() => setBankingMode(m.id)}
+                  title={m.label}
+                >
+                  {m.short}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="mode-switcher-row">
+              {BANKING_MODES.map((m) => (
+                <button
+                  key={m.id}
+                  className={`mode-btn${bankingMode === m.id ? ' active' : ''}`}
+                  onClick={() => setBankingMode(m.id)}
+                >
+                  {m.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
-        
-        <ul className="nav-menu" role="navigation" aria-label="Main navigation">
-          {/* ENTERPRISE NAVIGATION */}
-          <li>
-            <NavLink to="/app/enterprise/org-overview" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaChartBar /></span>
-              {!sidebarMinimized && t('nav.orgOverview')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/enterprise/entities" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaBuilding /></span>
-              {!sidebarMinimized && t('nav.entitiesCountries')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/enterprise/cashflow" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaChartLine /></span>
-              {!sidebarMinimized && t('nav.cashflowTreasury')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/enterprise/tax-compliance" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaCheckCircle /></span>
-              {!sidebarMinimized && t('nav.taxCompliance')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/enterprise/risk-exposure" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaExclamationTriangle /></span>
-              {!sidebarMinimized && t('nav.riskExposure')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/enterprise/reports" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaFileExport /></span>
-              {!sidebarMinimized && t('nav.reportsExports')}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/enterprise/team" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaUsers /></span>
-              {!sidebarMinimized && t('nav.teamPermissions')}
-            </NavLink>
-          </li>
-          <li className="nav-divider"></li>
 
-          {/* FIRM MANAGEMENT */}
-          {!sidebarMinimized && <li className="nav-section-label">FIRM</li>}
-          <li>
-            <NavLink to="/app/firm/dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaUsersCog /></span>
-              {!sidebarMinimized && 'Firm Dashboard'}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/firm/white-label" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaPalette /></span>
-              {!sidebarMinimized && 'White-Label'}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/firm/marketplace" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaStore /></span>
-              {!sidebarMinimized && 'Marketplace'}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/firm/integrations" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaPlug /></span>
-              {!sidebarMinimized && 'API Integrations'}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/app/firm/enterprise-branches" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaSitemap /></span>
-              {!sidebarMinimized && 'Enterprise Branches'}
-            </NavLink>
-          </li>
+        {/* Navigation */}
+        <ul className="nav-menu" role="list">
+          {/* Core — always visible */}
+          {!sidebarMinimized && <li className="nav-section-label">Core</li>}
+          {renderNavGroup(coreNav)}
 
-          <li className="nav-divider"></li>
-          <li>
-            <NavLink to="/app/enterprise/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <span className="nav-icon"><FaCog /></span>
-              {!sidebarMinimized && t('nav.enterpriseSettings')}
-            </NavLink>
-          </li>
+          <li className="nav-divider" role="separator" />
+
+          {/* Business Tools — visible in business + treasury modes */}
+          {bankingMode !== 'retail' && (
+            <>
+              {!sidebarMinimized && <li className="nav-section-label">Business Tools</li>}
+              {renderNavGroup(businessNav)}
+              <li className="nav-divider" role="separator" />
+            </>
+          )}
+
+          {/* Treasury — visible in treasury mode */}
+          {bankingMode === 'treasury' && (
+            <>
+              {!sidebarMinimized && <li className="nav-section-label">Treasury</li>}
+              {renderNavGroup(treasuryNav)}
+              <li className="nav-divider" role="separator" />
+            </>
+          )}
+
+          {renderNavGroup(bottomNav)}
         </ul>
 
+        {/* User Footer */}
         <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">{user?.avatar || 'U'}</div>
+          <div className="user-row">
+            <div className="user-avatar">{userInitial}</div>
             {!sidebarMinimized && (
-              <div className="user-details">
+              <div className="user-meta">
                 <div className="user-name">{user?.name || 'User'}</div>
                 <div className="user-email">{user?.email || ''}</div>
-                {user?.phone && (
-                  <div className="user-phone">{user.phone}</div>
-                )}
               </div>
             )}
           </div>
-          <button onClick={handleLogout} className="logout-btn">
-            <span className="nav-icon"><FaSignOutAlt /></span>
-            {!sidebarMinimized && t('nav.logout')}
+          <button onClick={handleLogout} className="logout-btn" title="Sign out">
+            <FaSignOutAlt className="logout-icon" />
+            {!sidebarMinimized && <span>Sign Out</span>}
           </button>
         </div>
       </nav>
 
-      <main className={`main-content ${sidebarMinimized ? 'sidebar-minimized' : ''}`}>
-        {children}
-      </main>
+      {/* ── MAIN CONTENT ── */}
+      <div className={`main-wrapper${sidebarMinimized ? ' sidebar-minimized' : ''}`}>
+        {/* Top Bar */}
+        <header className="topbar">
+          <div className="topbar-left">
+            <span className="topbar-mode-badge">
+              {BANKING_MODES.find(m => m.id === bankingMode)?.label} Banking
+            </span>
+          </div>
+          <div className="topbar-right">
+            <div className="topbar-user">
+              <div className="topbar-avatar">{userInitial}</div>
+              <span className="topbar-name">{user?.name || 'User'}</span>
+            </div>
+          </div>
+        </header>
+
+        <main className="main-content">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };

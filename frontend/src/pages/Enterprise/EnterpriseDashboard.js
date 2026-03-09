@@ -2,13 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import {
-  FaGlobe, FaBuilding, FaChartBar, FaMapMarkerAlt, FaDollarSign,
+  FaGlobe, FaBuilding, FaMapMarkerAlt, FaDollarSign,
   FaArrowUp, FaArrowDown, FaSync, FaExclamationTriangle,
-  FaCheckCircle, FaFilter, FaExchangeAlt, FaSitemap
+  FaFilter, FaSitemap
 } from 'react-icons/fa';
 import './EnterpriseDashboard.css';
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 const REGION_MAP = {
   US: 'North America', CA: 'North America', MX: 'North America',

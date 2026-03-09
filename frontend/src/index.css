@@ -5,24 +5,71 @@
 }
 
 :root {
-  /* Dashboard theme tokens — “Tech Startup Clean” */
-  --pf-base: #FFFFFF;
-  --pf-panel: #F2F2F7;
-  --pf-border: #E5E7EB;
-  --pf-text: #1C1C1E;
-  --pf-text-muted: #4B5563;
-  /* Map existing accent slots to the requested colors */
-  --pf-accent-blue: #4B5DFF; /* Primary (Indigo) */
-  --pf-accent-gold: #5AC8FA; /* Accent (Sky) */
+  /* ── ATC CAPITAL INSTITUTIONAL DESIGN SYSTEM ── */
+
+  /* Core Brand Palette */
+  --atc-navy:       #0A1A2F;   /* primary brand — deep navy */
+  --atc-blue:       #1E4D8F;   /* highlights, links, active states */
+  --atc-blue-light: #2563B0;   /* hover / focus rings */
+  --atc-white:      #FFFFFF;
+  --atc-bg:         #F4F6F9;   /* page background */
+
+  /* Gray Scale */
+  --atc-gray-100: #F4F6F9;
+  --atc-gray-200: #E8EBF0;
+  --atc-gray-300: #D1D5DB;
+  --atc-gray-400: #9CA3AF;
+  --atc-gray-500: #6B7280;
+  --atc-gray-600: #4B5563;
+  --atc-gray-700: #374151;
+  --atc-gray-800: #1F2937;
+  --atc-gray-900: #111827;
+
+  /* Semantic Accent Colors (used sparingly) */
+  --atc-green:  #1F8A4C;   /* success, positive indicators */
+  --atc-red:    #C0392B;   /* errors, risk, negative */
+  --atc-yellow: #D97706;   /* warnings, pending */
+
+  /* ── Token Aliases (used by Layout & Dashboard) ── */
+  --pf-base:       var(--atc-bg);
+  --pf-panel:      #FFFFFF;
+  --pf-border:     var(--atc-gray-200);
+  --pf-text:       var(--atc-gray-900);
+  --pf-text-muted: var(--atc-gray-500);
+  --pf-accent-blue: var(--atc-blue);
+  --pf-accent-gold: var(--atc-blue-light);
+
+  /* Typography Scale */
+  --font-size-page-title:   2rem;      /* 32px */
+  --font-size-section:      1.5rem;    /* 24px */
+  --font-size-subsection:   1.125rem;  /* 18px */
+  --font-size-body:         1rem;      /* 16px */
+  --font-size-secondary:    0.875rem;  /* 14px */
+  --font-size-meta:         0.75rem;   /* 12px */
+
+  /* Spacing (8-pt grid) */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+
+  /* Card System */
+  --card-radius:   8px;
+  --card-padding:  16px;
+  --card-border:   1px solid var(--atc-gray-200);
+  --card-shadow:   none;
 
   /* Light app defaults (public pages) */
-  --app-bg: #f5f7fa;
-  --app-text: var(--pf-text);
+  --app-bg: var(--atc-gray-100);
+  --app-text: var(--atc-gray-900);
 }
 
 body {
-  font-family: 'Open Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--font-size-body);
   line-height: 1.5;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -31,9 +78,10 @@ body {
   color: var(--app-text);
 }
 
-/* Headings: Open Sans SemiBold */
+/* Headings */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
+  line-height: 1.4;
 }
 
 /* Numbers / analytics: Inter (optional) */

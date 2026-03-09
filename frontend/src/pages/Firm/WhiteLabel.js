@@ -3,7 +3,7 @@ import { useEnterprise } from '../../context/EnterpriseContext';
 import {
   FaPalette, FaSave, FaUpload, FaGlobe, FaFileAlt,
   FaCheckCircle, FaExclamationCircle, FaEye, FaCopy,
-  FaTrash, FaDownload
+  FaDownload
 } from 'react-icons/fa';
 import './WhiteLabel.css';
 
@@ -27,7 +27,7 @@ const WhiteLabel = () => {
   const { currentOrganization } = useEnterprise();
   const [branding, setBranding] = useState(defaultBranding);
   const [brandingId, setBrandingId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');

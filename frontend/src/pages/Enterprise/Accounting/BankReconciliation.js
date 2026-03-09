@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaCheckCircle, FaHourglass, FaPlus, FaTimes, FaSave, FaDownload } from 'react-icons/fa';
+import { FaCheckCircle, FaPlus, FaTimes, FaSave, FaDownload } from 'react-icons/fa';
 import { bankReconciliationsAPI } from '../../../services/api';
 import './Accounting.css';
 
