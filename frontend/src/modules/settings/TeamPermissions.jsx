@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaUsersCog, FaPlus } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const ROLE_COLORS = { Admin: '#e74c3c', Manager: '#667eea', Editor: '#27ae60', Viewer: '#95a5a6' };
 

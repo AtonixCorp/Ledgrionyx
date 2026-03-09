@@ -17,7 +17,6 @@ import {
   FaRobot,
   FaWallet,
 } from 'react-icons/fa';
-import './Dashboard.css';
 
 const trendIconMap = {
   up: FaArrowUp,
@@ -34,7 +33,7 @@ const kpiIconMap = {
   robot: FaRobot,
 };
 
-const iconStyle = { background: '#edf2f7', color: '#2d3748' };
+// Icon styling moved to CSS class .kpi-widget-icon
 
 const emptyDashboard = {
   summary: {
@@ -107,7 +106,7 @@ const KPIWidget = ({ item, active, onSelect }) => {
     <div className={`kpi-widget ${active ? 'active' : ''}`} onClick={() => onSelect(item.id)}>
       <div className="kpi-widget-header">
         <span className="kpi-widget-label">{item.label}</span>
-        <span className="kpi-widget-icon" style={iconStyle}>
+        <span className="kpi-widget-icon">
           <Icon />
         </span>
       </div>
@@ -195,7 +194,7 @@ const ActivityFeed = ({ filter, onFilterChange, items, onSelectContext }) => (
     <div className="feed-list">
       {items.length ? items.map((item) => (
         <div key={item.id} className="feed-item feed-item-interactive" onClick={() => onSelectContext(item.context)}>
-          <div className="feed-dot" style={{ background: '#edf2f7', color: '#4a5568' }}>{item.type?.[0] || 'A'}</div>
+          <div className="feed-dot">{item.type?.[0] || 'A'}</div>
           <div className="feed-content">
             <div className="feed-title">{item.title}</div>
             <div className="feed-meta">{item.meta}</div>
@@ -372,7 +371,6 @@ const OverviewDashboard = () => {
   if (!currentOrganization) {
     return (
       <div className="dashboard">
-        <PageHeader title="Financial Accounting Overview" subtitle="Select an organization to load the dashboard." />
         <Card className="dashboard-state-card">
           <div className="empty-state">No organization is currently selected.</div>
         </Card>
@@ -383,11 +381,10 @@ const OverviewDashboard = () => {
   return (
     <div className="dashboard">
       <PageHeader
-        title="Financial Accounting Overview"
-        subtitle={`Live financial health, activity, and workflows for ${dashboard.metadata?.organizationName || currentOrganization.name}.`}
+        title={dashboard.metadata?.organizationName || currentOrganization.name}
+        subtitle={`Financial health, activity and workflows`}
         actions={
           <div className="dashboard-header-actions">
-            <Button variant="secondary" size="small" icon={FaDownload}>Export Pack</Button>
             <Button variant="primary" size="small" icon={FaLock}>Open Close Workspace</Button>
           </div>
         }

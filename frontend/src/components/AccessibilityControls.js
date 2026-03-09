@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { FaFont, FaEye, FaHeadphones } from 'react-icons/fa';
-import './AccessibilityControls.css';
 
 const AccessibilityControls = () => {
   const { fontSize, setFontSize } = useAccessibility();

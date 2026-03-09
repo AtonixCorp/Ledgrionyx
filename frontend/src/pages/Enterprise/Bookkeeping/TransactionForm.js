@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaSave, FaTimes } from 'react-icons/fa';
 import { useEnterprise } from '../../../context/EnterpriseContext';
-import './Bookkeeping.css';
 
 const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
   const { 

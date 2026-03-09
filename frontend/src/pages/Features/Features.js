@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FaWallet, FaChartBar, FaGlobe, FaShieldAlt, FaRocket, FaBrain, FaUsers, FaBuilding, FaFileAlt, FaCalculator, FaLock, FaMobile } from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import './Features.css';
 
 const Features = () => {
   const features = [

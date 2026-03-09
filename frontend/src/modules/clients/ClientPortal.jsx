@@ -1,7 +1,6 @@
 import React from 'react';
 import { PageHeader, Card } from '../../components/ui';
 import { FaGlobe, FaLock, FaFileAlt, FaChartBar } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockPortalClients = [
   { name: 'Acme Corporation', lastLogin: '2025-01-31 09:45', documentsShared: 12, requestsPending: 2 },

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
 import { FaChartBar, FaDownload, FaFileAlt } from 'react-icons/fa';
-import '../billing/billing.css';
-import './reporting.css';
 
 const STATEMENTS = [
   { id: 'income', title: 'Income Statement', subtitle: 'P&L for the period', icon: FaChartBar },

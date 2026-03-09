@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { taxAPI } from '../../services/api';
-import './TaxWidget.css';
 
 const TaxWidget = () => {
   const [countries, setCountries] = useState([]);

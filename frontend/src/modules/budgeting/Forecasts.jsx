@@ -1,8 +1,6 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
 import { FaChartLine, FaDownload } from 'react-icons/fa';
-import '../billing/billing.css';
-import './budgeting.css';
 
 const mockForecast = [
   { month: 'Feb 2025', revenue: '$292,000', expenses: '$162,000', netIncome: '$130,000', cashFlow: '$118,000', confidence: 'High' },

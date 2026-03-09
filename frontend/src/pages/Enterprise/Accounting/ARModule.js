@@ -5,7 +5,6 @@ import {
   FaPlus, FaEdit, FaTrash, FaSearch, FaDownload, FaTimes, FaSave
 } from 'react-icons/fa';
 import { customersAPI, invoicesAPI, creditNotesAPI, paymentsAPI } from '../../../services/api';
-import './Accounting.css';
 
 const STATUS_COLORS = {
   draft: '#a0aec0', posted: '#4299e1', partially_paid: '#ed8936',

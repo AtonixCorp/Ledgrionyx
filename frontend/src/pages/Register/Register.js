@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { countries } from '../../utils/countries';
 import AtonixLogo from '../../components/Logo/AtonixLogo';
-import './Register.css';
 
 const Register = () => {
   const [step, setStep] = useState(1); // 1: email → 2: details

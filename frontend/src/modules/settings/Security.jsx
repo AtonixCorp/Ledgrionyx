@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
 import { FaShieldAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import '../billing/billing.css';
 
 export default function Security() {
   const [mfa, setMfa] = useState(true);

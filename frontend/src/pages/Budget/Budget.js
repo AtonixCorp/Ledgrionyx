@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { useLanguage } from '../../context/LanguageContext';
-import './Budget.css';
 
 const Budget = () => {
   const { t, language } = useLanguage();

@@ -1,5 +1,4 @@
 import React from 'react';
-import './AtonixLogo.css';
 
 const AtonixLogo = ({ size = 'medium' }) => {
   return (

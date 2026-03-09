@@ -1,7 +1,6 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
 import { FaPercent, FaDownload, FaCheckCircle } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockTaxCenter = [
   { tax: 'Federal Income Tax (Q4 2024)', jurisdiction: 'USA', dueDate: '2025-01-15', amount: '$42,000.00', status: 'Filed', filedDate: '2025-01-10' },

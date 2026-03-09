@@ -1,8 +1,6 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
 import { FaList, FaDownload } from 'react-icons/fa';
-import '../billing/billing.css';
-import './reporting.css';
 
 const mockTB = [
   { code: '1001', account: 'Cash - Operating', type: 'Asset', debit: '$142,300.00', credit: '', balance: '$142,300.00' },

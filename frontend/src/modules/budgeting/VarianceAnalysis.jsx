@@ -1,8 +1,6 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
 import { FaChartBar, FaDownload } from 'react-icons/fa';
-import '../billing/billing.css';
-import './budgeting.css';
 
 const mockVariance = [
   { account: 'Service Revenue', budget: '$280,000', actual: '$284,000', variance: '+$4,000', pct: '+1.4%', type: 'Favorable' },

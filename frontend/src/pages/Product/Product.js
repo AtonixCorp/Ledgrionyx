@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FaWallet, FaGlobe, FaShieldAlt, FaRocket, FaBuilding, FaHandshake } from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import './Product.css';
 
 const Product = () => {
   return (

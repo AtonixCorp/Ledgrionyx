@@ -6,7 +6,6 @@ import {
   FaSlack, FaGoogle, FaMicrosoft, FaSave, FaCheck, FaInfo,
   FaDatabase, FaLock, FaServer
 } from 'react-icons/fa';
-import './EnterpriseSettings.css';
 
 // Comprehensive list of countries served by Atonix Capital
 const COUNTRIES_SERVED = [

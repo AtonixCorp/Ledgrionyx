@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaGlobe, FaExchangeAlt, FaPlus, FaTimes, FaSave, FaDownload } from 'react-icons/fa';
 import { exchangeRatesAPI, fxGainLossAPI } from '../../../services/api';
-import './Accounting.css';
 
 const fmt = (v, currency = 'USD') => {
   try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD', minimumFractionDigits: 4 }).format(parseFloat(v || 0)); } 

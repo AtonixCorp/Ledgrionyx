@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useEnterprise } from '../../../context/EnterpriseContext';
 import { FaPlus, FaEdit, FaTrash, FaDownload, FaChartLine } from 'react-icons/fa';
-import './EntityManagement.css';
 
 const IncomeManager = () => {
   const { entityId } = useParams();

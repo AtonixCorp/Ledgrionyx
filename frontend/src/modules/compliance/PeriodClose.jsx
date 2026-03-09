@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
 import { FaLock, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const periods = [
   { period: 'December 2024', closedDate: '2025-01-15', closedBy: 'Sarah Johnson', status: 'Closed' },

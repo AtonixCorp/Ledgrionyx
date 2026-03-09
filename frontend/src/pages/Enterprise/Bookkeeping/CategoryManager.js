@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaTag, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import { useEnterprise } from '../../../context/EnterpriseContext';
-import './Bookkeeping.css';
 
 const CategoryManager = () => {
   const { entityId } = useParams();

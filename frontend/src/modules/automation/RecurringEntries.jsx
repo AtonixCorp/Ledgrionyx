@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaSync, FaPlus } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockRecurring = [
   { name: 'Monthly Office Rent', type: 'Journal Entry', frequency: 'Monthly', nextRun: '2025-02-01', amount: '$5,500.00', status: 'Active' },

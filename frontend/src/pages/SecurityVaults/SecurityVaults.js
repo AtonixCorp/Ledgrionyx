@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FaShieldAlt, FaGlobe, FaClock, FaSignature, FaEyeSlash, FaLock, FaChartLine, FaRocket, FaRobot, FaBuilding, FaGem, FaUniversity } from 'react-icons/fa';
-import './SecurityVaults.css';
 
 const SecurityVaults = () => {
   const [activeTab, setActiveTab] = useState('security');

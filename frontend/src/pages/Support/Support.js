@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FaQuestionCircle, FaBook, FaVideo, FaEnvelope, FaPhone, FaComments, FaLifeRing, FaFileAlt, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import './Support.css';
 
 const Support = () => {
   const [showTicketModal, setShowTicketModal] = useState(false);

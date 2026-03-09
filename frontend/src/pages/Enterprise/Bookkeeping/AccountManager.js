@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaWallet, FaUniversity, FaMoneyBillWave, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import { useEnterprise } from '../../../context/EnterpriseContext';
-import './Bookkeeping.css';
 
 const AccountManager = () => {
   const { entityId } = useParams();

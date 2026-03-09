@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import taxCalculatorService from '../../services/taxCalculatorService';
 import { FaGlobe, FaPercentage, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
-import './FinancialSettings.css';
 
 const FinancialSettings = () => {
   const { 

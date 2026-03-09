@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { FaUsers, FaPlus, FaTrash, FaEdit, FaCheck } from 'react-icons/fa';
-import './EnterpriseTeam.css';
 
 const EnterpriseTeam = () => {
   const { currentOrganization } = useEnterprise();

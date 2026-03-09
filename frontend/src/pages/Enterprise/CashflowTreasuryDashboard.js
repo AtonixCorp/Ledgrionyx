@@ -4,7 +4,6 @@ import {
   FaArrowDown, FaExchangeAlt, FaPiggyBank, FaCreditCard, FaDownload
 } from 'react-icons/fa';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import './CashflowTreasury.css';
 
 const CashflowTreasuryDashboard = () => {
   const { entities, fetchCashflowTreasuryDashboard } = useEnterprise();

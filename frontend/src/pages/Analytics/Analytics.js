@@ -6,7 +6,6 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import './Analytics.css';
 
 const Analytics = () => {
   const navigate = useNavigate();

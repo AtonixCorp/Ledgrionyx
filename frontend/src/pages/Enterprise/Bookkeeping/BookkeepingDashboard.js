@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaMoneyBillWave, FaWallet, FaChartLine, FaFileInvoiceDollar, FaPlus, FaFilter, FaDownload, FaList, FaTag, FaUniversity, FaFileAlt, FaUsers } from 'react-icons/fa';
 import { useEnterprise } from '../../../context/EnterpriseContext';
 import TransactionForm from './TransactionForm';
-import './Bookkeeping.css';
 
 const BookkeepingDashboard = () => {
   const { entityId } = useParams();

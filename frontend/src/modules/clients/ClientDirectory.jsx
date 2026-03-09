@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaUsers, FaPlus } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockClients = [
   { id: 'CLI-001', name: 'Acme Corporation', industry: 'Manufacturing', entities: 3, engagement: 'Full Service', contact: 'John Smith', email: 'jsmith@acme.com', status: 'Active' },

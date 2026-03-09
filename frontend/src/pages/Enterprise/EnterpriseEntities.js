@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { countries, getBanksByCountryCode } from '../../utils/countries';
-import './EnterpriseEntities.css';
 import { FaPlus, FaEdit, FaTrash, FaGlobe, FaBuilding, FaCheckCircle, FaTimesCircle, FaChartBar } from 'react-icons/fa';
 
 const EnterpriseEntities = () => {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
 import { FaFileAlt, FaPlus, FaDownload } from 'react-icons/fa';
-import '../../billing/billing.css';
 
 const mockAP = [
   { bill: 'BILL-0001', vendor: 'AWS Cloud', billDate: '2025-01-10', dueDate: '2025-02-10', original: '$3,200.00', balance: '$3,200.00', aging: '0-30', status: 'Pending' },

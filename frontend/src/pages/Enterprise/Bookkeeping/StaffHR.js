@@ -7,7 +7,6 @@ import {
   FaGlobe, FaBuilding,
   FaTrophy, FaBell, FaShieldAlt, FaRobot, FaStar
 } from 'react-icons/fa';
-import './StaffHR.css';
 
 const StaffHR = ({ entityId }) => {
   const [searchParams, setSearchParams] = useSearchParams();

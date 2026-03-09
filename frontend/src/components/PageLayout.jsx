@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card } from '../../../components/ui';
-import './PageLayout.css';
 
 const PageLayout = ({ 
   title, 

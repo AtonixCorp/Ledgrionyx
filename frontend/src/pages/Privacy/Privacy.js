@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FaShieldAlt, FaLock, FaUserCheck, FaFileContract, FaGlobe, FaCookieBite } from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import './Privacy.css';
 
 const Privacy = () => {
   const sections = [

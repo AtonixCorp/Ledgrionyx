@@ -6,7 +6,6 @@ import {
   FaBan, FaArchive, FaTimes, FaSave
 } from 'react-icons/fa';
 import { chartOfAccountsAPI } from '../../../services/api';
-import './Accounting.css';
 
 const ACCOUNT_TYPES = [
   { value: 'asset', label: 'Asset', color: '#48bb78' },

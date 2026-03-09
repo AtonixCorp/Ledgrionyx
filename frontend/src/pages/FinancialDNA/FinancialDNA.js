@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { financialDNAService } from '../../services/financialDNAService';
 import { FaDna, FaBullseye, FaCreditCard, FaDice, FaUniversity, FaChartBar, FaBitcoin, FaFlask } from 'react-icons/fa';
-import './FinancialDNA.css';
 
 const FinancialDNA = () => {
   const { transactions, mockPortfolio } = useFinance();

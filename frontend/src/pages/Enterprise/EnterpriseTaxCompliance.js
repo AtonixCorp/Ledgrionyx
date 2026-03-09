@@ -40,7 +40,6 @@ import {
   FaShare
 } from 'react-icons/fa';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import './EnterpriseTaxCompliance.css';
 
 const EnterpriseTaxCompliance = () => {
   const [searchParams, setSearchParams] = useSearchParams();

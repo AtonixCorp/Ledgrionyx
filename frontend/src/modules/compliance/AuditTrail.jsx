@@ -1,7 +1,6 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
 import { FaShieldAlt, FaDownload } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockAudit = [
   { timestamp: '2025-01-31 14:23:01', user: 'sarah.johnson@atc.com', action: 'Journal Entry Created', entity: 'JE-2025-0142', changes: 'Debit: Rent Expense $5,500 / Credit: Cash $5,500', ip: '192.168.1.45' },

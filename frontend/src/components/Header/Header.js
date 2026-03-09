@@ -2,7 +2,6 @@ import React from 'react';
 import AtonixLogo from '../Logo/AtonixLogo';
 import { useLanguage } from '../../context/LanguageContext';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
-import './Header.css';
 
 const Header = () => {
   const { t } = useLanguage();

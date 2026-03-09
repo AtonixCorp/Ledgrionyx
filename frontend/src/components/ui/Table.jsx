@@ -1,5 +1,4 @@
 import React from 'react';
-import './Table.css';
 
 const Table = ({ columns, data, onRowClick, actions }) => {
   return (

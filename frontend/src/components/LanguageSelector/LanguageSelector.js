@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLanguage, LANGUAGE_LIST } from '../../context/LanguageContext';
-import './LanguageSelector.css';
 
 const LanguageSelector = () => {
   const { language, setLanguage } = useLanguage();

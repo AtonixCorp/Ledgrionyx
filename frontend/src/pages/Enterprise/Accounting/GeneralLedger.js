@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaBook, FaSearch, FaDownload, FaFilter } from 'react-icons/fa';
 import { generalLedgerAPI } from '../../../services/api';
-import './Accounting.css';
 
 const GeneralLedger = () => {
   const { entityId } = useParams();

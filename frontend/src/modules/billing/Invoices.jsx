@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaFileInvoice, FaPlus, FaDownload, FaFilter } from 'react-icons/fa';
-import './billing.css';
 
 const STATUS_COLORS = {
   paid: '#27ae60',

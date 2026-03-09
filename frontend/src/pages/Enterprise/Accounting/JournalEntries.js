@@ -5,7 +5,6 @@ import {
   FaDownload, FaTimes, FaSave, FaClock, FaBan
 } from 'react-icons/fa';
 import { journalEntriesAPI } from '../../../services/api';
-import './Accounting.css';
 
 const STATUS_COLORS = { draft: '#ed8936', posted: '#48bb78', reversed: '#a0aec0' };
 const ENTRY_TYPES = ['manual', 'automated', 'reversal', 'adjusting'];

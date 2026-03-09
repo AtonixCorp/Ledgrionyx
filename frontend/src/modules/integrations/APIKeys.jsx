@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaKey, FaPlus, FaTrash, FaEye } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockKeys = [
   { id: 'key_live_***4f8a', name: 'Production API', created: '2024-09-15', lastUsed: '2025-01-31', permissions: 'Read + Write', status: 'Active' },

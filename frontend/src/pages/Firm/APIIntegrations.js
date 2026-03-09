@@ -5,7 +5,6 @@ import {
   FaCheckCircle, FaExclamationCircle, FaSync, FaPlus, FaTrash,
   FaEye, FaEyeSlash, FaClock, FaShieldAlt
 } from 'react-icons/fa';
-import './APIIntegrations.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 

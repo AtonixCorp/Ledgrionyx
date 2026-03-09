@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button, Input } from '../../components/ui';
 import { FaCog, FaSave } from 'react-icons/fa';
-import '../billing/billing.css';
 
 export default function FirmSettings() {
   const [form, setForm] = useState({

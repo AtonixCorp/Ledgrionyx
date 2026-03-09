@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaBell, FaCog, FaCheck, FaTrash, FaFilter } from 'react-icons/fa';
 import { notificationsAPI, notificationPreferencesAPI } from '../../../services/api';
-import './Accounting.css';
 
 const TABS = [
   { id: 'inbox', label: 'Inbox', icon: <FaBell /> },

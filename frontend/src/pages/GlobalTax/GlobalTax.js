@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaChartBar, FaSearch, FaClipboardList, FaLandmark, FaBuilding, FaUser, FaCoins, FaLink } from 'react-icons/fa';
 import { taxAPI } from '../../services/api';
-import './GlobalTax.css';
 import localCountries from '../../data/tax/countries.json';
 
 const GlobalTax = () => {

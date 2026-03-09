@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaRobot, FaPlus, FaPlay, FaPause } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockRules = [
   { id: 'AUTO-001', name: 'Auto-categorize AWS invoices', trigger: 'Bill received from AWS', action: 'Set category: Technology', runs: 24, lastRun: '2025-01-31', status: 'Active' },

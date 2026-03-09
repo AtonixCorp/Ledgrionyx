@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
 import { FaFileInvoiceDollar, FaPlus, FaDownload } from 'react-icons/fa';
-import '../../billing/billing.css';
 
 const mockAR = [
   { invoice: 'INV-0001', customer: 'Acme Corp', invoiceDate: '2025-01-15', dueDate: '2025-02-15', original: '$12,500.00', balance: '$12,500.00', aging: '0-30', status: 'Current' },

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import '../FinancialModels.css';
 
 /**
  * Model Input Form Component

@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash, FaDownload, FaFilter, FaSearch, FaFileUpload } from 'react-icons/fa';
 import { useEnterprise } from '../../../context/EnterpriseContext';
 import TransactionForm from './TransactionForm';
-import './Bookkeeping.css';
 
 const TransactionList = () => {
   const { entityId } = useParams();

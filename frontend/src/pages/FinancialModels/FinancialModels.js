@@ -7,7 +7,6 @@ import ResultsDashboard from './components/ResultsDashboard';
 import ScenarioDashboard from './components/ScenarioDashboard';
 import ReportViewer from './components/ReportViewer';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
-import './FinancialModels.css';
 
 /**
  * Main Financial Models Page

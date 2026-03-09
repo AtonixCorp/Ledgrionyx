@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaPlug, FaPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const integrations = [
   { id: 'INT-001', name: 'Chase Bank (Direct Feed)', type: 'Banking', method: 'Plaid API', lastSync: '2025-01-31 06:02', status: 'Connected' },

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaLock, FaListAlt, FaCalendarAlt, FaPlus, FaTimes, FaSave, FaCheckCircle } from 'react-icons/fa';
 import { ledgerPeriodsAPI, periodCloseChecklistsAPI, periodCloseItemsAPI } from '../../../services/api';
-import './Accounting.css';
 
 const TABS = [
   { id: 'periods', label: 'Ledger Periods', icon: <FaCalendarAlt /> },

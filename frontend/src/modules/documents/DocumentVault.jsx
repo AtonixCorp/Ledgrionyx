@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 import { FaArchive, FaPlus, FaDownload, FaSearch } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const mockDocs = [
   { id: 'DOC-001', name: 'Audit Report FY2024.pdf', type: 'Audit', size: '2.4 MB', uploaded: '2025-01-20', uploader: 'Sarah Johnson', tags: 'audit, FY2024' },

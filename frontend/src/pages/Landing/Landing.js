@@ -9,7 +9,6 @@ import {
 } from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import './Landing.css';
 
 const Landing = () => {
   return (

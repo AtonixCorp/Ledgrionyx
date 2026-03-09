@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaTwitter, FaFacebookF, FaLinkedinIn, FaGithub } from 'react-icons/fa';
 import AtonixLogo from '../Logo/AtonixLogo';
-import './Footer.css';
 
 const Footer = () => {
   return (

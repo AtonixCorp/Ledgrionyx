@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
 import { FaBuilding, FaPlus, FaDownload } from 'react-icons/fa';
-import '../../billing/billing.css';
 
 const mockAssets = [
   { id: 'FA-001', name: 'Office Building', category: 'Real Estate', cost: '$2,500,000.00', accumulated: '$125,000.00', netBook: '$2,375,000.00', method: 'Straight-line', life: '40 yrs', status: 'Active' },

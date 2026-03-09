@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
 import { FaUsersCog, FaPlus, FaDownload } from 'react-icons/fa';
-import '../../billing/billing.css';
 
 const mockPayroll = [
   { id: 'EMP-001', name: 'Sarah Johnson', role: 'CFO', department: 'Finance', gross: '$18,333.33', deductions: '$4,200.00', net: '$14,133.33', period: 'Jan 2025', status: 'Processed' },

@@ -6,7 +6,6 @@ import {
   FaShieldAlt, FaChartLine, FaFileInvoice, FaCreditCard,
   FaUniversity, FaCalculator, FaUsers, FaBell, FaBoxOpen
 } from 'react-icons/fa';
-import './Marketplace.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 

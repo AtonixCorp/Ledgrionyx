@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaFileAlt, FaDownload, FaChartLine, FaMoneyBillWave, FaWallet, FaCalculator, FaFilter } from 'react-icons/fa';
 import { useEnterprise } from '../../../context/EnterpriseContext';
-import './Bookkeeping.css';
 
 const BookkeepingReports = () => {
   const { entityId } = useParams();

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FaTrophy, FaFire, FaMedal, FaMoneyBillWave, FaChartBar, FaRocket, FaRobot, FaShieldAlt, FaDna, FaGem, FaUsers, FaLock, FaSeedling, FaBullseye, FaStar, FaCheckCircle, FaLightbulb, FaBolt, FaGift, FaUniversity, FaCertificate } from 'react-icons/fa';
-import './Achievements.css';
 
 const Achievements = () => {
   const [currentLevel] = useState(7);

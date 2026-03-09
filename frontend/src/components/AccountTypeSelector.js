@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './AccountTypeSelector.css';
 import { FaUser, FaBuilding, FaCheckCircle } from 'react-icons/fa';
 
 const AccountTypeSelector = ({ onSelect }) => {

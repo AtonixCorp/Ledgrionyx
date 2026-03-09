@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { aiFinanceService } from '../../services/aiFinanceService';
 import { FaBrain, FaMoneyBillWave, FaChartLine, FaShieldAlt, FaFileInvoiceDollar, FaCheckCircle, FaExclamationTriangle, FaBell } from 'react-icons/fa';
-import './AIInsights.css';
 
 const AIInsights = () => {
   const navigate = useNavigate();

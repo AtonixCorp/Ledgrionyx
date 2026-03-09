@@ -97,7 +97,6 @@ import Support from './pages/Support/Support';
 import HelpCenter from './pages/HelpCenter/HelpCenter';
 import Contact from './pages/Contact/Contact';
 import Privacy from './pages/Privacy/Privacy';
-import './App.css';
 
 function App() {
   return (

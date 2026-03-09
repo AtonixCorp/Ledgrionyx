@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FaSearch, FaBook, FaVideo, FaQuestionCircle, FaChevronDown, FaChevronUp, FaFileAlt, FaPlay } from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import './HelpCenter.css';
 
 const HelpCenter = () => {
   const [searchTerm, setSearchTerm] = useState('');

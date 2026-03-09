@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaGlobe, FaPaperPlane } from 'react-icons/fa';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import './Contact.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({

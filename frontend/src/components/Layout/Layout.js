@@ -13,7 +13,6 @@ import {
   FaChartPie, FaPercent, FaLock,
   FaArchive, FaDatabase, FaRobot, FaKey, FaGlobe, FaHeadset, FaQuestion, FaTools
 } from 'react-icons/fa';
-import './Layout.css';
 
 const BANKING_MODES = [
   { id: 'retail',   label: 'Retail',   short: 'R' },
@@ -46,7 +45,7 @@ const Layout = ({ children }) => {
   // ── Navigation definitions ──────────────────────────────
   
   const overviewNav = [
-    { to: '/app/overview/dashboard',      icon: <FaHome />,         label: 'Dashboard' },
+    { to: '/app/firm/enterprise-branches',    icon: <FaHome />,         label: 'Dashboard' },
     { to: '/app/overview/notifications',  icon: <FaBell />,         label: 'Notifications' },
     { to: '/app/overview/tasks',          icon: <FaClipboardList />, label: 'Tasks' },
   ];

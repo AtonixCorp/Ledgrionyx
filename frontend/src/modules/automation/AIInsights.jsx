@@ -1,7 +1,6 @@
 import React from 'react';
 import { PageHeader, Card } from '../../components/ui';
 import { FaRobot, FaChartLine, FaExclamationTriangle, FaLightbulb } from 'react-icons/fa';
-import '../billing/billing.css';
 
 const insights = [
   {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
 import { FaUniversity, FaPlus, FaSync } from 'react-icons/fa';
-import '../../billing/billing.css';
 
 const mockAccounts = [
   { account: 'Operating - Chase 4521', type: 'Checking', balance: '$142,300.00', lastReconciled: '2025-01-31', transactions: 48, status: 'Reconciled' },

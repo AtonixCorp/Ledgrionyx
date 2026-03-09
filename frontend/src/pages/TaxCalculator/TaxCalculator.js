@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaCalculator, FaGlobe, FaDollarSign, FaChartLine, FaLightbulb, FaExchangeAlt, FaCheckCircle, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
 import taxCalculatorService from '../../services/taxCalculatorService';
-import './TaxCalculator.css';
 
 const TaxCalculator = () => {
   const [countries, setCountries] = useState([]);

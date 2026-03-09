@@ -1,8 +1,6 @@
 import React from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
 import { FaChartLine, FaDownload } from 'react-icons/fa';
-import '../billing/billing.css';
-import './reporting.css';
 
 const reports = [
   { id: 1, title: 'Income Statement', desc: 'Revenue, expenses, and net income by period', category: 'Financials' },

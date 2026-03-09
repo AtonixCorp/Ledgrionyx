@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { FaGlobe } from 'react-icons/fa';
-import './EntityDashboard.css';
 
 const EntityDashboard = () => {
   const { entityId } = useParams();

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
 import { FaBoxes, FaPlus, FaDownload } from 'react-icons/fa';
-import '../../billing/billing.css';
 
 const mockInventory = [
   { sku: 'SKU-001', name: 'Enterprise License - Annual', category: 'Software', qty: 142, unitCost: '$4,800.00', totalValue: '$681,600.00', reorderLevel: 10, status: 'In Stock' },
