@@ -1,9 +1,9 @@
 /**
  * Atonix Capital - Unified Financial Calculation Engine
- * 
+ *
  * This is the SINGLE SOURCE OF TRUTH for all financial calculations.
  * Every module must use these functions - NO calculations in components.
- * 
+ *
  * Purpose:
  * - Eliminate duplicate logic
  * - Prevent calculation drift
@@ -167,7 +167,7 @@ export const calculateIncomeBreakdown = (incomes = []) => {
   incomes.forEach(income => {
     const category = income.category || 'Other';
     const amount = parseFloat(income.amount || 0);
-    
+
     if (!breakdown[category]) {
       breakdown[category] = 0;
     }
@@ -208,7 +208,7 @@ export const calculateExpensesByCategory = (expenses = []) => {
   expenses.forEach(expense => {
     const category = expense.category || 'Other';
     const amount = parseFloat(expense.amount || 0);
-    
+
     if (!categories[category]) {
       categories[category] = 0;
     }
@@ -272,7 +272,7 @@ export const calculateBudgetUtilization = (budgetAmount, spent) => {
  */
 export const calculateBudgetVsExpenses = (budgets = [], expenses = []) => {
   const expensesByCategory = {};
-  
+
   // Sum expenses by category
   expenses.forEach(expense => {
     const category = expense.category || 'Other';
@@ -448,43 +448,43 @@ const calculationEngine = {
   subtract,
   multiply,
   divide,
-  
+
   // Percentages
   percentage,
   percentageChange,
   percentageOf,
-  
+
   // Tax
   calculateTax,
   calculateNetAfterTax,
   calculateTotalWithTax,
   calculateEffectiveTaxRate,
-  
+
   // Income
   calculateTotalIncome,
   calculateMonthlyIncome,
   calculateNetIncome,
   calculateIncomeBreakdown,
-  
+
   // Expenses
   calculateTotalExpenses,
   calculateExpensesByCategory,
   calculateMonthlyExpenses,
-  
+
   // Budget
   calculateTotalBudget,
   calculateBudgetUtilization,
   calculateBudgetVsExpenses,
-  
+
   // Balance
   calculateNetBalance,
   calculateSavingsRate,
   calculateBurnRate,
   calculateRunway,
-  
+
   // Summary
   calculateFinancialSummary,
-  
+
   // Validation
   validateFinancialData
 };

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
-import { FaLock, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 const periods = [
   { period: 'December 2024', closedDate: '2025-01-15', closedBy: 'Sarah Johnson', status: 'Closed' },
@@ -35,10 +34,8 @@ export default function PeriodClose() {
       <PageHeader
         title="Period Close"
         subtitle="Manage month-end and year-end close procedures"
-        icon={<FaLock />}
         actions={
-          <Button variant={canClose ? 'primary' : 'secondary'} size="small" icon={<FaLock />} disabled={!canClose}>
-            Close Period
+          <Button variant={canClose ? 'primary' : 'secondary'} size="small" disabled={!canClose}>Close Period
           </Button>
         }
       />
@@ -61,10 +58,7 @@ export default function PeriodClose() {
                 cursor: 'pointer',
               }}
             >
-              {item.done
-                ? <FaCheckCircle style={{ color: '#27ae60', fontSize: 16, flexShrink: 0 }} />
-                : <FaExclamationTriangle style={{ color: '#f39c12', fontSize: 16, flexShrink: 0 }} />
-              }
+
               <span style={{ fontSize: 13, color: item.done ? '#7a8fa6' : '#2c3e50', textDecoration: item.done ? 'line-through' : 'none' }}>
                 {item.task}
               </span>

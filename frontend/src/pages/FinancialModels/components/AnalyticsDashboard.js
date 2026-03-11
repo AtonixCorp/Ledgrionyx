@@ -53,15 +53,15 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
   const getStatusIcon = status => {
     switch (status) {
       case 'CRITICAL':
-        return '🔴';
+        return '';
       case 'WARNING':
         return '🟡';
       case 'ON_TARGET':
         return '🟢';
       case 'NORMAL':
-        return '🔵';
+        return '';
       default:
-        return '⚪';
+        return '';
     }
   };
 
@@ -89,22 +89,19 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
             className={`view-button ${dashboardView === 'kpis' ? 'active' : ''}`}
             onClick={() => setDashboardView('kpis')}
             disabled={isLoading}
-          >
-            📊 KPIs
+          >KPIs
           </button>
           <button
             className={`view-button ${dashboardView === 'trends' ? 'active' : ''}`}
             onClick={() => setDashboardView('trends')}
             disabled={isLoading}
-          >
-            📈 Trends
+          >Trends
           </button>
           <button
             className={`view-button ${dashboardView === 'benchmarking' ? 'active' : ''}`}
             onClick={() => setDashboardView('benchmarking')}
             disabled={isLoading}
-          >
-            ⚖️ Benchmarking
+          >Benchmarking
           </button>
         </div>
       </div>
@@ -140,14 +137,13 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
                       : kpi.value}
                   </div>
 
-                  <div className="kpi-target">
-                    Target: {kpi.target || 'N/A'}
+                  <div className="kpi-target">Target: {kpi.target || 'N/A'}
                   </div>
 
                   {kpi.trend && (
                     <div className="kpi-trend">
                       <span className="trend-icon">
-                        {kpi.trend > 0 ? '📈' : kpi.trend < 0 ? '📉' : '➡️'}
+                        ''
                       </span>
                       <span className={`trend-value ${kpi.trend > 0 ? 'positive' : kpi.trend < 0 ? 'negative' : ''}`}>
                         {Math.abs(kpi.trend).toFixed(1)}%
@@ -178,7 +174,7 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
                   className="modal-close"
                   onClick={() => setSelectedKpi(null)}
                 >
-                  ✕
+
                 </button>
 
                 <h3>{selectedKpi.name}</h3>
@@ -198,7 +194,7 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
                       <div className="detail-row">
                         <span>Status</span>
                         <strong>
-                          {getStatusIcon(selectedKpi.status)}{' '}
+                          {getStatusIcon(selectedKpi.status)}{''}
                           {selectedKpi.status}
                         </strong>
                       </div>
@@ -308,8 +304,7 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
                       <p className="forecast-label">Forecast</p>
                       <p className="forecast-value">{trend.forecast}</p>
                       {trend.confidenceInterval && (
-                        <p className="confidence">
-                          CI: {trend.confidenceInterval}
+                        <p className="confidence">CI: {trend.confidenceInterval}
                         </p>
                       )}
                     </div>
@@ -393,16 +388,16 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
 
                   <div className="benchmark-insights">
                     <div className="insight">
-                      <strong>Position:</strong>{' '}
+                      <strong>Position:</strong>{''}
                       {data.position || 'At Market'}
                     </div>
                     <div className="insight">
-                      <strong>Percentile:</strong>{' '}
+                      <strong>Percentile:</strong>{''}
                       {data.percentile || 'N/A'}
                     </div>
                     {data.recommendation && (
                       <div className="insight recommendation">
-                        <strong>Recommendation:</strong>{' '}
+                        <strong>Recommendation:</strong>{''}
                         {data.recommendation}
                       </div>
                     )}
@@ -420,7 +415,7 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
 
       {/* Summary Metrics at Bottom */}
       <div className="analytics-summary">
-        <h3>📊 Summary Metrics</h3>
+        <h3>Summary Metrics</h3>
         <div className="summary-grid">
           <div className="summary-card">
             <span className="summary-label">Total KPIs</span>

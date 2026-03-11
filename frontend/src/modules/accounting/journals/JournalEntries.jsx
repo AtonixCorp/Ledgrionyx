@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Card, PageHeader, Input, Modal, Table } from '../../../components/ui';
-import { FaPlus } from 'react-icons/fa';
 
 const JournalEntries = () => {
   const [showModal, setShowModal] = React.useState(false);
@@ -22,20 +21,17 @@ const JournalEntries = () => {
         title="Journal Entries"
         subtitle="Record and manage transactions"
         actions={
-          <Button 
-            variant="primary" 
-            icon={FaPlus}
+          <Button
+            variant="primary"
             onClick={() => setShowModal(true)}
-          >
-            New Journal Entry
+          >New Journal Entry
           </Button>
         }
       />
 
       <Card>
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>
-            No journal entries yet
+          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No journal entries yet
           </p>
         ) : (
           <Table columns={columns} data={data} />
@@ -51,7 +47,7 @@ const JournalEntries = () => {
         <Input label="Date" type="date" required />
         <Input label="Reference" required />
         <Input label="Description" required />
-        
+
         <div style={{ marginTop: '24px', marginBottom: '24px' }}>
           <h3>Line Items</h3>
           <Card>

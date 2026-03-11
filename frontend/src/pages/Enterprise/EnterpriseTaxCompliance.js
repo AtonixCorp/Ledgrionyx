@@ -1,44 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  FaGlobe,
-  FaCalculator,
-  FaFileAlt,
-  FaShieldAlt,
-  FaRobot,
-  FaLock,
-  FaSync,
-  FaFileExport,
-  FaDownload,
-  FaUpload,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaArrowRight,
-  FaCog,
-  FaBell,
-  FaSearch,
-  FaEye,
-  FaPlay,
-  FaRedo,
-  FaPlus,
-  FaFolder,
-  FaChevronRight,
-  FaFileInvoice,
-  FaLightbulb,
-  FaChartBar,
-  FaCalendarAlt,
-  FaMapMarkerAlt,
-  FaMoneyBillWave,
-  FaPercent,
-  FaClock,
-  FaBuilding,
-  FaDatabase,
-  FaLink,
-  FaTimes,
-  FaStar,
-  FaShare
-} from 'react-icons/fa';
+
 import { useEnterprise } from '../../context/EnterpriseContext';
 
 const EnterpriseTaxCompliance = () => {
@@ -59,7 +21,7 @@ const EnterpriseTaxCompliance = () => {
   const [selectedEntityId, setSelectedEntityId] = useState('');
   const selectedEntity = useMemo(() => {
     if (!selectedEntityId) return null;
-    return entities.find((e) => String(e.id) === String(selectedEntityId)) || null;
+    return entities.find((e) =>String(e.id) === String(selectedEntityId)) || null;
   }, [entities, selectedEntityId]);
 
   const [taxProfiles, setTaxProfiles] = useState([]);
@@ -325,14 +287,14 @@ const EnterpriseTaxCompliance = () => {
 
   // Available countries for tax profiles
   const availableCountries = [
-    { code: 'US', name: 'United States', flag: '🇺🇸', taxTypes: ['federal', 'state'], autoDetectable: true },
-    { code: 'UK', name: 'United Kingdom', flag: '🇬🇧', taxTypes: ['corporation'], autoDetectable: true },
-    { code: 'CA', name: 'Canada', flag: '🇨🇦', taxTypes: ['federal', 'provincial'], autoDetectable: true },
-    { code: 'DE', name: 'Germany', flag: '🇩🇪', taxTypes: ['corporate'], autoDetectable: false },
-    { code: 'FR', name: 'France', flag: '🇫🇷', taxTypes: ['corporate'], autoDetectable: false },
-    { code: 'AU', name: 'Australia', flag: '🇦🇺', taxTypes: ['corporate'], autoDetectable: true },
-    { code: 'ZA', name: 'South Africa', flag: '🇿🇦', taxTypes: ['corporate'], autoDetectable: false },
-    { code: 'SG', name: 'Singapore', flag: '🇸🇬', taxTypes: ['corporate'], autoDetectable: false },
+    { code: 'US', name: 'United States', flag: '', taxTypes: ['federal', 'state'], autoDetectable: true },
+    { code: 'UK', name: 'United Kingdom', flag: '', taxTypes: ['corporation'], autoDetectable: true },
+    { code: 'CA', name: 'Canada', flag: '', taxTypes: ['federal', 'provincial'], autoDetectable: true },
+    { code: 'DE', name: 'Germany', flag: '', taxTypes: ['corporate'], autoDetectable: false },
+    { code: 'FR', name: 'France', flag: '', taxTypes: ['corporate'], autoDetectable: false },
+    { code: 'AU', name: 'Australia', flag: '', taxTypes: ['corporate'], autoDetectable: true },
+    { code: 'ZA', name: 'South Africa', flag: '', taxTypes: ['corporate'], autoDetectable: false },
+    { code: 'SG', name: 'Singapore', flag: '', taxTypes: ['corporate'], autoDetectable: false },
   ];
 
   // AI Advisor conversation history
@@ -688,7 +650,7 @@ const EnterpriseTaxCompliance = () => {
       {/* Quick Stats */}
       <div className="overview-stats">
         <div className="stat-card">
-          <div className="stat-icon"><FaGlobe /></div>
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>{taxProfiles.filter(p => p.status === 'active').length}</h3>
             <p>Active Countries</p>
@@ -696,7 +658,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon"><FaCalculator /></div>
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>${calculations.quarterlyProjection.amount.toLocaleString()}</h3>
             <p>Quarterly Tax Projection</p>
@@ -704,7 +666,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon"><FaBell /></div>
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>{complianceAlerts.filter(a => a.severity === 'high').length}</h3>
             <p>Critical Alerts</p>
@@ -712,7 +674,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon"><FaFileAlt /></div>
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>{documents.filter(d => d.status === 'ready').length}</h3>
             <p>Ready Documents</p>
@@ -724,16 +686,16 @@ const EnterpriseTaxCompliance = () => {
       {/* Quick Actions Bar */}
       <div className="quick-actions">
         <button className="quick-action-btn" onClick={() => setSearchParams({ section: 'calculator' })}>
-          <FaCalculator /> Run Tax Calculation
+          Run Tax Calculation
         </button>
         <button className="quick-action-btn secondary" onClick={() => setSearchParams({ section: 'monitoring' })}>
-          <FaBell /> Check Compliance
+          Check Compliance
         </button>
         <button className="quick-action-btn secondary" onClick={() => setSearchParams({ section: 'filing' })}>
-          <FaFileExport /> Generate Reports
+          Generate Reports
         </button>
         <button className="quick-action-btn secondary" onClick={() => setSearchParams({ section: 'advisor' })}>
-          <FaRobot /> Ask AI Advisor
+          Ask AI Advisor
         </button>
       </div>
 
@@ -780,11 +742,11 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Recent Activity */}
       <div className="recent-activity">
-        <h3><FaClock /> Recent Activity</h3>
+        <h3>Recent Activity</h3>
         <div className="activity-list">
           {recentActivityItems.length === 0 ? (
             <div className="activity-item">
-              <div className="activity-icon info"><FaInfoCircle /></div>
+              <div className="activity-icon info"></div>
               <div className="activity-content">
                 <p>No activity yet for this entity</p>
                 <span>Create a tax profile, upload a document, or run a calculation</span>
@@ -793,7 +755,7 @@ const EnterpriseTaxCompliance = () => {
           ) : (
             recentActivityItems.map((item) => (
               <div key={item.key} className="activity-item">
-                <div className={`activity-icon ${item.kind}`}>{item.kind === 'success' ? <FaCheckCircle /> : <FaInfoCircle />}</div>
+                <div className={`activity-icon ${item.kind}`}> </div>
                 <div className="activity-content">
                   <p>{item.message}</p>
                   <span>{item.when ? new Date(item.when).toLocaleString() : ''}</span>
@@ -807,7 +769,7 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Upcoming Deadlines */}
       <div className="upcoming-deadlines">
-        <h3><FaCalendarAlt /> Upcoming Deadlines</h3>
+        <h3>Upcoming Deadlines</h3>
         <div className="deadlines-list">
           {upcomingDeadlines.length === 0 ? (
             <div className="deadline-item normal">
@@ -844,17 +806,17 @@ const EnterpriseTaxCompliance = () => {
   const renderTaxProfiles = () => (
     <div className="tax-profiles-section">
       <div className="section-header">
-        <h2><FaGlobe /> Multi-Country Tax Profiles</h2>
+        <h2>Multi-Country Tax Profiles</h2>
         <p>Auto-configured tax rules for global operations</p>
         <div className="header-actions">
-          <button 
+          <button
             className="btn-secondary"
             onClick={() => setShowCountrySelector(true)}
           >
-            <FaPlus /> Add Country
+            Add Country
           </button>
           <button className="btn-link">
-            <FaRedo /> Update All Rules
+            Update All Rules
           </button>
         </div>
       </div>
@@ -866,12 +828,12 @@ const EnterpriseTaxCompliance = () => {
             <div className="modal-header">
               <h3>Select Country for Tax Profile</h3>
               <button className="close-btn" onClick={() => setShowCountrySelector(false)}>
-                <FaTimes />
+
               </button>
             </div>
             <div className="country-grid">
               {availableCountries.map(country => (
-                <div 
+                <div
                   key={country.code}
                   className="country-option"
                   onClick={() => handleCountrySelect(country.code)}
@@ -888,7 +850,7 @@ const EnterpriseTaxCompliance = () => {
                       )}
                     </div>
                   </div>
-                  <FaArrowRight className="select-arrow" />
+
                 </div>
               ))}
             </div>
@@ -907,13 +869,13 @@ const EnterpriseTaxCompliance = () => {
                 {profile.status}
               </div>
               <div className="compliance-score">
-                <FaStar className="score-icon" />
+
                 <span>{profile.complianceScore}%</span>
               </div>
             </div>
             <div className="profile-content">
               <h3>{availableCountries.find(c => c.code === profile.country)?.name || profile.country} Tax Profile</h3>
-              
+
               <div className="profile-stats">
                 <div className="stat">
                   <span className="label">Entities:</span>
@@ -967,7 +929,7 @@ const EnterpriseTaxCompliance = () => {
                   )}
                 </div>
                 <div className="rule-update-info">
-                  <FaClock className="update-icon" />
+
                   <span>Last rule update: {new Date(profile.taxRules.lastRuleUpdate).toLocaleDateString()}</span>
                   {profile.taxRules.autoUpdate && (
                     <span className="auto-update-badge">Auto-updating</span>
@@ -985,7 +947,7 @@ const EnterpriseTaxCompliance = () => {
       </div>
 
       <div className="auto-update-notice">
-        <FaCog className="notice-icon spinning" />
+
         <div className="notice-content">
           <h4>Automatic Updates Active</h4>
           <p>Tax rules are automatically updated when changes are detected in supported jurisdictions. Last global update: January 10, 2025</p>
@@ -999,27 +961,27 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Residency Detection Section */}
       <div className="residency-detection">
-        <h3><FaMapMarkerAlt /> Residency Status Detection</h3>
+        <h3>Residency Status Detection</h3>
         <p>Automatically detect and confirm tax residency status across jurisdictions</p>
         <div className="detection-controls">
           <button className="btn-primary">
-            <FaSearch /> Run Detection Scan
+            Run Detection Scan
           </button>
           <button className="btn-secondary">
-            <FaEye /> Review Detected Status
+            Review Detected Status
           </button>
         </div>
         <div className="detection-results">
           <div className="result-item">
-            <FaCheckCircle className="result-icon success" />
+
             <span>US Residency: Confirmed (based on entity registrations)</span>
           </div>
           <div className="result-item">
-            <FaCheckCircle className="result-icon success" />
+
             <span>UK Residency: Confirmed (based on permanent establishment)</span>
           </div>
           <div className="result-item">
-            <FaClock className="result-icon pending" />
+
             <span>CA Residency: Pending verification (awaiting additional documentation)</span>
           </div>
         </div>
@@ -1030,13 +992,13 @@ const EnterpriseTaxCompliance = () => {
   const renderTaxCalculator = () => (
     <div className="tax-calculator-section">
       <div className="section-header">
-        <h2><FaCalculator /> Auto Tax Calculation Engine</h2>
+        <h2>Auto Tax Calculation Engine</h2>
         <p>Real-time tax calculations across all income types and jurisdictions</p>
         <div className="header-actions">
           <div className="calculation-mode">
             <label>Calculation Mode:</label>
-            <select 
-              value={taxCalculationMode} 
+            <select
+              value={taxCalculationMode}
               onChange={(e) => setTaxCalculationMode(e.target.value)}
             >
               <option value="automatic">Automatic</option>
@@ -1045,7 +1007,7 @@ const EnterpriseTaxCompliance = () => {
             </select>
           </div>
           <button className="btn-primary" onClick={handleRunTaxCalculation} disabled={!selectedEntityId || isLoading}>
-            <FaPlay /> Run Calculation
+            Run Calculation
           </button>
         </div>
       </div>
@@ -1109,9 +1071,8 @@ const EnterpriseTaxCompliance = () => {
       {/* Calculation Status */}
       <div className="calculation-status">
         <div className="status-indicator">
-          <FaSync className={`status-icon ${isLoading ? 'spinning' : ''}`} />
-          <span>
-            Last calculated:{' '}
+
+          <span>Last calculated:{''}
             {calculations.incomeTax.lastCalculated
               ? new Date(calculations.incomeTax.lastCalculated).toLocaleString()
               : '—'}
@@ -1286,11 +1247,11 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Taxable Events Detection */}
       <div className="taxable-events">
-        <h3><FaBell /> Recent Taxable Events Detected</h3>
+        <h3>Recent Taxable Events Detected</h3>
         <div className="events-list">
           <div className="event-item">
             <div className="event-icon">
-              <FaMoneyBillWave />
+
             </div>
             <div className="event-content">
               <h4>Stock Sale - AAPL (500 shares)</h4>
@@ -1304,7 +1265,7 @@ const EnterpriseTaxCompliance = () => {
 
           <div className="event-item">
             <div className="event-icon">
-              <FaPercent />
+
             </div>
             <div className="event-content">
               <h4>Dividend Payment - MSFT</h4>
@@ -1318,7 +1279,7 @@ const EnterpriseTaxCompliance = () => {
 
           <div className="event-item">
             <div className="event-icon">
-              <FaBuilding />
+
             </div>
             <div className="event-content">
               <h4>Business Income - Consulting</h4>
@@ -1334,11 +1295,11 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Income Classification */}
       <div className="income-classification">
-        <h3><FaChartBar /> Auto Income Classification</h3>
+        <h3>Auto Income Classification</h3>
         <p>Transactions automatically classified by income type</p>
         <div className="classification-stats">
           <div className="classification-item">
-            <div className="classification-icon">💼</div>
+            <div className="classification-icon"></div>
             <div className="classification-info">
               <h4>Business Income</h4>
               <p>$132,230 classified (89% accuracy)</p>
@@ -1346,7 +1307,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
 
           <div className="classification-item">
-            <div className="classification-icon">📈</div>
+            <div className="classification-icon"></div>
             <div className="classification-info">
               <h4>Investment Income</h4>
               <p>$45,670 classified (94% accuracy)</p>
@@ -1362,7 +1323,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
 
           <div className="classification-item">
-            <div className="classification-icon">🏠</div>
+            <div className="classification-icon"></div>
             <div className="classification-info">
               <h4>Real Estate</h4>
               <p>$67,890 classified (91% accuracy)</p>
@@ -1376,16 +1337,16 @@ const EnterpriseTaxCompliance = () => {
         <h3>Calculation Controls</h3>
         <div className="controls-grid">
           <button className="control-btn">
-            <FaRedo /> Recalculate All
+            Recalculate All
           </button>
           <button className="control-btn">
-            <FaFileExport /> Export Calculations
+            Export Calculations
           </button>
           <button className="control-btn">
-            <FaEye /> Review Assumptions
+            Review Assumptions
           </button>
           <button className="control-btn">
-            <FaCog /> Adjust Settings
+            Adjust Settings
           </button>
         </div>
       </div>
@@ -1395,17 +1356,17 @@ const EnterpriseTaxCompliance = () => {
   const renderDocuments = () => (
     <div className="documents-section">
       <div className="section-header">
-        <h2><FaFileAlt /> Compliance Document Generator</h2>
+        <h2>Compliance Document Generator</h2>
         <p>Auto-generated tax summaries and compliance reports</p>
         <div className="header-actions">
           <button className="btn-secondary" onClick={() => setShowUploadModal(true)}>
-            <FaUpload /> Upload Document
+            Upload Document
           </button>
           <button className="btn-primary" onClick={() => handleGenerateReport()}>
-            <FaPlus /> Generate Report
+            Generate Report
           </button>
           <button className="btn-link" onClick={() => handleBulkGenerate()}>
-            <FaSync /> Auto-Generate All
+            Auto-Generate All
           </button>
         </div>
       </div>
@@ -1462,10 +1423,7 @@ const EnterpriseTaxCompliance = () => {
           .map(doc => (
           <div key={doc.id} className="document-card">
             <div className="doc-icon">
-              {doc.type === 'summary' && <FaFileAlt />}
-              {doc.type === 'report' && <FaFileInvoice />}
-              {doc.type === 'audit' && <FaDatabase />}
-              {doc.type === 'form' && <FaFileExport />}
+
             </div>
             <div className="doc-content">
               <h4>{doc.name}</h4>
@@ -1476,13 +1434,13 @@ const EnterpriseTaxCompliance = () => {
               </div>
               {doc.autoGenerated && (
                 <div className="auto-generated-badge">
-                  <FaRobot /> Auto-generated
+                  Auto-generated
                 </div>
               )}
             </div>
             <div className="doc-status">
               <span className={`status-badge ${doc.status}`}>
-                {doc.status === 'generating' && <FaSync className="spinning" />}
+
                 {doc.status}
               </span>
             </div>
@@ -1490,19 +1448,19 @@ const EnterpriseTaxCompliance = () => {
               {doc.status === 'ready' ? (
                 <>
                   <button className="btn-link" onClick={() => handleDownloadDocument(doc.id)}>
-                    <FaDownload /> Download
+                    Download
                   </button>
                   <button className="btn-link" onClick={() => handleShareDocument(doc.id)}>
-                    <FaShare /> Share
+                    Share
                   </button>
                 </>
               ) : doc.status === 'generating' ? (
                 <button className="btn-link" disabled>
-                  <FaSync className="spinning" /> Generating...
+                  Generating...
                 </button>
               ) : (
                 <button className="btn-link" onClick={() => handleRegenerateDocument(doc.id)}>
-                  <FaRedo /> Retry
+                  Retry
                 </button>
               )}
             </div>
@@ -1512,7 +1470,7 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Auto-Generation Schedule */}
       <div className="auto-generation-schedule">
-        <h3><FaClock /> Auto-Generation Schedule</h3>
+        <h3>Auto-Generation Schedule</h3>
         <div className="schedule-grid">
           <div className="schedule-item">
             <div className="schedule-info">
@@ -1552,7 +1510,7 @@ const EnterpriseTaxCompliance = () => {
         <h3>Available Templates</h3>
         <div className="templates-grid">
           <div className="template-card">
-            <div className="template-icon"><FaFileAlt /></div>
+            <div className="template-icon"></div>
             <h4>Tax Summary Report</h4>
             <p>Comprehensive quarterly tax summary with breakdowns</p>
             <div className="template-meta">
@@ -1560,11 +1518,11 @@ const EnterpriseTaxCompliance = () => {
               <span>PDF & Excel formats</span>
             </div>
             <button className="btn-secondary" onClick={() => handleGenerateTemplate('tax-summary')}>
-              <FaPlay /> Generate Now
+              Generate Now
             </button>
           </div>
           <div className="template-card">
-            <div className="template-icon"><FaShieldAlt /></div>
+            <div className="template-icon"></div>
             <h4>Compliance Checklist</h4>
             <p>Check all filing requirements and deadlines</p>
             <div className="template-meta">
@@ -1572,11 +1530,11 @@ const EnterpriseTaxCompliance = () => {
               <span>Interactive checklist</span>
             </div>
             <button className="btn-secondary" onClick={() => handleGenerateTemplate('compliance-checklist')}>
-              <FaPlay /> Generate Now
+              Generate Now
             </button>
           </div>
           <div className="template-card">
-            <div className="template-icon"><FaDatabase /></div>
+            <div className="template-icon"></div>
             <h4>Audit Trail Report</h4>
             <p>Complete transaction history with classifications</p>
             <div className="template-meta">
@@ -1584,11 +1542,11 @@ const EnterpriseTaxCompliance = () => {
               <span>Export to accounting software</span>
             </div>
             <button className="btn-secondary" onClick={() => handleGenerateTemplate('audit-trail')}>
-              <FaPlay /> Generate Now
+              Generate Now
             </button>
           </div>
           <div className="template-card">
-            <div className="template-icon"><FaFileInvoice /></div>
+            <div className="template-icon"></div>
             <h4>Tax Authority Forms</h4>
             <p>Pre-filled forms ready for submission</p>
             <div className="template-meta">
@@ -1596,7 +1554,7 @@ const EnterpriseTaxCompliance = () => {
               <span>Multiple jurisdictions</span>
             </div>
             <button className="btn-secondary" onClick={() => handleGenerateTemplate('tax-forms')}>
-              <FaPlay /> Generate Now
+              Generate Now
             </button>
           </div>
         </div>
@@ -1609,7 +1567,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="modal-header">
               <h3>Add Compliance Document</h3>
               <button className="close-btn" onClick={() => setShowUploadModal(false)}>
-                <FaTimes />
+
               </button>
             </div>
             <div className="form-grid">
@@ -1676,8 +1634,7 @@ const EnterpriseTaxCompliance = () => {
             </div>
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setShowUploadModal(false)}>Cancel</button>
-              <button className="btn-primary" onClick={handleUploadComplianceDocument} disabled={!selectedEntityId || isLoading}>
-                Save Document
+              <button className="btn-primary" onClick={handleUploadComplianceDocument} disabled={!selectedEntityId || isLoading}>Save Document
               </button>
             </div>
           </div>
@@ -1689,17 +1646,17 @@ const EnterpriseTaxCompliance = () => {
   const renderMonitoring = () => (
     <div className="monitoring-section">
       <div className="section-header">
-        <h2><FaShieldAlt /> Real-Time Compliance Monitoring</h2>
+        <h2>Real-Time Compliance Monitoring</h2>
         <p>Automated detection of compliance risks and deadlines</p>
         <div className="header-actions">
           <button className="btn-primary" onClick={() => handleRunComplianceCheck()}>
-            <FaPlay /> Run Full Check
+            Run Full Check
           </button>
           <button className="btn-secondary" onClick={() => handleConfigureAlerts()}>
-            <FaCog /> Configure Alerts
+            Configure Alerts
           </button>
           <div className="monitoring-status">
-            <FaSync className="status-icon spinning" />
+
             <span>Monitoring Active</span>
           </div>
         </div>
@@ -1710,7 +1667,7 @@ const EnterpriseTaxCompliance = () => {
         <div className="status-overview">
           <div className="status-card">
             <div className="status-icon">
-              <FaCheckCircle className="success" />
+
             </div>
             <div className="status-info">
               <h3>System Health</h3>
@@ -1720,7 +1677,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
           <div className="status-card">
             <div className="status-icon">
-              <FaClock />
+
             </div>
             <div className="status-info">
               <h3>Last Scan</h3>
@@ -1730,7 +1687,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
           <div className="status-card">
             <div className="status-icon">
-              <FaBell />
+
             </div>
             <div className="status-info">
               <h3>Active Alerts</h3>
@@ -1759,8 +1716,7 @@ const EnterpriseTaxCompliance = () => {
             .map(alert => (
             <div key={alert.id} className={`alert-item ${alert.severity}`}>
               <div className="alert-icon">
-                {alert.severity === 'high' ? <FaExclamationTriangle /> :
-                 alert.severity === 'medium' ? <FaInfoCircle /> : <FaBell />}
+
               </div>
               <div className="alert-content">
                 <h4>{alert.message}</h4>
@@ -1768,7 +1724,7 @@ const EnterpriseTaxCompliance = () => {
                   <span className="alert-date">{new Date(alert.date).toLocaleDateString()}</span>
                   {alert.autoGenerated && (
                     <span className="auto-badge">
-                      <FaRobot /> Auto-detected
+                      Auto-detected
                     </span>
                   )}
                 </div>
@@ -1776,7 +1732,7 @@ const EnterpriseTaxCompliance = () => {
                   <div className="alert-actions">
                     {alert.actions.map(action => (
                       <button key={action} className="action-btn" onClick={() => handleAlertAction(alert.id, action)}>
-                        {action.replace('-', ' ')}
+                        {action.replace('-', '')}
                       </button>
                     ))}
                   </div>
@@ -1794,11 +1750,11 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Automated Monitoring Features */}
       <div className="monitoring-features">
-        <h3><FaEye /> Automated Monitoring</h3>
+        <h3>Automated Monitoring</h3>
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-icon">
-              <FaCalculator />
+
             </div>
             <h4>Taxable Event Detection</h4>
             <p>Automatically detects stock sales, dividends, business income, and other taxable events</p>
@@ -1810,7 +1766,7 @@ const EnterpriseTaxCompliance = () => {
 
           <div className="feature-card">
             <div className="feature-icon">
-              <FaCalendarAlt />
+
             </div>
             <h4>Deadline Tracking</h4>
             <p>Monitors filing deadlines across all jurisdictions with automatic reminders</p>
@@ -1822,7 +1778,7 @@ const EnterpriseTaxCompliance = () => {
 
           <div className="feature-card">
             <div className="feature-icon">
-              <FaExclamationTriangle />
+
             </div>
             <h4>Risk Assessment</h4>
             <p>Continuous evaluation of compliance risk based on transactions and behavior</p>
@@ -1834,7 +1790,7 @@ const EnterpriseTaxCompliance = () => {
 
           <div className="feature-card">
             <div className="feature-icon">
-              <FaSync />
+
             </div>
             <h4>Rule Updates</h4>
             <p>Automatically updates tax rules and thresholds when changes are detected</p>
@@ -1848,11 +1804,11 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Compliance Timeline */}
       <div className="compliance-timeline">
-        <h3><FaClock /> Compliance Timeline</h3>
+        <h3>Compliance Timeline</h3>
         <div className="timeline">
           <div className="timeline-item completed">
             <div className="timeline-marker">
-              <FaCheckCircle />
+
             </div>
             <div className="timeline-content">
               <h4>Q4 2024 Tax Return Filed</h4>
@@ -1863,7 +1819,7 @@ const EnterpriseTaxCompliance = () => {
 
           <div className="timeline-item upcoming">
             <div className="timeline-marker">
-              <FaClock />
+
             </div>
             <div className="timeline-content">
               <h4>UK VAT Return Due</h4>
@@ -1874,7 +1830,7 @@ const EnterpriseTaxCompliance = () => {
 
           <div className="timeline-item upcoming">
             <div className="timeline-marker">
-              <FaCalendarAlt />
+
             </div>
             <div className="timeline-content">
               <h4>Annual Tax Planning Review</h4>
@@ -1890,17 +1846,17 @@ const EnterpriseTaxCompliance = () => {
   const renderAdvisor = () => (
     <div className="advisor-section">
       <div className="section-header">
-        <h2><FaRobot /> AI Tax Advisor</h2>
+        <h2>AI Tax Advisor</h2>
         <p>Intelligent guidance and tax optimization insights</p>
         <div className="header-actions">
           <button className="btn-primary" onClick={() => handleNewConversation()}>
-            <FaPlus /> New Conversation
+            New Conversation
           </button>
           <button className="btn-secondary" onClick={() => handleScenarioAnalysis()}>
-            <FaChartBar /> Scenario Analysis
+            Scenario Analysis
           </button>
           <button className="btn-link" onClick={() => handleViewHistory()}>
-            <FaClock /> Conversation History
+            Conversation History
           </button>
         </div>
       </div>
@@ -1910,7 +1866,7 @@ const EnterpriseTaxCompliance = () => {
         <div className="advisor-chat">
           <div className="chat-header">
             <div className="chat-status">
-              <FaRobot className="status-icon" />
+
               <span>AI Advisor Online</span>
               <span className="status-indicator active"></span>
             </div>
@@ -1924,7 +1880,7 @@ const EnterpriseTaxCompliance = () => {
             {aiConversation.map(message => (
               <div key={message.id} className={`message ${message.type}`}>
                 <div className="message-avatar">
-                  {message.type === 'ai' ? '🤖' : '👤'}
+                  ''
                 </div>
                 <div className="message-content">
                   <p>{message.message}</p>
@@ -1936,7 +1892,7 @@ const EnterpriseTaxCompliance = () => {
                           className="suggestion-btn"
                           onClick={() => handleSuggestionClick(suggestion)}
                         >
-                          {suggestion.replace('-', ' ')}
+                          {suggestion.replace('-', '')}
                         </button>
                       ))}
                     </div>
@@ -1958,67 +1914,62 @@ const EnterpriseTaxCompliance = () => {
               placeholder="Ask about tax implications, optimization strategies, or compliance questions..."
             />
             <button className="btn-primary" onClick={handleAiQuery}>
-              <FaArrowRight />
+
             </button>
           </div>
         </div>
 
         {/* AI Insights Panel */}
         <div className="insights-panel">
-          <h3><FaLightbulb /> AI Insights & Recommendations</h3>
+          <h3>AI Insights & Recommendations</h3>
 
           <div className="insights-grid">
             <div className="insight-card priority">
               <div className="insight-header">
-                <FaStar className="priority-icon" />
+
                 <h4>High-Impact Opportunity</h4>
               </div>
               <p>Based on your Q4 income of $132,230, you qualify for the Qualified Business Income (QBI) deduction. This could save you approximately $26,446 in taxes.</p>
               <div className="insight-actions">
-                <button className="btn-secondary" onClick={() => handleApplyOptimization('qbi')}>
-                  Apply Deduction
+                <button className="btn-secondary" onClick={() => handleApplyOptimization('qbi')}>Apply Deduction
                 </button>
-                <button className="btn-link" onClick={() => handleLearnMore('qbi')}>
-                  Learn More
+                <button className="btn-link" onClick={() => handleLearnMore('qbi')}>Learn More
                 </button>
               </div>
             </div>
 
             <div className="insight-card">
               <div className="insight-header">
-                <FaCalculator />
+
                 <h4>Tax Efficiency Analysis</h4>
               </div>
               <p>Your current asset allocation could be optimized. Consider tax-loss harvesting in your investment portfolio to offset capital gains.</p>
               <div className="insight-actions">
-                <button className="btn-secondary" onClick={() => handleRunAnalysis('tax-loss-harvesting')}>
-                  Run Analysis
+                <button className="btn-secondary" onClick={() => handleRunAnalysis('tax-loss-harvesting')}>Run Analysis
                 </button>
               </div>
             </div>
 
             <div className="insight-card">
               <div className="insight-header">
-                <FaCalendarAlt />
+
                 <h4>Upcoming Tax Events</h4>
               </div>
               <p>Your estimated Q1 2025 tax liability is $45,230. Consider quarterly estimated payments to avoid penalties.</p>
               <div className="insight-actions">
-                <button className="btn-secondary" onClick={() => handleSchedulePayments()}>
-                  Schedule Payments
+                <button className="btn-secondary" onClick={() => handleSchedulePayments()}>Schedule Payments
                 </button>
               </div>
             </div>
 
             <div className="insight-card">
               <div className="insight-header">
-                <FaShieldAlt />
+
                 <h4>Risk Mitigation</h4>
               </div>
               <p>Consider increasing your withholding to cover potential tax increases from business growth.</p>
               <div className="insight-actions">
-                <button className="btn-secondary" onClick={() => handleAdjustWithholding()}>
-                  Adjust Withholding
+                <button className="btn-secondary" onClick={() => handleAdjustWithholding()}>Adjust Withholding
                 </button>
               </div>
             </div>
@@ -2026,29 +1977,26 @@ const EnterpriseTaxCompliance = () => {
 
           {/* Scenario Analysis */}
           <div className="scenario-analysis">
-            <h4><FaChartBar /> What-If Scenarios</h4>
+            <h4>What-If Scenarios</h4>
             <div className="scenarios-list">
               <div className="scenario-item">
                 <h5>If you sell $100K in appreciated stock:</h5>
                 <p>Estimated capital gains tax: $15,000 (15% rate)</p>
-                <button className="btn-link" onClick={() => handleAnalyzeScenario('stock-sale')}>
-                  Analyze
+                <button className="btn-link" onClick={() => handleAnalyzeScenario('stock-sale')}>Analyze
                 </button>
               </div>
 
               <div className="scenario-item">
                 <h5>If business revenue increases by 25%:</h5>
                 <p>Additional tax liability: $18,750 (estimated)</p>
-                <button className="btn-link" onClick={() => handleAnalyzeScenario('revenue-growth')}>
-                  Analyze
+                <button className="btn-link" onClick={() => handleAnalyzeScenario('revenue-growth')}>Analyze
                 </button>
               </div>
 
               <div className="scenario-item">
                 <h5>If you relocate to a tax-friendly state:</h5>
                 <p>Potential savings: $12,400 annually</p>
-                <button className="btn-link" onClick={() => handleAnalyzeScenario('relocation')}>
-                  Analyze
+                <button className="btn-link" onClick={() => handleAnalyzeScenario('relocation')}>Analyze
                 </button>
               </div>
             </div>
@@ -2058,17 +2006,13 @@ const EnterpriseTaxCompliance = () => {
           <div className="quick-questions">
             <h4>Frequently Asked</h4>
             <div className="questions-list">
-              <button className="question-btn" onClick={() => handleQuickQuestion('qbi-eligibility')}>
-                Am I eligible for QBI deduction?
+              <button className="question-btn" onClick={() => handleQuickQuestion('qbi-eligibility')}>Am I eligible for QBI deduction?
               </button>
-              <button className="question-btn" onClick={() => handleQuickQuestion('capital-gains-rates')}>
-                What are current capital gains rates?
+              <button className="question-btn" onClick={() => handleQuickQuestion('capital-gains-rates')}>What are current capital gains rates?
               </button>
-              <button className="question-btn" onClick={() => handleQuickQuestion('estimated-payments')}>
-                When are estimated tax payments due?
+              <button className="question-btn" onClick={() => handleQuickQuestion('estimated-payments')}>When are estimated tax payments due?
               </button>
-              <button className="question-btn" onClick={() => handleQuickQuestion('foreign-income')}>
-                How is foreign income taxed?
+              <button className="question-btn" onClick={() => handleQuickQuestion('foreign-income')}>How is foreign income taxed?
               </button>
             </div>
           </div>
@@ -2080,17 +2024,17 @@ const EnterpriseTaxCompliance = () => {
   const renderVault = () => (
     <div className="vault-section">
       <div className="section-header">
-        <h2><FaLock /> Compliance Vault</h2>
+        <h2>Compliance Vault</h2>
         <p>Secure, encrypted storage for all tax and compliance documents</p>
         <div className="header-actions">
           <button className="btn-primary" onClick={() => setShowVaultUpload(true)}>
-            <FaUpload /> Upload Document
+            Upload Document
           </button>
           <button className="btn-secondary" onClick={() => handleCreateFolder()}>
-            <FaPlus /> New Folder
+            New Folder
           </button>
           <button className="btn-link" onClick={() => handleVaultSettings()}>
-            <FaCog /> Settings
+            Settings
           </button>
         </div>
       </div>
@@ -2099,7 +2043,7 @@ const EnterpriseTaxCompliance = () => {
       <div className="vault-security">
         <div className="security-status">
           <div className="security-indicator">
-            <FaShieldAlt className="security-icon" />
+
             <span>Bank-grade encryption active</span>
           </div>
           <div className="security-details">
@@ -2132,16 +2076,16 @@ const EnterpriseTaxCompliance = () => {
       <div className="vault-organization">
         <div className="organization-tabs">
           <button className={`org-tab ${vaultView === 'folders' ? 'active' : ''}`} onClick={() => setVaultView('folders')}>
-            <FaFolder /> Folders
+            Folders
           </button>
           <button className={`org-tab ${vaultView === 'recent' ? 'active' : ''}`} onClick={() => setVaultView('recent')}>
-            <FaClock /> Recent
+            Recent
           </button>
           <button className={`org-tab ${vaultView === 'shared' ? 'active' : ''}`} onClick={() => setVaultView('shared')}>
-            <FaShare /> Shared
+            Shared
           </button>
           <button className={`org-tab ${vaultView === 'expiring' ? 'active' : ''}`} onClick={() => setVaultView('expiring')}>
-            <FaExclamationTriangle /> Expiring
+            Expiring
           </button>
         </div>
 
@@ -2149,63 +2093,63 @@ const EnterpriseTaxCompliance = () => {
           <div className="vault-folders">
             <div className="folder-grid">
               <div className="folder-card" onClick={() => handleOpenFolder('tax-returns')}>
-                <div className="folder-icon">📋</div>
+                <div className="folder-icon"></div>
                 <div className="folder-info">
                   <h4>Tax Returns</h4>
                   <p>45 documents • 2.3 GB</p>
                   <span className="folder-date">Updated 2 days ago</span>
                 </div>
-                <FaChevronRight className="folder-arrow" />
+
               </div>
 
               <div className="folder-card" onClick={() => handleOpenFolder('invoices')}>
-                <div className="folder-icon">🧾</div>
+                <div className="folder-icon"></div>
                 <div className="folder-info">
                   <h4>Invoices & Receipts</h4>
                   <p>89 documents • 4.1 GB</p>
                   <span className="folder-date">Updated today</span>
                 </div>
-                <FaChevronRight className="folder-arrow" />
+
               </div>
 
               <div className="folder-card" onClick={() => handleOpenFolder('financials')}>
-                <div className="folder-icon">📊</div>
+                <div className="folder-icon"></div>
                 <div className="folder-info">
                   <h4>Financial Statements</h4>
                   <p>23 documents • 1.8 GB</p>
                   <span className="folder-date">Updated 1 week ago</span>
                 </div>
-                <FaChevronRight className="folder-arrow" />
+
               </div>
 
               <div className="folder-card" onClick={() => handleOpenFolder('compliance')}>
-                <div className="folder-icon">🔒</div>
+                <div className="folder-icon"></div>
                 <div className="folder-info">
                   <h4>Compliance Reports</h4>
                   <p>67 documents • 3.2 GB</p>
                   <span className="folder-date">Updated 3 days ago</span>
                 </div>
-                <FaChevronRight className="folder-arrow" />
+
               </div>
 
               <div className="folder-card" onClick={() => handleOpenFolder('audit')}>
-                <div className="folder-icon">📈</div>
+                <div className="folder-icon"></div>
                 <div className="folder-info">
                   <h4>Audit Trails</h4>
                   <p>23 documents • 890 MB</p>
                   <span className="folder-date">Updated yesterday</span>
                 </div>
-                <FaChevronRight className="folder-arrow" />
+
               </div>
 
               <div className="folder-card" onClick={() => handleOpenFolder('legal')}>
-                <div className="folder-icon">⚖️</div>
+                <div className="folder-icon"></div>
                 <div className="folder-info">
                   <h4>Legal Documents</h4>
                   <p>12 documents • 456 MB</p>
                   <span className="folder-date">Updated 2 weeks ago</span>
                 </div>
-                <FaChevronRight className="folder-arrow" />
+
               </div>
             </div>
           </div>
@@ -2215,7 +2159,7 @@ const EnterpriseTaxCompliance = () => {
           <div className="recent-documents">
             <div className="documents-list">
               <div className="document-item">
-                <div className="doc-icon"><FaFileAlt /></div>
+                <div className="doc-icon"></div>
                 <div className="doc-info">
                   <h4>Q4 2024 Tax Summary.pdf</h4>
                   <p>Auto-generated • 2.3 MB</p>
@@ -2223,16 +2167,16 @@ const EnterpriseTaxCompliance = () => {
                 </div>
                 <div className="doc-actions">
                   <button className="btn-link" onClick={() => handleDownloadDocument('q4-summary')}>
-                    <FaDownload />
+
                   </button>
                   <button className="btn-link" onClick={() => handleShareDocument('q4-summary')}>
-                    <FaShare />
+
                   </button>
                 </div>
               </div>
 
               <div className="document-item">
-                <div className="doc-icon"><FaFileInvoice /></div>
+                <div className="doc-icon"></div>
                 <div className="doc-info">
                   <h4>Office Supplies Invoice - Jan 2025.pdf</h4>
                   <p>Auto-categorized • 1.2 MB</p>
@@ -2240,16 +2184,16 @@ const EnterpriseTaxCompliance = () => {
                 </div>
                 <div className="doc-actions">
                   <button className="btn-link" onClick={() => handleDownloadDocument('office-invoice')}>
-                    <FaDownload />
+
                   </button>
                   <button className="btn-link" onClick={() => handleViewDocument('office-invoice')}>
-                    <FaEye />
+
                   </button>
                 </div>
               </div>
 
               <div className="document-item">
-                <div className="doc-icon"><FaDatabase /></div>
+                <div className="doc-icon"></div>
                 <div className="doc-info">
                   <h4>Compliance Audit Trail.xlsx</h4>
                   <p>Auto-generated • 5.6 MB</p>
@@ -2257,10 +2201,10 @@ const EnterpriseTaxCompliance = () => {
                 </div>
                 <div className="doc-actions">
                   <button className="btn-link" onClick={() => handleDownloadDocument('audit-trail')}>
-                    <FaDownload />
+
                   </button>
                   <button className="btn-link" onClick={() => handleExportDocument('audit-trail')}>
-                    <FaFileExport />
+
                   </button>
                 </div>
               </div>
@@ -2272,7 +2216,7 @@ const EnterpriseTaxCompliance = () => {
       {/* Auto-Processing Features */}
       <div className="auto-processing">
         <div className="processing-header">
-          <FaSync className="processing-icon spinning" />
+
           <div className="processing-info">
             <h4>AI-Powered Auto-Processing</h4>
             <p>Documents are automatically scanned, categorized, and linked to transactions</p>
@@ -2281,7 +2225,7 @@ const EnterpriseTaxCompliance = () => {
 
         <div className="processing-features">
           <div className="feature-item">
-            <FaRobot className="feature-icon" />
+
             <div className="feature-info">
               <h5>Smart Categorization</h5>
               <p>AI automatically categorizes documents and extracts key data</p>
@@ -2290,7 +2234,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
 
           <div className="feature-item">
-            <FaLink className="feature-icon" />
+
             <div className="feature-info">
               <h5>Transaction Linking</h5>
               <p>Automatically links receipts and invoices to financial transactions</p>
@@ -2299,7 +2243,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
 
           <div className="feature-item">
-            <FaSearch className="feature-icon" />
+
             <div className="feature-info">
               <h5>OCR & Data Extraction</h5>
               <p>Extracts text and data from scanned documents and images</p>
@@ -2308,7 +2252,7 @@ const EnterpriseTaxCompliance = () => {
           </div>
 
           <div className="feature-item">
-            <FaShieldAlt className="feature-icon" />
+
             <div className="feature-info">
               <h5>Compliance Verification</h5>
               <p>Validates documents against regulatory requirements</p>
@@ -2320,7 +2264,7 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Backup & Recovery */}
       <div className="backup-recovery">
-        <h3><FaDatabase /> Backup & Recovery</h3>
+        <h3>Backup & Recovery</h3>
         <div className="backup-status">
           <div className="backup-item">
             <div className="backup-info">
@@ -2364,7 +2308,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="modal-header">
               <h3>Add to Compliance Vault</h3>
               <button className="close-btn" onClick={() => setShowVaultUpload(false)}>
-                <FaTimes />
+
               </button>
             </div>
             <div className="form-grid">
@@ -2430,8 +2374,7 @@ const EnterpriseTaxCompliance = () => {
             </div>
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setShowVaultUpload(false)}>Cancel</button>
-              <button className="btn-primary" onClick={handleUploadComplianceDocument} disabled={!selectedEntityId || isLoading}>
-                Save to Vault
+              <button className="btn-primary" onClick={handleUploadComplianceDocument} disabled={!selectedEntityId || isLoading}>Save to Vault
               </button>
             </div>
           </div>
@@ -2443,17 +2386,17 @@ const EnterpriseTaxCompliance = () => {
   const renderReconciliation = () => (
     <div className="reconciliation-section">
       <div className="section-header">
-        <h2><FaSync /> Auto-Reconciliation Engine</h2>
+        <h2>Auto-Reconciliation Engine</h2>
         <p>Automated matching, validation, and reconciliation of financial data</p>
         <div className="header-actions">
           <button className="btn-primary" onClick={() => handleRunReconciliation()}>
-            <FaPlay /> Run Reconciliation
+            Run Reconciliation
           </button>
           <button className="btn-secondary" onClick={() => handleReconciliationSettings()}>
-            <FaCog /> Settings
+            Settings
           </button>
           <div className="reconciliation-status">
-            <FaSync className={`status-icon ${reconciliationStatus === 'running' ? 'spinning' : ''}`} />
+
             <span>{reconciliationStatus === 'running' ? 'Running...' : 'Ready'}</span>
           </div>
         </div>
@@ -2463,7 +2406,7 @@ const EnterpriseTaxCompliance = () => {
       <div className="reconciliation-dashboard">
         <div className="reconciliation-stats">
           <div className="stat-card success">
-            <div className="stat-icon"><FaCheckCircle /></div>
+            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>98.7%</h3>
               <p>Auto-Matched</p>
@@ -2471,7 +2414,7 @@ const EnterpriseTaxCompliance = () => {
             </div>
           </div>
           <div className="stat-card warning">
-            <div className="stat-icon"><FaExclamationTriangle /></div>
+            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>1.2%</h3>
               <p>Manual Review</p>
@@ -2479,7 +2422,7 @@ const EnterpriseTaxCompliance = () => {
             </div>
           </div>
           <div className="stat-card error">
-            <div className="stat-icon"><FaTimes /></div>
+            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>0.1%</h3>
               <p>Exceptions</p>
@@ -2487,7 +2430,7 @@ const EnterpriseTaxCompliance = () => {
             </div>
           </div>
           <div className="stat-card info">
-            <div className="stat-icon"><FaClock /></div>
+            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>2.3s</h3>
               <p>Avg. Processing Time</p>
@@ -2506,7 +2449,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="step-content">
               <h4>Data Import & Normalization</h4>
               <p>Import transactions from banks, accounting software, and manual entries</p>
-              <span className="step-status">✓ Completed</span>
+              <span className="step-status">Completed</span>
             </div>
           </div>
 
@@ -2515,7 +2458,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="step-content">
               <h4>Duplicate Detection</h4>
               <p>AI-powered detection of duplicate transactions across all sources</p>
-              <span className="step-status">✓ 23 duplicates found & merged</span>
+              <span className="step-status"> 23 duplicates found & merged</span>
             </div>
           </div>
 
@@ -2524,7 +2467,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="step-content">
               <h4>Auto-Categorization</h4>
               <p>Machine learning categorizes transactions based on historical patterns</p>
-              <span className="step-status">✓ 94% accuracy rate</span>
+              <span className="step-status"> 94% accuracy rate</span>
             </div>
           </div>
 
@@ -2533,7 +2476,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="step-content">
               <h4>Rule-Based Matching</h4>
               <p>Apply custom reconciliation rules and matching algorithms</p>
-              <span className="step-status">⟳ Processing...</span>
+              <span className="step-status">Processing...</span>
             </div>
           </div>
 
@@ -2542,7 +2485,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="step-content">
               <h4>Exception Handling</h4>
               <p>Flag transactions requiring manual review or intervention</p>
-              <span className="step-status">○ Pending</span>
+              <span className="step-status">Pending</span>
             </div>
           </div>
 
@@ -2551,7 +2494,7 @@ const EnterpriseTaxCompliance = () => {
             <div className="step-content">
               <h4>Report Generation</h4>
               <p>Generate reconciliation reports and audit trails</p>
-              <span className="step-status">○ Pending</span>
+              <span className="step-status">Pending</span>
             </div>
           </div>
         </div>
@@ -2559,7 +2502,7 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Reconciliation Rules */}
       <div className="reconciliation-rules">
-        <h3><FaCog /> Active Reconciliation Rules</h3>
+        <h3>Active Reconciliation Rules</h3>
         <div className="rules-grid">
           <div className="rule-card">
             <div className="rule-header">
@@ -2613,7 +2556,7 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Manual Review Queue */}
       <div className="manual-review">
-        <h3><FaEye /> Manual Review Queue</h3>
+        <h3>Manual Review Queue</h3>
         <div className="review-queue">
           <div className="queue-header">
             <span>15 transactions need review</span>
@@ -2634,20 +2577,16 @@ const EnterpriseTaxCompliance = () => {
                   <span className="transaction-date">Jan 15, 2025</span>
                 </div>
                 <div className="review-suggestions">
-                  <button className="suggestion-btn" onClick={() => handleReviewAction('merge')}>
-                    Merge Transactions
+                  <button className="suggestion-btn" onClick={() => handleReviewAction('merge')}>Merge Transactions
                   </button>
-                  <button className="suggestion-btn" onClick={() => handleReviewAction('keep-both')}>
-                    Keep Both
+                  <button className="suggestion-btn" onClick={() => handleReviewAction('keep-both')}>Keep Both
                   </button>
-                  <button className="suggestion-btn" onClick={() => handleReviewAction('flag')}>
-                    Flag for Audit
+                  <button className="suggestion-btn" onClick={() => handleReviewAction('flag')}>Flag for Audit
                   </button>
                 </div>
               </div>
               <div className="review-actions">
-                <button className="btn-link" onClick={() => handleViewTransaction('office-depot')}>
-                  View Details
+                <button className="btn-link" onClick={() => handleViewTransaction('office-depot')}>View Details
                 </button>
               </div>
             </div>
@@ -2660,17 +2599,14 @@ const EnterpriseTaxCompliance = () => {
                   <span className="transaction-date">Jan 14, 2025</span>
                 </div>
                 <div className="review-suggestions">
-                  <button className="suggestion-btn" onClick={() => handleReviewAction('accept-suggestion')}>
-                    Accept Technology
+                  <button className="suggestion-btn" onClick={() => handleReviewAction('accept-suggestion')}>Accept Technology
                   </button>
-                  <button className="suggestion-btn" onClick={() => handleReviewAction('keep-office')}>
-                    Keep Office Supplies
+                  <button className="suggestion-btn" onClick={() => handleReviewAction('keep-office')}>Keep Office Supplies
                   </button>
                 </div>
               </div>
               <div className="review-actions">
-                <button className="btn-link" onClick={() => handleViewTransaction('aws')}>
-                  View Details
+                <button className="btn-link" onClick={() => handleViewTransaction('aws')}>View Details
                 </button>
               </div>
             </div>
@@ -2683,17 +2619,14 @@ const EnterpriseTaxCompliance = () => {
                   <span className="transaction-date">Jan 13, 2025</span>
                 </div>
                 <div className="review-suggestions">
-                  <button className="suggestion-btn" onClick={() => handleReviewAction('add-bank-record')}>
-                    Add Bank Record
+                  <button className="suggestion-btn" onClick={() => handleReviewAction('add-bank-record')}>Add Bank Record
                   </button>
-                  <button className="suggestion-btn" onClick={() => handleReviewAction('remove-transaction')}>
-                    Remove Transaction
+                  <button className="suggestion-btn" onClick={() => handleReviewAction('remove-transaction')}>Remove Transaction
                   </button>
                 </div>
               </div>
               <div className="review-actions">
-                <button className="btn-link" onClick={() => handleViewTransaction('starbucks')}>
-                  View Details
+                <button className="btn-link" onClick={() => handleViewTransaction('starbucks')}>View Details
                 </button>
               </div>
             </div>
@@ -2703,10 +2636,10 @@ const EnterpriseTaxCompliance = () => {
 
       {/* Reconciliation Reports */}
       <div className="reconciliation-reports">
-        <h3><FaFileAlt /> Reconciliation Reports</h3>
+        <h3>Reconciliation Reports</h3>
         <div className="reports-grid">
           <div className="report-card">
-            <div className="report-icon"><FaFileAlt /></div>
+            <div className="report-icon"></div>
             <div className="report-info">
               <h4>Daily Reconciliation Report</h4>
               <p>Automated daily reconciliation summary</p>
@@ -2714,13 +2647,13 @@ const EnterpriseTaxCompliance = () => {
             </div>
             <div className="report-actions">
               <button className="btn-link" onClick={() => handleDownloadReport('daily')}>
-                <FaDownload /> Download
+                Download
               </button>
             </div>
           </div>
 
           <div className="report-card">
-            <div className="report-icon"><FaFileInvoice /></div>
+            <div className="report-icon"></div>
             <div className="report-info">
               <h4>Monthly Reconciliation Audit</h4>
               <p>Comprehensive monthly audit trail</p>
@@ -2728,13 +2661,13 @@ const EnterpriseTaxCompliance = () => {
             </div>
             <div className="report-actions">
               <button className="btn-link" onClick={() => handleDownloadReport('monthly')}>
-                <FaDownload /> Download
+                Download
               </button>
             </div>
           </div>
 
           <div className="report-card">
-            <div className="report-icon"><FaDatabase /></div>
+            <div className="report-icon"></div>
             <div className="report-info">
               <h4>Exception Report</h4>
               <p>All transactions requiring manual review</p>
@@ -2742,7 +2675,7 @@ const EnterpriseTaxCompliance = () => {
             </div>
             <div className="report-actions">
               <button className="btn-link" onClick={() => handleDownloadReport('exceptions')}>
-                <FaDownload /> Download
+                Download
               </button>
             </div>
           </div>
@@ -2754,7 +2687,7 @@ const EnterpriseTaxCompliance = () => {
   const renderFiling = () => (
     <div className="filing-section">
       <div className="section-header">
-        <h2><FaFileExport /> Filing & Submission Assistance</h2>
+        <h2>Filing & Submission Assistance</h2>
         <p>Guided tax filing and form preparation</p>
       </div>
 
@@ -2883,55 +2816,55 @@ const EnterpriseTaxCompliance = () => {
           className={`nav-btn ${activeSection === 'overview' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'overview' })}
         >
-          <FaChartBar /> Overview
+          Overview
         </button>
         <button
           className={`nav-btn ${activeSection === 'profiles' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'profiles' })}
         >
-          <FaGlobe /> Tax Profiles
+          Tax Profiles
         </button>
         <button
           className={`nav-btn ${activeSection === 'calculator' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'calculator' })}
         >
-          <FaCalculator /> Tax Calculator
+          Tax Calculator
         </button>
         <button
           className={`nav-btn ${activeSection === 'documents' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'documents' })}
         >
-          <FaFileAlt /> Documents
+          Documents
         </button>
         <button
           className={`nav-btn ${activeSection === 'monitoring' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'monitoring' })}
         >
-          <FaBell /> Monitoring
+          Monitoring
         </button>
         <button
           className={`nav-btn ${activeSection === 'advisor' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'advisor' })}
         >
-          <FaRobot /> AI Advisor
+          AI Advisor
         </button>
         <button
           className={`nav-btn ${activeSection === 'vault' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'vault' })}
         >
-          <FaLock /> Compliance Vault
+          Compliance Vault
         </button>
         <button
           className={`nav-btn ${activeSection === 'reconciliation' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'reconciliation' })}
         >
-          <FaSync /> Reconciliation
+          Reconciliation
         </button>
         <button
           className={`nav-btn ${activeSection === 'filing' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'filing' })}
         >
-          <FaFileInvoice /> Filing Assistant
+          Filing Assistant
         </button>
       </div>
 

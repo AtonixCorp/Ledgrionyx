@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
-import { FaPercent, FaDownload, FaCheckCircle } from 'react-icons/fa';
 
 const mockTaxCenter = [
   { tax: 'Federal Income Tax (Q4 2024)', jurisdiction: 'USA', dueDate: '2025-01-15', amount: '$42,000.00', status: 'Filed', filedDate: '2025-01-10' },
@@ -29,11 +28,10 @@ export default function TaxCenter() {
       <PageHeader
         title="Tax Center"
         subtitle="Manage all tax obligations, filings, and compliance deadlines"
-        icon={<FaPercent />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Tax Summary</Button>
-            <Button variant="primary" size="small" icon={<FaCheckCircle />}>Mark as Filed</Button>
+            <Button variant="secondary" size="small">Tax Summary</Button>
+            <Button variant="primary" size="small">Mark as Filed</Button>
           </>
         }
       />

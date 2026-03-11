@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import {
-  FaStore, FaPlug, FaHandshake, FaPlusCircle, FaCheck,
-  FaSearch, FaStar, FaTimes,
-  FaShieldAlt, FaChartLine, FaFileInvoice, FaCreditCard,
-  FaUniversity, FaCalculator, FaUsers, FaBell, FaBoxOpen
-} from 'react-icons/fa';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
@@ -15,7 +9,7 @@ const CATALOG = [
   // Banking & Payments
   {
     id: 'stripe', name: 'Stripe Payments', category: 'Integration',
-    provider: 'Stripe Inc.', icon: <FaCreditCard />, color: '#635bff',
+    provider: 'Stripe Inc.', color: '#635bff',
     description: 'Accept payments, manage subscriptions, and process refunds directly within the platform.',
     tags: ['payments', 'billing', 'subscriptions'],
     rating: 4.9, reviews: 1240, featured: true,
@@ -23,7 +17,7 @@ const CATALOG = [
   },
   {
     id: 'plaid', name: 'Plaid Bank Connect', category: 'Integration',
-    provider: 'Plaid Technologies', icon: <FaUniversity />, color: '#008060',
+    provider: 'Plaid Technologies', color: '#008060',
     description: 'Connect and sync transactions from 11,000+ financial institutions automatically.',
     tags: ['banking', 'transactions', 'reconciliation'],
     rating: 4.8, reviews: 875, featured: true,
@@ -31,7 +25,7 @@ const CATALOG = [
   },
   {
     id: 'paypal', name: 'PayPal Business', category: 'Integration',
-    provider: 'PayPal Holdings', icon: <FaCreditCard />, color: '#003087',
+    provider: 'PayPal Holdings', color: '#003087',
     description: 'Collect payments and manage PayPal transactions alongside your bookkeeping.',
     tags: ['payments', 'invoicing'],
     rating: 4.5, reviews: 640, featured: false,
@@ -40,7 +34,7 @@ const CATALOG = [
   // Tax & Compliance
   {
     id: 'avalara', name: 'Avalara Tax Automation', category: 'Integration',
-    provider: 'Avalara Inc.', icon: <FaCalculator />, color: '#e8500a',
+    provider: 'Avalara Inc.', color: '#e8500a',
     description: 'Real-time tax rates and automated compliance for 12,000+ tax jurisdictions worldwide.',
     tags: ['tax', 'compliance', 'automation'],
     rating: 4.7, reviews: 520, featured: true,
@@ -48,7 +42,7 @@ const CATALOG = [
   },
   {
     id: 'taxjar', name: 'TaxJar', category: 'Integration',
-    provider: 'TaxJar by Stripe', icon: <FaCalculator />, color: '#00b2e3',
+    provider: 'TaxJar by Stripe', color: '#00b2e3',
     description: 'Sales tax calculations, nexus tracking, and automated returns for eCommerce and SaaS.',
     tags: ['tax', 'sales-tax', 'ecommerce'],
     rating: 4.6, reviews: 380, featured: false,
@@ -57,7 +51,7 @@ const CATALOG = [
   // Payroll
   {
     id: 'gusto', name: 'Gusto Payroll', category: 'Integration',
-    provider: 'Gusto Inc.', icon: <FaUsers />, color: '#f45d48',
+    provider: 'Gusto Inc.', color: '#f45d48',
     description: 'Full-service payroll processing with automatic tax filings and benefits management.',
     tags: ['payroll', 'hr', 'benefits'],
     rating: 4.8, reviews: 920, featured: true,
@@ -65,7 +59,7 @@ const CATALOG = [
   },
   {
     id: 'adp', name: 'ADP Run', category: 'Integration',
-    provider: 'ADP LLC', icon: <FaUsers />, color: '#d7282f',
+    provider: 'ADP LLC', color: '#d7282f',
     description: 'Enterprise payroll processing, HR administration, and workforce management.',
     tags: ['payroll', 'enterprise', 'hr'],
     rating: 4.5, reviews: 750, featured: false,
@@ -74,7 +68,7 @@ const CATALOG = [
   // Add-ons
   {
     id: 'ai_advisor', name: 'AI Financial Advisor', category: 'Add-on',
-    provider: 'AtonixCorp AI', icon: <FaChartLine />, color: '#8b5cf6',
+    provider: 'AtonixCorp AI', color: '#8b5cf6',
     description: 'AI-powered financial insights, anomaly detection, and predictive cash flow forecasting.',
     tags: ['ai', 'analytics', 'forecasting'],
     rating: 4.9, reviews: 445, featured: true,
@@ -82,7 +76,7 @@ const CATALOG = [
   },
   {
     id: 'doc_automation', name: 'Document Automation', category: 'Add-on',
-    provider: 'AtonixCorp Labs', icon: <FaFileInvoice />, color: '#0ea5e9',
+    provider: 'AtonixCorp Labs', color: '#0ea5e9',
     description: 'Auto-generate financial reports, proposals, and engagement letters from templates.',
     tags: ['documents', 'automation', 'reports'],
     rating: 4.7, reviews: 310, featured: false,
@@ -90,7 +84,7 @@ const CATALOG = [
   },
   {
     id: 'client_portal', name: 'Enhanced Client Portal', category: 'Add-on',
-    provider: 'AtonixCorp Labs', icon: <FaUsers />, color: '#10b981',
+    provider: 'AtonixCorp Labs', color: '#10b981',
     description: 'Branded self-service portal for clients with real-time financial visibility.',
     tags: ['portal', 'clients', 'collaboration'],
     rating: 4.8, reviews: 280, featured: false,
@@ -98,7 +92,7 @@ const CATALOG = [
   },
   {
     id: 'security_vault', name: 'Security Vault Pro', category: 'Add-on',
-    provider: 'AtonixCorp Security', icon: <FaShieldAlt />, color: '#ef4444',
+    provider: 'AtonixCorp Security', color: '#ef4444',
     description: 'Advanced encryption, multi-factor authentication, and audit trail capabilities.',
     tags: ['security', 'compliance', 'encryption'],
     rating: 4.9, reviews: 195, featured: false,
@@ -106,7 +100,7 @@ const CATALOG = [
   },
   {
     id: 'notifications_pro', name: 'Smart Alerts Pro', category: 'Add-on',
-    provider: 'AtonixCorp Labs', icon: <FaBell />, color: '#f59e0b',
+    provider: 'AtonixCorp Labs', color: '#f59e0b',
     description: 'Multi-channel alerts (email, SMS, WhatsApp) with custom threshold triggers.',
     tags: ['notifications', 'alerts', 'sms'],
     rating: 4.6, reviews: 220, featured: false,
@@ -115,7 +109,7 @@ const CATALOG = [
   // Partner Services
   {
     id: 'kpmg_advisory', name: 'KPMG Advisory Connect', category: 'Partner Service',
-    provider: 'KPMG International', icon: <FaHandshake />, color: '#00338d',
+    provider: 'KPMG International', color: '#00338d',
     description: 'Direct access to KPMG advisory services for tax planning, audits, and M&A support.',
     tags: ['advisory', 'audit', 'tax-planning'],
     rating: 4.9, reviews: 130, featured: true,
@@ -123,7 +117,7 @@ const CATALOG = [
   },
   {
     id: 'r2r', name: 'R2R Cloud Accounting', category: 'Partner Service',
-    provider: 'R2R Partners Group', icon: <FaHandshake />, color: '#1d4ed8',
+    provider: 'R2R Partners Group', color: '#1d4ed8',
     description: 'Outsourced CFO and controller services from certified accounting professionals.',
     tags: ['outsourcing', 'cfo', 'controller'],
     rating: 4.7, reviews: 88, featured: false,
@@ -131,7 +125,7 @@ const CATALOG = [
   },
   {
     id: 'inventory_link', name: 'InventoryLink', category: 'Partner Service',
-    provider: 'SupplyChain.io', icon: <FaBoxOpen />, color: '#059669',
+    provider: 'SupplyChain.io', color: '#059669',
     description: 'Connect your inventory management system for automated COGS and stock tracking.',
     tags: ['inventory', 'cogs', 'supply-chain'],
     rating: 4.5, reviews: 160, featured: false,
@@ -214,7 +208,7 @@ const Marketplace = () => {
       {/* Header */}
       <div className="mp-header">
         <div>
-          <h1><FaStore /> Marketplace</h1>
+          <h1>Marketplace</h1>
           <p>Extend your platform with integrations, add-ons, and partner services</p>
         </div>
       </div>
@@ -222,7 +216,7 @@ const Marketplace = () => {
       {/* Search & Filter */}
       <div className="mp-toolbar">
         <div className="mp-search">
-          <FaSearch className="mp-search-icon" />
+
           <input
             type="text"
             placeholder="Search integrations, add-ons, partners…"
@@ -237,9 +231,7 @@ const Marketplace = () => {
               className={`cat-tab ${category === cat ? 'active' : ''}`}
               onClick={() => setCategory(cat)}
             >
-              {cat === 'Integration' && <FaPlug />}
-              {cat === 'Add-on' && <FaPlusCircle />}
-              {cat === 'Partner Service' && <FaHandshake />}
+
               {cat}
             </button>
           ))}
@@ -249,14 +241,14 @@ const Marketplace = () => {
       {/* Installed count */}
       {Object.keys(installed).length > 0 && (
         <div className="mp-installed-bar">
-          <FaCheck /> <strong>{Object.keys(installed).length}</strong> integration(s) active
+           <strong>{Object.keys(installed).length}</strong> integration(s) active
         </div>
       )}
 
       {/* Featured */}
       {featured.length > 0 && (
         <div className="mp-section">
-          <h2 className="mp-section-title"><FaStar /> Featured</h2>
+          <h2 className="mp-section-title">Featured</h2>
           <div className="mp-featured-grid">
             {featured.map(item => (
               <div className="mp-featured-card" key={item.id} onClick={() => openDetail(item)}>
@@ -271,14 +263,14 @@ const Marketplace = () => {
                     {item.tags.slice(0, 3).map(t => <span className="tag" key={t}>{t}</span>)}
                   </div>
                   <div className="mfc-footer">
-                    <span className="rating"><FaStar /> {item.rating} ({item.reviews})</span>
+                    <span className="rating"> {item.rating} ({item.reviews})</span>
                     {installed[item.id] ? (
                       <button className="btn-installed" onClick={e => { e.stopPropagation(); handleUninstall(item); }}>
-                        <FaCheck /> Installed
+                        Installed
                       </button>
                     ) : (
                       <button className="btn-install" onClick={e => { e.stopPropagation(); handleInstall(item); }}>
-                        {installing[item.id] ? 'Installing…' : <><FaPlusCircle /> Install</>}
+                        {installing[item.id] ? 'Installing…' : <>Install</>}
                       </button>
                     )}
                   </div>
@@ -309,10 +301,10 @@ const Marketplace = () => {
                 </div>
                 <div className="mpc-desc">{item.description}</div>
                 <div className="mpc-footer">
-                  <span className="rating"><FaStar /> {item.rating}</span>
+                  <span className="rating"> {item.rating}</span>
                   {installed[item.id] ? (
                     <button className="btn-installed sm" onClick={e => { e.stopPropagation(); handleUninstall(item); }}>
-                      <FaCheck /> Active
+                      Active
                     </button>
                   ) : (
                     <button className="btn-install sm" onClick={e => { e.stopPropagation(); handleInstall(item); }}>
@@ -328,7 +320,7 @@ const Marketplace = () => {
 
       {filtered.length === 0 && (
         <div className="mp-empty">
-          <FaStore size={40} />
+
           <h2>No results found</h2>
           <p>Try a different search term or category.</p>
         </div>
@@ -338,7 +330,7 @@ const Marketplace = () => {
       {showModal && selectedItem && (
         <div className="mp-modal-overlay" onClick={() => setShowModal(false)}>
           <div className="mp-modal" onClick={e => e.stopPropagation()}>
-            <button className="mp-modal-close" onClick={() => setShowModal(false)}><FaTimes /></button>
+            <button className="mp-modal-close" onClick={() => setShowModal(false)}></button>
             <div className="modal-header">
               <div className="modal-icon" style={{ background: selectedItem.color + '18', color: selectedItem.color }}>
                 {selectedItem.icon}
@@ -354,7 +346,7 @@ const Marketplace = () => {
               <h3>Key Features</h3>
               <ul>
                 {selectedItem.features.map((f, i) => (
-                  <li key={i}><FaCheck /> {f}</li>
+                  <li key={i}> {f}</li>
                 ))}
               </ul>
             </div>
@@ -362,14 +354,14 @@ const Marketplace = () => {
               {selectedItem.tags.map(t => <span className="tag" key={t}>{t}</span>)}
             </div>
             <div className="modal-footer">
-              <span className="modal-rating"><FaStar /> {selectedItem.rating} · {selectedItem.reviews} reviews</span>
+              <span className="modal-rating"> {selectedItem.rating} · {selectedItem.reviews} reviews</span>
               {installed[selectedItem.id] ? (
                 <button className="btn-installed" onClick={() => handleUninstall(selectedItem)}>
-                  <FaCheck /> Installed — Click to Remove
+                  Installed — Click to Remove
                 </button>
               ) : (
                 <button className="btn-install large" onClick={() => { handleInstall(selectedItem); setShowModal(false); }}>
-                  {installing[selectedItem.id] ? 'Installing…' : <><FaPlusCircle /> Install Now</>}
+                  {installing[selectedItem.id] ? 'Installing…' : <>Install Now</>}
                 </button>
               )}
             </div>

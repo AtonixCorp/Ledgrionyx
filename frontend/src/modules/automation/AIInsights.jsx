@@ -1,11 +1,9 @@
 import React from 'react';
 import { PageHeader, Card } from '../../components/ui';
-import { FaRobot, FaChartLine, FaExclamationTriangle, FaLightbulb } from 'react-icons/fa';
 
 const insights = [
   {
     type: 'anomaly',
-    icon: FaExclamationTriangle,
     color: '#e74c3c',
     title: 'Unusual Expense Spike Detected',
     body: 'Technology expenses increased 42% month-over-month ($5,800 to $8,200). Review recent software subscriptions and AWS usage.',
@@ -13,7 +11,6 @@ const insights = [
   },
   {
     type: 'forecast',
-    icon: FaChartLine,
     color: '#667eea',
     title: 'Cash Flow Forecast',
     body: 'Based on current AR/AP trends, projected cash position in 30 days: $124,500. Consider accelerating collections on INV-0002 (Globex Inc, $4,200 overdue).',
@@ -21,7 +18,6 @@ const insights = [
   },
   {
     type: 'insight',
-    icon: FaLightbulb,
     color: '#f39c12',
     title: 'Tax Savings Opportunity',
     body: '3 vendor bills totaling $21,200 may be eligible for accelerated depreciation under Section 179. Review with your tax advisor.',
@@ -29,7 +25,6 @@ const insights = [
   },
   {
     type: 'insight',
-    icon: FaLightbulb,
     color: '#27ae60',
     title: 'Budget Performance Strong',
     body: 'You are tracking 8.2% under budget YTD with strong revenue growth (+8.7% in January vs forecast). On pace to exceed annual targets.',
@@ -43,7 +38,6 @@ export default function AIInsights() {
       <PageHeader
         title="AI Insights"
         subtitle="AI-powered anomaly detection, forecasting, and financial recommendations"
-        icon={<FaRobot />}
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

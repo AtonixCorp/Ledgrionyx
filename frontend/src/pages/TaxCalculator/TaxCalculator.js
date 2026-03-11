@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalculator, FaGlobe, FaDollarSign, FaChartLine, FaLightbulb, FaExchangeAlt, FaCheckCircle, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
+
 import taxCalculatorService from '../../services/taxCalculatorService';
 
 const TaxCalculator = () => {
@@ -40,7 +40,7 @@ const TaxCalculator = () => {
     }
 
     const calculation = taxCalculatorService.calculateTax(selectedCountry, parseFloat(amount), taxType);
-    
+
     if (!calculation.success) {
       alert(calculation.error);
       return;
@@ -81,10 +81,10 @@ const TaxCalculator = () => {
 
   const getSuggestionIcon = (type) => {
     switch (type) {
-      case 'success': return <FaCheckCircle className="suggestion-icon success" />;
-      case 'warning': return <FaExclamationTriangle className="suggestion-icon warning" />;
-      case 'info': return <FaInfoCircle className="suggestion-icon info" />;
-      default: return <FaLightbulb className="suggestion-icon" />;
+      case 'success': return ;
+      case 'warning': return ;
+      case 'info': return ;
+      default: return ;
     }
   };
 
@@ -92,22 +92,21 @@ const TaxCalculator = () => {
     <div className="tax-calculator-page">
       <div className="page-header">
         <h1 className="page-title">
-          <FaCalculator /> AI-Powered Tax Calculator
+          AI-Powered Tax Calculator
         </h1>
-        <p className="page-subtitle">
-          Calculate taxes across 60+ countries with intelligent optimization suggestions
+        <p className="page-subtitle">Calculate taxes across 60+ countries with intelligent optimization suggestions
         </p>
       </div>
 
       {/* Main Calculator */}
       <div className="calculator-card">
-        <h2><FaDollarSign /> Calculate Tax</h2>
-        
+        <h2>Calculate Tax</h2>
+
         <div className="calculator-form">
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="country">
-                <FaGlobe /> Country
+                Country
               </label>
               <select
                 id="country"
@@ -124,7 +123,7 @@ const TaxCalculator = () => {
 
             <div className="form-group">
               <label htmlFor="taxType">
-                <FaChartLine /> Tax Type
+                Tax Type
               </label>
               <select
                 id="taxType"
@@ -142,7 +141,7 @@ const TaxCalculator = () => {
 
           <div className="form-group">
             <label htmlFor="amount">
-              <FaDollarSign /> Amount ({currencyCode})
+              Amount ({currencyCode})
             </label>
             <input
               type="number"
@@ -157,7 +156,7 @@ const TaxCalculator = () => {
           </div>
 
           <button onClick={handleCalculate} className="btn-primary btn-large">
-            <FaCalculator /> Calculate Tax
+            Calculate Tax
           </button>
         </div>
       </div>
@@ -170,11 +169,11 @@ const TaxCalculator = () => {
               <h2>Tax Calculation Result</h2>
               {result.aiVerified && (
                 <span className="ai-verified-badge">
-                  <FaCheckCircle /> AI Verified
+                  AI Verified
                 </span>
               )}
             </div>
-            
+
             <div className="result-details">
               <div className="country-info">
                 <div className="result-item">
@@ -195,7 +194,7 @@ const TaxCalculator = () => {
 
               {result.notes && (
                 <div className="tax-notes">
-                  <FaInfoCircle /> <em>{result.notes}</em>
+                   <em>{result.notes}</em>
                 </div>
               )}
 
@@ -206,7 +205,7 @@ const TaxCalculator = () => {
                 <div className="formula-display">
                   <code>{result.calculation.formula}</code>
                 </div>
-                
+
                 <div className="result-item large">
                   <span className="result-label">Original Amount:</span>
                   <span className="result-value">{currencySymbol}{result.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
@@ -215,7 +214,7 @@ const TaxCalculator = () => {
                   <span className="result-label">Tax Amount:</span>
                   <span className="result-value tax-amount">{currencySymbol}{result.taxAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 </div>
-                
+
                 {taxType === 'vat' ? (
                   <div className="result-item large primary">
                     <span className="result-label">Total (with tax):</span>
@@ -232,12 +231,10 @@ const TaxCalculator = () => {
               <div className="result-footer">
                 <div className="footer-info">
                   <span>
-                    <FaCheckCircle className="footer-icon" />
                     Last updated: {result.lastUpdated}
                   </span>
                   {result.aiVerified && (
-                    <span className="verified-tag">
-                      AI Verified Tax Rate
+                    <span className="verified-tag">AI Verified Tax Rate
                     </span>
                   )}
                 </div>
@@ -249,7 +246,7 @@ const TaxCalculator = () => {
           {/* AI Suggestions */}
           {suggestions.length > 0 && (
             <div className="suggestions-card">
-              <h2><FaLightbulb /> AI-Powered Insights</h2>
+              <h2>AI-Powered Insights</h2>
               <div className="suggestions-list">
                 {suggestions.map((suggestion, index) => (
                   <div key={index} className={`suggestion-item ${suggestion.type}`}>
@@ -259,7 +256,7 @@ const TaxCalculator = () => {
                       <p>{suggestion.message}</p>
                       {suggestion.recommendation && (
                         <p className="suggestion-recommendation">
-                          💡 {suggestion.recommendation}
+                           {suggestion.recommendation}
                         </p>
                       )}
                     </div>
@@ -272,9 +269,8 @@ const TaxCalculator = () => {
           {/* Tax-Friendly Alternatives */}
           {alternatives.length > 0 && (
             <div className="alternatives-card">
-              <h2><FaExchangeAlt /> Tax-Friendly Alternatives</h2>
-              <p className="alternatives-intro">
-                Based on your selection, these countries offer lower {taxType} tax rates:
+              <h2>Tax-Friendly Alternatives</h2>
+              <p className="alternatives-intro">Based on your selection, these countries offer lower {taxType} tax rates:
               </p>
               <div className="alternatives-list">
                 {alternatives.map((alt, index) => (
@@ -300,9 +296,9 @@ const TaxCalculator = () => {
 
       {/* Country Comparison Tool */}
       <div className="comparison-section">
-        <h2><FaExchangeAlt /> Compare Countries</h2>
+        <h2>Compare Countries</h2>
         <p>Select up to 5 countries to compare their tax rates</p>
-        
+
         <div className="comparison-selector">
           <select
             onChange={(e) => {
@@ -333,7 +329,7 @@ const TaxCalculator = () => {
 
         {compareCountries.length > 0 && (
           <button onClick={handleCompare} className="btn-primary">
-            <FaChartLine /> Compare Tax Rates
+            Compare Tax Rates
           </button>
         )}
 
@@ -370,9 +366,8 @@ const TaxCalculator = () => {
 
       {/* API Information for Developers */}
       <div className="api-section">
-        <h2><FaInfoCircle /> API Integration</h2>
-        <p className="api-intro">
-          This calculator is built with a modular, API-ready architecture following the Atonix Capital specification.
+        <h2>API Integration</h2>
+        <p className="api-intro">This calculator is built with a modular, API-ready architecture following the Atonix Capital specification.
         </p>
         <div className="api-endpoints">
           <h3>Available Endpoints (Future)</h3>
@@ -399,29 +394,29 @@ const TaxCalculator = () => {
 
       {/* Tax Information */}
       <div className="info-section">
-        <h2><FaInfoCircle /> About This Calculator</h2>
+        <h2>About This Calculator</h2>
         <div className="info-grid">
           <div className="info-card">
-            <h3>🌍 Global Coverage</h3>
+            <h3>Global Coverage</h3>
             <p>Tax rates for 60+ countries including all major economies and tax havens</p>
           </div>
           <div className="info-card">
-            <h3>🤖 AI-Powered</h3>
+            <h3>AI-Powered</h3>
             <p>Intelligent suggestions for tax optimization and jurisdiction selection</p>
           </div>
           <div className="info-card">
-            <h3>📊 Multiple Tax Types</h3>
+            <h3>Multiple Tax Types</h3>
             <p>Corporate tax, personal income tax, and VAT/sales tax calculations</p>
           </div>
           <div className="info-card">
-            <h3>🔄 Regular Updates</h3>
+            <h3>Regular Updates</h3>
             <p>Tax rates updated regularly to reflect global tax law changes</p>
           </div>
         </div>
         <div className="disclaimer">
           <p>
-            <strong>Disclaimer:</strong> This calculator provides estimates based on standard tax rates. 
-            Actual tax liability may vary based on deductions, credits, and specific circumstances. 
+            <strong>Disclaimer:</strong>This calculator provides estimates based on standard tax rates.
+            Actual tax liability may vary based on deductions, credits, and specific circumstances.
             Consult with a qualified tax professional for accurate advice.
           </p>
         </div>

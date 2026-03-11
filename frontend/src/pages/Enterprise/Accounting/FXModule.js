@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaGlobe, FaExchangeAlt, FaPlus, FaTimes, FaSave, FaDownload } from 'react-icons/fa';
+
 import { exchangeRatesAPI, fxGainLossAPI } from '../../../services/api';
 
 const fmt = (v, currency = 'USD') => {
-  try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD', minimumFractionDigits: 4 }).format(parseFloat(v || 0)); } 
+  try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD', minimumFractionDigits: 4 }).format(parseFloat(v || 0)); }
   catch { return `${currency} ${parseFloat(v || 0).toFixed(4)}`; }
 };
 const fmtChange = (v) => {
@@ -13,11 +13,11 @@ const fmtChange = (v) => {
 };
 
 const TABS = [
-  { id: 'rates', label: 'Exchange Rates', icon: <FaGlobe /> },
-  { id: 'fxgl', label: 'FX Gain / Loss', icon: <FaExchangeAlt /> },
+  { id: 'rates', label: 'Exchange Rates', },
+  { id: 'fxgl', label: 'FX Gain / Loss', },
 ];
 
-// ─── Exchange Rates Tab ───────────────────────────────────────────────────────
+//  Exchange Rates Tab
 const ExchangeRatesTab = ({ entityId }) => {
   const [rates, setRates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +66,7 @@ const ExchangeRatesTab = ({ entityId }) => {
         <div className="acct-search" style={{ minWidth: 200 }}>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter by currency (USD, EUR...)  " style={{ paddingLeft: 12 }} />
         </div>
-        <button className="btn-primary" onClick={handleNew}><FaPlus /> Add Rate</button>
+        <button className="btn-primary" onClick={handleNew}>Add Rate</button>
       </div>
       {loading ? <div className="acct-loading">Loading rates...</div> : (
         <table className="acct-table">
@@ -81,8 +81,8 @@ const ExchangeRatesTab = ({ entityId }) => {
                 <td><span className="tag">{r.rate_type}</span></td>
                 <td><span className="tag tag-type">{r.source}</span></td>
                 <td className="acct-actions">
-                  <button className="btn-icon" onClick={() => handleEdit(r)}><FaPlus style={{ transform: 'rotate(45deg)' }} /></button>
-                  <button className="btn-icon btn-icon-danger" onClick={() => handleDelete(r.id)}><FaTimes /></button>
+                  <button className="btn-icon" onClick={() => handleEdit(r)}></button>
+                  <button className="btn-icon btn-icon-danger" onClick={() => handleDelete(r.id)}></button>
                 </td>
               </tr>
             ))}
@@ -92,7 +92,7 @@ const ExchangeRatesTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>{editing ? 'Edit Rate' : 'Add Exchange Rate'}</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>{editing ? 'Edit Rate' : 'Add Exchange Rate'}</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -110,7 +110,7 @@ const ExchangeRatesTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Save</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Save</>}</button>
             </div>
           </div>
         </div>
@@ -119,7 +119,7 @@ const ExchangeRatesTab = ({ entityId }) => {
   );
 };
 
-// ─── FX Gain / Loss Tab ───────────────────────────────────────────────────────
+//  FX Gain / Loss Tab
 const FXGainLossTab = ({ entityId }) => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -158,7 +158,7 @@ const FXGainLossTab = ({ entityId }) => {
         <div className="acct-stat-card"><div className="acct-stat-label">FX Losses</div><div className="acct-stat-count" style={{ color: '#e53e3e' }}>{losses.length}</div></div>
       </div>
       <div className="tab-toolbar">
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> Record FX Gain/Loss</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>Record FX Gain/Loss</button>
       </div>
       {loading ? <div className="acct-loading">Loading FX records...</div> : (
         <table className="acct-table">
@@ -181,7 +181,7 @@ const FXGainLossTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>Record FX Gain / Loss</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>Record FX Gain / Loss</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -200,7 +200,7 @@ const FXGainLossTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Record</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Record</>}</button>
             </div>
           </div>
         </div>
@@ -209,7 +209,7 @@ const FXGainLossTab = ({ entityId }) => {
   );
 };
 
-// ─── Main FX Module ───────────────────────────────────────────────────────────
+//  Main FX Module
 const FXModule = () => {
   const { entityId } = useParams();
   const [activeTab, setActiveTab] = useState('rates');
@@ -218,10 +218,10 @@ const FXModule = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaGlobe /> FX Accounting</h1>
+          <h1>FX Accounting</h1>
           <p>Manage exchange rates and track foreign currency gain/loss</p>
         </div>
-        <button className="btn-secondary"><FaDownload /> Export</button>
+        <button className="btn-secondary">Export</button>
       </div>
 
       <div className="module-tabs">

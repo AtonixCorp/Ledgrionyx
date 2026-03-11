@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card } from '../../components/ui';
-import { FaGlobe, FaLock, FaFileAlt, FaChartBar } from 'react-icons/fa';
 
 const mockPortalClients = [
   { name: 'Acme Corporation', lastLogin: '2025-01-31 09:45', documentsShared: 12, requestsPending: 2 },
@@ -13,7 +12,6 @@ export default function ClientPortal() {
       <PageHeader
         title="Client Portal"
         subtitle="Secure portal for clients to view reports, documents, and submit requests"
-        icon={<FaGlobe />}
       />
 
       <div className="stats-row">
@@ -51,10 +49,10 @@ export default function ClientPortal() {
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 <button className="filter-btn active" style={{ flex: 1 }}>
-                  <FaFileAlt style={{ marginRight: 4 }} />View Documents
+                  View Documents
                 </button>
                 <button className="filter-btn" style={{ flex: 1 }}>
-                  <FaChartBar style={{ marginRight: 4 }} />Reports
+                  Reports
                 </button>
               </div>
             </div>
@@ -64,7 +62,7 @@ export default function ClientPortal() {
 
       <Card title="Portal Security" style={{ marginTop: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', fontSize: 13, color: '#2c3e50' }}>
-          <FaLock style={{ color: '#27ae60', fontSize: 18 }} />
+
           <div>
             <div style={{ fontWeight: 600 }}>Two-Factor Authentication Required</div>
             <div style={{ color: '#7a8fa6' }}>All client portal access requires 2FA via email OTP</div>

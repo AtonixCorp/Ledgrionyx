@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaExclamationTriangle, FaChartBar, FaMap, FaBell } from 'react-icons/fa';
 
 const EnterpriseRiskExposure = () => {
   const { currentOrganization, fetchRiskExposureDashboard } = useEnterprise();
@@ -51,7 +50,7 @@ const EnterpriseRiskExposure = () => {
     <div className="risk-exposure-container">
       {/* Header */}
       <div className="risk-header">
-        <h1><FaExclamationTriangle /> Risk & Exposure Analysis</h1>
+        <h1>Risk & Exposure Analysis</h1>
         <p>Concentration risk, country risk scores, and compliance alerts</p>
       </div>
 
@@ -89,10 +88,10 @@ const EnterpriseRiskExposure = () => {
 
           {/* Country Risk Heatmap */}
           <div className="risk-heatmap-section">
-            <h2><FaMap /> Country Risk Scores</h2>
+            <h2>Country Risk Scores</h2>
             <div className="heatmap-grid">
               {(riskData.country_risks || []).map(country => (
-                <div 
+                <div
                   key={country.country}
                   className={`risk-cell ${country.status}`}
                   style={{backgroundColor: getRiskColor(country.risk_score) + '20', borderColor: getRiskColor(country.risk_score)}}
@@ -126,7 +125,7 @@ const EnterpriseRiskExposure = () => {
 
           {/* Compliance Alerts */}
           <div className="alerts-section">
-            <h2><FaBell /> Compliance Alerts & Actions Required</h2>
+            <h2>Compliance Alerts & Actions Required</h2>
             <div className="alerts-list">
               {(riskData.compliance_alerts || []).map(alert => (
                 <div key={alert.id} className={`alert-card severity-${alert.severity}`}>
@@ -146,7 +145,7 @@ const EnterpriseRiskExposure = () => {
 
           {/* FX Risk */}
           <div className="fx-risk-section">
-            <h2><FaChartBar /> Foreign Exchange Risk</h2>
+            <h2>Foreign Exchange Risk</h2>
             <div className="fx-grid">
               {(riskData.fx_exposure?.by_currency || []).map(curr => (
                 <div key={curr.currency} className="fx-card">

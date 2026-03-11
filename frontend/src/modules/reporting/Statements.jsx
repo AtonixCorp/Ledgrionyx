@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
-import { FaChartBar, FaDownload, FaFileAlt } from 'react-icons/fa';
 
 const STATEMENTS = [
-  { id: 'income', title: 'Income Statement', subtitle: 'P&L for the period', icon: FaChartBar },
-  { id: 'balance', title: 'Balance Sheet', subtitle: 'Assets, liabilities, equity', icon: FaFileAlt },
-  { id: 'cashflow', title: 'Cash Flow Statement', subtitle: 'Operating, investing, financing', icon: FaChartBar },
-  { id: 'equity', title: "Statement of Owners' Equity", subtitle: 'Changes in equity', icon: FaFileAlt },
-  { id: 'retained', title: 'Retained Earnings', subtitle: 'Accumulated earnings', icon: FaChartBar },
+  { id: 'income', title: 'Income Statement', subtitle: 'P&L for the period'},
+  { id: 'balance', title: 'Balance Sheet', subtitle: 'Assets, liabilities, equity'},
+  { id: 'cashflow', title: 'Cash Flow Statement', subtitle: 'Operating, investing, financing'},
+  { id: 'equity', title: "Statement of Owners'Equity", subtitle: 'Changes in equity'},
+  { id: 'retained', title: 'Retained Earnings', subtitle: 'Accumulated earnings'},
 ];
 
 const mockPL = [
@@ -28,9 +27,8 @@ export default function Statements() {
       <PageHeader
         title="Financial Statements"
         subtitle="GAAP-compliant income statement, balance sheet, and cash flow reports"
-        icon={<FaFileAlt />}
         actions={
-          <Button variant="secondary" size="small" icon={<FaDownload />}>Export PDF</Button>
+          <Button variant="secondary" size="small">Export PDF</Button>
         }
       />
 

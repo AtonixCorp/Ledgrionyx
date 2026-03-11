@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useEnterprise } from '../../../context/EnterpriseContext';
-import { FaPlus, FaEdit, FaTrash, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 
 const BudgetsManager = () => {
   const { entityId } = useParams();
   const { fetchEntityBudgets, createEntityBudget, fetchEntityExpenses, entities } = useEnterprise();
-  
+
   const [budgets, setBudgets] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +17,7 @@ const BudgetsManager = () => {
   // Budget categories
   const categories = [
     'Office Supplies', 'Travel', 'Marketing', 'Utilities', 'Rent', 'Insurance',
-    'Professional Services', 'Equipment', 'Software', 'Training', 'Meals', 
+    'Professional Services', 'Equipment', 'Software', 'Training', 'Meals',
     'Transportation', 'Salaries', 'Benefits', 'Taxes', 'Other'
   ];
 
@@ -127,7 +126,7 @@ const BudgetsManager = () => {
         </div>
         <div className="header-actions">
           <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <FaPlus /> Create Budget
+            Create Budget
           </button>
         </div>
       </div>
@@ -159,13 +158,13 @@ const BudgetsManager = () => {
         <div className="alert-summary">
           {exceededBudgets > 0 && (
             <div className="alert-card danger">
-              <FaExclamationTriangle />
+
               <span>{exceededBudgets} budget{exceededBudgets > 1 ? 's' : ''} exceeded</span>
             </div>
           )}
           {warningBudgets > 0 && (
             <div className="alert-card warning">
-              <FaExclamationTriangle />
+
               <span>{warningBudgets} budget{warningBudgets > 1 ? 's' : ''} approaching limit</span>
             </div>
           )}
@@ -182,10 +181,10 @@ const BudgetsManager = () => {
                 <h3>{budget.category}</h3>
                 <div className="budget-actions">
                   <button className="btn-icon-small" title="Edit" onClick={() => handleEditBudget(budget)}>
-                    <FaEdit />
+
                   </button>
                   <button className="btn-icon-small delete" title="Delete">
-                    <FaTrash />
+
                   </button>
                 </div>
               </div>
@@ -209,7 +208,7 @@ const BudgetsManager = () => {
 
               <div className="budget-progress">
                 <div className="progress-bar">
-                  <div 
+                  <div
                     className={`progress-fill ${status.status}`}
                     style={{ width: `${Math.min(status.percentage, 100)}%` }}
                   />
@@ -222,9 +221,9 @@ const BudgetsManager = () => {
 
               <div className="budget-meta">
                 <span className={`status-badge ${status.status}`}>
-                  {status.status === 'exceeded' && '⚠️ Exceeded'}
-                  {status.status === 'warning' && '⚠️ Warning'}
-                  {status.status === 'good' && <><FaCheckCircle /> On Track</>}
+                  {status.status === 'exceeded' && 'Exceeded'}
+                  {status.status === 'warning' && 'Warning'}
+                  {status.status === 'good' && <>On Track</>}
                 </span>
                 <span className="period">{budget.period}</span>
               </div>
@@ -243,7 +242,7 @@ const BudgetsManager = () => {
         <div className="empty-state">
           <p>No budgets created yet. Create your first budget to start tracking spending.</p>
           <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <FaPlus /> Create First Budget
+            Create First Budget
           </button>
         </div>
       )}
@@ -338,8 +337,7 @@ const BudgetsManager = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
-                  Cancel
+                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel
                 </button>
                 <button type="submit" className="btn-primary">
                   {editingBudget ? 'Update' : 'Create'} Budget

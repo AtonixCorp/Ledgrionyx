@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaRobot, FaPlus, FaPlay, FaPause } from 'react-icons/fa';
 
 const mockRules = [
   { id: 'AUTO-001', name: 'Auto-categorize AWS invoices', trigger: 'Bill received from AWS', action: 'Set category: Technology', runs: 24, lastRun: '2025-01-31', status: 'Active' },
@@ -30,10 +29,8 @@ export default function AutomationRules() {
       <PageHeader
         title="Automation Rules"
         subtitle="Create trigger-based rules to automate repetitive accounting tasks"
-        icon={<FaRobot />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            New Rule
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>New Rule
           </Button>
         }
       />
@@ -66,7 +63,7 @@ export default function AutomationRules() {
         </div>
         <div className="modal-footer">
           <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="primary" icon={<FaPlay />}>Create & Activate</Button>
+          <Button variant="primary">Create & Activate</Button>
         </div>
       </Modal>
     </div>

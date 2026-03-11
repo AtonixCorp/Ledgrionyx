@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaGlobe, FaPaperPlane } from 'react-icons/fa';
+
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
@@ -57,21 +57,18 @@ const Contact = () => {
 
   const contactMethods = [
     {
-      icon: <FaPhone />,
       title: 'Phone Support',
       description: 'Speak directly with our experts',
       contact: '+1 (555) 123-4567',
       availability: 'Mon-Fri, 9AM-6PM EST'
     },
     {
-      icon: <FaEnvelope />,
       title: 'Email Support',
       description: 'Send us a detailed message',
       contact: 'support@atonixcapital.com',
       availability: '24/7 Response within 24 hours'
     },
     {
-      icon: <FaGlobe />,
       title: 'Live Chat',
       description: 'Get instant help online',
       contact: 'Available on our website',
@@ -99,8 +96,7 @@ const Contact = () => {
           <div className="contact-content">
             <div className="contact-info">
               <h2>Get In Touch</h2>
-              <p>
-                Have questions about our platform, need support, or want to learn more about
+              <p>Have questions about our platform, need support, or want to learn more about
                 our services? We'd love to hear from you. Send us a message and we'll respond
                 as soon as possible.
               </p>
@@ -178,7 +174,6 @@ const Contact = () => {
                 </div>
 
                 <button type="submit" className="submit-btn">
-                  <FaPaperPlane />
                   Send Message
                 </button>
               </form>
@@ -195,18 +190,18 @@ const Contact = () => {
             {offices.map((office, index) => (
               <div key={index} className="office-card">
                 <div className="office-header">
-                  <FaMapMarkerAlt className="office-icon" />
+
                   <h3>{office.city}</h3>
                 </div>
                 <div className="office-details">
                   <p className="office-address">{office.address}</p>
                   <div className="office-contact">
                     <div className="contact-item">
-                      <FaPhone />
+
                       <span>{office.phone}</span>
                     </div>
                     <div className="contact-item">
-                      <FaEnvelope />
+
                       <span>{office.email}</span>
                     </div>
                   </div>
@@ -222,7 +217,7 @@ const Contact = () => {
         <div className="container">
           <div className="hours-content">
             <div className="hours-info">
-              <FaClock className="hours-icon" />
+
               <div>
                 <h3>Business Hours</h3>
                 <div className="hours-schedule">
@@ -239,8 +234,7 @@ const Contact = () => {
                     <span className="time">Closed</span>
                   </div>
                 </div>
-                <p className="hours-note">
-                  Emergency support available 24/7 for Enterprise clients.
+                <p className="hours-note">Emergency support available 24/7 for Enterprise clients.
                 </p>
               </div>
             </div>
@@ -260,7 +254,7 @@ const Contact = () => {
       <section className="map-section">
         <div className="container">
           <div className="map-placeholder">
-            <FaGlobe size={64} />
+
             <h3>Global Presence</h3>
             <p>Serving clients in 207 countries worldwide</p>
           </div>

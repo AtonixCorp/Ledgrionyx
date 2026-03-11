@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaSave, FaTimes } from 'react-icons/fa';
+
 import { useEnterprise } from '../../../context/EnterpriseContext';
 
 const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
-  const { 
-    fetchBookkeepingCategories, 
+  const {
+    fetchBookkeepingCategories,
     fetchBookkeepingAccounts,
-    createTransaction, 
-    updateTransaction 
+    createTransaction,
+    updateTransaction
   } = useEnterprise();
-  
+
   const [formData, setFormData] = useState({
     entity: entityId,
     type: 'expense',
@@ -23,7 +23,7 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
     date: new Date().toISOString().split('T')[0],
     attachment_url: ''
   });
-  
+
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
     setCategories(categoriesData.results || categoriesData);
     setAccounts(accountsData.results || accountsData);
   }, [entityId, fetchBookkeepingAccounts, fetchBookkeepingCategories]);
-  
+
   useEffect(() => {
     loadData();
     if (transaction) {
@@ -48,11 +48,11 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
       });
     }
   }, [entityId, loadData, transaction]);
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       if (transaction) {
         await updateTransaction(transaction.id, formData);
@@ -66,23 +66,23 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
       setLoading(false);
     }
   };
-  
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  
+
   const filteredCategories = categories.filter(cat => cat.type === formData.type);
-  
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content transaction-form" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{transaction ? 'Edit Transaction' : 'New Transaction'}</h2>
           <button onClick={onClose} className="close-btn">
-            <FaTimes />
+
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
@@ -92,19 +92,19 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
                 <option value="expense">Expense</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label>Date *</label>
-              <input 
-                type="date" 
-                name="date" 
-                value={formData.date} 
-                onChange={handleChange} 
-                required 
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
               />
             </div>
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
               <label>Category *</label>
@@ -115,7 +115,7 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label>Account *</label>
               <select name="account" value={formData.account} onChange={handleChange} required>
@@ -126,21 +126,21 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
               </select>
             </div>
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
               <label>Amount *</label>
-              <input 
-                type="number" 
-                name="amount" 
-                value={formData.amount} 
-                onChange={handleChange} 
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleChange}
                 step="0.01"
                 min="0"
-                required 
+                required
               />
             </div>
-            
+
             <div className="form-group">
               <label>Payment Method *</label>
               <select name="payment_method" value={formData.payment_method} onChange={handleChange} required>
@@ -153,34 +153,34 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
               </select>
             </div>
           </div>
-          
+
           <div className="form-group">
             <label>Description *</label>
-            <textarea 
-              name="description" 
-              value={formData.description} 
+            <textarea
+              name="description"
+              value={formData.description}
               onChange={handleChange}
               rows="3"
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label>Reference Number</label>
-            <input 
-              type="text" 
-              name="reference_number" 
-              value={formData.reference_number} 
+            <input
+              type="text"
+              name="reference_number"
+              value={formData.reference_number}
               onChange={handleChange}
             />
           </div>
-          
+
           <div className="form-actions">
             <button type="button" onClick={onClose} className="btn-secondary">
-              <FaTimes /> Cancel
+              Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
-              <FaSave /> {loading ? 'Saving...' : 'Save Transaction'}
+               {loading ? 'Saving...' : 'Save Transaction'}
             </button>
           </div>
         </form>

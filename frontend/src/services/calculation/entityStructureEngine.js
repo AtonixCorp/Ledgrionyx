@@ -1,16 +1,16 @@
 /**
  * Entity Structure Engine
- * 
+ *
  * Manages multi-entity organizational structures, relationships, and consolidation logic.
  * Handles parent-subsidiary relationships, ownership percentages, intercompany transactions,
  * and complex organizational hierarchies across multiple countries and currencies.
- * 
+ *
  * ALL CALCULATIONS USE calculationEngine - NEVER do math directly
  * ALL DATA VALIDATED using validationService
- * 
+ *
  * Phase 1 Feature: Foundation for enterprise consolidation
  * Phase 6 Dependencies: Used by consolidationEngine.js
- * 
+ *
  * Strict Rule: All entity relationships must be documented and traceable for audit purposes
  */
 
@@ -20,7 +20,7 @@ import * as ValidationService from './validationService';
 /**
  * Entity Structure Definition
  * Represents a single entity in the organizational hierarchy
- * 
+ *
  * @typedef {Object} EntityStructure
  * @property {string} entityId - Unique identifier (e.g., 'ENT-001-NG')
  * @property {string} entityName - Legal entity name
@@ -38,7 +38,7 @@ import * as ValidationService from './validationService';
 
 /**
  * Create a new entity in the organizational structure
- * 
+ *
  * @param {string} entityId - Unique entity identifier
  * @param {string} entityName - Legal entity name
  * @param {string} country - Country code (ISO 3166-1 alpha-2)
@@ -47,9 +47,9 @@ import * as ValidationService from './validationService';
  * @param {number} ownershipPercentage - Ownership percentage (0-100)
  * @param {string} currency - Operating currency
  * @returns {EntityStructure|null} Created entity or null if invalid
- * 
+ *
  * @example
- * const entity = createEntity('ENT-001-NG', 'Atonix Nigeria Ltd', 'NG', 'SUBSIDIARY', 
+ * const entity = createEntity('ENT-001-NG', 'Atonix Nigeria Ltd', 'NG', 'SUBSIDIARY',
  *   'ENT-000-US', 100, 'NGN');
  */
 export function createEntity(
@@ -62,7 +62,7 @@ export function createEntity(
   currency
 ) {
   // Validate inputs
-  if (!ValidationService.isValidString(entityId) || 
+  if (!ValidationService.isValidString(entityId) ||
       !ValidationService.isValidString(entityName) ||
       !ValidationService.isValidString(country) ||
       !ValidationService.isValidString(entityType)) {
@@ -70,7 +70,7 @@ export function createEntity(
     return null;
   }
 
-  if (!ValidationService.isValidNumber(ownershipPercentage) || 
+  if (!ValidationService.isValidNumber(ownershipPercentage) ||
       ownershipPercentage < 0 || ownershipPercentage > 100) {
     console.error('createEntity: Ownership percentage must be 0-100');
     return null;
@@ -121,12 +121,12 @@ export function createEntity(
 /**
  * Add a subsidiary to a parent entity
  * Updates both parent's subsidiaryIds array and child's parentId
- * 
+ *
  * @param {EntityStructure} parentEntity - Parent entity object
  * @param {EntityStructure} childEntity - Child entity object
  * @param {number} ownershipPercentage - Ownership percentage
  * @returns {boolean} Success indicator
- * 
+ *
  * @example
  * addSubsidiary(parentEntity, childEntity, 100);
  */
@@ -136,7 +136,7 @@ export function addSubsidiary(parentEntity, childEntity, ownershipPercentage) {
     return false;
   }
 
-  if (!ValidationService.isValidNumber(ownershipPercentage) || 
+  if (!ValidationService.isValidNumber(ownershipPercentage) ||
       ownershipPercentage < 0 || ownershipPercentage > 100) {
     console.error('addSubsidiary: Invalid ownership percentage');
     return false;
@@ -163,14 +163,14 @@ export function addSubsidiary(parentEntity, childEntity, ownershipPercentage) {
 /**
  * Check for circular relationships in entity structure
  * Prevents A→B→C→A type cycles
- * 
+ *
  * @param {EntityStructure} parentEntity - Potential parent
  * @param {EntityStructure} childEntity - Potential child
  * @returns {boolean} True if circular relationship exists
  */
 export function isCircularRelationship(parentEntity, childEntity) {
   if (!childEntity.parentId) return false;
-  
+
   let current = childEntity;
   const visited = new Set();
 
@@ -194,11 +194,11 @@ export function isCircularRelationship(parentEntity, childEntity) {
 /**
  * Get organization hierarchy as tree structure
  * Shows parent-subsidiary relationships with ownership percentages
- * 
+ *
  * @param {EntityStructure} rootEntity - Root entity to start traversal
  * @param {Map<string, EntityStructure>} entityMap - Map of all entities by ID
  * @returns {Object} Tree structure representation
- * 
+ *
  * @example
  * const tree = getOrganizationHierarchy(parentEntity, entityMap);
  * // Returns: {
@@ -235,14 +235,14 @@ export function getOrganizationHierarchy(rootEntity, entityMap) {
 /**
  * Calculate consolidated ownership percentage through hierarchy
  * Traces ownership from root to specific entity through all levels
- * 
+ *
  * Example: If A owns B (100%) and B owns C (80%), then consolidated ownership of C = 100% × 80% = 80%
- * 
+ *
  * @param {EntityStructure} rootEntity - Root/parent entity
  * @param {EntityStructure} targetEntity - Target entity to calculate ownership for
  * @param {Map<string, EntityStructure>} entityMap - Map of all entities
  * @returns {number} Consolidated ownership percentage
- * 
+ *
  * @example
  * const consolidated = getConsolidatedOwnership(parent, subsidiary, entityMap);
  * // Returns: 80 (representing 80% ownership through hierarchy)
@@ -286,11 +286,11 @@ export function getConsolidatedOwnership(rootEntity, targetEntity, entityMap) {
 /**
  * Eliminate intercompany transactions between consolidated entities
  * Removes double-counting of intra-group transactions
- * 
+ *
  * @param {Object[]} entities - Array of entity financial objects
  * @param {Object[]} transactions - Array of intercompany transactions
  * @returns {Object} Adjusted financials with eliminations applied
- * 
+ *
  * @example
  * const adjusted = eliminateIntercompanyTransactions(entities, transactions);
  * // Removes: revenue/expense for sales between group companies
@@ -343,12 +343,12 @@ export function eliminateIntercompanyTransactions(entities, transactions) {
 /**
  * Calculate goodwill on acquisition
  * Goodwill = Purchase Price - Fair Value of Net Assets
- * 
+ *
  * @param {number} purchasePrice - Total acquisition price
  * @param {number} fairValueAssets - Fair value of acquired assets
  * @param {number} fairValueLiabilities - Fair value of acquired liabilities
  * @returns {number} Goodwill amount (can be negative indicating bargain purchase)
- * 
+ *
  * @example
  * const goodwill = calculateGoodwill(1000000, 800000, 200000);
  * // Returns: 400000 (Purchase price - (Assets - Liabilities))
@@ -363,19 +363,19 @@ export function calculateGoodwill(purchasePrice, fairValueAssets, fairValueLiabi
 
   const netAssets = CalcEngine.subtract(fairValueAssets, fairValueLiabilities);
   const goodwill = CalcEngine.subtract(purchasePrice, netAssets);
-  
+
   return CalcEngine.round(goodwill, 2);
 }
 
 /**
  * Calculate minority interest (non-controlling interest)
  * Minority Interest = Non-controlling % × Fair Value of Net Assets
- * 
+ *
  * @param {number} nonControllingPercentage - Non-controlling ownership (0-100)
  * @param {number} fairValueAssets - Fair value of assets
  * @param {number} fairValueLiabilities - Fair value of liabilities
  * @returns {number} Minority interest amount
- * 
+ *
  * @example
  * const minority = calculateMinorityInterest(20, 500000, 200000);
  * // Returns: 60000 (20% of 300000 net assets)
@@ -395,19 +395,19 @@ export function calculateMinorityInterest(
   const netAssets = CalcEngine.subtract(fairValueAssets, fairValueLiabilities);
   const percentageAmount = CalcEngine.multiply(netAssets, nonControllingPercentage);
   const minorityInterest = CalcEngine.divide(percentageAmount, 100);
-  
+
   return CalcEngine.round(minorityInterest, 2);
 }
 
 /**
  * Calculate step acquisition impact
  * When ownership increases through multiple purchases, affects goodwill calculation
- * 
+ *
  * @param {number[]} purchasePrices - Array of purchase prices (chronological)
  * @param {number[]} purchasePercentages - Ownership % for each purchase
  * @param {number} currentFairValue - Current fair value of net assets
  * @returns {Object} Step acquisition details
- * 
+ *
  * @example
  * const stepAcq = calculateStepAcquisition(
  *   [500000, 300000],
@@ -433,7 +433,7 @@ export function calculateStepAcquisition(purchasePrices, purchasePercentages, cu
   for (let i = 0; i < purchasePrices.length; i++) {
     const price = purchasePrices[i];
     const percentage = purchasePercentages[i];
-    
+
     totalCost = CalcEngine.add(totalCost, price);
     totalOwnership = CalcEngine.add(totalOwnership, percentage);
 
@@ -463,11 +463,11 @@ export function calculateStepAcquisition(purchasePrices, purchasePercentages, cu
 /**
  * Get all descendants of an entity (all subsidiaries at all levels)
  * Useful for identifying which entities to consolidate
- * 
+ *
  * @param {EntityStructure} entity - Entity to find descendants for
  * @param {Map<string, EntityStructure>} entityMap - Map of all entities
  * @returns {EntityStructure[]} Array of all descendant entities
- * 
+ *
  * @example
  * const descendants = getAllDescendants(parentEntity, entityMap);
  * // Returns all subsidiaries, sub-subsidiaries, etc.
@@ -497,10 +497,10 @@ export function getAllDescendants(entity, entityMap) {
 /**
  * Validate entity structure for completeness and consistency
  * Checks for missing data, circular relationships, invalid percentages
- * 
+ *
  * @param {EntityStructure[]} entities - All entities in structure
  * @returns {Object} Validation report with errors and warnings
- * 
+ *
  * @example
  * const report = validateEntityStructure(entities);
  * // Returns: { valid: true, errors: [], warnings: [] }
@@ -559,10 +559,10 @@ export function validateEntityStructure(entities) {
 /**
  * Generate entity structure report
  * Summary of all entities, their relationships, and consolidation status
- * 
+ *
  * @param {EntityStructure[]} entities - All entities
  * @returns {string} Formatted report
- * 
+ *
  * @example
  * const report = generateEntityStructureReport(entities);
  * console.log(report);

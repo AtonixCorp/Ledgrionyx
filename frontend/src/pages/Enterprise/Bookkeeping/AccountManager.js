@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaWallet, FaUniversity, FaMoneyBillWave, FaToggleOn, FaToggleOff } from 'react-icons/fa';
+
 import { useEnterprise } from '../../../context/EnterpriseContext';
 
 const AccountManager = () => {
   const { entityId } = useParams();
-  const { 
+  const {
     fetchBookkeepingAccounts,
     createBookkeepingAccount,
-    entities 
+    entities
   } = useEnterprise();
-  
+
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -22,7 +22,7 @@ const AccountManager = () => {
     description: '',
     balance: 0
   });
-  
+
   const entity = entities.find(e => e.id === parseInt(entityId));
 
   const loadAccounts = useCallback(async () => {
@@ -31,20 +31,20 @@ const AccountManager = () => {
     setAccounts(data.results || data);
     setLoading(false);
   }, [entityId, fetchBookkeepingAccounts]);
-  
+
   useEffect(() => {
     loadAccounts();
   }, [loadAccounts]);
-  
+
   useEffect(() => {
     if (entity) {
       setFormData(prev => ({ ...prev, currency: entity.local_currency || 'USD' }));
     }
   }, [entity]);
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       await createBookkeepingAccount({
         entity: parseInt(entityId),
@@ -66,29 +66,29 @@ const AccountManager = () => {
       alert('Failed to create account: ' + err.message);
     }
   };
-  
+
   const getAccountIcon = (type) => {
     switch (type) {
       case 'bank':
-        return <FaUniversity />;
+        return ;
       case 'wallet':
-        return <FaWallet />;
+        return ;
       case 'cash':
-        return <FaMoneyBillWave />;
+        return ;
       default:
-        return <FaWallet />;
+        return ;
     }
   };
-  
+
   const formatCurrency = (amount, currency = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency
     }).format(amount);
   };
-  
+
   const totalBalance = accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
-  
+
   if (loading) {
     return (
       <div className="account-manager">
@@ -96,22 +96,22 @@ const AccountManager = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="account-manager">
       {/* Header */}
       <div className="page-header">
         <div className="header-left">
-          <h1><FaWallet /> Accounts</h1>
+          <h1>Accounts</h1>
           <p>{entity?.name} • {accounts.length} accounts</p>
         </div>
         <div className="header-right">
           <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <FaPlus /> New Account
+            New Account
           </button>
         </div>
       </div>
-      
+
       {/* Total Balance Card */}
       <div className="total-balance-card">
         <div className="balance-header">
@@ -122,7 +122,7 @@ const AccountManager = () => {
           {formatCurrency(totalBalance, entity?.local_currency)}
         </div>
       </div>
-      
+
       {/* Accounts Grid */}
       <div className="accounts-grid">
         {accounts.length > 0 ? (
@@ -131,41 +131,41 @@ const AccountManager = () => {
               <div className="account-icon">
                 {getAccountIcon(account.type)}
               </div>
-              
+
               <div className="account-content">
                 <div className="account-header">
                   <h4>{account.name}</h4>
                   <span className={`account-status ${account.is_active ? 'active' : 'inactive'}`}>
-                    {account.is_active ? <FaToggleOn /> : <FaToggleOff />}
+
                   </span>
                 </div>
-                
+
                 <div className="account-type-badge">
                   <span className="badge">{account.type}</span>
                   {account.account_number && (
                     <span className="account-number">••••{account.account_number.slice(-4)}</span>
                   )}
                 </div>
-                
+
                 <div className="account-balance">
                   {formatCurrency(account.balance, account.currency)}
                 </div>
-                
+
                 <div className="account-meta">
                   <span>{account.transaction_count || 0} transactions</span>
                   <span>{account.currency}</span>
                 </div>
-                
+
                 {account.description && (
                   <p className="account-description">{account.description}</p>
                 )}
-                
+
                 <div className="account-actions">
                   <button className="btn-icon" title="Edit account">
-                    <FaEdit />
+
                   </button>
                   <button className="btn-icon btn-delete" title="Delete account">
-                    <FaTrash />
+
                   </button>
                 </div>
               </div>
@@ -173,16 +173,16 @@ const AccountManager = () => {
           ))
         ) : (
           <div className="empty-state">
-            <FaWallet size={48} />
+
             <h3>No Accounts Yet</h3>
             <p>Create your first account to start tracking transactions</p>
             <button className="btn-primary" onClick={() => setShowForm(true)}>
-              <FaPlus /> Create Account
+              Create Account
             </button>
           </div>
         )}
       </div>
-      
+
       {/* Create Account Form Modal */}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
@@ -191,7 +191,7 @@ const AccountManager = () => {
               <h3>Create New Account</h3>
               <button className="btn-close" onClick={() => setShowForm(false)}>×</button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Account Name *</label>
@@ -203,7 +203,7 @@ const AccountManager = () => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Account Type *</label>
                 <select
@@ -216,7 +216,7 @@ const AccountManager = () => {
                   <option value="cash">Cash</option>
                 </select>
               </div>
-              
+
               <div className="form-group">
                 <label>Currency</label>
                 <input
@@ -227,7 +227,7 @@ const AccountManager = () => {
                   maxLength="3"
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Account Number (Optional)</label>
                 <input
@@ -237,7 +237,7 @@ const AccountManager = () => {
                   placeholder="0123456789"
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Initial Balance</label>
                 <input
@@ -248,7 +248,7 @@ const AccountManager = () => {
                   placeholder="0.00"
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Description (Optional)</label>
                 <textarea
@@ -258,13 +258,11 @@ const AccountManager = () => {
                   rows="3"
                 />
               </div>
-              
+
               <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
-                  Cancel
+                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel
                 </button>
-                <button type="submit" className="btn-primary">
-                  Create Account
+                <button type="submit" className="btn-primary">Create Account
                 </button>
               </div>
             </form>

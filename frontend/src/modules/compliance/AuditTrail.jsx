@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
-import { FaShieldAlt, FaDownload } from 'react-icons/fa';
 
 const mockAudit = [
   { timestamp: '2025-01-31 14:23:01', user: 'sarah.johnson@atc.com', action: 'Journal Entry Created', entity: 'JE-2025-0142', changes: 'Debit: Rent Expense $5,500 / Credit: Cash $5,500', ip: '192.168.1.45' },
@@ -25,9 +24,8 @@ export default function AuditTrail() {
       <PageHeader
         title="Audit Trail"
         subtitle="Immutable log of all user actions, changes, and system events"
-        icon={<FaShieldAlt />}
         actions={
-          <Button variant="secondary" size="small" icon={<FaDownload />}>Export Audit Log</Button>
+          <Button variant="secondary" size="small">Export Audit Log</Button>
         }
       />
 

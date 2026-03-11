@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaQuestionCircle, FaBook, FaVideo, FaEnvelope, FaPhone, FaComments, FaLifeRing, FaFileAlt, FaTimes, FaPaperPlane } from 'react-icons/fa';
+
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
@@ -90,7 +90,7 @@ const Support = () => {
           <div className="help-grid">
             <div className="help-card">
               <div className="help-icon">
-                <FaQuestionCircle />
+
               </div>
               <h3>FAQs</h3>
               <p>Find answers to commonly asked questions about our platform and services.</p>
@@ -98,7 +98,7 @@ const Support = () => {
             </div>
             <div className="help-card">
               <div className="help-icon">
-                <FaBook />
+
               </div>
               <h3>Documentation</h3>
               <p>Comprehensive guides and tutorials to help you make the most of Atonix Capital.</p>
@@ -106,7 +106,7 @@ const Support = () => {
             </div>
             <div className="help-card">
               <div className="help-icon">
-                <FaVideo />
+
               </div>
               <h3>Video Tutorials</h3>
               <p>Step-by-step video guides to walk you through our key features and tools.</p>
@@ -114,7 +114,7 @@ const Support = () => {
             </div>
             <div className="help-card">
               <div className="help-icon">
-                <FaLifeRing />
+
               </div>
               <h3>Live Support</h3>
               <p>Connect with our support team for personalized assistance.</p>
@@ -182,7 +182,7 @@ const Support = () => {
           <div className="contact-grid">
             <div className="contact-method">
               <div className="contact-icon">
-                <FaComments />
+
               </div>
               <h3>Live Chat</h3>
               <p>Get instant help from our support team during business hours.</p>
@@ -193,7 +193,7 @@ const Support = () => {
             </div>
             <div className="contact-method">
               <div className="contact-icon">
-                <FaEnvelope />
+
               </div>
               <h3>Email Support</h3>
               <p>Send us a detailed message and we'll get back to you within 24 hours.</p>
@@ -204,7 +204,7 @@ const Support = () => {
             </div>
             <div className="contact-method">
               <div className="contact-icon">
-                <FaPhone />
+
               </div>
               <h3>Phone Support</h3>
               <p>Speak directly with our experts for urgent matters.</p>
@@ -215,7 +215,7 @@ const Support = () => {
             </div>
             <div className="contact-method">
               <div className="contact-icon">
-                <FaFileAlt />
+
               </div>
               <h3>Submit a Ticket</h3>
               <p>Create a support ticket for complex issues that need detailed investigation.</p>
@@ -257,8 +257,7 @@ const Support = () => {
           </div>
           <div className="community-content">
             <div className="community-text">
-              <p>
-                Connect with other Atonix Capital users, share insights, and learn from the community.
+              <p>Connect with other Atonix Capital users, share insights, and learn from the community.
                 Our forums and social channels are great places to get peer support and discover new ways
                 to maximize your financial potential.
               </p>
@@ -294,7 +293,7 @@ const Support = () => {
             <div className="modal-header">
               <h2>Submit Support Ticket</h2>
               <button className="modal-close" onClick={() => setShowTicketModal(false)}>
-                <FaTimes />
+
               </button>
             </div>
             <form onSubmit={handleTicketSubmit} className="ticket-form">
@@ -369,11 +368,9 @@ const Support = () => {
                 ></textarea>
               </div>
               <div className="form-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowTicketModal(false)}>
-                  Cancel
+                <button type="button" className="btn-cancel" onClick={() => setShowTicketModal(false)}>Cancel
                 </button>
-                <button type="submit" className="btn-submit">
-                  Submit Ticket
+                <button type="submit" className="btn-submit">Submit Ticket
                 </button>
               </div>
             </form>
@@ -386,14 +383,14 @@ const Support = () => {
         <div className="chat-widget">
           <div className="chat-header">
             <div className="chat-header-info">
-              <FaComments />
+
               <div>
                 <h3>Live Support</h3>
                 <span className="chat-status">Online</span>
               </div>
             </div>
             <button className="chat-close" onClick={() => setShowChat(false)}>
-              <FaTimes />
+
             </button>
           </div>
           <div className="chat-messages">
@@ -415,7 +412,7 @@ const Support = () => {
               onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
             />
             <button onClick={handleChatSend} className="chat-send-btn">
-              <FaPaperPlane />
+
             </button>
           </div>
         </div>

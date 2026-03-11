@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaStore, FaPlus } from 'react-icons/fa';
 
 const mockVendors = [
   { id: 'V-001', name: 'AWS Cloud', email: 'billing@aws.com', category: 'Technology', balance: '$3,200.00', status: 'Active' },
@@ -28,10 +27,8 @@ export default function Vendors() {
       <PageHeader
         title="Vendors"
         subtitle="Manage your vendor directory and accounts payable contacts"
-        icon={<FaStore />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            Add Vendor
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Add Vendor
           </Button>
         }
       />

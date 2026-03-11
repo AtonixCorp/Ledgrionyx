@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaUsersCog, FaPlus } from 'react-icons/fa';
 
 const ROLE_COLORS = { Admin: '#e74c3c', Manager: '#667eea', Editor: '#27ae60', Viewer: '#95a5a6' };
 
@@ -32,10 +31,8 @@ export default function TeamPermissions() {
       <PageHeader
         title="Team & Permissions"
         subtitle="Manage team members, roles, and entity-level access controls"
-        icon={<FaUsersCog />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            Invite User
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Invite User
           </Button>
         }
       />

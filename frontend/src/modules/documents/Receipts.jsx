@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaFileAlt, FaPlus } from 'react-icons/fa';
 
 const mockReceipts = [
   { id: 'REC-001', merchant: 'Amazon AWS', date: '2025-01-15', amount: '$3,200.00', category: 'Technology', status: 'Matched', bill: 'BILL-0001' },
@@ -31,10 +30,8 @@ export default function Receipts() {
       <PageHeader
         title="Receipts"
         subtitle="Capture, categorize, and match receipts to expense transactions"
-        icon={<FaFileAlt />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            Upload Receipt
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Upload Receipt
           </Button>
         }
       />

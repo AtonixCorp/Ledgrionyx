@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { FaUser, FaBuilding, FaCheckCircle } from 'react-icons/fa';
 
 const AccountTypeSelector = ({ onSelect }) => {
   const [selectedType, setSelectedType] = useState(null);
@@ -25,11 +24,11 @@ const AccountTypeSelector = ({ onSelect }) => {
         >
           <div className="card-header">
             <div className="icon-container personal-icon">
-              <FaUser size={40} />
+
             </div>
             {selectedType === 'personal' && (
               <div className="selected-badge">
-                <FaCheckCircle size={24} />
+
               </div>
             )}
           </div>
@@ -37,29 +36,28 @@ const AccountTypeSelector = ({ onSelect }) => {
           <div className="card-content">
             <h3>Personal</h3>
             <p className="badge-label">For Individuals</p>
-            <p className="card-description">
-              Manage your personal finances and track taxes across multiple countries with ease.
+            <p className="card-description">Manage your personal finances and track taxes across multiple countries with ease.
             </p>
 
             <div className="features-list">
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Track income & expenses</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Monitor multiple countries</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Manage tax obligations</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Personal insights & alerts</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Budget planning tools</span>
               </div>
             </div>
@@ -82,11 +80,11 @@ const AccountTypeSelector = ({ onSelect }) => {
         >
           <div className="card-header">
             <div className="icon-container enterprise-icon">
-              <FaBuilding size={40} />
+
             </div>
             {selectedType === 'enterprise' && (
               <div className="selected-badge">
-                <FaCheckCircle size={24} />
+
               </div>
             )}
           </div>
@@ -94,29 +92,28 @@ const AccountTypeSelector = ({ onSelect }) => {
           <div className="card-content">
             <h3>Enterprise</h3>
             <p className="badge-label">For Organizations</p>
-            <p className="card-description">
-              Manage multiple entities and teams with advanced compliance and reporting features.
+            <p className="card-description">Manage multiple entities and teams with advanced compliance and reporting features.
             </p>
 
             <div className="features-list">
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Multi-entity management</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Team collaboration</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Role-based access control</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Compliance tracking & alerts</span>
               </div>
               <div className="feature-item">
-                <span className="feature-icon">✓</span>
+                <span className="feature-icon"></span>
                 <span>Advanced reporting & exports</span>
               </div>
             </div>
@@ -131,7 +128,7 @@ const AccountTypeSelector = ({ onSelect }) => {
       </div>
 
       <div className="selector-note">
-        <p>💡 <strong>Pro Tip:</strong> You can upgrade or change your account type anytime in settings</p>
+        <p> <strong>Pro Tip:</strong>You can upgrade or change your account type anytime in settings</p>
       </div>
     </div>
   );

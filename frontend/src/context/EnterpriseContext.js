@@ -37,7 +37,7 @@ export const EnterpriseProvider = ({ children }) => {
     const token = localStorage.getItem('token') || localStorage.getItem('access_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
-  
+
   // Organization state
   const [organizations, setOrganizations] = useState([]);
   const [currentOrganization, setCurrentOrganization] = useState(null);
@@ -76,31 +76,31 @@ export const EnterpriseProvider = ({ children }) => {
     VIEW_ORG_OVERVIEW: 'view_org_overview',
     MANAGE_ORG_SETTINGS: 'manage_org_settings',
     MANAGE_BILLING: 'manage_billing',
-    
+
     // Entity
     VIEW_ENTITIES: 'view_entities',
     CREATE_ENTITY: 'create_entity',
     EDIT_ENTITY: 'edit_entity',
     DELETE_ENTITY: 'delete_entity',
-    
+
     // Tax
     VIEW_TAX_COMPLIANCE: 'view_tax_compliance',
     EDIT_TAX_COMPLIANCE: 'edit_tax_compliance',
     EXPORT_TAX_REPORTS: 'export_tax_reports',
-    
+
     // Cashflow
     VIEW_CASHFLOW: 'view_cashflow',
     EDIT_CASHFLOW: 'edit_cashflow',
-    
+
     // Risk
     VIEW_RISK_EXPOSURE: 'view_risk_exposure',
     EDIT_RISK_EXPOSURE: 'edit_risk_exposure',
-    
+
     // Reports
     VIEW_REPORTS: 'view_reports',
     GENERATE_REPORTS: 'generate_reports',
     EXPORT_REPORTS: 'export_reports',
-    
+
     // Team
     VIEW_TEAM: 'view_team',
     MANAGE_TEAM: 'manage_team',
@@ -208,7 +208,7 @@ export const EnterpriseProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setTeamMembers(Array.isArray(data) ? data : data.results || []);
-        
+
         // Find current user's role
         const currentMember = (Array.isArray(data) ? data : data.results || []).find(
           m => m.user_email === user?.email
@@ -562,7 +562,7 @@ export const EnterpriseProvider = ({ children }) => {
   /**
    * Entity-specific financial operations
    */
-  
+
   /**
    * Fetch entity-specific expenses
    */
@@ -1144,7 +1144,7 @@ export const EnterpriseProvider = ({ children }) => {
       const response = await fetch(apiUrl(`/api/bookkeeping-categories/?entity_id=${entityId}`), {
         headers: buildAuthHeaders(),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1170,7 +1170,7 @@ export const EnterpriseProvider = ({ children }) => {
         },
         body: JSON.stringify({ entity_id: entityId }),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1195,7 +1195,7 @@ export const EnterpriseProvider = ({ children }) => {
         },
         body: JSON.stringify(categoryData),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1217,7 +1217,7 @@ export const EnterpriseProvider = ({ children }) => {
       const response = await fetch(apiUrl(`/api/bookkeeping-accounts/?entity_id=${entityId}`), {
         headers: buildAuthHeaders(),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1243,7 +1243,7 @@ export const EnterpriseProvider = ({ children }) => {
         },
         body: JSON.stringify(accountData),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1266,7 +1266,7 @@ export const EnterpriseProvider = ({ children }) => {
       const response = await fetch(apiUrl(`/api/transactions/?${params}`), {
         headers: buildAuthHeaders(),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1292,7 +1292,7 @@ export const EnterpriseProvider = ({ children }) => {
         },
         body: JSON.stringify(transactionData),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1319,7 +1319,7 @@ export const EnterpriseProvider = ({ children }) => {
         },
         body: JSON.stringify(transactionData),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1342,7 +1342,7 @@ export const EnterpriseProvider = ({ children }) => {
         method: 'DELETE',
         headers: buildAuthHeaders(),
       });
-      
+
       if (response.ok) {
         return true;
       } else {
@@ -1364,7 +1364,7 @@ export const EnterpriseProvider = ({ children }) => {
       const response = await fetch(apiUrl(`/api/transactions/summary/?${params}`), {
         headers: buildAuthHeaders(),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1485,7 +1485,7 @@ export const EnterpriseProvider = ({ children }) => {
       const response = await fetch(apiUrl(`/api/bookkeeping-audit-logs/?entity_id=${entityId}`), {
         headers: buildAuthHeaders(),
       });
-      
+
       if (response.ok) {
         return await response.json();
       } else {
@@ -1536,7 +1536,7 @@ export const EnterpriseProvider = ({ children }) => {
     updateOrganization,
     createEntity,
     addTeamMember,
-    
+
     // Entity-specific financial methods
     fetchEntityExpenses,
     fetchEntityIncome,

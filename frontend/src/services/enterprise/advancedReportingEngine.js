@@ -1,8 +1,8 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════════════
+ *
  * ADVANCED REPORTING & ANALYTICS ENGINE - Phase 6 Enterprise Feature
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
+ *
+ *
  * Comprehensive advanced reporting and analytics platform providing:
  * - Custom KPI definition and calculation
  * - Interactive dashboard builder
@@ -11,7 +11,7 @@
  * - Advanced visualization data generation
  * - Scheduled report delivery
  * - Report versioning and historical tracking
- * 
+ *
  * @author Enterprise Analytics Team
  * @version 2.0
  * @since Phase 6
@@ -274,7 +274,7 @@ export function performTrendAnalysis(historicalData, options = {}) {
   const xValues = Array.from({ length: n }, (_, i) => i);
   const xMean = xValues.reduce((a, b) => a + b) / n;
   const yMean = mean;
-  
+
   const slope = xValues.reduce((sum, x, i) => sum + (x - xMean) * (values[i] - yMean), 0) /
                 xValues.reduce((sum, x) => sum + Math.pow(x - xMean, 2), 0);
   const intercept = yMean - slope * xMean;
@@ -286,7 +286,7 @@ export function performTrendAnalysis(historicalData, options = {}) {
     const x = n + i;
     const forecastValue = intercept + slope * x;
     const confidenceInterval = 1.96 * stdDev; // 95% confidence
-    
+
     forecast.push({
       period: i + 1,
       forecastValue,
@@ -334,11 +334,11 @@ export function performTrendAnalysis(historicalData, options = {}) {
 export function performPeerBenchmarking(entityMetrics, peerMetrics, industry = 'general') {
   // Calculate key ratios for entity
   const entityRatios = calculateIndustryRatios(entityMetrics, industry);
-  
+
   // Calculate peer averages
   const peerAverages = {};
   const ratioKeys = Object.keys(entityRatios);
-  
+
   ratioKeys.forEach(ratio => {
     const peerValues = peerMetrics.map(peer => calculateIndustryRatios(peer, industry)[ratio]).filter(v => v !== null);
     if (peerValues.length > 0) {
@@ -548,9 +548,9 @@ export function generateVersionedReport(entityId, reportConfig) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+//
 // HELPER FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────────
+//
 
 function evaluateKPIStatus(value, target, min, max) {
   if (!value) return 'NO_DATA';
@@ -587,7 +587,7 @@ function evaluateFormula(formula, financialData) {
       const regex = new RegExp('\\b' + key + '\\b', 'g');
       expression = expression.replace(regex, financialData[key]);
     });
-    
+
     // Evaluate expression
     const result = Function('"use strict"; return (' + expression + ')')();
     return { result, confidence: 90 };
@@ -645,7 +645,7 @@ function calculateIndustryRatios(metrics, industry) {
 function calculateCompetitivePosition(benchmarking) {
   let advantageCount = 0;
   let disadvantageCount = 0;
-  
+
   Object.values(benchmarking.performance).forEach(perf => {
     if (perf.status === 'ABOVE_AVERAGE') advantageCount++;
     if (perf.status === 'BELOW_AVERAGE') disadvantageCount++;
@@ -659,7 +659,7 @@ function calculateCompetitivePosition(benchmarking) {
 function calculateNextExecution(frequency, dayOfWeek, dayOfMonth, hour) {
   const now = new Date();
   const next = new Date(now);
-  
+
   switch (frequency) {
     case 'daily':
       next.setDate(next.getDate() + 1);
@@ -672,7 +672,7 @@ function calculateNextExecution(frequency, dayOfWeek, dayOfMonth, hour) {
       next.setDate(dayOfMonth);
       break;
   }
-  
+
   next.setHours(hour, 0, 0, 0);
   return next.toISOString();
 }

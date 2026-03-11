@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaChartBar, FaPlus, FaDownload } from 'react-icons/fa';
 
 const mockBudgets = [
   { name: 'FY2025 Operating Budget', period: '2025-01-01 to 2025-12-31', total: '$4,200,000.00', spent: '$346,000.00', remaining: '$3,854,000.00', pct: 8.2, status: 'Active' },
@@ -33,12 +32,10 @@ export default function Budgets() {
       <PageHeader
         title="Budgets"
         subtitle="Create, manage, and track departmental and entity budgets"
-        icon={<FaChartBar />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Export</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              New Budget
+            <Button variant="secondary" size="small">Export</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>New Budget
             </Button>
           </>
         }

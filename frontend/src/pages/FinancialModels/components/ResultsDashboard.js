@@ -81,22 +81,19 @@ const ResultsDashboard = ({
             className={`view-toggle ${viewMode === 'overview' ? 'active' : ''}`}
             onClick={() => setViewMode('overview')}
             disabled={isLoading}
-          >
-            📋 Overview
+          >Overview
           </button>
           <button
             className={`view-toggle ${viewMode === 'detailed' ? 'active' : ''}`}
             onClick={() => setViewMode('detailed')}
             disabled={isLoading}
-          >
-            📊 Detailed
+          >Detailed
           </button>
           <button
             className={`view-toggle ${viewMode === 'comparison' ? 'active' : ''}`}
             onClick={() => setViewMode('comparison')}
             disabled={isLoading}
-          >
-            ⚖️ Comparison
+          >Comparison
           </button>
         </div>
       </div>
@@ -106,7 +103,7 @@ const ResultsDashboard = ({
         <div className="results-overview">
           {/* Key Valuation Metrics */}
           <section className="metrics-grid">
-            <h3>💎 Valuation Summary</h3>
+            <h3>Valuation Summary</h3>
 
             <div className="metric-card primary">
               <div className="metric-label">Enterprise Value</div>
@@ -143,7 +140,7 @@ const ResultsDashboard = ({
 
           {/* Return Metrics */}
           <section className="metrics-grid">
-            <h3>📈 Return Metrics</h3>
+            <h3>Return Metrics</h3>
 
             <div className="metric-card">
               <div className="metric-label">IRR (Internal Rate of Return)</div>
@@ -224,7 +221,7 @@ const ResultsDashboard = ({
 
           {/* Cash Flow & Key Drivers */}
           <section className="results-section">
-            <h3>💵 Key Drivers</h3>
+            <h3>Key Drivers</h3>
 
             <div className="drivers-grid">
               <div className="driver-card">
@@ -259,7 +256,7 @@ const ResultsDashboard = ({
 
           {/* Projection Summary */}
           <section className="results-section">
-            <h3>📅 Projection Summary</h3>
+            <h3>Projection Summary</h3>
 
             <div className="collapsible-section">
               <button
@@ -270,8 +267,7 @@ const ResultsDashboard = ({
                   )
                 }
               >
-                <span>{expandedSection === 'projections' ? '▼' : '▶'}</span>
-                Year-by-Year Projections
+                <span>''</span>Year-by-Year Projections
               </button>
 
               {expandedSection === 'projections' && results.projections && (
@@ -313,7 +309,7 @@ const ResultsDashboard = ({
           <div className="detail-sections">
             {/* Income Statement Metrics */}
             <div className="detail-section">
-              <h3>📊 Income Statement</h3>
+              <h3>Income Statement</h3>
               <div className="detail-metrics">
                 <div className="detail-row">
                   <span>Revenue</span>
@@ -336,7 +332,7 @@ const ResultsDashboard = ({
 
             {/* Balance Sheet Metrics */}
             <div className="detail-section">
-              <h3>🏦 Balance Sheet</h3>
+              <h3>Balance Sheet</h3>
               <div className="detail-metrics">
                 <div className="detail-row">
                   <span>Total Assets</span>
@@ -355,7 +351,7 @@ const ResultsDashboard = ({
 
             {/* Cash Flow Metrics */}
             <div className="detail-section">
-              <h3>💰 Cash Flow</h3>
+              <h3>Cash Flow</h3>
               <div className="detail-metrics">
                 <div className="detail-row">
                   <span>Operating Cash Flow</span>
@@ -374,7 +370,7 @@ const ResultsDashboard = ({
 
             {/* Valuation Multiples */}
             <div className="detail-section">
-              <h3>📈 Valuation Multiples</h3>
+              <h3>Valuation Multiples</h3>
               <div className="detail-metrics">
                 <div className="detail-row">
                   <span>EV/Revenue</span>
@@ -401,20 +397,18 @@ const ResultsDashboard = ({
       {/* Comparison Mode */}
       {viewMode === 'comparison' && (
         <div className="results-comparison">
-          <h3>📊 Scenario Comparison</h3>
-          <p className="comparison-note">
-            Run scenario analysis to compare different assumptions and outcomes
+          <h3>Scenario Comparison</h3>
+          <p className="comparison-note">Run scenario analysis to compare different assumptions and outcomes
           </p>
 
           <div className="comparison-placeholder">
-            <div className="placeholder-icon">🎯</div>
+            <div className="placeholder-icon"></div>
             <div className="placeholder-text">No scenarios yet</div>
             <button
               className="btn-primary"
               onClick={onScenarioAnalysis}
               disabled={isLoading}
-            >
-              Generate Scenarios
+            >Generate Scenarios
             </button>
           </div>
         </div>
@@ -426,36 +420,30 @@ const ResultsDashboard = ({
           className="btn-primary"
           onClick={onScenarioAnalysis}
           disabled={isLoading}
-        >
-          🎯 Scenario Analysis
+        >Scenario Analysis
         </button>
 
         <button
           className="btn-secondary"
           onClick={() => onGenerateReport('executive')}
           disabled={isLoading}
-        >
-          📄 Generate Report
+        >Generate Report
         </button>
 
         <button
           className="btn-secondary"
           onClick={onLoadAnalytics}
           disabled={isLoading}
-        >
-          📈 View Analytics
+        >View Analytics
         </button>
 
         <div className="dropdown-actions">
-          <button className="btn-tertiary dropdown-toggle" disabled={isLoading}>
-            ⬇ Export
+          <button className="btn-tertiary dropdown-toggle" disabled={isLoading}>Export
           </button>
           <div className="dropdown-menu">
-            <button onClick={() => onExport('json')} disabled={isLoading}>
-              JSON
+            <button onClick={() => onExport('json')} disabled={isLoading}>JSON
             </button>
-            <button onClick={() => onExport('csv')} disabled={isLoading}>
-              CSV
+            <button onClick={() => onExport('csv')} disabled={isLoading}>CSV
             </button>
           </div>
         </div>

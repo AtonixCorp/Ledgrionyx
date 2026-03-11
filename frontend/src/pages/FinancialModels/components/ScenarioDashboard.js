@@ -56,20 +56,17 @@ const ScenarioDashboard = ({
           <button
             className={`chart-type-button ${chartType === 'valuation' ? 'active' : ''}`}
             onClick={() => setChartType('valuation')}
-          >
-            💎 Valuations
+          >Valuations
           </button>
           <button
             className={`chart-type-button ${chartType === 'returns' ? 'active' : ''}`}
             onClick={() => setChartType('returns')}
-          >
-            📈 Returns
+          >Returns
           </button>
           <button
             className={`chart-type-button ${chartType === 'sensitivity' ? 'active' : ''}`}
             onClick={() => setChartType('sensitivity')}
-          >
-            📊 Sensitivity
+          >Sensitivity
           </button>
         </div>
       </div>
@@ -83,9 +80,9 @@ const ScenarioDashboard = ({
             onClick={() => setSelectedScenario(scenario)}
           >
             <div className="scenario-title">
-              {scenario === 'worst' && '📉 Worst Case'}
-              {scenario === 'base' && '📊 Base Case'}
-              {scenario === 'best' && '📈 Best Case'}
+              {scenario === 'worst' && 'Worst Case'}
+              {scenario === 'base' && 'Base Case'}
+              {scenario === 'best' && 'Best Case'}
             </div>
 
             {scenarioData[scenario] && (
@@ -128,7 +125,7 @@ const ScenarioDashboard = ({
       {/* Chart Visualization */}
       {chartType === 'valuation' && (
         <div className="scenario-chart">
-          <h3>💎 Valuation Waterfall</h3>
+          <h3>Valuation Waterfall</h3>
           <div className="waterfall-chart">
             <div className="waterfall-bar">
               <div className="bar worst">
@@ -154,9 +151,9 @@ const ScenarioDashboard = ({
             {['worst', 'base', 'best'].map(scenario => (
               <div key={scenario} className="detail-card">
                 <h4>
-                  {scenario === 'worst' && '📉 Worst Case'}
-                  {scenario === 'base' && '📊 Base Case'}
-                  {scenario === 'best' && '📈 Best Case'}
+                  {scenario === 'worst' && 'Worst Case'}
+                  {scenario === 'base' && 'Base Case'}
+                  {scenario === 'best' && 'Best Case'}
                 </h4>
 
                 <div className="detail-metrics">
@@ -185,7 +182,7 @@ const ScenarioDashboard = ({
 
       {chartType === 'returns' && (
         <div className="scenario-chart">
-          <h3>📈 Return Metrics Comparison</h3>
+          <h3>Return Metrics Comparison</h3>
 
           <div className="returns-comparison">
             <div className="comparison-metric">
@@ -247,11 +244,10 @@ const ScenarioDashboard = ({
 
       {chartType === 'sensitivity' && (
         <div className="scenario-chart">
-          <h3>📊 Sensitivity Analysis</h3>
+          <h3>Sensitivity Analysis</h3>
 
           <div className="sensitivity-table">
-            <p className="sensitivity-note">
-              Shows how valuation changes with key assumptions
+            <p className="sensitivity-note">Shows how valuation changes with key assumptions
             </p>
 
             {scenarios.sensitivity && scenarios.sensitivity.length > 0 ? (
@@ -300,22 +296,22 @@ const ScenarioDashboard = ({
 
       {/* Key Insights */}
       <div className="scenario-insights">
-        <h3>💡 Key Insights</h3>
+        <h3>Key Insights</h3>
 
         <div className="insights-grid">
           <div className="insight-card">
-            <span className="insight-icon">📊</span>
+            <span className="insight-icon"></span>
             <div className="insight-text">
               <strong>Valuation Range</strong>
               <p>
-                {formatCurrency(scenarioData.worst?.enterpriseValue)} to{' '}
+                {formatCurrency(scenarioData.worst?.enterpriseValue)} to{''}
                 {formatCurrency(scenarioData.best?.enterpriseValue)}
               </p>
             </div>
           </div>
 
           <div className="insight-card">
-            <span className="insight-icon">📈</span>
+            <span className="insight-icon"></span>
             <div className="insight-text">
               <strong>Upside Potential</strong>
               <p>
@@ -324,14 +320,14 @@ const ScenarioDashboard = ({
                     scenarioData.best?.enterpriseValue,
                     scenarioData.base?.enterpriseValue
                   )
-                )}{' '}
+                )}{''}
                 upside vs. Base
               </p>
             </div>
           </div>
 
           <div className="insight-card">
-            <span className="insight-icon">📉</span>
+            <span className="insight-icon"></span>
             <div className="insight-text">
               <strong>Downside Risk</strong>
               <p>
@@ -340,14 +336,14 @@ const ScenarioDashboard = ({
                     scenarioData.worst?.enterpriseValue,
                     scenarioData.base?.enterpriseValue
                   )
-                )}{' '}
+                )}{''}
                 downside vs. Base
               </p>
             </div>
           </div>
 
           <div className="insight-card">
-            <span className="insight-icon">⚖️</span>
+            <span className="insight-icon"></span>
             <div className="insight-text">
               <strong>Total Range</strong>
               <p>
@@ -356,7 +352,7 @@ const ScenarioDashboard = ({
                     scenarioData.best?.enterpriseValue,
                     scenarioData.worst?.enterpriseValue
                   )
-                )}{' '}
+                )}{''}
                 spread
               </p>
             </div>
@@ -370,8 +366,7 @@ const ScenarioDashboard = ({
           className="btn-primary"
           onClick={() => onGenerateReport('scenario')}
           disabled={isLoading}
-        >
-          📄 Generate Scenario Report
+        >Generate Scenario Report
         </button>
       </div>
     </div>

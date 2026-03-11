@@ -1,8 +1,8 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════════════
+ *
  * MULTI-TENANT ENGINE - Phase 6 Enterprise Feature
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
+ *
+ *
  * Complete multi-tenant architecture supporting:
  * - Complete data isolation between tenants
  * - Tenant management and provisioning
@@ -11,7 +11,7 @@
  * - Tenant-specific configurations and customizations
  * - Usage analytics and billing
  * - Tenant analytics and performance monitoring
- * 
+ *
  * @author Enterprise Platform Team
  * @version 2.0
  * @since Phase 6
@@ -536,9 +536,9 @@ export function verifyTenantIsolation(tenantId) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+//
 // HELPER FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────────
+//
 
 function generateEncryptionKey() {
   return `KEY-${Date.now()}-${Math.random().toString(36).substr(2, 32)}`;

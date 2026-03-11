@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaTimes } from 'react-icons/fa';
 
 const Modal = ({ isOpen, onClose, title, children, footer, size = 'medium' }) => {
   if (!isOpen) return null;
@@ -10,9 +9,7 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = 'medium' }) =>
       <div className={`modal modal-${size}`}>
         <div className="modal-header">
           <h2>{title}</h2>
-          <button className="modal-close" onClick={onClose}>
-            <FaTimes />
-          </button>
+          <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-footer">{footer}</div>}

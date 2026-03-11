@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  FaUsers, FaFileInvoice, FaMoneyCheckAlt, FaStickyNote,
-  FaPlus, FaEdit, FaTrash, FaSearch, FaDownload, FaTimes, FaSave
-} from 'react-icons/fa';
+
 import { customersAPI, invoicesAPI, creditNotesAPI, paymentsAPI } from '../../../services/api';
 
 const STATUS_COLORS = {
@@ -13,17 +10,17 @@ const STATUS_COLORS = {
 };
 
 const TABS = [
-  { id: 'customers', label: 'Customers', icon: <FaUsers /> },
-  { id: 'invoices', label: 'Invoices', icon: <FaFileInvoice /> },
-  { id: 'payments', label: 'Payments', icon: <FaMoneyCheckAlt /> },
-  { id: 'credit-notes', label: 'Credit Notes', icon: <FaStickyNote /> },
+  { id: 'customers', label: 'Customers', },
+  { id: 'invoices', label: 'Invoices', },
+  { id: 'payments', label: 'Payments', },
+  { id: 'credit-notes', label: 'Credit Notes', },
 ];
 
 const fmt = (v, currency = 'USD') => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
 };
 
-// ─── Customers Tab ────────────────────────────────────────────────────────────
+//  Customers Tab
 const CustomersTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,8 +62,8 @@ const CustomersTab = ({ entityId }) => {
   return (
     <div>
       <div className="tab-toolbar">
-        <div className="acct-search"><FaSearch className="search-icon" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customers..." /></div>
-        <button className="btn-primary" onClick={handleNew}><FaPlus /> New Customer</button>
+        <div className="acct-search"><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customers..." /></div>
+        <button className="btn-primary" onClick={handleNew}>New Customer</button>
       </div>
       <div className="ar-summary-mini">
         <div className="mini-stat"><span>Total</span><strong>{items.length}</strong></div>
@@ -84,10 +81,10 @@ const CustomersTab = ({ entityId }) => {
                 <td>{c.email || '—'}</td>
                 <td>{c.country || '—'}</td>
                 <td>{c.currency}</td>
-                <td>{c.payment_terms?.replace('_', ' ')}</td>
+                <td>{c.payment_terms?.replace('_', '')}</td>
                 <td>{fmt(c.credit_limit, c.currency)}</td>
                 <td><span className="status-badge" style={{ background: STATUS_COLORS[c.status], color: 'white' }}>{c.status}</span></td>
-                <td className="acct-actions"><button className="btn-icon" onClick={() => handleEdit(c)}><FaEdit /></button><button className="btn-icon btn-icon-danger" onClick={() => handleDelete(c.id)}><FaTrash /></button></td>
+                <td className="acct-actions"><button className="btn-icon" onClick={() => handleEdit(c)}></button><button className="btn-icon btn-icon-danger" onClick={() => handleDelete(c.id)}></button></td>
               </tr>
             ))}
           </tbody>
@@ -96,7 +93,7 @@ const CustomersTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>{editing ? 'Edit Customer' : 'New Customer'}</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>{editing ? 'Edit Customer' : 'New Customer'}</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -122,7 +119,7 @@ const CustomersTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Save</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Save</>}</button>
             </div>
           </div>
         </div>
@@ -131,7 +128,7 @@ const CustomersTab = ({ entityId }) => {
   );
 };
 
-// ─── Invoices Tab ─────────────────────────────────────────────────────────────
+//  Invoices Tab
 const InvoicesTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -178,12 +175,12 @@ const InvoicesTab = ({ entityId }) => {
   return (
     <div>
       <div className="tab-toolbar">
-        <div className="acct-search"><FaSearch className="search-icon" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search invoices..." /></div>
+        <div className="acct-search"><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search invoices..." /></div>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="acct-select">
           <option value="">All Statuses</option>
-          {['draft','posted','partially_paid','paid','overdue','cancelled'].map(s => <option key={s} value={s}>{s.replace(/_/g,' ')}</option>)}
+          {['draft','posted','partially_paid','paid','overdue','cancelled'].map(s => <option key={s} value={s}>{s.replace(/_/g,'')}</option>)}
         </select>
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Invoice</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>New Invoice</button>
       </div>
       <div className="ar-summary-mini">
         <div className="mini-stat"><span>Total Invoices</span><strong>{items.length}</strong></div>
@@ -204,7 +201,7 @@ const InvoicesTab = ({ entityId }) => {
                 <td>{fmt(i.total_amount)}</td>
                 <td style={{ color: '#48bb78' }}>{fmt(i.paid_amount)}</td>
                 <td style={{ color: parseFloat(i.outstanding_amount) > 0 ? '#e53e3e' : '#48bb78' }}>{fmt(i.outstanding_amount)}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[i.status], color: 'white' }}>{i.status?.replace(/_/g,' ')}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[i.status], color: 'white' }}>{i.status?.replace(/_/g,'')}</span></td>
                 <td className="acct-actions">{i.status === 'draft' && <button className="btn-sm btn-success" onClick={() => handlePost(i.id)}>Post</button>}</td>
               </tr>
             ))}
@@ -214,7 +211,7 @@ const InvoicesTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Invoice</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Invoice</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -233,7 +230,7 @@ const InvoicesTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Create Invoice</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Create Invoice</>}</button>
             </div>
           </div>
         </div>
@@ -242,7 +239,7 @@ const InvoicesTab = ({ entityId }) => {
   );
 };
 
-// ─── Payments Tab ─────────────────────────────────────────────────────────────
+//  Payments Tab
 const PaymentsTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -280,7 +277,7 @@ const PaymentsTab = ({ entityId }) => {
       <div className="tab-toolbar">
         <div className="mini-stat"><span>Total Payments</span><strong>{items.length}</strong></div>
         <div className="mini-stat"><span>Total Received</span><strong style={{ color: '#48bb78' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> Record Payment</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>Record Payment</button>
       </div>
       {loading ? <div className="acct-loading">Loading payments...</div> : (
         <table className="acct-table">
@@ -292,7 +289,7 @@ const PaymentsTab = ({ entityId }) => {
                 <td>{p.customer_name || `Customer ${p.customer}`}</td>
                 <td><code className="acct-code">{p.invoice_number || `INV-${p.invoice}`}</code></td>
                 <td style={{ color: '#48bb78' }}><strong>{fmt(p.amount)}</strong></td>
-                <td><span className="tag">{p.payment_method?.replace(/_/g,' ')}</span></td>
+                <td><span className="tag">{p.payment_method?.replace(/_/g,'')}</span></td>
                 <td>{p.reference_number || '—'}</td>
                 <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || '#4299e1', color: 'white' }}>{p.status}</span></td>
               </tr>
@@ -303,7 +300,7 @@ const PaymentsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>Record Payment</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>Record Payment</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row"><label>Customer *</label><select value={form.customer} onChange={e => setForm(p => ({ ...p, customer: e.target.value }))}><option value="">Select customer</option>{customers.map(c => <option key={c.id} value={c.id}>{c.customer_name}</option>)}</select></div>
@@ -319,7 +316,7 @@ const PaymentsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Record</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Record</>}</button>
             </div>
           </div>
         </div>
@@ -328,7 +325,7 @@ const PaymentsTab = ({ entityId }) => {
   );
 };
 
-// ─── Credit Notes Tab ─────────────────────────────────────────────────────────
+//  Credit Notes Tab
 const CreditNotesTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -365,7 +362,7 @@ const CreditNotesTab = ({ entityId }) => {
   );
 };
 
-// ─── Main AR Module ───────────────────────────────────────────────────────────
+//  Main AR Module
 const ARModule = () => {
   const { entityId } = useParams();
   const [activeTab, setActiveTab] = useState('customers');
@@ -374,10 +371,10 @@ const ARModule = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaUsers /> Accounts Receivable</h1>
+          <h1>Accounts Receivable</h1>
           <p>Manage customers, invoices, payments, and credit notes — track money owed to you</p>
         </div>
-        <button className="btn-secondary"><FaDownload /> Export</button>
+        <button className="btn-secondary">Export</button>
       </div>
 
       <div className="module-tabs">

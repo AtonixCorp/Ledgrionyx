@@ -1,6 +1,6 @@
 /**
  * Atonix Capital - Monthly Financial Tracking & Analysis Service
- * 
+ *
  * Provides automatic monthly aggregation, analysis, and insights
  * Integrates with the unified calculation engine
  */
@@ -52,13 +52,13 @@ export const isInMonth = (date, year, month) => {
  */
 export const getAvailableMonths = (transactions) => {
   const monthsSet = new Set();
-  
+
   transactions.forEach(transaction => {
     if (transaction.date) {
       monthsSet.add(formatYearMonth(transaction.date));
     }
   });
-  
+
   return Array.from(monthsSet).sort().reverse();
 };
 
@@ -91,7 +91,7 @@ export const filterByTypeAndMonth = (transactions, type, year, month) => {
 export const filterByDateRange = (transactions, startDate, endDate) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
+
   return transactions.filter(transaction => {
     if (!transaction.date) return false;
     const transactionDate = new Date(transaction.date);
@@ -142,11 +142,11 @@ export const getCategoryBreakdown = (expenses, year, month) => {
   const monthlyExpenses = filterByMonth(expenses, year, month);
   const categories = {};
   let total = 0;
-  
+
   monthlyExpenses.forEach(expense => {
     const category = expense.category || 'Other';
     const amount = parseFloat(expense.amount || 0);
-    
+
     if (!categories[category]) {
       categories[category] = {
         amount: 0,
@@ -155,23 +155,23 @@ export const getCategoryBreakdown = (expenses, year, month) => {
         transactions: []
       };
     }
-    
+
     categories[category].amount = calculationEngine.round(categories[category].amount + amount);
     categories[category].count += 1;
     categories[category].transactions.push(expense);
     total = calculationEngine.round(total + amount);
   });
-  
+
   // Calculate percentages
   Object.keys(categories).forEach(category => {
     categories[category].percentage = calculationEngine.percentageOf(categories[category].amount, total);
   });
-  
+
   // Sort by amount (highest first)
   const sortedCategories = Object.entries(categories)
     .map(([name, data]) => ({ name, ...data }))
     .sort((a, b) => b.amount - a.amount);
-  
+
   return {
     categories: sortedCategories,
     total,
@@ -204,18 +204,18 @@ export const getDailyAverage = (expenses, year, month) => {
 export const getDailySpending = (expenses, year, month) => {
   const monthlyExpenses = filterByMonth(expenses, year, month);
   const dailyTotals = {};
-  
+
   monthlyExpenses.forEach(expense => {
     const day = new Date(expense.date).getDate();
     const amount = parseFloat(expense.amount || 0);
-    
+
     if (!dailyTotals[day]) {
       dailyTotals[day] = 0;
     }
-    
+
     dailyTotals[day] = calculationEngine.round(dailyTotals[day] + amount);
   });
-  
+
   return dailyTotals;
 };
 
@@ -225,15 +225,15 @@ export const getDailySpending = (expenses, year, month) => {
 export const getWeeklySpending = (expenses, year, month) => {
   const monthlyExpenses = filterByMonth(expenses, year, month);
   const weeklyTotals = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-  
+
   monthlyExpenses.forEach(expense => {
     const day = new Date(expense.date).getDate();
     const week = Math.ceil(day / 7);
     const amount = parseFloat(expense.amount || 0);
-    
+
     weeklyTotals[week] = calculationEngine.round(weeklyTotals[week] + amount);
   });
-  
+
   return weeklyTotals;
 };
 
@@ -244,14 +244,14 @@ export const getHighestSpendingDay = (expenses, year, month) => {
   const dailySpending = getDailySpending(expenses, year, month);
   let maxDay = null;
   let maxAmount = 0;
-  
+
   Object.entries(dailySpending).forEach(([day, amount]) => {
     if (amount > maxAmount) {
       maxAmount = amount;
       maxDay = parseInt(day);
     }
   });
-  
+
   return {
     day: maxDay,
     amount: maxAmount,
@@ -267,16 +267,16 @@ export const getHighestSpendingDay = (expenses, year, month) => {
 export const getBudgetVsActual = (budgets, expenses, year, month) => {
   const categorySpending = getCategoryBreakdown(expenses, year, month);
   const spendingByCategory = {};
-  
+
   categorySpending.categories.forEach(cat => {
     spendingByCategory[cat.name] = cat.amount;
   });
-  
+
   const comparison = budgets.map(budget => {
     const spent = spendingByCategory[budget.category] || 0;
     const budgetAmount = parseFloat(budget.amount || budget.limit || 0);
     const utilization = calculationEngine.calculateBudgetUtilization(budgetAmount, spent);
-    
+
     return {
       category: budget.category,
       budgeted: budgetAmount,
@@ -290,7 +290,7 @@ export const getBudgetVsActual = (budgets, expenses, year, month) => {
               'Good'
     };
   });
-  
+
   return comparison.sort((a, b) => b.percentageUsed - a.percentageUsed);
 };
 
@@ -302,7 +302,7 @@ export const getRemainingBudget = (budgets, expenses, year, month) => {
   const monthlyExpenses = calculateMonthlyExpenses(expenses, year, month).total;
   const remaining = calculationEngine.subtract(totalBudget, monthlyExpenses);
   const percentageUsed = calculationEngine.percentageOf(monthlyExpenses, totalBudget);
-  
+
   return {
     totalBudget,
     spent: monthlyExpenses,
@@ -333,31 +333,31 @@ export const generateMonthlySummary = ({
   const taxAmount = calculateMonthlyTax(incomes, year, month, taxRate);
   const netIncome = calculationEngine.calculateNetAfterTax(incomeData.total, taxRate);
   const netBalance = calculationEngine.subtract(netIncome, expenseData.total);
-  
+
   // Category analysis
   const categoryBreakdown = getCategoryBreakdown(expenses, year, month);
   const topCategories = getTopCategories(expenses, year, month, 5);
-  
+
   // Spending patterns
   const dailyAverage = getDailyAverage(expenses, year, month);
   const weeklySpending = getWeeklySpending(expenses, year, month);
   const highestSpendingDay = getHighestSpendingDay(expenses, year, month);
-  
+
   // Budget analysis
   const budgetVsActual = getBudgetVsActual(budgets, expenses, year, month);
   const remainingBudget = getRemainingBudget(budgets, expenses, year, month);
-  
+
   // Calculate savings rate
   const savingsRate = calculationEngine.calculateSavingsRate(netIncome, expenseData.total);
-  
+
   // Month info
   const monthName = new Date(year, month, 1).toLocaleString('default', { month: 'long' });
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const currentDay = new Date().getDate();
-  const daysRemaining = month === new Date().getMonth() && year === new Date().getFullYear() 
-    ? daysInMonth - currentDay 
+  const daysRemaining = month === new Date().getMonth() && year === new Date().getFullYear()
+    ? daysInMonth - currentDay
     : 0;
-  
+
   return {
     // Period info
     period: {
@@ -369,7 +369,7 @@ export const generateMonthlySummary = ({
       daysRemaining,
       isCurrentMonth: month === new Date().getMonth() && year === new Date().getFullYear()
     },
-    
+
     // Financial totals
     totals: {
       grossIncome: calculationEngine.round(incomeData.total),
@@ -379,14 +379,14 @@ export const generateMonthlySummary = ({
       netBalance: calculationEngine.round(netBalance),
       savingsRate: calculationEngine.round(savingsRate)
     },
-    
+
     // Transaction counts
     counts: {
       income: incomeData.count,
       expenses: expenseData.count,
       total: incomeData.count + expenseData.count
     },
-    
+
     // Category breakdown
     categories: {
       breakdown: categoryBreakdown.categories,
@@ -394,7 +394,7 @@ export const generateMonthlySummary = ({
       total: categoryBreakdown.total,
       count: categoryBreakdown.categoryCount
     },
-    
+
     // Spending patterns
     patterns: {
       dailyAverage: calculationEngine.round(dailyAverage),
@@ -402,30 +402,30 @@ export const generateMonthlySummary = ({
       highestDay: highestSpendingDay,
       dailySpending: getDailySpending(expenses, year, month)
     },
-    
+
     // Budget analysis
     budget: {
       comparison: budgetVsActual,
       remaining: remainingBudget,
       overBudgetCategories: budgetVsActual.filter(b => b.isOverBudget).length
     },
-    
+
     // Tax info
     tax: {
       rate: taxRate,
       amount: calculationEngine.round(taxAmount),
       country: country
     },
-    
+
     // Transactions
     transactions: {
       income: incomeData.transactions,
       expenses: expenseData.transactions,
-      all: [...incomeData.transactions, ...expenseData.transactions].sort((a, b) => 
+      all: [...incomeData.transactions, ...expenseData.transactions].sort((a, b) =>
         new Date(b.date) - new Date(a.date)
       )
     },
-    
+
     // Status indicators
     status: {
       isPositive: netBalance > 0,
@@ -446,18 +446,18 @@ export const generateMonthlySummary = ({
  */
 const calculateHealthScore = ({ savingsRate, isOverBudget, netBalance }) => {
   let score = 100;
-  
+
   // Deduct for negative balance
   if (netBalance < 0) score -= 40;
-  
+
   // Deduct for low savings rate
   if (savingsRate < 0) score -= 30;
   else if (savingsRate < 10) score -= 20;
   else if (savingsRate < 20) score -= 10;
-  
+
   // Deduct for being over budget
   if (isOverBudget) score -= 20;
-  
+
   return Math.max(0, Math.min(100, score));
 };
 
@@ -476,10 +476,10 @@ export const compareWithPreviousMonth = ({
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
-  
+
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-  
+
   const current = generateMonthlySummary({
     incomes,
     expenses,
@@ -489,7 +489,7 @@ export const compareWithPreviousMonth = ({
     taxRate,
     country
   });
-  
+
   const previous = generateMonthlySummary({
     incomes,
     expenses,
@@ -499,7 +499,7 @@ export const compareWithPreviousMonth = ({
     taxRate,
     country
   });
-  
+
   return {
     current,
     previous,
@@ -521,34 +521,34 @@ const monthlyAnalysisService = {
   formatYearMonth,
   isInMonth,
   getAvailableMonths,
-  
+
   // Filtering
   filterByMonth,
   filterByTypeAndMonth,
   filterByDateRange,
-  
+
   // Monthly totals
   calculateMonthlyIncome,
   calculateMonthlyExpenses,
   calculateMonthlyTax,
-  
+
   // Category analysis
   getCategoryBreakdown,
   getTopCategories,
-  
+
   // Spending patterns
   getDailyAverage,
   getDailySpending,
   getWeeklySpending,
   getHighestSpendingDay,
-  
+
   // Budget analysis
   getBudgetVsActual,
   getRemainingBudget,
-  
+
   // Monthly summary (master function)
   generateMonthlySummary,
-  
+
   // Trends
   compareWithPreviousMonth
 };

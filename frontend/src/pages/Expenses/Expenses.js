@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 
 const Expenses = () => {
-  const { 
-    expenses, 
-    addExpense, 
-    deleteExpense, 
+  const {
+    expenses,
+    addExpense,
+    deleteExpense,
     calculationEngine,
     monthlySummary,
     financialSummary,
     validationResults,
     budgets
   } = useFinance();
-  
+
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState('all'); // 'all' or 'monthly'
   const [formData, setFormData] = useState({
@@ -49,15 +49,15 @@ const Expenses = () => {
   };
 
   // Use calculation engine for total
-  const totalExpenses = financialSummary 
+  const totalExpenses = financialSummary
     ? financialSummary.expenses?.total || 0
     : calculationEngine.calculateTotalExpenses(Array.isArray(expenses) ? expenses : []);
-  
+
   // Get monthly expenses if in monthly view
   const displayExpenses = viewMode === 'monthly' && monthlySummary
     ? (Array.isArray(monthlySummary.transactions) ? monthlySummary.transactions : [])
     : (Array.isArray(expenses) ? expenses : []);
-  
+
   const displayTotal = viewMode === 'monthly' && monthlySummary
     ? (monthlySummary.totals?.totalExpenses || 0)
     : totalExpenses;
@@ -68,17 +68,15 @@ const Expenses = () => {
         <h1 className="page-title">Expenses</h1>
         <div className="header-actions">
           <div className="view-toggle">
-            <button 
+            <button
               className={`toggle-btn ${viewMode === 'all' ? 'active' : ''}`}
               onClick={() => setViewMode('all')}
-            >
-              All Time
+            >All Time
             </button>
-            <button 
+            <button
               className={`toggle-btn ${viewMode === 'monthly' ? 'active' : ''}`}
               onClick={() => setViewMode('monthly')}
-            >
-              This Month
+            >This Month
             </button>
           </div>
           <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
@@ -157,7 +155,7 @@ const Expenses = () => {
       <div className="card summary-card">
         <div className="expenses-summary">
           <h2>
-            {viewMode === 'monthly' ? 'Monthly' : 'Total'} Expenses: 
+            {viewMode === 'monthly' ? 'Monthly' : 'Total'} Expenses:
             <span className="total-amount"> ${displayTotal.toFixed(2)}</span>
           </h2>
           {viewMode === 'monthly' && monthlySummary && (
@@ -177,18 +175,18 @@ const Expenses = () => {
             </div>
           )}
         </div>
-        
+
         {/* Budget Warnings */}
         {validationResults?.warnings && validationResults.warnings.length > 0 && (
           <div className="validation-warnings">
             {validationResults.warnings.slice(0, 2).map((warning, idx) => (
               <div key={idx} className="warning-message">
-                ⚠️ {warning}
+                 {warning}
               </div>
             ))}
           </div>
         )}
-        
+
         {/* Category Breakdown (Monthly View) */}
         {viewMode === 'monthly' && Array.isArray(monthlySummary?.categories) && monthlySummary.categories.length > 0 && (
           <div className="category-breakdown">
@@ -197,7 +195,7 @@ const Expenses = () => {
               {monthlySummary.categories.map((cat, idx) => {
                 const budget = Array.isArray(budgets) ? budgets.find(b => b.category === cat.category) : null;
                 const percentUsed = budget && budget.limit ? ((cat.amount || 0) / budget.limit) * 100 : 0;
-                
+
                 return (
                   <div key={idx} className="category-item">
                     <div className="category-header">
@@ -206,7 +204,7 @@ const Expenses = () => {
                     </div>
                     {budget && (
                       <div className="category-progress">
-                        <div 
+                        <div
                           className={`progress-bar ${percentUsed > 100 ? 'over-budget' : ''}`}
                           style={{ width: `${Math.min(percentUsed, 100)}%` }}
                         />
@@ -222,13 +220,13 @@ const Expenses = () => {
           </div>
         )}
       </div>
-      
+
       {/* Expenses Table */}
       <div className="card">
         <h2 className="section-title">
           {viewMode === 'monthly' ? 'Monthly' : 'All'} Transactions
         </h2>
-        
+
         <div className="expenses-list">
           {displayExpenses.length > 0 ? (
             <table className="expenses-table">
@@ -253,11 +251,10 @@ const Expenses = () => {
                     </td>
                     <td className="amount">${(expense.amount || 0).toFixed(2)}</td>
                     <td>
-                      <button 
+                      <button
                         className="btn-danger"
                         onClick={() => deleteExpense(expense.id)}
-                      >
-                        Delete
+                      >Delete
                       </button>
                     </td>
                   </tr>

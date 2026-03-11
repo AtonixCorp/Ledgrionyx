@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaSync, FaPlus } from 'react-icons/fa';
 
 const mockRecurring = [
   { name: 'Monthly Office Rent', type: 'Journal Entry', frequency: 'Monthly', nextRun: '2025-02-01', amount: '$5,500.00', status: 'Active' },
@@ -30,10 +29,8 @@ export default function RecurringEntries() {
       <PageHeader
         title="Recurring Entries"
         subtitle="Configure recurring journal entries, bills, and expenses"
-        icon={<FaSync />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            New Recurring Entry
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>New Recurring Entry
           </Button>
         }
       />

@@ -47,7 +47,7 @@ import LegacyPeriodClose from './pages/Enterprise/Accounting/PeriodClose';
 import FXModule from './pages/Enterprise/Accounting/FXModule';
 import NotificationsCenter from './pages/Enterprise/Accounting/NotificationsCenter';
 
-// ── New module pages ──────────────────────────────────────────────────────────
+//  New module pages
 import AppDashboard from './modules/overview/Dashboard';
 import AppNotifications from './modules/overview/Notifications';
 import AppTasks from './modules/overview/Tasks';
@@ -111,7 +111,7 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              
+
               {/* Website Pages */}
               <Route path="/product" element={<Product />} />
               <Route path="/features" element={<Features />} />
@@ -307,7 +307,7 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              {/* ── New Module Routes ─────────────────────────────────────── */}
+              {/*  New Module Routes  */}
               {/* Overview */}
               <Route path="/app/overview/dashboard" element={<ProtectedRoute><Layout><AppDashboard /></Layout></ProtectedRoute>} />
               <Route path="/app/overview/notifications" element={<ProtectedRoute><Layout><AppNotifications /></Layout></ProtectedRoute>} />

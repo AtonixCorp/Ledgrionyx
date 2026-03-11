@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import {
-  FaPalette, FaSave, FaUpload, FaGlobe, FaFileAlt,
-  FaCheckCircle, FaExclamationCircle, FaEye, FaCopy,
-  FaDownload
-} from 'react-icons/fa';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
@@ -120,16 +115,16 @@ const WhiteLabel = () => {
   };
 
   const sections = [
-    { key: 'branding', label: 'Brand Identity', icon: <FaPalette /> },
-    { key: 'domain', label: 'Custom Domain', icon: <FaGlobe /> },
-    { key: 'reports', label: 'Branded Reports', icon: <FaFileAlt /> },
+    { key: 'branding', label: 'Brand Identity', },
+    { key: 'domain', label: 'Custom Domain', },
+    { key: 'reports', label: 'Branded Reports', },
   ];
 
   if (!currentOrganization) {
     return (
       <div className="wl-container">
         <div className="wl-empty">
-          <FaPalette size={40} />
+
           <h2>No Organization Selected</h2>
           <p>Select an organization to configure white-label branding.</p>
         </div>
@@ -142,21 +137,21 @@ const WhiteLabel = () => {
       {/* Header */}
       <div className="wl-header">
         <div>
-          <h1><FaPalette /> White-Label Branding</h1>
+          <h1>White-Label Branding</h1>
           <p>Customize your client-facing portal with your firm's identity</p>
         </div>
         <div className="wl-header-actions">
           <button className="btn-preview" onClick={() => setPreviewMode(!previewMode)}>
-            <FaEye /> {previewMode ? 'Exit Preview' : 'Preview'}
+             {previewMode ? 'Exit Preview' : 'Preview'}
           </button>
           <button className="btn-save" onClick={handleSave} disabled={saving}>
-            <FaSave /> {saving ? 'Saving…' : 'Save Changes'}
+             {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
       </div>
 
-      {success && <div className="wl-alert success"><FaCheckCircle /> {success}</div>}
-      {error && <div className="wl-alert error"><FaExclamationCircle /> {error}</div>}
+      {success && <div className="wl-alert success"> {success}</div>}
+      {error && <div className="wl-alert error"> {error}</div>}
 
       <div className="wl-layout">
         {/* Sidebar nav */}
@@ -175,7 +170,7 @@ const WhiteLabel = () => {
         {/* Content */}
         <div className="wl-content">
 
-          {/* ── BRANDING SECTION ── */}
+          {/*  BRANDING SECTION  */}
           {activeSection === 'branding' && (
             <div className="wl-section">
               <h2>Brand Identity</h2>
@@ -264,7 +259,7 @@ const WhiteLabel = () => {
                 <div className="wl-field full">
                   <label>Brand Logo</label>
                   <div className="upload-zone">
-                    <FaUpload />
+
                     <p>Drag &amp; drop or click to upload your logo (PNG, SVG — max 2MB)</p>
                     <button className="btn-upload">Choose File</button>
                   </div>
@@ -272,19 +267,19 @@ const WhiteLabel = () => {
                 <div className="wl-field">
                   <label>Light Mode Logo</label>
                   <div className="upload-zone sm">
-                    <FaUpload /> <span>Upload light logo</span>
+                     <span>Upload light logo</span>
                   </div>
                 </div>
                 <div className="wl-field">
                   <label>Dark Mode Logo</label>
                   <div className="upload-zone sm">
-                    <FaUpload /> <span>Upload dark logo</span>
+                     <span>Upload dark logo</span>
                   </div>
                 </div>
                 <div className="wl-field">
                   <label>Favicon</label>
                   <div className="upload-zone sm">
-                    <FaUpload /> <span>Upload favicon (32×32 px)</span>
+                     <span>Upload favicon (32×32 px)</span>
                   </div>
                 </div>
 
@@ -311,7 +306,7 @@ const WhiteLabel = () => {
 
               {/* Live Preview */}
               <div className="wl-preview-box">
-                <h3><FaEye /> Live Preview</h3>
+                <h3>Live Preview</h3>
                 <div className="wl-preview" style={{
                   '--primary': branding.primary_color,
                   '--secondary': branding.secondary_color,
@@ -341,7 +336,7 @@ const WhiteLabel = () => {
             </div>
           )}
 
-          {/* ── CUSTOM DOMAIN SECTION ── */}
+          {/*  CUSTOM DOMAIN SECTION  */}
           {activeSection === 'domain' && (
             <div className="wl-section">
               <h2>Custom Domain</h2>
@@ -351,7 +346,7 @@ const WhiteLabel = () => {
                 <div className="wl-field full">
                   <label>Custom Domain</label>
                   <div className="domain-input-row">
-                    <FaGlobe className="domain-icon" />
+
                     <input
                       type="text"
                       value={branding.custom_domain}
@@ -363,10 +358,10 @@ const WhiteLabel = () => {
                     </button>
                   </div>
                   {domainVerified && (
-                    <div className="domain-verified"><FaCheckCircle /> Domain configured correctly</div>
+                    <div className="domain-verified">Domain configured correctly</div>
                   )}
                   {!domainVerified && branding.custom_domain && !verifying && (
-                    <div className="domain-error"><FaExclamationCircle /> Domain not yet verified. Add the DNS records below.</div>
+                    <div className="domain-error">Domain not yet verified. Add the DNS records below.</div>
                   )}
                 </div>
 
@@ -393,7 +388,7 @@ const WhiteLabel = () => {
                           <td><code>{rec.value}</code></td>
                           <td>
                             <button className="btn-copy" onClick={() => copyDNSRecord(rec.value)}>
-                              <FaCopy />
+
                             </button>
                           </td>
                         </tr>
@@ -405,7 +400,7 @@ const WhiteLabel = () => {
             </div>
           )}
 
-          {/* ── BRANDED REPORTS SECTION ── */}
+          {/*  BRANDED REPORTS SECTION  */}
           {activeSection === 'reports' && (
             <div className="wl-section">
               <h2>Branded Reports</h2>
@@ -413,12 +408,12 @@ const WhiteLabel = () => {
 
               <div className="reports-preview-grid">
                 {[
-                  { title: 'Financial Statement', desc: 'Balance sheet, P&L, Cash Flow', icon: '📊' },
-                  { title: 'Tax Summary Report', desc: 'Annual tax calculations and filings', icon: '🧾' },
-                  { title: 'Client Portfolio', desc: 'Full client financial overview', icon: '📁' },
-                  { title: 'Audit Report', desc: 'Transaction audit trail export', icon: '🔍' },
-                  { title: 'Payroll Report', desc: 'Staff payroll summary', icon: '💰' },
-                  { title: 'Compliance Report', desc: 'Regulatory compliance status', icon: '✅' },
+                  { title: 'Financial Statement', desc: 'Balance sheet, P&L, Cash Flow', icon: '' },
+                  { title: 'Tax Summary Report', desc: 'Annual tax calculations and filings', icon: '' },
+                  { title: 'Client Portfolio', desc: 'Full client financial overview', icon: '' },
+                  { title: 'Audit Report', desc: 'Transaction audit trail export', icon: '' },
+                  { title: 'Payroll Report', desc: 'Staff payroll summary', icon: '' },
+                  { title: 'Compliance Report', desc: 'Regulatory compliance status', icon: '' },
                 ].map((rpt, i) => (
                   <div className="report-card" key={i}>
                     <div className="rc-icon">{rpt.icon}</div>
@@ -436,7 +431,7 @@ const WhiteLabel = () => {
                         <div className="rc-line" />
                       </div>
                     </div>
-                    <button className="btn-preview-report"><FaDownload /> Preview Template</button>
+                    <button className="btn-preview-report">Preview Template</button>
                   </div>
                 ))}
               </div>

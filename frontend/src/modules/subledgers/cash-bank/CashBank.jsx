@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
-import { FaUniversity, FaPlus, FaSync } from 'react-icons/fa';
 
 const mockAccounts = [
   { account: 'Operating - Chase 4521', type: 'Checking', balance: '$142,300.00', lastReconciled: '2025-01-31', transactions: 48, status: 'Reconciled' },
@@ -30,12 +29,10 @@ export default function CashBank() {
       <PageHeader
         title="Cash & Bank"
         subtitle="Monitor bank accounts, cash positions, and reconciliation status"
-        icon={<FaUniversity />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaSync />}>Sync Transactions</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              Add Account
+            <Button variant="secondary" size="small">Sync Transactions</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Add Account
             </Button>
           </>
         }

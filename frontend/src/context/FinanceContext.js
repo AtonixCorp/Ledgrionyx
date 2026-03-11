@@ -63,26 +63,26 @@ export const FinanceProvider = ({ children }) => {
   // Loading and Error States
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // User Settings
   const [userCountry, setUserCountry] = useState('United States');
   const [userTaxRate, setUserTaxRate] = useState(21); // Default corporate tax
   const [userTaxType, setUserTaxType] = useState('corporate');
-  
+
   // Monthly Tracking
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const current = monthlyAnalysisService.getCurrentMonth();
     return { year: current.year, month: current.month };
   });
   const [availableMonths, setAvailableMonths] = useState([]);
-  
+
   // Calculated States (auto-updated by engine)
   const [financialSummary, setFinancialSummary] = useState(null);
   const [monthlySummary, setMonthlySummary] = useState(null);
   const [validationResults, setValidationResults] = useState(null);
-  
+
   // ==================== CALCULATION ENGINE ====================
-  
+
   /**
    * Master recalculation function
    * Called automatically when any financial data changes
@@ -91,14 +91,14 @@ export const FinanceProvider = ({ children }) => {
     // Get tax info for user's country
     const taxInfo = taxCalculatorService.getTaxInfo(userCountry);
     const effectiveTaxRate = userTaxRate || (taxInfo ? taxInfo.rate : 0);
-    
+
     // Transform income data to match calculator format
     const transformedIncome = income.map(item => ({
       amount: parseFloat(item.amount || 0),
       category: item.source || 'Other',
       date: item.date
     }));
-    
+
     // Calculate complete financial summary using engine
     const summary = calculationEngine.calculateFinancialSummary({
       incomes: transformedIncome,
@@ -107,9 +107,9 @@ export const FinanceProvider = ({ children }) => {
       taxRate: effectiveTaxRate,
       country: userCountry
     });
-    
+
     setFinancialSummary(summary);
-    
+
     // Calculate monthly summary for selected month
     const monthly = monthlyAnalysisService.generateMonthlySummary({
       incomes: transformedIncome,
@@ -120,9 +120,9 @@ export const FinanceProvider = ({ children }) => {
       taxRate: effectiveTaxRate,
       country: userCountry
     });
-    
+
     setMonthlySummary(monthly);
-    
+
     // Validate all data
     const validation = validationService.validateAllFinancialData({
       totalIncome: summary.income.gross,
@@ -132,18 +132,18 @@ export const FinanceProvider = ({ children }) => {
       country: userCountry,
       summary: summary
     });
-    
+
     setValidationResults(validation);
-    
+
     return summary;
   }, [budgets, expenses, income, selectedMonth.month, selectedMonth.year, userCountry, userTaxRate]);
-  
+
   /**
    * Update available months based on existing transactions
    */
   const updateAvailableMonths = useCallback(() => {
     const months = new Set();
-    
+
     // Get months from income
     income.forEach(item => {
       if (item.date) {
@@ -151,7 +151,7 @@ export const FinanceProvider = ({ children }) => {
         months.add(`${date.getFullYear()}-${date.getMonth()}`);
       }
     });
-    
+
     // Get months from expenses
     expenses.forEach(item => {
       if (item.date) {
@@ -159,7 +159,7 @@ export const FinanceProvider = ({ children }) => {
         months.add(`${date.getFullYear()}-${date.getMonth()}`);
       }
     });
-    
+
     // Convert to sorted array of {year, month} objects
     const monthsList = Array.from(months)
       .map(str => {
@@ -170,14 +170,14 @@ export const FinanceProvider = ({ children }) => {
         if (a.year !== b.year) return b.year - a.year; // Newest first
         return b.month - a.month;
       });
-    
+
     // Always include current month
     const current = monthlyAnalysisService.getCurrentMonth();
     const currentExists = monthsList.some(m => m.year === current.year && m.month === current.month);
     if (!currentExists) {
       monthsList.unshift(current);
     }
-    
+
     setAvailableMonths(monthsList);
   }, [expenses, income]);
 
@@ -247,16 +247,16 @@ export const FinanceProvider = ({ children }) => {
 
     loadSettings();
   }, [apiUrl, buildAuthHeaders]);
-  
+
   /**
    * Change selected month
    */
   const changeMonth = (year, month) => {
     setSelectedMonth({ year, month });
   };
-  
+
   // ==================== EXPENSES ====================
-  
+
   const addExpense = async (expense) => {
     // Validate expense first
     const validation = validationService.validateExpense(
@@ -264,7 +264,7 @@ export const FinanceProvider = ({ children }) => {
       expense.category,
       budgets.find(b => b.category === expense.category)?.limit
     );
-    
+
     if (!validation.isValid) {
       console.error('Expense validation failed:', validation.errors);
       // Still add but warn user
@@ -272,7 +272,7 @@ export const FinanceProvider = ({ children }) => {
         console.warn('Expense warnings:', validation.warnings);
       }
     }
-    
+
     try {
       const response = await fetch(apiUrl('/api/expenses/'), {
         method: 'POST',
@@ -323,26 +323,26 @@ export const FinanceProvider = ({ children }) => {
   };
 
   const updateExpense = (id, updatedExpense) => {
-    setExpenses(expenses.map(e => 
-      e.id === id 
+    setExpenses(expenses.map(e =>
+      e.id === id
         ? { ...e, ...updatedExpense, amount: calculationEngine.round(parseFloat(updatedExpense.amount || e.amount)) }
         : e
     ));
   };
 
   // ==================== INCOME ====================
-  
+
   const addIncome = async (incomeItem) => {
     // Validate income first
     const validation = validationService.validateIncome(
       incomeItem.amount,
       incomeItem.source
     );
-    
+
     if (!validation.isValid) {
       console.error('Income validation failed:', validation.errors);
     }
-    
+
     try {
       const response = await fetch(apiUrl('/api/income/'), {
         method: 'POST',
@@ -384,23 +384,23 @@ export const FinanceProvider = ({ children }) => {
   };
 
   const updateIncome = (id, updatedIncome) => {
-    setIncome(income.map(i => 
-      i.id === id 
+    setIncome(income.map(i =>
+      i.id === id
         ? { ...i, ...updatedIncome, amount: calculationEngine.round(parseFloat(updatedIncome.amount || i.amount)) }
         : i
     ));
   };
 
   // ==================== BUDGETS ====================
-  
+
   const addBudget = async (budget) => {
     // Validate budget
     const validation = validationService.validateBudget(budget.amount || budget.limit);
-    
+
     if (!validation.isValid) {
       console.error('Budget validation failed:', validation.errors);
     }
-    
+
     try {
       const response = await fetch(apiUrl('/api/budgets/'), {
         method: 'POST',
@@ -427,11 +427,11 @@ export const FinanceProvider = ({ children }) => {
   };
 
   const updateBudget = (id, updates) => {
-    setBudgets(budgets.map(b => 
-      b.id === id 
-        ? { 
-            ...b, 
-            ...updates, 
+    setBudgets(budgets.map(b =>
+      b.id === id
+        ? {
+            ...b,
+            ...updates,
             amount: updates.amount ? calculationEngine.round(parseFloat(updates.amount)) : b.amount,
             limit: updates.limit ? calculationEngine.round(parseFloat(updates.limit)) : b.limit
           }
@@ -455,23 +455,23 @@ export const FinanceProvider = ({ children }) => {
   };
 
   // ==================== CALCULATIONS (from engine) ====================
-  
+
   // These use the calculation engine instead of manual calculations
-  const totalIncome = financialSummary ? financialSummary.income.gross : 
+  const totalIncome = financialSummary ? financialSummary.income.gross :
     calculationEngine.calculateTotalIncome(income.map(i => ({ amount: i.amount })));
-  
+
   const totalExpenses = financialSummary ? financialSummary.expenses.total :
     calculationEngine.calculateTotalExpenses(expenses);
-  
+
   const balance = financialSummary ? financialSummary.balance.net :
     calculationEngine.calculateNetBalance(totalIncome, totalExpenses);
-  
+
   const netIncome = financialSummary ? financialSummary.income.net :
     calculationEngine.calculateNetIncome(totalIncome, userTaxRate);
-  
+
   const taxAmount = financialSummary ? financialSummary.tax.amount :
     calculationEngine.calculateTax(totalIncome, userTaxRate);
-  
+
   // ==================== API INTEGRATION FUNCTIONS ====================
 
   // Financial Modeling APIs
@@ -782,14 +782,14 @@ export const FinanceProvider = ({ children }) => {
     // Financial Summary (comprehensive)
     financialSummary,
     validationResults,
-    
+
     // Monthly Tracking
     monthlySummary,
     selectedMonth,
     availableMonths,
     changeMonth,
     monthlyAnalysisService,
-    
+
     // Tax & Country Settings
     userCountry,
     userTaxRate,
@@ -797,11 +797,11 @@ export const FinanceProvider = ({ children }) => {
     updateUserCountry,
     updateUserTaxType,
     updateUserTaxRate,
-    
+
     // Calculation Engine (expose for components that need it)
     calculationEngine,
     validationService,
-    
+
     // Manual recalculation trigger
     recalculateAll
   };

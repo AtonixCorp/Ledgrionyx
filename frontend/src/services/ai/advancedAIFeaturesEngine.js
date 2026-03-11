@@ -2,7 +2,7 @@
  * Advanced AI Features Engine
  * Provides sophisticated AI capabilities: anomaly detection, pattern recognition,
  * trend analysis, and predictive analytics for financial modeling
- * 
+ *
  * @module advancedAIFeaturesEngine
  * @version 1.0.0
  */
@@ -31,7 +31,7 @@ export const detectForecastAnomalies = (values, options = {}) => {
     // Calculate mean and standard deviation
     const mean = CalcEngine.arraySum(values) / values.length;
     const variance = CalcEngine.arraySum(
-      values.map(v => CalcEngine.power(CalcEngine.subtract(v, mean), 2))
+      values.map(v =>CalcEngine.power(CalcEngine.subtract(v, mean), 2))
     ) / values.length;
     const stdDev = CalcEngine.squareRoot(variance);
 
@@ -40,7 +40,7 @@ export const detectForecastAnomalies = (values, options = {}) => {
     const endIdx = excludeEdges ? values.length - 1 : values.length;
 
     for (let i = startIdx; i < endIdx; i++) {
-      const zScore = stdDev > 0 
+      const zScore = stdDev > 0
         ? CalcEngine.divide(CalcEngine.subtract(values[i], mean), stdDev)
         : 0;
 
@@ -229,23 +229,23 @@ export const recognizePatterns = (values, modelType = 'forecasting') => {
 // Helper functions for pattern recognition
 const isLinearGrowth = (values) => {
   if (values.length < 4) return false;
-  
+
   const diffs = [];
   for (let i = 1; i < values.length; i++) {
     diffs.push(CalcEngine.subtract(values[i], values[i - 1]));
   }
-  
+
   const avgDiff = CalcEngine.arraySum(diffs) / diffs.length;
   const variance = CalcEngine.arraySum(
-    diffs.map(d => CalcEngine.power(CalcEngine.subtract(d, avgDiff), 2))
+    diffs.map(d =>CalcEngine.power(CalcEngine.subtract(d, avgDiff), 2))
   ) / diffs.length;
-  
+
   return CalcEngine.lessThan(variance, CalcEngine.power(avgDiff, 2) * 0.1);
 };
 
 const isExponentialGrowth = (growthRates) => {
   if (growthRates.length < 3) return false;
-  
+
   // Check if growth rates are increasing
   let increasing = true;
   for (let i = 1; i < growthRates.length; i++) {
@@ -254,50 +254,50 @@ const isExponentialGrowth = (growthRates) => {
       break;
     }
   }
-  
+
   return increasing && CalcEngine.greaterThan(growthRates[growthRates.length - 1], 0.15);
 };
 
 const isCyclicalPattern = (values) => {
   if (values.length < 6) return false;
-  
+
   // Look for repeating min-max patterns
   const peaks = [];
   const troughs = [];
-  
+
   for (let i = 1; i < values.length - 1; i++) {
-    if (CalcEngine.greaterThan(values[i], values[i - 1]) && 
+    if (CalcEngine.greaterThan(values[i], values[i - 1]) &&
         CalcEngine.greaterThan(values[i], values[i + 1])) {
       peaks.push(i);
     }
-    if (CalcEngine.lessThan(values[i], values[i - 1]) && 
+    if (CalcEngine.lessThan(values[i], values[i - 1]) &&
         CalcEngine.lessThan(values[i], values[i + 1])) {
       troughs.push(i);
     }
   }
-  
+
   return peaks.length >= 2 && troughs.length >= 2;
 };
 
 const isTrendReversal = (growthRates) => {
   if (growthRates.length < 3) return false;
-  
+
   const lastThree = growthRates.slice(-3);
   const signChanged = (lastThree[0] > 0 && lastThree[2] < 0) ||
                       (lastThree[0] < 0 && lastThree[2] > 0);
-  
+
   return signChanged;
 };
 
 const isVolatilityIncreasing = (growthRates) => {
   if (growthRates.length < 6) return false;
-  
+
   const firstHalf = growthRates.slice(0, CalcEngine.divide(growthRates.length, 2));
   const secondHalf = growthRates.slice(CalcEngine.divide(growthRates.length, 2));
-  
+
   const var1 = calculateVariance(firstHalf);
   const var2 = calculateVariance(secondHalf);
-  
+
   return CalcEngine.greaterThan(var2, CalcEngine.multiply(var1, 1.5));
 };
 
@@ -305,7 +305,7 @@ const calculateVariance = (values) => {
   if (values.length === 0) return 0;
   const mean = CalcEngine.arraySum(values) / values.length;
   return CalcEngine.arraySum(
-    values.map(v => CalcEngine.power(CalcEngine.subtract(v, mean), 2))
+    values.map(v =>CalcEngine.power(CalcEngine.subtract(v, mean), 2))
   ) / values.length;
 };
 
@@ -327,10 +327,10 @@ export const analyzeTrends = (values, periods = 3) => {
   try {
     const recentValues = values.slice(-periods);
     const historicalValues = values.slice(0, values.length - periods);
-    
+
     const recentAvg = CalcEngine.arraySum(recentValues) / recentValues.length;
     const historicalAvg = CalcEngine.arraySum(historicalValues) / historicalValues.length;
-    
+
     const trendChange = CalcEngine.divide(
       CalcEngine.subtract(recentAvg, historicalAvg),
       historicalAvg

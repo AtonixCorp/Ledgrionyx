@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import {
-  FaPlug, FaUniversity, FaCreditCard, FaCalculator, FaUsers,
-  FaCheckCircle, FaExclamationCircle, FaSync, FaPlus, FaTrash,
-  FaEye, FaEyeSlash, FaClock, FaShieldAlt
-} from 'react-icons/fa';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
@@ -12,7 +7,6 @@ const INTEGRATION_CATEGORIES = [
   {
     key: 'banks',
     label: 'Bank Feeds',
-    icon: <FaUniversity />,
     color: '#1d4ed8',
     description: 'Connect bank accounts for real-time transaction sync and reconciliation',
     providers: ['Chase Business', 'Bank of America', 'Wells Fargo', 'Citibank', 'HSBC', 'Barclays', 'Standard Chartered', 'SBI', 'Emirates NBD', 'DBS Bank'],
@@ -20,7 +14,6 @@ const INTEGRATION_CATEGORIES = [
   {
     key: 'payments',
     label: 'Payment Processors',
-    icon: <FaCreditCard />,
     color: '#7c3aed',
     description: 'Sync payment data from processors to automate revenue recognition',
     providers: ['Stripe', 'PayPal', 'Square', 'Adyen', 'Braintree', 'Checkout.com', 'Razorpay', 'Flutterwave'],
@@ -28,7 +21,6 @@ const INTEGRATION_CATEGORIES = [
   {
     key: 'tax',
     label: 'Tax Authorities',
-    icon: <FaCalculator />,
     color: '#b45309',
     description: 'Direct integration with government tax portals for automated filing',
     providers: ['IRS (USA)', 'HMRC (UK)', 'ATO (Australia)', 'CRA (Canada)', 'FTA (UAE)', 'CBDT (India)', 'ZRA (Zambia)', 'KRA (Kenya)', 'FIRS (Nigeria)'],
@@ -36,7 +28,6 @@ const INTEGRATION_CATEGORIES = [
   {
     key: 'payroll',
     label: 'Payroll Systems',
-    icon: <FaUsers />,
     color: '#047857',
     description: 'Sync payroll data for automated journal entries and cost allocation',
     providers: ['Gusto', 'ADP', 'Paychex', 'QuickBooks Payroll', 'Rippling', 'BambooHR', 'Workday', 'SAP SuccessFactors'],
@@ -185,16 +176,16 @@ const APIIntegrations = () => {
       {/* Header */}
       <div className="ai-header">
         <div>
-          <h1><FaPlug /> API Integrations</h1>
+          <h1>API Integrations</h1>
           <p>Connect your platform with banks, payment processors, tax authorities, and payroll systems</p>
         </div>
         <button className="btn-add-integration" onClick={() => setShowForm(!showForm)}>
-          <FaPlus /> Add Integration
+          Add Integration
         </button>
       </div>
 
-      {success && <div className="ai-alert success"><FaCheckCircle /> {success}</div>}
-      {error && <div className="ai-alert error"><FaExclamationCircle /> {error}</div>}
+      {success && <div className="ai-alert success"> {success}</div>}
+      {error && <div className="ai-alert error"> {error}</div>}
 
       {/* Category tabs */}
       <div className="ai-categories">
@@ -231,7 +222,7 @@ const APIIntegrations = () => {
       {/* Add Integration Form */}
       {showForm && (
         <div className="ai-form-card">
-          <h3><FaPlus /> Add {activeCat?.label} Integration</h3>
+          <h3>Add {activeCat?.label} Integration</h3>
           <form onSubmit={handleSubmit} className="ai-form">
             <div className="ai-field">
               <label>Provider</label>
@@ -282,7 +273,7 @@ const APIIntegrations = () => {
               />
             </div>
             <div className="ai-form-notice">
-              <FaShieldAlt /> API credentials are encrypted at rest using AES-256.
+              API credentials are encrypted at rest using AES-256.
             </div>
             <div className="ai-form-actions">
               <button type="button" className="btn-cancel" onClick={() => setShowForm(false)}>Cancel</button>
@@ -298,14 +289,14 @@ const APIIntegrations = () => {
       <div className="ai-integrations-section">
         <h3>Active {activeCat?.label} ({activeIntegrations.length})</h3>
         {loading ? (
-          <div className="ai-loading"><div className="spinner" /> Loading integrations…</div>
+          <div className="ai-loading"><div className="spinner" />Loading integrations…</div>
         ) : activeIntegrations.length === 0 ? (
           <div className="ai-empty">
             <span className="ai-empty-icon" style={{ color: activeCat?.color }}>{activeCat?.icon}</span>
             <h4>No {activeCat?.label} connected yet</h4>
             <p>Click "Add Integration" to connect your first {activeCat?.label.toLowerCase()} integration.</p>
             <button className="btn-add-integration sm" onClick={() => setShowForm(true)}>
-              <FaPlus /> Connect Now
+              Connect Now
             </button>
           </div>
         ) : (
@@ -321,14 +312,14 @@ const APIIntegrations = () => {
                     <div className="aic-type">{activeCat?.label}</div>
                     {integration.last_sync && (
                       <div className="aic-sync">
-                        <FaClock /> Last sync: {new Date(integration.last_sync).toLocaleString()}
+                        Last sync: {new Date(integration.last_sync).toLocaleString()}
                       </div>
                     )}
                   </div>
                 </div>
                 <div className="aic-right">
                   <span className={`status-badge ${integration.status === 'active' ? 'active' : integration.status === 'pending' ? 'pending' : 'inactive'}`}>
-                    {integration.status === 'active' ? <FaCheckCircle /> : <FaExclamationCircle />}
+
                     {integration.status}
                   </span>
                   {integration.api_key && (
@@ -339,7 +330,7 @@ const APIIntegrations = () => {
                           : integration.api_key.substring(0, 8) + '••••••••'}
                       </code>
                       <button className="btn-icon" onClick={() => toggleSecret(integration.id)}>
-                        {showSecrets[integration.id] ? <FaEyeSlash /> : <FaEye />}
+
                       </button>
                     </div>
                   )}
@@ -349,11 +340,11 @@ const APIIntegrations = () => {
                       onClick={() => handleSync(integration.id)}
                       disabled={!!syncing[integration.id]}
                     >
-                      <FaSync className={syncing[integration.id] ? 'spin' : ''} />
+
                       {syncing[integration.id] ? 'Syncing…' : 'Sync Now'}
                     </button>
                     <button className="btn-remove" onClick={() => handleDelete(integration.id)}>
-                      <FaTrash />
+
                     </button>
                   </div>
                 </div>

@@ -1,16 +1,16 @@
 /**
  * Recommendation Engine
- * 
+ *
  * Generates actionable financial recommendations based on analysis results.
  * Suggests optimizations for tax, growth, risk, cashflow, and wealth building.
- * 
+ *
  * ALWAYS references calculations that support the recommendation
  * ALWAYS provides specific, actionable steps
  * ALWAYS includes confidence level and expected impact
- * 
+ *
  * Phase 3 Extension: Actionable recommendations from insights
  * Phase 5 Dependencies: Reports include these recommendations
- * 
+ *
  * Strict Rule: Every recommendation must have calculation basis and realistic impact estimate
  */
 
@@ -20,7 +20,7 @@ import * as TaxLibrary from '../calculation/countryTaxLibrary';
 
 /**
  * Recommendation Object
- * 
+ *
  * @typedef {Object} Recommendation
  * @property {string} id - Unique recommendation ID
  * @property {string} category - Category of recommendation
@@ -38,7 +38,7 @@ import * as TaxLibrary from '../calculation/countryTaxLibrary';
 /**
  * Generate recommendations from forecast analysis
  * Suggests growth acceleration, market expansion, cost optimization
- * 
+ *
  * @param {Object} forecastResults - Forecast model results
  * @param {Object} assumptions - Assumptions used
  * @returns {Object[]} Array of recommendations
@@ -134,7 +134,7 @@ export function generateForecastRecommendations(forecastResults, assumptions) {
 /**
  * Generate recommendations from valuation analysis
  * Suggests value creation, margin improvement, capital allocation
- * 
+ *
  * @param {Object} valuationResults - Valuation model results
  * @param {Object} inputs - Valuation inputs
  * @returns {Object[]} Array of recommendations
@@ -251,7 +251,7 @@ export function generateValuationRecommendations(valuationResults, inputs) {
 /**
  * Generate recommendations from risk analysis
  * Suggests diversification, risk mitigation, compliance improvements
- * 
+ *
  * @param {Object} riskResults - Risk model results
  * @param {string} country - Primary operating country
  * @returns {Object[]} Array of recommendations
@@ -365,7 +365,7 @@ export function generateRiskRecommendations(riskResults, country) {
 /**
  * Generate recommendations from personal finance analysis
  * Suggests debt reduction, savings increase, investment strategies
- * 
+ *
  * @param {Object} financeResults - Personal finance results
  * @returns {Object[]} Array of recommendations
  */
@@ -489,7 +489,7 @@ export function generatePersonalFinanceRecommendations(financeResults) {
 
 /**
  * Prioritize recommendations by impact and feasibility
- * 
+ *
  * @param {Object[]} recommendations - All recommendations
  * @returns {Object[]} Ranked recommendations
  */
@@ -518,7 +518,7 @@ export function prioritizeRecommendations(recommendations) {
 
 /**
  * Format recommendations for user display
- * 
+ *
  * @param {Object[]} recommendations - Recommendations to format
  * @returns {string} Formatted text
  */
@@ -532,10 +532,10 @@ export function formatRecommendationsForDisplay(recommendations) {
   for (let i = 0; i < recommendations.length; i++) {
     const rec = recommendations[i];
     output += `${i + 1}. [${rec.priority}] ${rec.title}\n`;
-    output += `   ${rec.description}\n\n`;
+    output += `${rec.description}\n\n`;
 
     if (rec.actionSteps && rec.actionSteps.length > 0) {
-      output += `   ACTION STEPS:\n`;
+      output += `ACTION STEPS:\n`;
       for (const step of rec.actionSteps.slice(0, 3)) {
         output += `   • ${step}\n`;
       }
@@ -548,7 +548,7 @@ export function formatRecommendationsForDisplay(recommendations) {
       output += `\n   EXPECTED BENEFIT: ${rec.expectedBenefit.value} ${rec.expectedBenefit.unit}\n`;
     }
 
-    output += `   Difficulty: ${rec.implementationDifficulty}/10 | Timeline: ${rec.timeToImplement} months\n\n`;
+    output += `Difficulty: ${rec.implementationDifficulty}/10 | Timeline: ${rec.timeToImplement} months\n\n`;
   }
 
   return output;
@@ -576,7 +576,7 @@ export default {
 /**
  * Generate industry-specific recommendations
  * Tailors suggestions based on industry vertical and business model
- * 
+ *
  * @param {Object} analysisResults - Complete analysis results
  * @param {string} industry - Industry classification
  * @param {string} businessModel - Business model type (B2B, B2C, SaaS, etc.)
@@ -696,7 +696,7 @@ export function generateIndustrySpecificRecommendations(analysisResults, industr
 /**
  * Generate risk-based recommendations
  * Prioritizes recommendations by risk exposure and mitigation impact
- * 
+ *
  * @param {Object} riskAnalysis - Risk assessment results
  * @param {Array<Object>} existingRecommendations - Current recommendations
  * @returns {Object[]} Risk-prioritized recommendations
@@ -793,7 +793,7 @@ export function generateRiskBasedRecommendations(riskAnalysis, existingRecommend
 /**
  * Apply confidence weighting to recommendations
  * Scales recommendations based on confidence levels
- * 
+ *
  * @param {Object[]} recommendations - Array of recommendations
  * @returns {Object[]} Confidence-weighted recommendations
  */
@@ -807,10 +807,10 @@ export function applyConfidenceWeighting(recommendations) {
       confidenceWeighting: {
         baseConfidence: confidence,
         weight: Math.round(weight * 100),
-        adjustedPriority: weight > 0.8 ? rec.priority : 
+        adjustedPriority: weight > 0.8 ? rec.priority :
                          weight > 0.6 ? (rec.priority === 'HIGH' ? 'MEDIUM' : 'LOW') :
                          'LOW',
-        trustLevel: weight > 0.85 ? 'Very High' : 
+        trustLevel: weight > 0.85 ? 'Very High' :
                    weight > 0.7 ? 'High' :
                    weight > 0.5 ? 'Moderate' : 'Low'
       }
@@ -821,7 +821,7 @@ export function applyConfidenceWeighting(recommendations) {
 /**
  * Rank recommendations by feasibility
  * Considers implementation difficulty, timeline, and resource requirements
- * 
+ *
  * @param {Object[]} recommendations - Array of recommendations
  * @param {Object} constraints - Implementation constraints
  * @returns {Object[]} Feasibility-ranked recommendations
@@ -873,7 +873,7 @@ export function rankRecommendationsByFeasibility(recommendations, constraints = 
 /**
  * Calculate impact score for each recommendation
  * Combines priority, benefit, and feasibility into single score
- * 
+ *
  * @param {Object[]} recommendations - Array of recommendations
  * @returns {Object[]} Recommendations with impact scores
  */
@@ -888,7 +888,7 @@ export function calculateRecommendationImpactScore(recommendations) {
 
   return recommendations.map(rec => {
     const priorityScore = (priorityWeights[rec.priority] || 1) * 20;
-    const benefitScore = (benefitMapping[rec.expectedBenefit?.type] || 15) * 
+    const benefitScore = (benefitMapping[rec.expectedBenefit?.type] || 15) *
                         (rec.expectedBenefit?.value || 50) / 100;
     const confidenceScore = (rec.confidence || 70);
     const feasibilityBonus = (rec.feasibilityScore || 70) / 2;
@@ -913,7 +913,7 @@ export function calculateRecommendationImpactScore(recommendations) {
 /**
  * Aggregate recommendations from multiple analysis sources
  * Deduplicates and combines related recommendations
- * 
+ *
  * @param {Object[]} allRecommendations - All recommendations from various engines
  * @returns {Object[]} Aggregated and deduplicated recommendations
  */
@@ -923,7 +923,7 @@ export function aggregateRecommendations(allRecommendations = []) {
 
     for (const rec of allRecommendations) {
       const key = rec.title.toLowerCase().replace(/\s+/g, '_');
-      
+
       if (aggregated.has(key)) {
         const existing = aggregated.get(key);
         existing.count = (existing.count || 1) + 1;
@@ -946,7 +946,7 @@ export function aggregateRecommendations(allRecommendations = []) {
     return Array.from(aggregated.values())
       .sort((a, b) => {
         const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-        const priorityDiff = (priorityOrder[a.priority] || 2) - 
+        const priorityDiff = (priorityOrder[a.priority] || 2) -
                             (priorityOrder[b.priority] || 2);
         return priorityDiff !== 0 ? priorityDiff : (b.confidence || 70) - (a.confidence || 70);
       });

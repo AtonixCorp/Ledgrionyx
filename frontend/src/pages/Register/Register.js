@@ -109,8 +109,7 @@ const Register = () => {
                 />
               </div>
 
-              <button type="submit" className="btn-primary btn-full">
-                Continue →
+              <button type="submit" className="btn-primary btn-full">Continue →
               </button>
             </form>
 
@@ -222,7 +221,7 @@ const Register = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  '{showPassword ? "Hide" : "Show"}'
                 </button>
               </div>
             </div>
@@ -244,13 +243,12 @@ const Register = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
-                  {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                  '{showConfirmPassword ? "Hide" : "Show"}'
                 </button>
               </div>
             </div>
 
-            <button type="submit" className="btn-primary btn-full">
-              Create Account →
+            <button type="submit" className="btn-primary btn-full">Create Account →
             </button>
           </form>
 

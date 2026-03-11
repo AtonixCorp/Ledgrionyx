@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  FaUsers, FaUserShield, FaFileContract, FaChartLine, FaUserPlus,
-  FaDownload, FaSearch, FaEye, FaEdit, FaCog,
-  FaCheckCircle, FaExclamationTriangle, FaClock, FaCalendarAlt,
-  FaGlobe, FaBuilding,
-  FaTrophy, FaBell, FaShieldAlt, FaRobot, FaStar
-} from 'react-icons/fa';
 
 const StaffHR = ({ entityId }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,7 +22,7 @@ const StaffHR = ({ entityId }) => {
       role: 'Chief Financial Officer',
       department: 'Finance',
       entity: 'Atonix Capital LLC',
-      country: '🇺🇸 United States',
+      country: 'United States',
       countryCode: 'US',
       status: 'active',
       contractType: 'full-time',
@@ -47,7 +40,7 @@ const StaffHR = ({ entityId }) => {
       role: 'Senior Tax Analyst',
       department: 'Tax & Compliance',
       entity: 'Atonix APAC Pte Ltd',
-      country: '🇸🇬 Singapore',
+      country: 'Singapore',
       countryCode: 'SG',
       status: 'active',
       contractType: 'full-time',
@@ -65,7 +58,7 @@ const StaffHR = ({ entityId }) => {
       role: 'Treasury Manager',
       department: 'Treasury',
       entity: 'Atonix Europe GmbH',
-      country: '🇩🇪 Germany',
+      country: 'Germany',
       countryCode: 'DE',
       status: 'active',
       contractType: 'full-time',
@@ -83,7 +76,7 @@ const StaffHR = ({ entityId }) => {
       role: 'Compliance Specialist',
       department: 'Compliance',
       entity: 'Atonix Capital LLC',
-      country: '🇺🇸 United States',
+      country: 'United States',
       countryCode: 'US',
       status: 'contract-expiring',
       contractType: 'contract',
@@ -102,7 +95,7 @@ const StaffHR = ({ entityId }) => {
       role: 'Payroll Coordinator',
       department: 'HR & Payroll',
       entity: 'Atonix UK Ltd',
-      country: '🇬🇧 United Kingdom',
+      country: 'United Kingdom',
       countryCode: 'GB',
       status: 'onboarding',
       contractType: 'full-time',
@@ -190,7 +183,7 @@ const StaffHR = ({ entityId }) => {
 
   const computeInitials = (name) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+    return name.split('').map(n => n[0]).slice(0,2).join('').toUpperCase();
   };
 
   const addRole = (role) => {
@@ -222,7 +215,7 @@ const StaffHR = ({ entityId }) => {
       role: staff.role,
       department: staff.department,
       entity: staff.entity || 'Atonix Capital LLC',
-      country: staff.country || '🇺🇸 United States',
+      country: staff.country || 'United States',
       countryCode: staff.countryCode || 'US',
       status: staff.status || 'active',
       contractType: staff.contractType || 'full-time',
@@ -244,7 +237,7 @@ const StaffHR = ({ entityId }) => {
       {/* Search and Filters */}
       <div className="people-controls">
         <div className="search-bar">
-          <FaSearch className="search-icon" />
+
           <input
             type="text"
             placeholder="Search staff by name, role, or email..."
@@ -288,7 +281,7 @@ const StaffHR = ({ entityId }) => {
           </select>
 
           <button className="btn-primary" onClick={() => setShowAddStaff(true)}>
-            <FaUserPlus /> Add Staff
+            Add Staff
           </button>
         </div>
       </div>
@@ -296,28 +289,28 @@ const StaffHR = ({ entityId }) => {
       {/* Staff Stats */}
       <div className="people-stats">
         <div className="stat-card">
-          <FaUsers className="stat-icon" />
+
           <div className="stat-content">
             <h3>{staffMembers.length}</h3>
             <p>Total Staff</p>
           </div>
         </div>
         <div className="stat-card active">
-          <FaCheckCircle className="stat-icon" />
+
           <div className="stat-content">
             <h3>{staffMembers.filter(s => s.status === 'active').length}</h3>
             <p>Active</p>
           </div>
         </div>
         <div className="stat-card warning">
-          <FaExclamationTriangle className="stat-icon" />
+
           <div className="stat-content">
             <h3>{staffMembers.filter(s => s.status === 'contract-expiring').length}</h3>
             <p>Expiring Soon</p>
           </div>
         </div>
         <div className="stat-card info">
-          <FaClock className="stat-icon" />
+
           <div className="stat-content">
             <h3>{staffMembers.filter(s => s.status === 'onboarding').length}</h3>
             <p>Onboarding</p>
@@ -346,30 +339,30 @@ const StaffHR = ({ entityId }) => {
 
             <div className="staff-details">
               <div className="detail-row">
-                <FaBuilding /> <span>{staff.entity}</span>
+                 <span>{staff.entity}</span>
               </div>
               <div className="detail-row">
-                <FaGlobe /> <span>{staff.country}</span>
+                 <span>{staff.country}</span>
               </div>
               <div className="detail-row">
-                <FaCalendarAlt /> <span>Since {new Date(staff.startDate).toLocaleDateString()}</span>
+                 <span>Since {new Date(staff.startDate).toLocaleDateString()}</span>
               </div>
               {staff.performance && (
                 <div className="detail-row">
-                  <FaStar /> <span>Performance: {staff.performance}%</span>
+                   <span>Performance: {staff.performance}%</span>
                 </div>
               )}
             </div>
 
             <div className="staff-actions">
               <button className="action-btn view">
-                <FaEye /> View
+                View
               </button>
               <button className="action-btn edit">
-                <FaEdit /> Edit
+                Edit
               </button>
               <button className="action-btn permissions">
-                <FaUserShield /> Permissions
+                Permissions
               </button>
             </div>
           </div>
@@ -388,7 +381,7 @@ const StaffHR = ({ entityId }) => {
             + Dept
           </button>
           <button className="btn-primary" onClick={() => setShowAddRole(true)}>
-            <FaUserShield /> Create Role
+            Create Role
           </button>
         </div>
       </div>
@@ -406,12 +399,12 @@ const StaffHR = ({ entityId }) => {
             <p className="role-description">{role.description}</p>
             <div className="role-stats">
               <div className="stat">
-                <FaUsers />
+
                 <span>{role.assignedCount} staff</span>
               </div>
             </div>
             <button className="btn-secondary">
-              <FaCog /> Manage Permissions
+              Manage Permissions
             </button>
           </div>
         ))}
@@ -462,7 +455,7 @@ const StaffHR = ({ entityId }) => {
       <div className="contracts-header">
         <h2>Contracts & Compliance</h2>
         <button className="btn-primary">
-          <FaFileContract /> New Contract
+          New Contract
         </button>
       </div>
 
@@ -485,7 +478,7 @@ const StaffHR = ({ entityId }) => {
                 <p>{staff.role} • {staff.country}</p>
                 {staff.contractEnd && (
                   <div className="expiry-warning">
-                    <FaExclamationTriangle />
+
                     <span>Expires: {new Date(staff.contractEnd).toLocaleDateString()}</span>
                   </div>
                 )}
@@ -504,22 +497,22 @@ const StaffHR = ({ entityId }) => {
         <h3>Compliance Status</h3>
         <div className="compliance-grid">
           <div className="compliance-card complete">
-            <FaCheckCircle className="compliance-icon" />
+
             <h4>Work Permits</h4>
             <p>4/5 complete</p>
           </div>
           <div className="compliance-card warning">
-            <FaExclamationTriangle className="compliance-icon" />
+
             <h4>Background Checks</h4>
             <p>1 pending</p>
           </div>
           <div className="compliance-card complete">
-            <FaCheckCircle className="compliance-icon" />
+
             <h4>Tax Forms</h4>
             <p>All submitted</p>
           </div>
           <div className="compliance-card complete">
-            <FaShieldAlt className="compliance-icon" />
+
             <h4>Data Protection</h4>
             <p>Fully compliant</p>
           </div>
@@ -534,7 +527,7 @@ const StaffHR = ({ entityId }) => {
       <div className="performance-header">
         <h2>Performance & Payroll Intelligence</h2>
         <button className="btn-primary">
-          <FaDownload /> Export Report
+          Export Report
         </button>
       </div>
 
@@ -551,7 +544,7 @@ const StaffHR = ({ entityId }) => {
                   <p>{staff.role}</p>
                 </div>
               </div>
-              
+
               <div className="perf-score">
                 <div className="score-circle">
                   <svg viewBox="0 0 36 36" className="circular-chart">
@@ -571,10 +564,10 @@ const StaffHR = ({ entityId }) => {
 
               <div className="perf-insights">
                 <div className="insight-item">
-                  <FaTrophy /> <span>Top Performer</span>
+                   <span>Top Performer</span>
                 </div>
                 <div className="insight-item">
-                  <FaCheckCircle /> <span>Goals: 12/15</span>
+                   <span>Goals: 12/15</span>
                 </div>
               </div>
             </div>
@@ -605,7 +598,7 @@ const StaffHR = ({ entityId }) => {
                 const deductions = staff.salary * 0.07;
                 const tax = (staff.salary + bonus - deductions) * 0.25;
                 const netPay = staff.salary + bonus - deductions - tax;
-                
+
                 return (
                   <tr key={staff.id}>
                     <td>
@@ -622,7 +615,7 @@ const StaffHR = ({ entityId }) => {
                     <td className="net-pay">${netPay.toLocaleString()}</td>
                     <td>
                       <button className="btn-link">
-                        <FaEye /> Details
+                        Details
                       </button>
                     </td>
                   </tr>
@@ -636,19 +629,19 @@ const StaffHR = ({ entityId }) => {
       {/* AI Insights */}
       <div className="ai-insights">
         <div className="insight-card">
-          <FaRobot className="insight-icon" />
+
           <h4>AI Payroll Validator</h4>
           <p>All calculations verified against country-specific tax rules</p>
-          <span className="insight-status success">✓ Validated</span>
+          <span className="insight-status success">Validated</span>
         </div>
         <div className="insight-card">
-          <FaBell className="insight-icon" />
+
           <h4>Performance Alert</h4>
           <p>2 staff members showing signs of burnout risk</p>
           <button className="btn-link">Review</button>
         </div>
         <div className="insight-card">
-          <FaTrophy className="insight-icon" />
+
           <h4>Top Performers</h4>
           <p>3 staff members exceeding all KPIs this quarter</p>
           <button className="btn-link">Recognition Program</button>
@@ -810,25 +803,25 @@ const StaffHR = ({ entityId }) => {
           className={`nav-btn ${activeSection === 'people' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'people' })}
         >
-          <FaUsers /> People Directory
+          People Directory
         </button>
         <button
           className={`nav-btn ${activeSection === 'roles' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'roles' })}
         >
-          <FaUserShield /> Roles & Permissions
+          Roles & Permissions
         </button>
         <button
           className={`nav-btn ${activeSection === 'contracts' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'contracts' })}
         >
-          <FaFileContract /> Contracts & Compliance
+          Contracts & Compliance
         </button>
         <button
           className={`nav-btn ${activeSection === 'performance' ? 'active' : ''}`}
           onClick={() => setSearchParams({ section: 'performance' })}
         >
-          <FaChartLine /> Performance & Payroll
+          Performance & Payroll
         </button>
       </div>
 

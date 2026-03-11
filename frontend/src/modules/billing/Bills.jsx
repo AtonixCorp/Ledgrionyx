@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaFileAlt, FaPlus, FaDownload } from 'react-icons/fa';
 
 const STATUS_COLORS = { paid: '#27ae60', pending: '#f39c12', overdue: '#e74c3c', draft: '#95a5a6' };
 
@@ -32,12 +31,10 @@ export default function Bills() {
       <PageHeader
         title="Bills"
         subtitle="Manage vendor bills and payables"
-        icon={<FaFileAlt />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Export</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              New Bill
+            <Button variant="secondary" size="small">Export</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>New Bill
             </Button>
           </>
         }

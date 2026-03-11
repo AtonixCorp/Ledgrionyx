@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
-import { FaDollarSign, FaDownload } from 'react-icons/fa';
 
 const mockCollections = [
   { invoice: 'INV-0002', customer: 'Globex Inc', amount: '$4,200.00', overdueDays: 15, lastContact: '2025-01-25', nextAction: 'Call', priority: 'High' },
@@ -30,9 +29,8 @@ export default function Collections() {
       <PageHeader
         title="Collections"
         subtitle="Track and manage overdue invoices and collection workflows"
-        icon={<FaDollarSign />}
         actions={
-          <Button variant="secondary" size="small" icon={<FaDownload />}>Export Report</Button>
+          <Button variant="secondary" size="small">Export Report</Button>
         }
       />
 

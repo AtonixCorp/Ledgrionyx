@@ -1,16 +1,16 @@
 /**
  * Personal Finance Engine
- * 
+ *
  * Manages personal financial planning including cashflow analysis, tax optimization,
  * savings/investment models, retirement planning, and personal tax calculations.
- * 
+ *
  * ALL CALCULATIONS USE calculationEngine - NEVER do math directly
  * ALL DATA VALIDATED using validationService
- * 
+ *
  * Phase 1 Feature: Foundation for personal finance models
  * Phase 3 Dependencies: Used by AI interpretation layer
  * Phase 5 Dependencies: Used in personal finance reports
- * 
+ *
  * Strict Rule: All personal tax calculations must comply with countryTaxLibrary rules
  */
 
@@ -20,7 +20,7 @@ import * as TaxLibrary from './countryTaxLibrary';
 
 /**
  * Personal Financial Profile
- * 
+ *
  * @typedef {Object} PersonalProfile
  * @property {string} profileId - Unique identifier
  * @property {string} name - Full name
@@ -37,13 +37,13 @@ import * as TaxLibrary from './countryTaxLibrary';
 /**
  * Calculate net personal income after tax
  * Considers all income sources and applicable taxes
- * 
+ *
  * @param {number} grossIncome - Total gross income for period
  * @param {string} country - Country code for tax rules
  * @param {string} taxFilingStatus - Tax filing status
  * @param {number} dependents - Number of dependents
  * @returns {Object} Income breakdown with taxes
- * 
+ *
  * @example
  * const income = calculateNetIncome(500000, 'NG', 'SINGLE', 0);
  * // Returns: {
@@ -83,7 +83,7 @@ export function calculateNetIncome(grossIncome, country, taxFilingStatus, depend
   }
 
   const netIncome = CalcEngine.subtract(grossIncome, incomeTax);
-  const effectiveTaxRate = grossIncome > 0 
+  const effectiveTaxRate = grossIncome > 0
     ? CalcEngine.round(CalcEngine.divide(CalcEngine.multiply(incomeTax, 100), grossIncome), 2)
     : 0;
 
@@ -105,11 +105,11 @@ export function calculateNetIncome(grossIncome, country, taxFilingStatus, depend
 /**
  * Calculate tax from progressive tax bands
  * Applies marginal tax rates to appropriate income portions
- * 
+ *
  * @param {number} taxableIncome - Taxable income amount
  * @param {Array} taxBands - Array of tax band objects with {min, max, rate}
  * @returns {number} Total tax calculated
- * 
+ *
  * @example
  * const bands = [
  *   {min: 0, max: 100000, rate: 5},
@@ -149,12 +149,12 @@ export function calculateTaxFromBands(taxableIncome, taxBands) {
 /**
  * Calculate personal cashflow statement
  * Projects income, expenses, and surplus/deficit over period
- * 
+ *
  * @param {Object} incomeItems - Income sources (salary, investments, etc.)
  * @param {Object} expenseItems - Expense categories (rent, food, utilities, etc.)
  * @param {Object} investments - Savings/investment amounts
  * @returns {Object} Cashflow analysis with projections
- * 
+ *
  * @example
  * const cashflow = calculatePersonalCashflow(
  *   { salary: 500000, investments: 50000 },
@@ -210,7 +210,7 @@ export function calculatePersonalCashflow(incomeItems, expenseItems, investments
     expenseBreakdown,
     totalInvestments: CalcEngine.round(totalInvestments, 2),
     surplus: CalcEngine.round(surplus, 2),
-    expenseRatio: totalIncome > 0 
+    expenseRatio: totalIncome > 0
       ? CalcEngine.round(CalcEngine.divide(CalcEngine.multiply(totalExpenses, 100), totalIncome), 2)
       : 0,
     savingsRate: totalIncome > 0
@@ -222,7 +222,7 @@ export function calculatePersonalCashflow(incomeItems, expenseItems, investments
 /**
  * Calculate retirement savings projection
  * Projects growth of retirement savings with contributions and returns
- * 
+ *
  * @param {number} currentSavings - Current retirement savings
  * @param {number} annualContribution - Annual contribution amount
  * @param {number} annualReturn - Expected annual return percentage
@@ -230,7 +230,7 @@ export function calculatePersonalCashflow(incomeItems, expenseItems, investments
  * @param {number} retirementYears - Years in retirement
  * @param {number} annualSpending - Annual spending in retirement
  * @returns {Object} Retirement analysis
- * 
+ *
  * @example
  * const retirement = calculateRetirementProjection(
  *   1000000,      // Current savings
@@ -265,7 +265,7 @@ export function calculateRetirementProjection(
     // Apply return on existing balance
     const returns = CalcEngine.multiply(savingsAtRetirement, annualReturn);
     const returnsAmount = CalcEngine.divide(returns, 100);
-    
+
     // Add contribution
     savingsAtRetirement = CalcEngine.add(savingsAtRetirement, returnsAmount);
     savingsAtRetirement = CalcEngine.add(savingsAtRetirement, annualContribution);
@@ -317,7 +317,7 @@ export function calculateRetirementProjection(
     retirementViable,
     viablYears,
     analysis: {
-      message: retirementViable 
+      message: retirementViable
         ? `Retirement plan is viable for ${viablYears} years`
         : `Retirement savings depleted after ${viablYears} years of planned ${retirementYears} years`,
       recommendation: retirementViable
@@ -330,10 +330,10 @@ export function calculateRetirementProjection(
 /**
  * Calculate investment portfolio allocation
  * Analyzes portfolio composition and asset allocation percentages
- * 
+ *
  * @param {Object} holdings - Investment holdings by type
  * @returns {Object} Portfolio analysis
- * 
+ *
  * @example
  * const portfolio = calculatePortfolioAllocation({
  *   stocks: 300000,
@@ -377,7 +377,7 @@ export function calculatePortfolioAllocation(holdings) {
     totalPortfolioValue: CalcEngine.round(totalValue, 2),
     allocation,
     diversified: Object.keys(allocation).length >= 3,
-    recommendation: Object.keys(allocation).length < 3 
+    recommendation: Object.keys(allocation).length < 3
       ? 'Consider diversifying across more asset classes'
       : 'Portfolio is adequately diversified'
   };
@@ -386,11 +386,11 @@ export function calculatePortfolioAllocation(holdings) {
 /**
  * Calculate debt-to-income ratio
  * Important metric for financial health assessment
- * 
+ *
  * @param {number} monthlyDebtPayments - Total monthly debt payments
  * @param {number} monthlyGrossIncome - Gross monthly income
  * @returns {number} Debt-to-income ratio as percentage
- * 
+ *
  * @example
  * const dti = calculateDebtToIncomeRatio(5000, 25000);
  * // Returns: 20 (meaning 20% of income goes to debt service)
@@ -414,12 +414,12 @@ export function calculateDebtToIncomeRatio(monthlyDebtPayments, monthlyGrossInco
 /**
  * Calculate loan payment (PMT formula)
  * Calculates monthly payment for fixed-rate loan
- * 
+ *
  * @param {number} principal - Loan amount
  * @param {number} annualRate - Annual interest rate percentage
  * @param {number} months - Number of months
  * @returns {number} Monthly payment amount
- * 
+ *
  * @example
  * const payment = calculateLoanPayment(500000, 8, 360);
  * // Returns: monthly payment for 500k loan at 8% over 30 years
@@ -459,11 +459,11 @@ export function calculateLoanPayment(principal, annualRate, months) {
 /**
  * Calculate net worth
  * Total assets minus total liabilities
- * 
+ *
  * @param {Object} assets - Asset values by category
  * @param {Object} liabilities - Liability values by category
  * @returns {Object} Net worth analysis
- * 
+ *
  * @example
  * const netWorth = calculateNetWorth(
  *   { home: 2000000, investments: 500000, cash: 100000 },
@@ -512,7 +512,7 @@ export function calculateNetWorth(assets, liabilities) {
 /**
  * Generate personal finance report
  * Comprehensive summary of income, expenses, investments, and financial health
- * 
+ *
  * @param {Object} profile - Personal financial profile
  * @returns {string} Formatted report
  */

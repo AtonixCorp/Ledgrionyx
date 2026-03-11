@@ -1,18 +1,18 @@
 /**
  * Input Mapping Engine
- * 
+ *
  * Maps user inputs from UI forms to standardized model variables.
  * Transforms data formats, applies defaults, handles missing values,
  * and validates input quality before passing to calculation engine.
- * 
+ *
  * ALL CALCULATIONS USE calculationEngine - NEVER do math directly
  * ALL VALIDATIONS USE validationService
  * ALL DATA TRANSFORMATION logged for audit trail
- * 
+ *
  * Phase 2 Foundation: Input data pipeline
  * Phase 3 Dependencies: AI interpretation receives mapped inputs
  * Phase 5 Dependencies: Reports show input lineage
- * 
+ *
  * Strict Rule: Every user input must be traced, validated, and logged
  */
 
@@ -24,7 +24,7 @@ import * as ModelTemplates from './modelTemplates';
 /**
  * Input Mapping Configuration
  * Defines how to transform user input to model input
- * 
+ *
  * @typedef {Object} InputMapping
  * @property {string} fieldName - Name in model
  * @property {string} userInputName - Name in form data
@@ -37,12 +37,12 @@ import * as ModelTemplates from './modelTemplates';
 /**
  * Map user form inputs to standardized model inputs
  * Transforms raw form data into validated, typed model variables
- * 
+ *
  * @param {Object} rawUserInput - Raw data from UI form
  * @param {string} modelType - Type of model ('forecasting', 'valuation', etc.)
  * @param {Object} mappingConfig - Configuration for field mappings
  * @returns {Object|null} Mapped and validated inputs, or null if invalid
- * 
+ *
  * @example
  * const mapped = mapUserInputToModel(
  *   { companyName: 'Atonix', revenue: '1000000' },
@@ -104,7 +104,7 @@ export function mapUserInputToModel(rawUserInput, modelType, mappingConfig) {
 /**
  * Transform a single input value according to spec
  * Handles type conversion, default values, range validation
- * 
+ *
  * @param {*} rawValue - Raw value from user
  * @param {string} fieldName - Field name for logging
  * @param {Object} inputSpec - Input specification from template
@@ -183,7 +183,7 @@ function transformInputValue(rawValue, fieldName, inputSpec, mappingResult) {
 
 /**
  * Validate input against constraints (min, max, pattern, etc.)
- * 
+ *
  * @param {*} value - Value to validate
  * @param {Object} constraints - Constraint specifications
  * @returns {Object} Validation result
@@ -231,12 +231,12 @@ function validateInputConstraints(value, constraints) {
 /**
  * Apply default assumptions based on model type and country
  * Fills in assumed values for missing/unspecified inputs
- * 
+ *
  * @param {Object} mappedInputs - Currently mapped inputs
  * @param {string} modelType - Type of model
  * @param {string} country - Country code for country-specific assumptions
  * @returns {Object} Inputs with assumptions applied
- * 
+ *
  * @example
  * const withAssumptions = applyDefaultAssumptions(
  *   mappedInputs,
@@ -280,7 +280,7 @@ export function applyDefaultAssumptions(mappedInputs, modelType, country) {
 
 /**
  * Get country-specific economic assumptions
- * 
+ *
  * @param {string} country - Country code
  * @returns {Object} Country assumptions
  */
@@ -298,7 +298,7 @@ function getCountryAssumptions(country) {
 
 /**
  * Get model-type specific assumptions
- * 
+ *
  * @param {string} modelType - Type of model
  * @returns {Object} Model-specific assumptions
  */
@@ -340,10 +340,10 @@ function getModelTypeAssumptions(modelType) {
 /**
  * Normalize input values to standard ranges/units
  * Converts various input formats to standardized values
- * 
+ *
  * @param {Object} mappedInputs - Mapped input data
  * @returns {Object} Normalized inputs
- * 
+ *
  * @example
  * // Convert "5%" to 5, "1000k" to 1000000, etc.
  * const normalized = normalizeInputValues(mappedInputs);
@@ -388,11 +388,11 @@ export function normalizeInputValues(mappedInputs) {
 /**
  * Perform comprehensive input validation
  * Checks for completeness, consistency, accuracy, timeliness
- * 
+ *
  * @param {Object} mappedInputs - Mapped inputs to validate
  * @param {string} modelType - Model type for validation rules
  * @returns {Object} Comprehensive validation report
- * 
+ *
  * @example
  * const validation = validateInputQuality(mappedInputs, 'forecasting');
  * // Returns: {
@@ -443,7 +443,7 @@ export function validateInputQuality(mappedInputs, modelType) {
 /**
  * Check input completeness
  * Are all required fields present?
- * 
+ *
  * @param {Object} mappedInputs - Inputs to check
  * @param {string} modelType - Model type
  * @returns {Object} Completeness check result
@@ -482,7 +482,7 @@ function checkCompleteness(mappedInputs, modelType) {
 /**
  * Check input consistency
  * Do values make logical sense together?
- * 
+ *
  * @param {Object} mappedInputs - Inputs to check
  * @returns {Object} Consistency check result
  */
@@ -527,7 +527,7 @@ function checkConsistency(mappedInputs) {
 /**
  * Check input accuracy
  * Are values realistic and within expected ranges?
- * 
+ *
  * @param {Object} mappedInputs - Inputs to check
  * @returns {Object} Accuracy check result
  */
@@ -572,7 +572,7 @@ function checkAccuracy(mappedInputs) {
 /**
  * Check input timeliness
  * Is data current and appropriately dated?
- * 
+ *
  * @param {Object} mappedInputs - Inputs to check
  * @returns {Object} Timeliness check result
  */
@@ -604,7 +604,7 @@ function checkTimeliness(mappedInputs) {
 
 /**
  * Calculate overall data quality score from checks
- * 
+ *
  * @param {Object} checks - Results from all validation checks
  * @returns {number} Quality score 0-100
  */
@@ -629,7 +629,7 @@ function calculateQualityScore(checks) {
 /**
  * Calculate overall mapping quality score
  * Based on errors, warnings, and data completeness
- * 
+ *
  * @param {Object} mappingResult - Result from mapping process
  * @returns {number} Quality score 0-100
  */
@@ -653,7 +653,7 @@ function calculateMappingQualityScore(mappingResult) {
 /**
  * Generate input mapping report
  * Shows input transformation, assumptions applied, quality metrics
- * 
+ *
  * @param {Object} mappedInputs - Mapped input data
  * @param {Object} validation - Validation results
  * @returns {string} Formatted report

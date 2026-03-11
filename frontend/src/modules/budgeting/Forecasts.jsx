@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
-import { FaChartLine, FaDownload } from 'react-icons/fa';
 
 const mockForecast = [
   { month: 'Feb 2025', revenue: '$292,000', expenses: '$162,000', netIncome: '$130,000', cashFlow: '$118,000', confidence: 'High' },
@@ -29,14 +28,12 @@ export default function Forecasts() {
       <PageHeader
         title="Forecasts"
         subtitle="AI-assisted financial projections and scenario modeling"
-        icon={<FaChartLine />}
         actions={
-          <Button variant="secondary" size="small" icon={<FaDownload />}>Export Forecast</Button>
+          <Button variant="secondary" size="small">Export Forecast</Button>
         }
       />
 
-      <div className="forecast-chart">
-        Revenue & Net Income Forecast Chart (Chart.js integration point)
+      <div className="forecast-chart">Revenue & Net Income Forecast Chart (Chart.js integration point)
       </div>
 
       <div className="stats-row">

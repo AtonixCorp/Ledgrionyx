@@ -1,16 +1,16 @@
 /**
  * Insights Generator
- * 
+ *
  * Analyzes calculation results and generates human-readable, actionable insights.
  * Detects patterns, anomalies, opportunities, and risks.
- * 
+ *
  * ALWAYS references the model/calculation that produced each insight
  * ALWAYS validates insights against reasonable thresholds
  * ALWAYS explains the reasoning behind each insight
- * 
+ *
  * Phase 3 Extension: Human-readable findings from AI interpretation
  * Phase 5 Dependencies: Reports include these insights
- * 
+ *
  * Strict Rule: Every insight must be traceable to its source calculation
  */
 
@@ -20,7 +20,7 @@ import * as TaxLibrary from '../calculation/countryTaxLibrary';
 
 /**
  * Insight Object
- * 
+ *
  * @typedef {Object} Insight
  * @property {string} category - Category of insight
  * @property {string} severity - 'INFO', 'WARNING', 'CRITICAL'
@@ -35,7 +35,7 @@ import * as TaxLibrary from '../calculation/countryTaxLibrary';
 /**
  * Generate insights from forecast results
  * Analyzes growth trends, acceleration, deceleration
- * 
+ *
  * @param {Object} forecastResults - Forecast model results
  * @param {Object} assumptions - Assumptions used in forecast
  * @returns {Object[]} Array of insights
@@ -131,7 +131,7 @@ export function generateForecastInsights(forecastResults, assumptions) {
 /**
  * Generate insights from valuation results
  * Analyzes valuation multiples, value drivers, sensitivity
- * 
+ *
  * @param {Object} valuationResults - Valuation model results
  * @param {Object} inputs - Valuation inputs
  * @returns {Object[]} Array of insights
@@ -150,7 +150,7 @@ export function generateValuationInsights(valuationResults, inputs) {
 
     let severity = 'INFO';
     let assessment = '';
-    
+
     if (evRevenue > 10) {
       severity = 'WARNING';
       assessment = 'Premium valuation - company trading at significant multiple';
@@ -234,7 +234,7 @@ export function generateValuationInsights(valuationResults, inputs) {
 /**
  * Generate insights from risk analysis
  * Identifies concentration risk, jurisdictional risks, mitigation opportunities
- * 
+ *
  * @param {Object} riskResults - Risk model results
  * @returns {Object[]} Array of insights
  */
@@ -332,7 +332,7 @@ export function generateRiskInsights(riskResults) {
 /**
  * Generate insights from personal finance analysis
  * Identifies financial health status, improvement areas, opportunities
- * 
+ *
  * @param {Object} financeResults - Personal finance results
  * @returns {Object[]} Array of insights
  */
@@ -461,7 +461,7 @@ export function generatePersonalFinanceInsights(financeResults) {
 /**
  * Prioritize insights by severity and impact
  * Sorts insights for user consumption
- * 
+ *
  * @param {Object[]} insights - All insights to prioritize
  * @returns {Object[]} Sorted insights by priority
  */
@@ -485,7 +485,7 @@ export function prioritizeInsights(insights) {
 /**
  * Format insights for user display
  * Creates human-readable insight summaries
- * 
+ *
  * @param {Object[]} insights - Insights to format
  * @returns {string} Formatted insights text
  */
@@ -501,7 +501,7 @@ export function formatInsightsForDisplay(insights) {
   const info = insights.filter(i => i.severity === 'INFO');
 
   if (critical.length > 0) {
-    output += '🔴 CRITICAL FINDINGS:\n';
+    output += 'CRITICAL FINDINGS:\n';
     for (const insight of critical) {
       output += `• ${insight.title}: ${insight.description}\n`;
       if (insight.recommendation) {
@@ -520,7 +520,7 @@ export function formatInsightsForDisplay(insights) {
   }
 
   if (info.length > 0) {
-    output += '🔵 KEY FINDINGS:\n';
+    output += 'KEY FINDINGS:\n';
     for (const insight of info) {
       output += `• ${insight.title}: ${insight.description}\n`;
     }

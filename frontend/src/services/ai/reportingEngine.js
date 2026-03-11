@@ -1,16 +1,16 @@
 /**
  * Reporting Engine
- * 
+ *
  * Generates comprehensive financial reports in multiple formats:
  * - Executive Summaries (1-2 pages)
  * - Detailed Analysis Reports (comprehensive analysis)
  * - PDF/HTML/JSON export formats
  * - Custom report templates
  * - Data export for visualization
- * 
+ *
  * Phase 5 Feature: Reporting and export capabilities
  * Integrates with Phases 1-4 to create actionable reports
- * 
+ *
  * @module reportingEngine
  * @version 1.0.0
  */
@@ -24,7 +24,7 @@ import * as CalcEngine from '../calculation/calculationEngine';
 /**
  * Generate executive summary report
  * One-page overview of key findings, metrics, and recommendations
- * 
+ *
  * @param {Object} modelData - Complete model analysis data
  * @param {Object} options - Report options
  * @returns {Object} Executive summary data structure
@@ -67,7 +67,7 @@ export function generateExecutiveSummary(modelData, options = {}) {
         overview: generateOverviewStatement(keyMetrics, interpretations),
         keyFindings: extractTopInsights(insights, 3),
         criticalIssues: extractCriticalInsights(insights),
-        recommendation: includeRecommendations 
+        recommendation: includeRecommendations
           ? recommendations.slice(0, maxRecommendations)
           : []
       },
@@ -99,7 +99,7 @@ export function generateExecutiveSummary(modelData, options = {}) {
 /**
  * Generate detailed analysis report
  * Comprehensive report with full analysis, calculations, and recommendations
- * 
+ *
  * @param {Object} modelData - Complete model analysis data
  * @param {Object} options - Report options
  * @returns {Object} Detailed analysis report structure
@@ -252,7 +252,7 @@ function extractKeyMetrics(calculations) {
   const totalRevenue = CalcEngine.arraySum(forecast);
   const firstYear = forecast[0] || 0;
   const lastYear = forecast[forecast.length - 1] || 0;
-  const cagr = forecast.length > 1 
+  const cagr = forecast.length > 1
     ? CalcEngine.power(CalcEngine.divide(lastYear, firstYear), CalcEngine.divide(1, forecast.length - 1)) - 1
     : 0;
 
@@ -324,7 +324,7 @@ function generateFinancialAnalysisSection(calculations, interpretations) {
  */
 function generateRevenueAnalysis(calculations) {
   const forecast = calculations.forecast || [];
-  
+
   if (forecast.length === 0) return null;
 
   const growth = [];
@@ -354,12 +354,12 @@ function generateRevenueAnalysis(calculations) {
  */
 function generateProfitabilityAnalysis(calculations) {
   const metrics = calculations.financialMetrics || {};
-  
+
   return {
     profitMargin: CalcEngine.round((metrics.profitMargin || 0) * 100, 1) + '%',
     ebitdaMargin: CalcEngine.round((metrics.ebitdaMargin || 0) * 100, 1) + '%',
     returnOnAssets: CalcEngine.round((metrics.roa || 0) * 100, 1) + '%',
-    assessment: (metrics.profitMargin || 0) > 0.15 ? 'Strong' : 
+    assessment: (metrics.profitMargin || 0) > 0.15 ? 'Strong' :
                (metrics.profitMargin || 0) > 0.1 ? 'Healthy' : 'Requires Improvement'
   };
 }
@@ -369,12 +369,12 @@ function generateProfitabilityAnalysis(calculations) {
  */
 function generateCashFlowAnalysis(calculations) {
   const metrics = calculations.financialMetrics || {};
-  
+
   return {
     operatingCashFlow: CalcEngine.round(metrics.operatingCashFlow || 0, 2),
     freeCashFlow: CalcEngine.round(metrics.freeCashFlow || 0, 2),
     cashConversion: CalcEngine.round((metrics.cashConversion || 0) * 100, 1) + '%',
-    liquidity: (metrics.currentRatio || 0) > 1.5 ? 'Strong' : 
+    liquidity: (metrics.currentRatio || 0) > 1.5 ? 'Strong' :
               (metrics.currentRatio || 0) > 1.0 ? 'Adequate' : 'Concerning'
   };
 }
@@ -396,12 +396,12 @@ function generateRiskAssessmentSection(insights, calculations) {
  */
 function calculateConcentrationRisks(calculations) {
   const risks = calculations.riskMetrics?.concentrationRisks || [];
-  
+
   return risks.map(risk => ({
     category: risk.category,
     concentration: CalcEngine.round(risk.concentration * 100, 1) + '%',
     risk: risk.concentration > 0.6 ? 'HIGH' : risk.concentration > 0.4 ? 'MEDIUM' : 'LOW',
-    recommendation: risk.concentration > 0.6 
+    recommendation: risk.concentration > 0.6
       ? 'Diversify immediately'
       : risk.concentration > 0.4
       ? 'Monitor and plan diversification'
@@ -449,7 +449,7 @@ function formatRecommendationsForReport(recommendations, limit = 10) {
       priority: rec.priority,
       title: rec.title,
       description: rec.description,
-      benefit: rec.expectedBenefit?.value + ' ' + (rec.expectedBenefit?.unit || ''),
+      benefit: rec.expectedBenefit?.value + '' + (rec.expectedBenefit?.unit || ''),
       timeline: rec.timeToImplement + ' months',
       difficulty: rec.implementationDifficulty + '/10',
       actionSteps: rec.actionSteps || [],
@@ -511,8 +511,7 @@ function formatCalculationsForReport(calculations) {
  * Generate methodology explanation
  */
 function generateMethodologyExplanation() {
-  return `
-This analysis employs a comprehensive financial modeling framework utilizing:
+  return `This analysis employs a comprehensive financial modeling framework utilizing:
 
 1. CALCULATION ENGINE: Deterministic calculations using standardized formulas ensuring reproducibility
 2. COUNTRY TAX LIBRARY: Accurate tax calculations across 40+ jurisdictions
@@ -534,7 +533,7 @@ Results have been validated against industry benchmarks and best practices.
 /**
  * Generate JSON export format
  * Machine-readable format suitable for data integration
- * 
+ *
  * @param {Object} reportData - Report data structure
  * @returns {string} JSON string
  */
@@ -549,7 +548,7 @@ export function exportAsJSON(reportData) {
 /**
  * Generate HTML export format
  * Formatted HTML suitable for browser viewing and printing
- * 
+ *
  * @param {Object} reportData - Report data structure
  * @returns {string} HTML content
  */
@@ -595,11 +594,11 @@ export function exportAsHTML(reportData) {
       if (section.content) {
         html += `<p>${section.content}</p>`;
       }
-      
+
       if (section.data) {
         html += formatDataAsHTML(section.data);
       }
-      
+
       if (section.subsections) {
         for (const sub of section.subsections) {
           html += `<h3>${sub.title}</h3>`;
@@ -657,7 +656,7 @@ function formatDataAsHTML(data) {
 /**
  * Generate CSV export format
  * Suitable for spreadsheet applications
- * 
+ *
  * @param {Object[]} data - Array of data objects
  * @param {string} title - Report title/section name
  * @returns {string} CSV content
@@ -694,7 +693,7 @@ export function exportAsCSV(data, title = 'Financial Data') {
 /**
  * Generate chart data for visualization
  * Prepares data for Recharts and similar visualization libraries
- * 
+ *
  * @param {Object} calculations - Calculation results
  * @returns {Object} Chart data structures
  */
@@ -712,7 +711,7 @@ export function generateChartData(calculations) {
       data: forecast.map((value, index) => ({
         name: `Year ${index + 1}`,
         revenue: value,
-        trend: index > 0 
+        trend: index > 0
           ? Math.round(((value - forecast[index - 1]) / forecast[index - 1]) * 100)
           : 0
       }))

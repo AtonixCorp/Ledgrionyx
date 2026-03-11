@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Card, PageHeader, Table } from '../../../components/ui';
-import { FaSync, FaPlay } from 'react-icons/fa';
 
 const Reconciliation = () => {
   const columns = [
@@ -21,16 +20,15 @@ const Reconciliation = () => {
         subtitle="Bank and account matching"
         actions={
           <>
-            <Button variant="secondary" icon={FaSync}>Sync Banks</Button>
-            <Button variant="primary" icon={FaPlay}>Start Reconciliation</Button>
+            <Button variant="secondary">Sync Banks</Button>
+            <Button variant="primary">Start Reconciliation</Button>
           </>
         }
       />
 
       <Card header="Account Status">
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>
-            No accounts to reconcile yet
+          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No accounts to reconcile yet
           </p>
         ) : (
           <Table columns={columns} data={data} />

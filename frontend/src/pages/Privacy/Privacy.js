@@ -1,13 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaShieldAlt, FaLock, FaUserCheck, FaFileContract, FaGlobe, FaCookieBite } from 'react-icons/fa';
+
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
 const Privacy = () => {
   const sections = [
     {
-      icon: <FaShieldAlt />,
       title: "Information We Collect",
       content: [
         "Personal information you provide (name, email, phone, address)",
@@ -17,7 +16,6 @@ const Privacy = () => {
       ]
     },
     {
-      icon: <FaLock />,
       title: "How We Use Your Information",
       content: [
         "Provide and maintain our financial services",
@@ -28,7 +26,6 @@ const Privacy = () => {
       ]
     },
     {
-      icon: <FaUserCheck />,
       title: "Your Rights and Choices",
       content: [
         "Access and update your personal information",
@@ -39,7 +36,6 @@ const Privacy = () => {
       ]
     },
     {
-      icon: <FaCookieBite />,
       title: "Cookies and Tracking",
       content: [
         "Essential cookies for platform functionality",
@@ -89,15 +85,15 @@ const Privacy = () => {
             <p>Your privacy and data security are our top priorities</p>
             <div className="hero-stats">
               <div className="stat">
-                <FaShieldAlt />
+
                 <span>Bank-Level Security</span>
               </div>
               <div className="stat">
-                <FaLock />
+
                 <span>End-to-End Encryption</span>
               </div>
               <div className="stat">
-                <FaGlobe />
+
                 <span>Global Compliance</span>
               </div>
             </div>
@@ -110,27 +106,25 @@ const Privacy = () => {
         <div className="container">
           <div className="overview-content">
             <h2>Privacy Overview</h2>
-            <p>
-              At Atonix Capital, we are committed to protecting your privacy and ensuring the security
+            <p>At Atonix Capital, we are committed to protecting your privacy and ensuring the security
               of your personal and financial information. This privacy policy explains how we collect,
               use, and safeguard your data when you use our platform.
             </p>
-            <p>
-              We comply with global privacy regulations including GDPR, CCPA, and other applicable
+            <p>We comply with global privacy regulations including GDPR, CCPA, and other applicable
               data protection laws. Your trust is essential to our relationship, and we are dedicated
               to maintaining the highest standards of data protection.
             </p>
             <div className="overview-highlights">
               <div className="highlight">
-                <FaFileContract />
+
                 <span>GDPR Compliant</span>
               </div>
               <div className="highlight">
-                <FaFileContract />
+
                 <span>CCPA Compliant</span>
               </div>
               <div className="highlight">
-                <FaFileContract />
+
                 <span>SOC 2 Certified</span>
               </div>
             </div>
@@ -181,8 +175,7 @@ const Privacy = () => {
           <h2>Privacy Questions?</h2>
           <div className="contact-content">
             <div className="contact-text">
-              <p>
-                If you have any questions about our privacy practices or would like to exercise
+              <p>If you have any questions about our privacy practices or would like to exercise
                 your data rights, please don't hesitate to contact us. Our privacy team is here
                 to help.
               </p>
@@ -210,8 +203,7 @@ const Privacy = () => {
         <div className="container">
           <h2>Regulatory Compliance</h2>
           <div className="compliance-content">
-            <p>
-              Atonix Capital maintains compliance with major global privacy and data protection regulations:
+            <p>Atonix Capital maintains compliance with major global privacy and data protection regulations:
             </p>
             <div className="compliance-grid">
               <div className="compliance-item">

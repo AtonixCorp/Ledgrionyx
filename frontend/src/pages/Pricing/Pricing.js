@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaCheck, FaBuilding, FaStar, FaCrown } from 'react-icons/fa';
+
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
@@ -10,7 +10,6 @@ const Pricing = () => {
   const plans = [
     {
       name: 'Personal',
-      icon: <FaStar />,
       description: 'Perfect for individuals managing personal finances',
       price: {
         monthly: 9.99,
@@ -30,7 +29,6 @@ const Pricing = () => {
     },
     {
       name: 'Professional',
-      icon: <FaCrown />,
       description: 'Ideal for freelancers and small business owners',
       price: {
         monthly: 29.99,
@@ -51,7 +49,6 @@ const Pricing = () => {
     },
     {
       name: 'Enterprise',
-      icon: <FaBuilding />,
       description: 'Complete solution for large businesses and corporations',
       price: {
         monthly: 99.99,
@@ -106,8 +103,7 @@ const Pricing = () => {
       <section className="pricing-hero">
         <div className="hero-content">
           <h1>Simple, Transparent Pricing</h1>
-          <p>
-            Choose the perfect plan for your financial management needs.
+          <p>Choose the perfect plan for your financial management needs.
             All plans include our core features with no hidden fees.
           </p>
 
@@ -121,8 +117,7 @@ const Pricing = () => {
               />
               <span className="slider"></span>
             </label>
-            <span className={billingCycle === 'annual' ? 'active' : ''}>
-              Annual
+            <span className={billingCycle === 'annual' ? 'active' : ''}>Annual
               <span className="save-badge">Save 20%</span>
             </span>
           </div>
@@ -151,8 +146,7 @@ const Pricing = () => {
                   </span>
                   <span className="period">/month</span>
                   {billingCycle === 'annual' && (
-                    <div className="annual-price">
-                      Billed ${plan.price.annual} annually
+                    <div className="annual-price">Billed ${plan.price.annual} annually
                     </div>
                   )}
                 </div>
@@ -160,7 +154,7 @@ const Pricing = () => {
                 <ul className="plan-features">
                   {plan.features.map((feature, idx) => (
                     <li key={idx}>
-                      <FaCheck className="check-icon" />
+
                       {feature}
                     </li>
                   ))}
@@ -183,42 +177,42 @@ const Pricing = () => {
           <h2>All Plans Include</h2>
           <div className="features-grid">
             <div className="feature-item">
-              <FaCheck className="feature-icon" />
+
               <div>
                 <h4>Bank-Grade Security</h4>
                 <p>256-bit encryption and advanced security protocols</p>
               </div>
             </div>
             <div className="feature-item">
-              <FaCheck className="feature-icon" />
+
               <div>
                 <h4>24/7 Support</h4>
                 <p>Round-the-clock customer support for all users</p>
               </div>
             </div>
             <div className="feature-item">
-              <FaCheck className="feature-icon" />
+
               <div>
                 <h4>Mobile Apps</h4>
                 <p>Native iOS and Android apps for on-the-go access</p>
               </div>
             </div>
             <div className="feature-item">
-              <FaCheck className="feature-icon" />
+
               <div>
                 <h4>Free Updates</h4>
                 <p>Continuous updates and new features at no extra cost</p>
               </div>
             </div>
             <div className="feature-item">
-              <FaCheck className="feature-icon" />
+
               <div>
                 <h4>Data Export</h4>
                 <p>Export your data in multiple formats anytime</p>
               </div>
             </div>
             <div className="feature-item">
-              <FaCheck className="feature-icon" />
+
               <div>
                 <h4>API Access</h4>
                 <p>RESTful API for integrations (Professional+ plans)</p>
@@ -247,11 +241,9 @@ const Pricing = () => {
           <h2>Ready to Get Started?</h2>
           <p>Start your 14-day free trial today. No credit card required.</p>
           <div className="cta-buttons">
-            <Link to="/register" className="btn-primary btn-large">
-              Start Free Trial
+            <Link to="/register" className="btn-primary btn-large">Start Free Trial
             </Link>
-            <Link to="/contact" className="btn-outline btn-large">
-              Contact Sales
+            <Link to="/contact" className="btn-outline btn-large">Contact Sales
             </Link>
           </div>
         </div>

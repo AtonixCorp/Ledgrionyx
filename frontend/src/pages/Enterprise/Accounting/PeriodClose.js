@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaLock, FaListAlt, FaCalendarAlt, FaPlus, FaTimes, FaSave, FaCheckCircle } from 'react-icons/fa';
+
 import { ledgerPeriodsAPI, periodCloseChecklistsAPI, periodCloseItemsAPI } from '../../../services/api';
 
 const TABS = [
-  { id: 'periods', label: 'Ledger Periods', icon: <FaCalendarAlt /> },
-  { id: 'checklists', label: 'Close Checklists', icon: <FaListAlt /> },
+  { id: 'periods', label: 'Ledger Periods', },
+  { id: 'checklists', label: 'Close Checklists', },
 ];
 
 const STATUS_COLORS = { open: '#38a169', closed: '#e53e3e', pending: '#ed8936', in_progress: '#4299e1', completed: '#38a169' };
 
-// ─── Ledger Periods Tab ───────────────────────────────────────────────────────
+//  Ledger Periods Tab
 const PeriodsTab = ({ entityId }) => {
   const [periods, setPeriods] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ const PeriodsTab = ({ entityId }) => {
         <div className="acct-stat-card"><div className="acct-stat-label">Closed</div><div className="acct-stat-count" style={{ color: '#e53e3e' }}>{periods.filter(p => p.status === 'closed').length}</div></div>
       </div>
       <div className="tab-toolbar">
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Period</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>New Period</button>
       </div>
       {loading ? <div className="acct-loading">Loading ledger periods...</div> : (
         <table className="acct-table">
@@ -69,7 +69,7 @@ const PeriodsTab = ({ entityId }) => {
                 <td>
                   {p.status === 'open' && (
                     <button className="btn-danger btn-sm" onClick={() => handleClose(p.id)} disabled={closing === p.id}>
-                      {closing === p.id ? '...' : <><FaLock /> Close Period</>}
+                      {closing === p.id ? '...' : <>Close Period</>}
                     </button>
                   )}
                 </td>
@@ -81,7 +81,7 @@ const PeriodsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Ledger Period</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Ledger Period</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -95,7 +95,7 @@ const PeriodsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Create</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Create</>}</button>
             </div>
           </div>
         </div>
@@ -104,7 +104,7 @@ const PeriodsTab = ({ entityId }) => {
   );
 };
 
-// ─── Checklists Tab ───────────────────────────────────────────────────────────
+//  Checklists Tab
 const ChecklistsTab = ({ entityId }) => {
   const [checklists, setChecklists] = useState([]);
   const [items, setItems] = useState({});
@@ -148,14 +148,14 @@ const ChecklistsTab = ({ entityId }) => {
     <div>
       <div className="tab-toolbar">
         <div className="mini-stat"><span>Total Checklists</span><strong>{checklists.length}</strong></div>
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Checklist</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>New Checklist</button>
       </div>
       {loading ? <div className="acct-loading">Loading checklists...</div> : (
         <div className="acct-groups">
           {checklists.length === 0 ? <div className="acct-empty">No period close checklists found</div> : checklists.map(cl => (
             <div key={cl.id} className="acct-group">
               <div className="acct-group-header" onClick={() => toggleChecklist(cl.id)}>
-                <span style={{ fontSize: '0.9rem' }}>{expanded === cl.id ? '▼' : '▶'}</span>
+                <span style={{ fontSize: '0.9rem' }}>''</span>
                 <strong style={{ flex: 1 }}>{cl.checklist_name}</strong>
                 {cl.description && <span style={{ color: '#718096', fontSize: '0.82rem' }}>{cl.description}</span>}
                 <span className="status-badge" style={{ background: STATUS_COLORS[cl.status] || '#a0aec0', color: 'white' }}>{cl.status}</span>
@@ -181,7 +181,7 @@ const ChecklistsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Period Close Checklist</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Period Close Checklist</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row"><label>Checklist Name *</label><input value={form.checklist_name} onChange={e => setForm(p => ({ ...p, checklist_name: e.target.value }))} placeholder="e.g. Month-End Close — January 2025" /></div>
@@ -189,7 +189,7 @@ const ChecklistsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Create</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Create</>}</button>
             </div>
           </div>
         </div>
@@ -198,7 +198,7 @@ const ChecklistsTab = ({ entityId }) => {
   );
 };
 
-// ─── Main Period Close Module ─────────────────────────────────────────────────
+//  Main Period Close Module
 const PeriodClose = () => {
   const { entityId } = useParams();
   const [activeTab, setActiveTab] = useState('periods');
@@ -207,11 +207,11 @@ const PeriodClose = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaLock /> Period Close</h1>
+          <h1>Period Close</h1>
           <p>Manage accounting periods, close checklists, and period-end processes</p>
         </div>
         <span style={{ color: '#718096', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FaCheckCircle style={{ color: '#38a169' }} /> Closing a period prevents new journal entries
+          Closing a period prevents new journal entries
         </span>
       </div>
 

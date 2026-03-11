@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
-import { FaShieldAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 export default function Security() {
   const [mfa, setMfa] = useState(true);
@@ -12,7 +11,6 @@ export default function Security() {
       <PageHeader
         title="Security"
         subtitle="Configure authentication, session management, and access policies"
-        icon={<FaShieldAlt />}
         actions={
           <Button variant="primary" size="small">Save Security Settings</Button>
         }
@@ -78,10 +76,7 @@ export default function Security() {
             { label: 'API Key Expiry Configured', ok: false },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid #f0f2f5', fontSize: 13 }}>
-              {item.ok
-                ? <FaCheckCircle style={{ color: '#27ae60', fontSize: 16 }} />
-                : <FaTimesCircle style={{ color: '#e74c3c', fontSize: 16 }} />
-              }
+
               <span style={{ color: item.ok ? '#2c3e50' : '#7a8fa6' }}>{item.label}</span>
             </div>
           ))}

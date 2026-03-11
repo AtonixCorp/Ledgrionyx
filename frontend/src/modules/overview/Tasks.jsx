@@ -18,11 +18,10 @@ const Tasks = () => {
         subtitle="Manage your accounting tasks"
         actions={<Button variant="primary">Add Task</Button>}
       />
-      
+
       <Card>
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>
-            No tasks yet
+          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No tasks yet
           </p>
         ) : (
           <Table columns={columns} data={data} />

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { FaTrophy, FaFire, FaMedal, FaMoneyBillWave, FaChartBar, FaRocket, FaRobot, FaShieldAlt, FaDna, FaGem, FaUsers, FaLock, FaSeedling, FaBullseye, FaStar, FaCheckCircle, FaLightbulb, FaBolt, FaGift, FaUniversity, FaCertificate } from 'react-icons/fa';
 
 const Achievements = () => {
   const [currentLevel] = useState(7);
@@ -8,71 +7,65 @@ const Achievements = () => {
   const [streak] = useState(23);
 
   const badges = [
-    { id: 1, name: 'First Deposit', icon: <FaMoneyBillWave />, earned: true, date: '2025-11-01', xp: 100 },
-    { id: 2, name: 'Budget Master', icon: <FaChartBar />, earned: true, date: '2025-11-15', xp: 250 },
-    { id: 3, name: 'Savings Champion', icon: <FaTrophy />, earned: true, date: '2025-12-01', xp: 500 },
-    { id: 4, name: '30-Day Streak', icon: <FaFire />, earned: false, xp: 300 },
-    { id: 5, name: 'Investment Pioneer', icon: <FaRocket />, earned: true, date: '2025-11-20', xp: 400 },
-    { id: 6, name: 'AI Insights User', icon: <FaRobot />, earned: true, date: '2025-12-10', xp: 150 },
-    { id: 7, name: 'Security Expert', icon: <FaShieldAlt />, earned: true, date: '2025-12-05', xp: 300 },
-    { id: 8, name: 'Portfolio Diversifier', icon: <FaGem />, earned: false, xp: 350 },
-    { id: 9, name: 'Referral Master', icon: <FaUsers />, earned: false, xp: 500 },
-    { id: 10, name: 'Financial DNA Analyzed', icon: <FaDna />, earned: true, date: '2025-12-12', xp: 200 },
+    { id: 1, name: 'First Deposit', earned: true, date: '2025-11-01', xp: 100 },
+    { id: 2, name: 'Budget Master', earned: true, date: '2025-11-15', xp: 250 },
+    { id: 3, name: 'Savings Champion', earned: true, date: '2025-12-01', xp: 500 },
+    { id: 4, name: '30-Day Streak', earned: false, xp: 300 },
+    { id: 5, name: 'Investment Pioneer', earned: true, date: '2025-11-20', xp: 400 },
+    { id: 6, name: 'AI Insights User', earned: true, date: '2025-12-10', xp: 150 },
+    { id: 7, name: 'Security Expert', earned: true, date: '2025-12-05', xp: 300 },
+    { id: 8, name: 'Portfolio Diversifier', earned: false, xp: 350 },
+    { id: 9, name: 'Referral Master', earned: false, xp: 500 },
+    { id: 10, name: 'Financial DNA Analyzed', earned: true, date: '2025-12-12', xp: 200 },
   ];
 
   const missions = [
-    { id: 1, title: 'Complete your Financial DNA Profile', reward: '200 XP', progress: 100, icon: <FaDna />, completed: true },
-    { id: 2, title: 'Make 5 budget-conscious transactions', reward: '150 XP', progress: 80, icon: <FaLightbulb />, completed: false },
-    { id: 3, title: 'Maintain 7-day financial streak', reward: '100 XP', progress: 100, icon: <FaBolt />, completed: true },
-    { id: 4, name: 'Refer 3 friends to Atonix Capital', reward: '500 XP', progress: 33, icon: <FaGift />, completed: false },
-    { id: 5, title: 'Invest in 3 different vaults', reward: '300 XP', progress: 66, icon: <FaUniversity />, completed: false },
-    { id: 6, title: 'Enable all security features', reward: '250 XP', progress: 100, icon: <FaLock />, completed: true },
+    { id: 1, title: 'Complete your Financial DNA Profile', reward: '200 XP', progress: 100, completed: true },
+    { id: 2, title: 'Make 5 budget-conscious transactions', reward: '150 XP', progress: 80, completed: false },
+    { id: 3, title: 'Maintain 7-day financial streak', reward: '100 XP', progress: 100, completed: true },
+    { id: 4, name: 'Refer 3 friends to Atonix Capital', reward: '500 XP', progress: 33, completed: false },
+    { id: 5, title: 'Invest in 3 different vaults', reward: '300 XP', progress: 66, completed: false },
+    { id: 6, title: 'Enable all security features', reward: '250 XP', progress: 100, completed: true },
   ];
 
   const journey = [
-    { 
-      id: 1, 
-      title: 'Started Financial Journey', 
-      date: '2025-11-01', 
+    {
+      id: 1,
+      title: 'Started Financial Journey',
+      date: '2025-11-01',
       description: 'Created account and made first deposit',
-      icon: <FaSeedling />,
       milestone: true
     },
-    { 
-      id: 2, 
-      title: 'Set Up First Budget', 
-      date: '2025-11-05', 
+    {
+      id: 2,
+      title: 'Set Up First Budget',
+      date: '2025-11-05',
       description: 'Created budgets for 5 categories',
-      icon: <FaChartBar />
-    },
-    { 
-      id: 3, 
-      title: 'Achieved Savings Goal', 
-      date: '2025-11-15', 
+      },
+    {
+      id: 3,
+      title: 'Achieved Savings Goal',
+      date: '2025-11-15',
       description: 'Saved $5,000 milestone',
-      icon: <FaBullseye />,
       milestone: true
     },
-    { 
-      id: 4, 
-      title: 'First Investment', 
-      date: '2025-11-20', 
+    {
+      id: 4,
+      title: 'First Investment',
+      date: '2025-11-20',
       description: 'Invested in Treasury Vault',
-      icon: <FaUniversity />
-    },
-    { 
-      id: 5, 
-      title: 'Analyzed Financial DNA', 
-      date: '2025-12-12', 
+      },
+    {
+      id: 5,
+      title: 'Analyzed Financial DNA',
+      date: '2025-12-12',
       description: 'Discovered your financial personality',
-      icon: <FaDna />
-    },
-    { 
-      id: 6, 
-      title: 'Level 7 Achieved', 
-      date: '2025-12-15', 
+      },
+    {
+      id: 6,
+      title: 'Level 7 Achieved',
+      date: '2025-12-15',
       description: 'Reached Wealth Master tier',
-      icon: <FaStar />,
       milestone: true
     },
   ];
@@ -88,7 +81,7 @@ const Achievements = () => {
   return (
     <div className="achievements-page">
       <div className="page-header">
-        <h1><FaTrophy /> Achievements & Progress</h1>
+        <h1>Achievements & Progress</h1>
         <p>Track your financial growth journey and earn rewards</p>
       </div>
 
@@ -103,7 +96,7 @@ const Achievements = () => {
             <h2>Wealth Master</h2>
             <p>You've mastered the fundamentals of financial management</p>
             <div className="xp-bar">
-              <div 
+              <div
                 className="xp-fill"
                 style={{ width: `${(currentXP / xpToNextLevel) * 100}%` }}
               ></div>
@@ -113,7 +106,7 @@ const Achievements = () => {
         </div>
 
         <div className="streak-display">
-          <div className="streak-icon"><FaFire /></div>
+          <div className="streak-icon"></div>
           <div className="streak-info">
             <span className="streak-number">{streak}</span>
             <span className="streak-label">Day Streak</span>
@@ -124,7 +117,7 @@ const Achievements = () => {
 
       {/* Achievements Grid */}
       <div className="section-header">
-        <h2><FaMedal /> Your Badges</h2>
+        <h2>Your Badges</h2>
         <p>{badges.filter(b => b.earned).length} of {badges.length} earned</p>
       </div>
 
@@ -140,7 +133,7 @@ const Achievements = () => {
               </>
             ) : (
               <>
-                <span className="badge-locked">🔒 Locked</span>
+                <span className="badge-locked">Locked</span>
                 <span className="badge-xp">{badge.xp} XP</span>
               </>
             )}
@@ -150,7 +143,7 @@ const Achievements = () => {
 
       {/* Active Missions */}
       <div className="section-header">
-        <h2><FaBullseye /> Active Missions</h2>
+        <h2>Active Missions</h2>
         <p>Complete missions to earn bonus XP and unlock achievements</p>
       </div>
 
@@ -161,7 +154,7 @@ const Achievements = () => {
             <div className="mission-info">
               <h3>{mission.title}</h3>
               <div className="mission-progress-bar">
-                <div 
+                <div
                   className="mission-progress-fill"
                   style={{ width: `${mission.progress}%` }}
                 ></div>
@@ -170,7 +163,7 @@ const Achievements = () => {
             </div>
             <div className="mission-reward">
               <span className="reward-badge">{mission.reward}</span>
-              {mission.completed && <span className="completed-check"><FaCheckCircle /></span>}
+              {mission.completed && <span className="completed-check"></span>}
             </div>
           </div>
         ))}
@@ -178,7 +171,7 @@ const Achievements = () => {
 
       {/* Financial Journey Timeline */}
       <div className="section-header">
-        <h2><FaCertificate /> Your Financial Journey</h2>
+        <h2>Your Financial Journey</h2>
         <p>A visual story of your financial milestones</p>
       </div>
 
@@ -192,7 +185,7 @@ const Achievements = () => {
               <div className="timeline-date">{event.date}</div>
               <h3>{event.title}</h3>
               <p>{event.description}</p>
-              {event.milestone && <span className="milestone-badge">Milestone 🎉</span>}
+              {event.milestone && <span className="milestone-badge">Milestone </span>}
             </div>
           </div>
         ))}
@@ -200,7 +193,7 @@ const Achievements = () => {
 
       {/* Reputation Score */}
       <div className="reputation-section">
-        <h2><FaStar /> Reputation & Trust Score</h2>
+        <h2>Reputation & Trust Score</h2>
         <div className="reputation-display">
           <div className="reputation-score-circle">
             <span className="rep-score">{reputationScore.overall}</span>

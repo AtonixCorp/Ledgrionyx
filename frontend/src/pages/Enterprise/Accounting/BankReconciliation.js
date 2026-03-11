@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaCheckCircle, FaPlus, FaTimes, FaSave, FaDownload } from 'react-icons/fa';
+
 import { bankReconciliationsAPI } from '../../../services/api';
 
 const fmt = (v, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
@@ -48,12 +48,12 @@ const BankReconciliation = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaCheckCircle /> Bank Reconciliation</h1>
+          <h1>Bank Reconciliation</h1>
           <p>Match bank statements with book balances to identify discrepancies</p>
         </div>
         <div className="acct-header-actions">
-          <button className="btn-secondary"><FaDownload /> Export</button>
-          <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Reconciliation</button>
+          <button className="btn-secondary">Export</button>
+          <button className="btn-primary" onClick={() => setShowForm(true)}>New Reconciliation</button>
         </div>
       </div>
 
@@ -77,20 +77,20 @@ const BankReconciliation = () => {
                     <small style={{ color: '#718096' }}>Reconciliation Date: {rec.reconciliation_date}</small>
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <span className="status-badge" style={{ background: STATUS_COLORS[rec.status] || '#a0aec0', color: 'white' }}>{rec.status?.replace('_', ' ')}</span>
+                    <span className="status-badge" style={{ background: STATUS_COLORS[rec.status] || '#a0aec0', color: 'white' }}>{rec.status?.replace('_', '')}</span>
                     {!isReconciled && (
                       <button className="btn-success btn-sm" onClick={() => handleReconcile(rec.id)} disabled={reconciling === rec.id}>
-                        {reconciling === rec.id ? 'Processing...' : <><FaCheckCircle /> Reconcile</>}
+                        {reconciling === rec.id ? 'Processing...' : <>Reconcile</>}
                       </button>
                     )}
-                    {isReconciled && <span style={{ color: '#38a169', fontSize: '0.85rem', fontWeight: 600 }}><FaCheckCircle /> Reconciled {rec.reconciled_at?.split('T')[0]}</span>}
+                    {isReconciled && <span style={{ color: '#38a169', fontSize: '0.85rem', fontWeight: 600 }}>Reconciled {rec.reconciled_at?.split('T')[0]}</span>}
                   </div>
                 </div>
                 <div className="recon-variance">
                   <div className="mini-stat"><span>Bank Statement Balance</span><strong>{fmt(rec.bank_statement_balance)}</strong></div>
                   <div className="mini-stat"><span>Book Balance</span><strong>{fmt(rec.book_balance)}</strong></div>
                   <div className="mini-stat"><span>Variance</span><strong style={{ color: Math.abs(variance) < 0.01 ? '#38a169' : '#e53e3e' }}>{fmt(variance)}</strong></div>
-                  {Math.abs(variance) < 0.01 && <span style={{ color: '#38a169', fontSize: '0.85rem', fontWeight: 600 }}>✓ Balanced</span>}
+                  {Math.abs(variance) < 0.01 && <span style={{ color: '#38a169', fontSize: '0.85rem', fontWeight: 600 }}>Balanced</span>}
                 </div>
                 {rec.notes && <p style={{ color: '#718096', fontSize: '0.85rem', margin: 0 }}>{rec.notes}</p>}
               </div>
@@ -102,7 +102,7 @@ const BankReconciliation = () => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Bank Reconciliation</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Bank Reconciliation</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row"><label>Bank Account *</label><input value={form.bank_account} onChange={e => setForm(p => ({ ...p, bank_account: e.target.value }))} placeholder="e.g. Chase Checking ****1234" /></div>
@@ -112,7 +112,7 @@ const BankReconciliation = () => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleCreate} disabled={saving} className="btn-primary">{saving ? 'Creating...' : <><FaSave /> Create</>}</button>
+              <button onClick={handleCreate} disabled={saving} className="btn-primary">{saving ? 'Creating...' : <>Create</>}</button>
             </div>
           </div>
         </div>

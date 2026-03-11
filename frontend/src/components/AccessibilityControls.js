@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAccessibility } from '../context/AccessibilityContext';
-import { FaFont, FaEye, FaHeadphones } from 'react-icons/fa';
 
 const AccessibilityControls = () => {
   const { fontSize, setFontSize } = useAccessibility();
@@ -15,7 +14,7 @@ const AccessibilityControls = () => {
         aria-label="Small font size"
         aria-pressed={fontSize === 'small'}
       >
-        <FaFont style={{ fontSize: '14px' }} /> S
+        S
       </button>
       <button
         type="button"
@@ -25,7 +24,7 @@ const AccessibilityControls = () => {
         aria-label="Normal font size"
         aria-pressed={fontSize === 'normal'}
       >
-        <FaFont style={{ fontSize: '16px' }} /> M
+        M
       </button>
       <button
         type="button"
@@ -35,7 +34,7 @@ const AccessibilityControls = () => {
         aria-label="Large font size"
         aria-pressed={fontSize === 'large'}
       >
-        <FaFont style={{ fontSize: '18px' }} /> L
+        L
       </button>
       <button
         type="button"
@@ -45,7 +44,7 @@ const AccessibilityControls = () => {
         aria-label="Extra large font size"
         aria-pressed={fontSize === 'extra-large'}
       >
-        <FaFont style={{ fontSize: '20px' }} /> XL
+        XL
       </button>
     </div>
   );

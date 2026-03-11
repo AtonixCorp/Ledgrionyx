@@ -13,7 +13,7 @@ export const aiFinanceService = {
       .reduce((sum, t) => sum + t.amount, 0) / 3;
 
     const netMonthlyCashflow = avgMonthlyIncome - avgMonthlyExpenses;
-    const monthsUntilEmpty = netMonthlyCashflow < 0 
+    const monthsUntilEmpty = netMonthlyCashflow < 0
       ? Math.floor(currentBalance / Math.abs(netMonthlyCashflow))
       : Infinity;
 
@@ -22,15 +22,15 @@ export const aiFinanceService = {
       avgMonthlyIncome,
       netMonthlyCashflow,
       monthsUntilEmpty,
-      prediction: monthsUntilEmpty === Infinity 
+      prediction: monthsUntilEmpty === Infinity
         ? 'Your income exceeds expenses. Great job!'
         : monthsUntilEmpty > 6
         ? 'Your current savings can sustain you for ' + monthsUntilEmpty + ' months.'
         : monthsUntilEmpty > 3
-        ? '⚠️ Warning: Only ' + monthsUntilEmpty + ' months of runway remaining.'
-        : '🚨 Critical: Only ' + monthsUntilEmpty + ' months left. Reduce spending immediately!',
+        ? 'Warning: Only ' + monthsUntilEmpty + ' months of runway remaining.'
+        : 'Critical: Only ' + monthsUntilEmpty + ' months left. Reduce spending immediately!',
       confidence: 85,
-      recommendation: netMonthlyCashflow < 0 
+      recommendation: netMonthlyCashflow < 0
         ? 'Consider reducing expenses by $' + Math.abs(netMonthlyCashflow / 2).toFixed(2) + ' monthly.'
         : 'Maintain your current financial habits.',
       projectedBalance: currentBalance + (netMonthlyCashflow * 6)
@@ -43,7 +43,7 @@ export const aiFinanceService = {
     const volatileAssets = portfolio.filter(a => a.volatility === 'high');
     const volatilePercentage = (volatileAssets.reduce((sum, a) => sum + a.value, 0) / totalValue) * 100;
 
-    const riskLevel = volatilePercentage > 60 ? 'critical' 
+    const riskLevel = volatilePercentage > 60 ? 'critical'
       : volatilePercentage > 40 ? 'high'
       : volatilePercentage > 20 ? 'moderate'
       : 'low';
@@ -53,10 +53,10 @@ export const aiFinanceService = {
       volatilePercentage: volatilePercentage.toFixed(1),
       diversificationScore: Math.min(100, (portfolio.length * 20)),
       recommendation: riskLevel === 'critical'
-        ? '🚨 Portfolio is too risky. Consider moving ' + (volatilePercentage - 40).toFixed(0) + '% to stable assets.'
+        ? 'Portfolio is too risky. Consider moving ' + (volatilePercentage - 40).toFixed(0) + '% to stable assets.'
         : riskLevel === 'high'
-        ? '⚠️ Risk is elevated. Consider rebalancing to reduce volatility.'
-        : '✅ Risk level is appropriate for most investors.',
+        ? 'Risk is elevated. Consider rebalancing to reduce volatility.'
+        : 'Risk level is appropriate for most investors.',
       suggestedRebalance: {
         stable: Math.max(0, 40 - (100 - volatilePercentage)),
         moderate: 40,
@@ -73,8 +73,8 @@ export const aiFinanceService = {
 
     // Check for unusual spending patterns
     const avgAmount = recentTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0) / recentTransactions.length;
-    const largeTransactions = recentTransactions.filter(t => Math.abs(t.amount) > avgAmount * 3);
-    
+    const largeTransactions = recentTransactions.filter(t =>Math.abs(t.amount) > avgAmount * 3);
+
     if (largeTransactions.length > 0) {
       alerts.push({
         type: 'unusual_amount',
@@ -103,7 +103,7 @@ export const aiFinanceService = {
     // Check for duplicate transactions
     const amounts = recentTransactions.map(t => t.amount);
     const duplicates = amounts.filter((item, index) => amounts.indexOf(item) !== index);
-    
+
     if (duplicates.length > 2) {
       alerts.push({
         type: 'duplicate_amounts',
@@ -116,12 +116,12 @@ export const aiFinanceService = {
     return {
       alerts,
       fraudScore: alerts.length * 20,
-      status: alerts.length === 0 ? 'secure' 
+      status: alerts.length === 0 ? 'secure'
         : alerts.some(a => a.severity === 'high') ? 'suspicious'
         : 'monitor',
-      recommendation: alerts.length === 0 
-        ? '✅ No suspicious activity detected.'
-        : '⚠️ Review flagged transactions and verify they are legitimate.',
+      recommendation: alerts.length === 0
+        ? 'No suspicious activity detected.'
+        : 'Review flagged transactions and verify they are legitimate.',
       lastScanTime: today,
       confidence: 88
     };
@@ -160,11 +160,11 @@ export const aiFinanceService = {
         medicare: taxableIncome * 0.0145
       },
       recommendations: [
-        deductibleExpenses < taxableIncome * 0.1 
+        deductibleExpenses < taxableIncome * 0.1
           ? 'Consider tracking more deductible expenses to reduce tax burden.'
           : 'Good job tracking deductible expenses.',
         'Estimated quarterly tax: $' + (totalTaxEstimate / 4).toFixed(2),
-        capitalGains > 0 
+        capitalGains > 0
           ? 'Consider tax-loss harvesting strategies to offset capital gains.'
           : null
       ].filter(Boolean),

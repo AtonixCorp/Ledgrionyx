@@ -1,6 +1,6 @@
 /**
  * Atonix Capital - AI-Powered Validation Service
- * 
+ *
  * Provides intelligent validation, anomaly detection, and warnings
  * to prevent user errors and maintain data integrity.
  */
@@ -55,12 +55,12 @@ export const validateTaxRate = (taxRate, country = null) => {
   if (rate < VALIDATION_RULES.TAX_RATE.min) {
     errors.push('Tax rate cannot be negative');
   }
-  if (rate > VALIDATION_RULES.TAX_RATE.max) {
+  if (rate >VALIDATION_RULES.TAX_RATE.max) {
     errors.push('Tax rate cannot exceed 100%');
   }
 
   // Warning for high rates
-  if (rate > VALIDATION_RULES.TAX_RATE.warningThreshold && rate <= VALIDATION_RULES.TAX_RATE.max) {
+  if (rate >VALIDATION_RULES.TAX_RATE.warningThreshold && rate <= VALIDATION_RULES.TAX_RATE.max) {
     warnings.push(`Tax rate of ${rate}% is very high. Please verify this is correct for ${country || 'your country'}.`);
   }
 
@@ -83,7 +83,7 @@ export const validateTaxRate = (taxRate, country = null) => {
 export const validateTaxCalculation = (amount, taxRate, calculatedTax) => {
   const expectedTax = calculationEngine.calculateTax(amount, taxRate);
   const difference = Math.abs(expectedTax - calculatedTax);
-  
+
   if (difference > 0.01) {
     return {
       isValid: false,
@@ -113,12 +113,12 @@ export const validateIncome = (amount, category = null) => {
   if (value < VALIDATION_RULES.INCOME.min) {
     errors.push('Income cannot be negative');
   }
-  if (value > VALIDATION_RULES.INCOME.max) {
+  if (value >VALIDATION_RULES.INCOME.max) {
     errors.push(`Income amount exceeds maximum allowed (${VALIDATION_RULES.INCOME.max.toLocaleString()})`);
   }
 
   // Warning for unusually high values
-  if (value > VALIDATION_RULES.INCOME.warningThreshold) {
+  if (value >VALIDATION_RULES.INCOME.warningThreshold) {
     warnings.push(`Income of ${value.toLocaleString()} is unusually high. Please verify this amount.`);
   }
 
@@ -148,12 +148,12 @@ export const validateExpense = (amount, category = null, budget = null) => {
   if (value < VALIDATION_RULES.EXPENSE.min) {
     errors.push('Expense cannot be negative');
   }
-  if (value > VALIDATION_RULES.EXPENSE.max) {
+  if (value >VALIDATION_RULES.EXPENSE.max) {
     errors.push(`Expense amount exceeds maximum allowed (${VALIDATION_RULES.EXPENSE.max.toLocaleString()})`);
   }
 
   // Warning for unusually high values
-  if (value > VALIDATION_RULES.EXPENSE.warningThreshold) {
+  if (value >VALIDATION_RULES.EXPENSE.warningThreshold) {
     warnings.push(`Expense of ${value.toLocaleString()} is unusually high. Please verify this amount.`);
   }
 
@@ -175,12 +175,12 @@ export const validateExpense = (amount, category = null, budget = null) => {
 export const validateExpenseRatio = (totalExpenses, totalIncome) => {
   const errors = [];
   const warnings = [];
-  
+
   const ratio = totalIncome > 0 ? totalExpenses / totalIncome : 0;
 
-  if (ratio > VALIDATION_RULES.EXPENSE_TO_INCOME_RATIO.critical) {
+  if (ratio >VALIDATION_RULES.EXPENSE_TO_INCOME_RATIO.critical) {
     errors.push(`Expenses exceed income by ${((ratio - 1) * 100).toFixed(1)}%. This is financially unsustainable.`);
-  } else if (ratio > VALIDATION_RULES.EXPENSE_TO_INCOME_RATIO.warning) {
+  } else if (ratio >VALIDATION_RULES.EXPENSE_TO_INCOME_RATIO.warning) {
     warnings.push(`Expenses are ${(ratio * 100).toFixed(1)}% of income. Consider reducing spending.`);
   }
 
@@ -206,7 +206,7 @@ export const validateBudget = (amount, category = null) => {
   if (value < VALIDATION_RULES.BUDGET.min) {
     errors.push('Budget cannot be negative');
   }
-  if (value > VALIDATION_RULES.BUDGET.max) {
+  if (value >VALIDATION_RULES.BUDGET.max) {
     errors.push(`Budget amount exceeds maximum allowed (${VALIDATION_RULES.BUDGET.max.toLocaleString()})`);
   }
 
@@ -229,7 +229,7 @@ export const validateBudgetVsIncome = (totalBudget, totalIncome) => {
   }
 
   const budgetRatio = totalIncome > 0 ? (totalBudget / totalIncome) * 100 : 0;
-  
+
   if (budgetRatio > 90) {
     warnings.push(`Budget allocates ${budgetRatio.toFixed(1)}% of income. Consider leaving buffer for savings.`);
   }
@@ -302,9 +302,9 @@ export const validateFinancialHealth = (summary) => {
     errors,
     warnings,
     recommendations,
-    status: healthScore >= 80 ? 'Excellent' : 
-            healthScore >= 60 ? 'Good' : 
-            healthScore >= 40 ? 'Fair' : 
+    status: healthScore >= 80 ? 'Excellent' :
+            healthScore >= 60 ? 'Good' :
+            healthScore >= 40 ? 'Fair' :
             'Poor'
   };
 };

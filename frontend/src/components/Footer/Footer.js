@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaTwitter, FaFacebookF, FaLinkedinIn, FaGithub } from 'react-icons/fa';
+
 import AtonixLogo from '../Logo/AtonixLogo';
 
 const Footer = () => {
@@ -13,23 +13,22 @@ const Footer = () => {
               <AtonixLogo size="extra-small" />
               <span>Atonix Capital</span>
             </div>
-            <p className="footer-tagline">
-              Atonix Capital envisions a world where financial power is no longer constrained by geography, 
-              institutions, or legacy systems. We are building a platform that empowers individuals and 
+            <p className="footer-tagline">Atonix Capital envisions a world where financial power is no longer constrained by geography,
+              institutions, or legacy systems. We are building a platform that empowers individuals and
               enterprises with sovereign financial intelligence.
             </p>
             <div className="footer-social">
               <a href="https://twitter.com/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
-                <FaTwitter />
+
               </a>
               <a href="https://facebook.com/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
-                <FaFacebookF />
+
               </a>
               <a href="https://linkedin.com/company/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
-                <FaLinkedinIn />
+
               </a>
               <a href="https://github.com/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
-                <FaGithub />
+
               </a>
             </div>
           </div>

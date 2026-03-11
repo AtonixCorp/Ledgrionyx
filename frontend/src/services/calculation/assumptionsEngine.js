@@ -1,17 +1,17 @@
 /**
  * Assumptions Engine
- * 
+ *
  * Manages default assumptions by country, model type, and scenario.
  * Allows user overrides, tracks assumption changes, generates assumption reports.
- * 
+ *
  * ALL CALCULATIONS USE calculationEngine - NEVER do math directly
  * ALL VALIDATIONS USE validationService
  * ALL ASSUMPTION CHANGES AUDITED for transparency
- * 
+ *
  * Phase 2 Foundation: Assumption management pipeline
  * Phase 3 Dependencies: AI uses assumptions in interpretation
  * Phase 5 Dependencies: Reports show all assumptions used
- * 
+ *
  * Strict Rule: Every assumption must be documented with source and confidence level
  */
 
@@ -22,7 +22,7 @@ import * as TaxLibrary from './countryTaxLibrary';
 /**
  * Default Assumptions by Model Type
  * Baseline assumptions if user doesn't specify
- * 
+ *
  * @typedef {Object} AssumptionSet
  * @property {string} name - Descriptive name
  * @property {string} source - 'SYSTEM', 'USER', 'MARKET_DATA'
@@ -254,11 +254,11 @@ const COUNTRY_ASSUMPTION_OVERRIDES = {
 /**
  * Get default assumptions for a model type and country
  * Combines system defaults with country overrides
- * 
+ *
  * @param {string} modelType - Type of model
  * @param {string} country - Country code
  * @returns {Object|null} Combined assumptions or null if invalid
- * 
+ *
  * @example
  * const assumptions = getDefaultAssumptions('valuation', 'NG');
  * // Returns: { discountRate: 15, terminalGrowthRate: 2.5, ... }
@@ -299,7 +299,7 @@ export function getDefaultAssumptions(modelType, country) {
 /**
  * Get all assumption metadata (sources, confidence, descriptions)
  * Includes default assumptions with full details
- * 
+ *
  * @param {string} modelType - Type of model
  * @param {string} country - Country code
  * @returns {Object} Complete assumption metadata
@@ -326,12 +326,12 @@ export function getAssumptionMetadata(modelType, country) {
 /**
  * Create custom assumption set
  * For scenarios or user-specific overrides
- * 
+ *
  * @param {string} name - Descriptive name
  * @param {string} modelType - Base model type
  * @param {Object} overrides - Overridden assumptions
  * @returns {Object} Custom assumption set
- * 
+ *
  * @example
  * const custom = createCustomAssumptions('Aggressive Growth', 'forecasting', {
  *   initialGrowthRate: 20,
@@ -379,11 +379,11 @@ export function createCustomAssumptions(name, modelType, overrides) {
 /**
  * Validate assumption values
  * Checks if assumptions are within reasonable ranges
- * 
+ *
  * @param {Object} assumptions - Assumptions to validate
  * @param {string} modelType - Model type for context
  * @returns {Object} Validation result
- * 
+ *
  * @example
  * const valid = validateAssumptions({
  *   discountRate: 15,
@@ -443,11 +443,11 @@ export function validateAssumptions(assumptions, modelType) {
 /**
  * Compare assumption sets
  * Shows differences between baseline and alternative assumptions
- * 
+ *
  * @param {Object} baselineAssumptions - Baseline for comparison
  * @param {Object} alternativeAssumptions - Alternative to compare
  * @returns {Object} Comparison results
- * 
+ *
  * @example
  * const comparison = compareAssumptions(
  *   { discountRate: 10, growthRate: 5 },
@@ -509,7 +509,7 @@ export function compareAssumptions(baselineAssumptions, alternativeAssumptions) 
 /**
  * Apply assumption changes and track impact
  * Shows how changing an assumption affects model outputs
- * 
+ *
  * @param {Object} baselineResults - Results with baseline assumptions
  * @param {Object} newAssumptions - New assumptions to apply
  * @param {Function} recalculateFunction - Function to recalculate with new assumptions
@@ -532,7 +532,7 @@ export function analyzeAssumptionImpact(baselineResults, newAssumptions, recalcu
   for (const [key, value] of Object.entries(baselineResults)) {
     if (ValidationService.isValidNumber(value) && ValidationService.isValidNumber(impact.newResults[key])) {
       const change = CalcEngine.subtract(impact.newResults[key], value);
-      const changePercent = value !== 0 
+      const changePercent = value !== 0
         ? CalcEngine.round(CalcEngine.divide(CalcEngine.multiply(change, 100), value), 2)
         : 0;
 
@@ -551,12 +551,12 @@ export function analyzeAssumptionImpact(baselineResults, newAssumptions, recalcu
 /**
  * Generate assumptions report
  * Documents all assumptions used in analysis with sources and confidence
- * 
+ *
  * @param {Object} assumptions - Assumptions used
  * @param {Object} metadata - Metadata about assumptions
  * @param {string} modelType - Type of model
  * @returns {string} Formatted report
- * 
+ *
  * @example
  * const report = generateAssumptionsReport(assumptions, metadata, 'valuation');
  */
@@ -573,7 +573,7 @@ export function generateAssumptionsReport(assumptions, metadata, modelType) {
   for (const [key, value] of Object.entries(assumptions)) {
     const meta = metadata && metadata[key];
     report += `\n${key}: ${value}`;
-    
+
     if (meta) {
       report += `\n  Source: ${meta.source}`;
       report += `\n  Confidence: ${meta.confidenceLevel}%`;
@@ -588,7 +588,7 @@ export function generateAssumptionsReport(assumptions, metadata, modelType) {
   if (metadata) {
     const sources = new Set(Object.values(metadata).map(m => m.source));
     const avgConfidence = Math.round(
-      Object.values(metadata).reduce((sum, m) => sum + (m.confidenceLevel || 0), 0) / 
+      Object.values(metadata).reduce((sum, m) => sum + (m.confidenceLevel || 0), 0) /
       Object.keys(metadata).length
     );
 

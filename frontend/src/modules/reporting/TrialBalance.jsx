@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
-import { FaList, FaDownload } from 'react-icons/fa';
 
 const mockTB = [
   { code: '1001', account: 'Cash - Operating', type: 'Asset', debit: '$142,300.00', credit: '', balance: '$142,300.00' },
@@ -29,9 +28,8 @@ export default function TrialBalance() {
       <PageHeader
         title="Trial Balance"
         subtitle="Verify debit and credit totals are in balance across all accounts"
-        icon={<FaList />}
         actions={
-          <Button variant="secondary" size="small" icon={<FaDownload />}>Export</Button>
+          <Button variant="secondary" size="small">Export</Button>
         }
       />
 

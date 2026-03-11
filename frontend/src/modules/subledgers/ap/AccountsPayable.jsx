@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
-import { FaFileAlt, FaPlus, FaDownload } from 'react-icons/fa';
 
 const mockAP = [
   { bill: 'BILL-0001', vendor: 'AWS Cloud', billDate: '2025-01-10', dueDate: '2025-02-10', original: '$3,200.00', balance: '$3,200.00', aging: '0-30', status: 'Pending' },
@@ -31,12 +30,10 @@ export default function AccountsPayable() {
       <PageHeader
         title="Accounts Payable"
         subtitle="Track all outstanding vendor bills and payable balances"
-        icon={<FaFileAlt />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Aging Report</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              Record Bill
+            <Button variant="secondary" size="small">Aging Report</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Record Bill
             </Button>
           </>
         }

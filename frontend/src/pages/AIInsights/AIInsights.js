@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFinance } from '../../context/FinanceContext';
 import { aiFinanceService } from '../../services/aiFinanceService';
-import { FaBrain, FaMoneyBillWave, FaChartLine, FaShieldAlt, FaFileInvoiceDollar, FaCheckCircle, FaExclamationTriangle, FaBell } from 'react-icons/fa';
 
 const AIInsights = () => {
   const navigate = useNavigate();
@@ -62,7 +61,7 @@ const AIInsights = () => {
       <div className="ai-insights-page">
         <div className="loading-container">
           <div className="ai-loader">
-            <div className="brain-icon"><FaBrain /></div>
+            <div className="brain-icon"></div>
             <p>AI analyzing your financial data...</p>
           </div>
         </div>
@@ -73,14 +72,14 @@ const AIInsights = () => {
   return (
     <div className="ai-insights-page">
       <div className="page-header">
-        <h1><FaBrain /> AI Financial Intelligence</h1>
+        <h1>AI Financial Intelligence</h1>
         <p>Advanced AI-powered insights for smarter financial decisions</p>
       </div>
 
       {/* Backend AI Insights */}
       {aiInsights && aiInsights.length > 0 && (
         <div className="backend-insights-section">
-          <h2>🤖 Model-Specific AI Insights</h2>
+          <h2>Model-Specific AI Insights</h2>
           <div className="backend-insights-grid">
             {aiInsights.slice(0, 6).map((insight) => (
               <div key={insight.id} className={`backend-insight-card priority-${insight.priority}`}>
@@ -99,7 +98,7 @@ const AIInsights = () => {
                 </div>
                 {insight.recommendations && (
                   <div className="insight-recommendations">
-                    <strong>💡 Recommendations:</strong>
+                    <strong>Recommendations:</strong>
                     <ul>
                       {Object.entries(insight.recommendations).map(([key, value]) => (
                         <li key={key}>{value}</li>
@@ -117,12 +116,12 @@ const AIInsights = () => {
         {/* Cashflow Predictor */}
         <div className="insight-card cashflow-card">
           <div className="card-header">
-            <h2><FaMoneyBillWave /> Cashflow Predictor</h2>
+            <h2>Cashflow Predictor</h2>
             <span className="confidence-badge">
               {cashflowPrediction?.confidence}% confident
             </span>
           </div>
-          
+
           <div className="prediction-result">
             <p className="main-prediction">{cashflowPrediction?.prediction}</p>
           </div>
@@ -155,7 +154,7 @@ const AIInsights = () => {
           </div>
 
           <div className="recommendation">
-            <strong>💡 Recommendation:</strong>
+            <strong>Recommendation:</strong>
             <p>{cashflowPrediction?.recommendation}</p>
           </div>
         </div>
@@ -163,7 +162,7 @@ const AIInsights = () => {
         {/* Investment Risk Radar */}
         <div className="insight-card risk-card">
           <div className="card-header">
-            <h2><FaChartLine /> Investment Risk Radar</h2>
+            <h2>Investment Risk Radar</h2>
             <span className={`risk-badge risk-${riskAnalysis?.riskLevel}`}>
               {riskAnalysis?.riskLevel.toUpperCase()}
             </span>
@@ -171,8 +170,8 @@ const AIInsights = () => {
 
           <div className="risk-gauge">
             <div className="gauge-container">
-              <div 
-                className="gauge-fill" 
+              <div
+                className="gauge-fill"
                 style={{ width: `${riskAnalysis?.volatilePercentage}%` }}
               ></div>
             </div>
@@ -199,8 +198,8 @@ const AIInsights = () => {
               <div className="balance-bar">
                 <span>Stable Assets</span>
                 <div className="bar">
-                  <div 
-                    className="bar-fill stable" 
+                  <div
+                    className="bar-fill stable"
                     style={{ width: `${riskAnalysis?.suggestedRebalance.stable}%` }}
                   ></div>
                 </div>
@@ -209,8 +208,8 @@ const AIInsights = () => {
               <div className="balance-bar">
                 <span>Moderate Risk</span>
                 <div className="bar">
-                  <div 
-                    className="bar-fill moderate" 
+                  <div
+                    className="bar-fill moderate"
                     style={{ width: `${riskAnalysis?.suggestedRebalance.moderate}%` }}
                   ></div>
                 </div>
@@ -219,8 +218,8 @@ const AIInsights = () => {
               <div className="balance-bar">
                 <span>Aggressive</span>
                 <div className="bar">
-                  <div 
-                    className="bar-fill aggressive" 
+                  <div
+                    className="bar-fill aggressive"
                     style={{ width: `${riskAnalysis?.suggestedRebalance.aggressive}%` }}
                   ></div>
                 </div>
@@ -230,7 +229,7 @@ const AIInsights = () => {
           </div>
 
           <div className="recommendation">
-            <strong>💡 Recommendation:</strong>
+            <strong>Recommendation:</strong>
             <p>{riskAnalysis?.recommendation}</p>
           </div>
         </div>
@@ -238,7 +237,7 @@ const AIInsights = () => {
         {/* Fraud Pattern Detector */}
         <div className="insight-card fraud-card">
           <div className="card-header">
-            <h2><FaShieldAlt /> Fraud Pattern Detector</h2>
+            <h2>Fraud Pattern Detector</h2>
             <span className={`status-badge status-${fraudDetection?.status}`}>
               {fraudDetection?.status.toUpperCase()}
             </span>
@@ -247,11 +246,11 @@ const AIInsights = () => {
           <div className="fraud-score-circle">
             <svg viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" strokeWidth="8" />
-              <circle 
-                cx="50" 
-                cy="50" 
-                r="45" 
-                fill="none" 
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
                 stroke={fraudDetection?.fraudScore > 60 ? '#e74c3c' : fraudDetection?.fraudScore > 30 ? '#f39c12' : '#27ae60'}
                 strokeWidth="8"
                 strokeDasharray={`${(fraudDetection?.fraudScore / 100) * 283} 283`}
@@ -266,14 +265,14 @@ const AIInsights = () => {
 
           {fraudDetection?.alerts.length > 0 ? (
             <div className="alerts-list">
-              <h4><FaExclamationTriangle /> Detected Alerts:</h4>
+              <h4>Detected Alerts:</h4>
               {fraudDetection.alerts.map((alert, index) => (
                 <div key={index} className={`alert-item severity-${alert.severity}`}>
                   <span className="alert-icon">
-                    {alert.severity === 'high' ? <FaBell /> : alert.severity === 'medium' ? <FaExclamationTriangle /> : <FaBell />}
+
                   </span>
                   <div className="alert-content">
-                    <strong>{alert.type.replace(/_/g, ' ').toUpperCase()}</strong>
+                    <strong>{alert.type.replace(/_/g, '').toUpperCase()}</strong>
                     <p>{alert.message}</p>
                   </div>
                 </div>
@@ -281,14 +280,14 @@ const AIInsights = () => {
             </div>
           ) : (
             <div className="no-alerts">
-              <span className="check-icon"><FaCheckCircle /></span>
+              <span className="check-icon"></span>
               <p>No suspicious activity detected</p>
               <small>Last scan: {new Date(fraudDetection?.lastScanTime).toLocaleString()}</small>
             </div>
           )}
 
           <div className="recommendation">
-            <strong>💡 Recommendation:</strong>
+            <strong>Recommendation:</strong>
             <p>{fraudDetection?.recommendation}</p>
           </div>
         </div>
@@ -296,7 +295,7 @@ const AIInsights = () => {
         {/* Tax Estimator */}
         <div className="insight-card tax-card">
           <div className="card-header">
-            <h2><FaFileInvoiceDollar /> AI Tax Estimator</h2>
+            <h2>AI Tax Estimator</h2>
             <span className="confidence-badge">{taxEstimate?.confidence}% confident</span>
           </div>
 
@@ -346,7 +345,7 @@ const AIInsights = () => {
           </div>
 
           <div className="recommendations-list">
-            <h4>💡 Tax Optimization Tips:</h4>
+            <h4>Tax Optimization Tips:</h4>
             {taxEstimate?.recommendations.map((rec, index) => (
               <p key={index} className="recommendation-item">• {rec}</p>
             ))}

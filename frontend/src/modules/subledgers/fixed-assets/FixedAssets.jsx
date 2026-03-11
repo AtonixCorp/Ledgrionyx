@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
-import { FaBuilding, FaPlus, FaDownload } from 'react-icons/fa';
 
 const mockAssets = [
   { id: 'FA-001', name: 'Office Building', category: 'Real Estate', cost: '$2,500,000.00', accumulated: '$125,000.00', netBook: '$2,375,000.00', method: 'Straight-line', life: '40 yrs', status: 'Active' },
@@ -33,12 +32,10 @@ export default function FixedAssets() {
       <PageHeader
         title="Fixed Assets"
         subtitle="Manage fixed assets, depreciation schedules, and disposal tracking"
-        icon={<FaBuilding />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Depreciation Schedule</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              Add Asset
+            <Button variant="secondary" size="small">Depreciation Schedule</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Add Asset
             </Button>
           </>
         }

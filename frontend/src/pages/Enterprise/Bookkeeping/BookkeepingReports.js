@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaFileAlt, FaDownload, FaChartLine, FaMoneyBillWave, FaWallet, FaCalculator, FaFilter } from 'react-icons/fa';
+
 import { useEnterprise } from '../../../context/EnterpriseContext';
 
 const BookkeepingReports = () => {
@@ -153,7 +153,7 @@ const BookkeepingReports = () => {
           />
         </div>
         <button className="btn-primary" onClick={loadReportData}>
-          <FaFilter /> Apply Filters
+          Apply Filters
         </button>
       </div>
 
@@ -163,19 +163,19 @@ const BookkeepingReports = () => {
           className={`report-type-btn ${reportType === 'pnl' ? 'active' : ''}`}
           onClick={() => setReportType('pnl')}
         >
-          <FaCalculator /> Profit & Loss
+          Profit & Loss
         </button>
         <button
           className={`report-type-btn ${reportType === 'cashflow' ? 'active' : ''}`}
           onClick={() => setReportType('cashflow')}
         >
-          <FaChartLine /> Cash Flow
+          Cash Flow
         </button>
         <button
           className={`report-type-btn ${reportType === 'summary' ? 'active' : ''}`}
           onClick={() => setReportType('summary')}
         >
-          <FaFileAlt /> Summary
+          Summary
         </button>
       </div>
 
@@ -186,13 +186,13 @@ const BookkeepingReports = () => {
             <div className="report-header">
               <h2>Profit & Loss Statement</h2>
               <button className="btn-primary" onClick={generatePNLReport}>
-                <FaDownload /> Export CSV
+                Export CSV
               </button>
             </div>
 
             <div className="pnl-grid">
               <div className="pnl-section income">
-                <h3><FaMoneyBillWave /> Income</h3>
+                <h3>Income</h3>
                 <div className="pnl-item">
                   <span>Total Income</span>
                   <span className="amount positive">
@@ -202,7 +202,7 @@ const BookkeepingReports = () => {
               </div>
 
               <div className="pnl-section expenses">
-                <h3><FaWallet /> Expenses</h3>
+                <h3>Expenses</h3>
                 <div className="pnl-item">
                   <span>Total Expenses</span>
                   <span className="amount negative">
@@ -218,7 +218,7 @@ const BookkeepingReports = () => {
               </div>
 
               <div className="pnl-section net-profit">
-                <h3><FaCalculator /> Net Result</h3>
+                <h3>Net Result</h3>
                 <div className="pnl-item total">
                   <span>Net Profit</span>
                   <span className={`amount ${summary?.net_profit >= 0 ? 'positive' : 'negative'}`}>
@@ -262,7 +262,7 @@ const BookkeepingReports = () => {
             <div className="report-header">
               <h2>Cash Flow Statement</h2>
               <button className="btn-primary" onClick={generateCashflowReport}>
-                <FaDownload /> Export CSV
+                Export CSV
               </button>
             </div>
 
@@ -335,14 +335,14 @@ const BookkeepingReports = () => {
                 ['Payroll Total', formatCurrency(summary?.payroll_total || 0, entity?.local_currency)],
                 ['Transaction Count', summary?.transaction_count || 0]
               ], `summary-report-${entity?.name || 'entity'}-${dateRange.start}-to-${dateRange.end}.csv`)}>
-                <FaDownload /> Export CSV
+                Export CSV
               </button>
             </div>
 
             <div className="summary-stats">
               <div className="stat-card">
                 <div className="stat-icon income">
-                  <FaMoneyBillWave />
+
                 </div>
                 <div className="stat-content">
                   <p className="stat-label">Total Income</p>
@@ -354,7 +354,7 @@ const BookkeepingReports = () => {
 
               <div className="stat-card">
                 <div className="stat-icon expense">
-                  <FaWallet />
+
                 </div>
                 <div className="stat-content">
                   <p className="stat-label">Total Expenses</p>
@@ -366,7 +366,7 @@ const BookkeepingReports = () => {
 
               <div className="stat-card">
                 <div className="stat-icon profit">
-                  <FaCalculator />
+
                 </div>
                 <div className="stat-content">
                   <p className="stat-label">Net Profit</p>
@@ -378,7 +378,7 @@ const BookkeepingReports = () => {
 
               <div className="stat-card">
                 <div className="stat-icon transactions">
-                  <FaFileAlt />
+
                 </div>
                 <div className="stat-content">
                   <p className="stat-label">Transactions</p>

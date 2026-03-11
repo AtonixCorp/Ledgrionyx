@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  FaBuilding, FaFileInvoiceDollar, FaShoppingCart, FaMoneyBill,
-  FaPlus, FaEdit, FaTrash, FaSearch, FaDownload, FaTimes, FaSave
-} from 'react-icons/fa';
+
 import { vendorsAPI, purchaseOrdersAPI, billsAPI, billPaymentsAPI } from '../../../services/api';
 
 const STATUS_COLORS = {
@@ -14,13 +11,13 @@ const STATUS_COLORS = {
 const fmt = (v, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
 
 const TABS = [
-  { id: 'vendors', label: 'Vendors', icon: <FaBuilding /> },
-  { id: 'purchase-orders', label: 'Purchase Orders', icon: <FaShoppingCart /> },
-  { id: 'bills', label: 'Bills', icon: <FaFileInvoiceDollar /> },
-  { id: 'bill-payments', label: 'Bill Payments', icon: <FaMoneyBill /> },
+  { id: 'vendors', label: 'Vendors', },
+  { id: 'purchase-orders', label: 'Purchase Orders', },
+  { id: 'bills', label: 'Bills', },
+  { id: 'bill-payments', label: 'Bill Payments', },
 ];
 
-// ─── Vendors Tab ──────────────────────────────────────────────────────────────
+//  Vendors Tab
 const VendorsTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,8 +59,8 @@ const VendorsTab = ({ entityId }) => {
   return (
     <div>
       <div className="tab-toolbar">
-        <div className="acct-search"><FaSearch className="search-icon" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search vendors..." /></div>
-        <button className="btn-primary" onClick={handleNew}><FaPlus /> New Vendor</button>
+        <div className="acct-search"><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search vendors..." /></div>
+        <button className="btn-primary" onClick={handleNew}>New Vendor</button>
       </div>
       {loading ? <div className="acct-loading">Loading vendors...</div> : (
         <table className="acct-table">
@@ -76,9 +73,9 @@ const VendorsTab = ({ entityId }) => {
                 <td>{v.email || '—'}</td>
                 <td>{v.country || '—'}</td>
                 <td>{v.currency}</td>
-                <td>{v.payment_terms?.replace('_', ' ')}</td>
+                <td>{v.payment_terms?.replace('_', '')}</td>
                 <td><span className="status-badge" style={{ background: STATUS_COLORS[v.status], color: 'white' }}>{v.status}</span></td>
-                <td className="acct-actions"><button className="btn-icon" onClick={() => handleEdit(v)}><FaEdit /></button><button className="btn-icon btn-icon-danger" onClick={() => handleDelete(v.id)}><FaTrash /></button></td>
+                <td className="acct-actions"><button className="btn-icon" onClick={() => handleEdit(v)}></button><button className="btn-icon btn-icon-danger" onClick={() => handleDelete(v.id)}></button></td>
               </tr>
             ))}
           </tbody>
@@ -87,7 +84,7 @@ const VendorsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>{editing ? 'Edit Vendor' : 'New Vendor'}</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>{editing ? 'Edit Vendor' : 'New Vendor'}</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -109,7 +106,7 @@ const VendorsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Save</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Save</>}</button>
             </div>
           </div>
         </div>
@@ -118,7 +115,7 @@ const VendorsTab = ({ entityId }) => {
   );
 };
 
-// ─── Bills Tab ────────────────────────────────────────────────────────────────
+//  Bills Tab
 const BillsTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -158,7 +155,7 @@ const BillsTab = ({ entityId }) => {
           <div className="mini-stat"><span>Outstanding AP</span><strong style={{ color: '#e53e3e' }}>{fmt(totalOutstanding)}</strong></div>
           <div className="mini-stat"><span>Overdue</span><strong style={{ color: '#e53e3e' }}>{items.filter(i => i.status === 'overdue').length}</strong></div>
         </div>
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Bill</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>New Bill</button>
       </div>
       {loading ? <div className="acct-loading">Loading bills...</div> : (
         <table className="acct-table">
@@ -173,7 +170,7 @@ const BillsTab = ({ entityId }) => {
                 <td>{fmt(b.total_amount)}</td>
                 <td style={{ color: '#48bb78' }}>{fmt(b.paid_amount)}</td>
                 <td style={{ color: parseFloat(b.outstanding_amount) > 0 ? '#e53e3e' : '#48bb78' }}>{fmt(b.outstanding_amount)}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[b.status] || '#a0aec0', color: 'white' }}>{b.status?.replace(/_/g,' ')}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[b.status] || '#a0aec0', color: 'white' }}>{b.status?.replace(/_/g,'')}</span></td>
               </tr>
             ))}
           </tbody>
@@ -182,7 +179,7 @@ const BillsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Bill</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Bill</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -201,7 +198,7 @@ const BillsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Create Bill</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Create Bill</>}</button>
             </div>
           </div>
         </div>
@@ -210,7 +207,7 @@ const BillsTab = ({ entityId }) => {
   );
 };
 
-// ─── Bill Payments Tab ────────────────────────────────────────────────────────
+//  Bill Payments Tab
 const BillPaymentsTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -246,7 +243,7 @@ const BillPaymentsTab = ({ entityId }) => {
       <div className="tab-toolbar">
         <div className="mini-stat"><span>Total Payments</span><strong>{items.length}</strong></div>
         <div className="mini-stat"><span>Total Paid Out</span><strong style={{ color: '#fc8181' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> Pay Bill</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>Pay Bill</button>
       </div>
       {loading ? <div className="acct-loading">Loading payments...</div> : (
         <table className="acct-table">
@@ -258,7 +255,7 @@ const BillPaymentsTab = ({ entityId }) => {
                 <td>{p.vendor_name || `Vendor ${p.vendor}`}</td>
                 <td><code className="acct-code">{p.bill_number || `BILL-${p.bill}`}</code></td>
                 <td style={{ color: '#fc8181' }}><strong>{fmt(p.amount)}</strong></td>
-                <td><span className="tag">{p.payment_method?.replace(/_/g,' ')}</span></td>
+                <td><span className="tag">{p.payment_method?.replace(/_/g,'')}</span></td>
                 <td>{p.reference_number || '—'}</td>
                 <td><span className="status-badge" style={{ background: '#4299e1', color: 'white' }}>{p.status}</span></td>
               </tr>
@@ -269,7 +266,7 @@ const BillPaymentsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>Pay Bill</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>Pay Bill</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row"><label>Vendor *</label><select value={form.vendor} onChange={e => setForm(p => ({ ...p, vendor: e.target.value }))}><option value="">Select vendor</option>{vendors.map(v => <option key={v.id} value={v.id}>{v.vendor_name}</option>)}</select></div>
@@ -285,7 +282,7 @@ const BillPaymentsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Pay</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Pay</>}</button>
             </div>
           </div>
         </div>
@@ -294,7 +291,7 @@ const BillPaymentsTab = ({ entityId }) => {
   );
 };
 
-// ─── Main AP Module ───────────────────────────────────────────────────────────
+//  Main AP Module
 const APModule = () => {
   const { entityId } = useParams();
   const [activeTab, setActiveTab] = useState('vendors');
@@ -303,10 +300,10 @@ const APModule = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaBuilding /> Accounts Payable</h1>
+          <h1>Accounts Payable</h1>
           <p>Manage vendors, purchase orders, bills, and payments — track money you owe</p>
         </div>
-        <button className="btn-secondary"><FaDownload /> Export</button>
+        <button className="btn-secondary">Export</button>
       </div>
 
       <div className="module-tabs">
@@ -327,7 +324,7 @@ const APModule = () => {
   );
 };
 
-// ─── Purchase Orders Tab ──────────────────────────────────────────────────────
+//  Purchase Orders Tab
 const PurchaseOrdersTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -362,7 +359,7 @@ const PurchaseOrdersTab = ({ entityId }) => {
       <div className="tab-toolbar">
         <div className="mini-stat"><span>Total POs</span><strong>{items.length}</strong></div>
         <div className="mini-stat"><span>Open</span><strong style={{ color: '#4299e1' }}>{items.filter(p => !['received','cancelled'].includes(p.status)).length}</strong></div>
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New PO</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>New PO</button>
       </div>
       {loading ? <div className="acct-loading">Loading purchase orders...</div> : (
         <table className="acct-table">
@@ -384,7 +381,7 @@ const PurchaseOrdersTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Purchase Order</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Purchase Order</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -399,7 +396,7 @@ const PurchaseOrdersTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Create PO</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Create PO</>}</button>
             </div>
           </div>
         </div>

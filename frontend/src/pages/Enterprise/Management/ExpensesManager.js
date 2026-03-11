@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useEnterprise } from '../../../context/EnterpriseContext';
-import { FaPlus, FaEdit, FaTrash, FaDownload, FaChartPie } from 'react-icons/fa';
 
 const ExpensesManager = () => {
   const { entityId } = useParams();
   const { fetchEntityExpenses, createEntityExpense, entities } = useEnterprise();
-  
+
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -25,7 +24,7 @@ const ExpensesManager = () => {
   // Default expense categories
   const categories = [
     'Office Supplies', 'Travel', 'Marketing', 'Utilities', 'Rent', 'Insurance',
-    'Professional Services', 'Equipment', 'Software', 'Training', 'Meals', 
+    'Professional Services', 'Equipment', 'Software', 'Training', 'Meals',
     'Transportation', 'Salaries', 'Benefits', 'Taxes', 'Other'
   ];
 
@@ -132,7 +131,7 @@ const ExpensesManager = () => {
 
   // Calculate totals
   const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
-  
+
   // Category breakdown
   const categoryBreakdown = filteredExpenses.reduce((acc, exp) => {
     if (!acc[exp.category]) {
@@ -155,10 +154,10 @@ const ExpensesManager = () => {
         </div>
         <div className="header-actions">
           <button className="btn-icon" onClick={handleExportCSV} title="Export CSV">
-            <FaDownload /> Export
+            Export
           </button>
           <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <FaPlus /> Add Expense
+            Add Expense
           </button>
         </div>
       </div>
@@ -232,17 +231,16 @@ const ExpensesManager = () => {
             className="filter-input"
           />
         </div>
-        <button 
+        <button
           className="btn-clear-filters"
           onClick={() => setFilters({ category: '', dateFrom: '', dateTo: '', minAmount: '', maxAmount: '', search: '' })}
-        >
-          Clear Filters
+        >Clear Filters
         </button>
       </div>
 
       {/* Category Breakdown */}
       <div className="category-breakdown">
-        <h3><FaChartPie /> Category Breakdown</h3>
+        <h3>Category Breakdown</h3>
         <div className="category-grid">
           {Object.entries(categoryBreakdown)
             .sort(([, a], [, b]) => b.amount - a.amount)
@@ -252,7 +250,7 @@ const ExpensesManager = () => {
                 <p className="amount">${data.amount.toFixed(2)}</p>
                 <p className="count-mini">{data.count} transactions</p>
                 <div className="percentage-bar">
-                  <div 
+                  <div
                     className="percentage-fill"
                     style={{ width: `${(data.amount / totalExpenses * 100).toFixed(0)}%` }}
                   />
@@ -283,18 +281,18 @@ const ExpensesManager = () => {
                 <td>{expense.description}</td>
                 <td><span className="badge-category">{expense.category}</span></td>
                 <td>{expense.vendor || '-'}</td>
-                <td className="payment-method">{expense.payment_method?.replace('_', ' ')}</td>
+                <td className="payment-method">{expense.payment_method?.replace('_', '')}</td>
                 <td className="amount negative">${parseFloat(expense.amount).toFixed(2)}</td>
                 <td className="actions">
                   <button className="btn-icon-small" title="Edit" onClick={() => handleEdit(expense)}>
-                    <FaEdit />
+
                   </button>
-                  <button 
-                    className="btn-icon-small delete" 
+                  <button
+                    className="btn-icon-small delete"
                     onClick={() => handleDelete(expense.id)}
                     title="Delete"
                   >
-                    <FaTrash />
+
                   </button>
                 </td>
               </tr>
@@ -399,8 +397,7 @@ const ExpensesManager = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
-                  Cancel
+                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel
                 </button>
                 <button type="submit" className="btn-primary">
                   {editingExpense ? 'Update' : 'Create'} Expense

@@ -4,98 +4,98 @@
 
 const TAX_RATES = {
   // North America
-  'United States': { 
-    code: 'US', 
-    rate: 21, 
-    type: 'Corporate', 
-    personal: 37, 
-    vat: 0, 
+  'United States': {
+    code: 'US',
+    rate: 21,
+    type: 'Corporate',
+    personal: 37,
+    vat: 0,
     currency: 'USD',
     currencySymbol: '$',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'Federal rate. State taxes vary by location.'
   },
-  'Canada': { 
-    code: 'CA', 
-    rate: 15, 
-    type: 'Corporate', 
-    personal: 33, 
-    vat: 5, 
+  'Canada': {
+    code: 'CA',
+    rate: 15,
+    type: 'Corporate',
+    personal: 33,
+    vat: 5,
     currency: 'CAD',
     currencySymbol: 'C$',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'GST rate. Provincial taxes additional.'
   },
-  'Mexico': { 
-    code: 'MX', 
-    rate: 30, 
-    type: 'Corporate', 
-    personal: 35, 
-    vat: 16, 
+  'Mexico': {
+    code: 'MX',
+    rate: 30,
+    type: 'Corporate',
+    personal: 35,
+    vat: 16,
     currency: 'MXN',
     currencySymbol: 'MX$',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'IVA (VAT) standard rate'
   },
-  
+
   // Europe
-  'United Kingdom': { 
-    code: 'GB', 
-    rate: 19, 
-    type: 'Corporate', 
-    personal: 45, 
-    vat: 20, 
+  'United Kingdom': {
+    code: 'GB',
+    rate: 19,
+    type: 'Corporate',
+    personal: 45,
+    vat: 20,
     currency: 'GBP',
     currencySymbol: '£',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'Standard VAT rate'
   },
-  'Germany': { 
-    code: 'DE', 
-    rate: 15, 
-    type: 'Corporate', 
-    personal: 45, 
-    vat: 19, 
+  'Germany': {
+    code: 'DE',
+    rate: 15,
+    type: 'Corporate',
+    personal: 45,
+    vat: 19,
     currency: 'EUR',
     currencySymbol: '€',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'Mehrwertsteuer (VAT)'
   },
-  'France': { 
-    code: 'FR', 
-    rate: 25, 
-    type: 'Corporate', 
-    personal: 45, 
-    vat: 20, 
+  'France': {
+    code: 'FR',
+    rate: 25,
+    type: 'Corporate',
+    personal: 45,
+    vat: 20,
     currency: 'EUR',
     currencySymbol: '€',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'TVA (VAT) standard rate'
   },
-  'Italy': { 
-    code: 'IT', 
-    rate: 24, 
-    type: 'Corporate', 
-    personal: 43, 
-    vat: 22, 
+  'Italy': {
+    code: 'IT',
+    rate: 24,
+    type: 'Corporate',
+    personal: 43,
+    vat: 22,
     currency: 'EUR',
     currencySymbol: '€',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'IVA (VAT) standard rate'
   },
-  'Spain': { 
-    code: 'ES', 
-    rate: 25, 
-    type: 'Corporate', 
-    personal: 47, 
-    vat: 21, 
+  'Spain': {
+    code: 'ES',
+    rate: 25,
+    type: 'Corporate',
+    personal: 47,
+    vat: 21,
     currency: 'EUR',
     currencySymbol: '€',
     lastUpdated: '2025-01-01',
@@ -114,7 +114,7 @@ const TAX_RATES = {
   'Poland': { rate: 19, type: 'Corporate', personal: 32, vat: 23, currency: 'PLN', currencySymbol: 'zł', lastUpdated: '2025-01-01' },
   'Austria': { rate: 24, type: 'Corporate', personal: 55, vat: 20, currency: 'EUR', currencySymbol: '€', lastUpdated: '2025-01-01' },
   'Greece': { rate: 22, type: 'Corporate', personal: 44, vat: 24, currency: 'EUR', currencySymbol: '€', lastUpdated: '2025-01-01' },
-  
+
   // Asia
   'China': { rate: 25, type: 'Corporate', personal: 45, vat: 13, currency: 'CNY', currencySymbol: '¥', lastUpdated: '2025-01-01' },
   'Japan': { rate: 23.2, type: 'Corporate', personal: 45, vat: 10, currency: 'JPY', currencySymbol: '¥', lastUpdated: '2025-01-01' },
@@ -134,30 +134,30 @@ const TAX_RATES = {
   'Saudi Arabia': { rate: 20, type: 'Corporate', personal: 0, vat: 15, currency: 'SAR', currencySymbol: 'SR', lastUpdated: '2025-01-01' },
   'United Arab Emirates': { rate: 9, type: 'Corporate', personal: 0, vat: 5, currency: 'AED', currencySymbol: 'د.إ', lastUpdated: '2025-01-01' },
   'Turkey': { rate: 20, type: 'Corporate', personal: 40, vat: 18, currency: 'TRY', currencySymbol: '₺', lastUpdated: '2025-01-01' },
-  
+
   // Oceania
   'Australia': { rate: 30, type: 'Corporate', personal: 45, vat: 10, currency: 'AUD', currencySymbol: 'A$', lastUpdated: '2025-01-01' },
   'New Zealand': { rate: 28, type: 'Corporate', personal: 39, vat: 15, currency: 'NZD', currencySymbol: 'NZ$', lastUpdated: '2025-01-01' },
-  
+
   // Africa
-  'South Africa': { 
-    code: 'ZA', 
-    rate: 27, 
-    type: 'Corporate', 
-    personal: 45, 
-    vat: 15, 
+  'South Africa': {
+    code: 'ZA',
+    rate: 27,
+    type: 'Corporate',
+    personal: 45,
+    vat: 15,
     currency: 'ZAR',
     currencySymbol: 'R',
     lastUpdated: '2025-01-01',
     aiVerified: true,
     notes: 'Standard VAT rate as per SARS'
   },
-  'Nigeria': { 
-    code: 'NG', 
-    rate: 30, 
-    type: 'Corporate', 
-    personal: 24, 
-    vat: 7.5, 
+  'Nigeria': {
+    code: 'NG',
+    rate: 30,
+    type: 'Corporate',
+    personal: 24,
+    vat: 7.5,
     currency: 'NGN',
     currencySymbol: '₦',
     lastUpdated: '2025-01-01',
@@ -167,14 +167,14 @@ const TAX_RATES = {
   'Egypt': { rate: 22.5, type: 'Corporate', personal: 25, vat: 14, currency: 'EGP', currencySymbol: '£', lastUpdated: '2025-01-01' },
   'Kenya': { rate: 30, type: 'Corporate', personal: 35, vat: 16, currency: 'KES', currencySymbol: 'KSh', lastUpdated: '2025-01-01' },
   'Morocco': { rate: 31, type: 'Corporate', personal: 38, vat: 20, currency: 'MAD', currencySymbol: 'د.م.', lastUpdated: '2025-01-01' },
-  
+
   // South America
   'Brazil': { rate: 34, type: 'Corporate', personal: 27.5, vat: 17, currency: 'BRL', currencySymbol: 'R$', lastUpdated: '2025-01-01' },
   'Argentina': { rate: 30, type: 'Corporate', personal: 35, vat: 21, currency: 'ARS', currencySymbol: '$', lastUpdated: '2025-01-01' },
   'Chile': { rate: 27, type: 'Corporate', personal: 40, vat: 19, currency: 'CLP', currencySymbol: '$', lastUpdated: '2025-01-01' },
   'Colombia': { rate: 35, type: 'Corporate', personal: 39, vat: 19, currency: 'COP', currencySymbol: '$', lastUpdated: '2025-01-01' },
   'Peru': { rate: 29.5, type: 'Corporate', personal: 30, vat: 18, currency: 'PEN', currencySymbol: 'S/', lastUpdated: '2025-01-01' },
-  
+
   // Tax Havens / Low Tax Jurisdictions
   'Bahamas': { rate: 0, type: 'Corporate', personal: 0, vat: 12, currency: 'BSD', currencySymbol: 'B$', lastUpdated: '2025-01-01' },
   'Cayman Islands': { rate: 0, type: 'Corporate', personal: 0, vat: 0, currency: 'KYD', currencySymbol: 'CI$', lastUpdated: '2025-01-01' },
@@ -213,7 +213,7 @@ class TaxCalculatorService {
     const lowerQuery = query.toLowerCase();
     return this.getCountries().filter(country => {
       const taxInfo = this.taxRates[country];
-      return country.toLowerCase().includes(lowerQuery) || 
+      return country.toLowerCase().includes(lowerQuery) ||
              taxInfo.code.toLowerCase().includes(lowerQuery);
     });
   }
@@ -277,36 +277,36 @@ class TaxCalculatorService {
       };
     }
 
-    const expectedRate = taxType === 'personal' ? taxInfo.personal : 
+    const expectedRate = taxType === 'personal' ? taxInfo.personal :
                         taxType === 'vat' ? taxInfo.vat : taxInfo.rate;
-    
+
     const difference = Math.abs(rate - expectedRate);
     const percentageDiff = (difference / expectedRate) * 100;
 
     if (percentageDiff === 0) {
       return {
         valid: true,
-        message: '✓ Tax rate is correct and up to date',
+        message: 'Tax rate is correct and up to date',
         confidence: 100
       };
     } else if (percentageDiff < 5) {
       return {
         valid: true,
-        message: '⚠ Tax rate is close but may have recent changes',
+        message: 'Tax rate is close but may have recent changes',
         recommendation: `Current database rate: ${expectedRate}%`,
         confidence: 90
       };
     } else if (percentageDiff < 15) {
       return {
         valid: false,
-        message: '⚠ Tax rate differs significantly from database',
+        message: 'Tax rate differs significantly from database',
         recommendation: `Expected rate: ${expectedRate}%. Please verify with local tax authority.`,
         confidence: 60
       };
     } else {
       return {
         valid: false,
-        message: '❌ Tax rate appears incorrect',
+        message: 'Tax rate appears incorrect',
         recommendation: `Database shows ${expectedRate}% for ${country}. Your input of ${rate}% is significantly different.`,
         confidence: 30
       };
@@ -319,7 +319,7 @@ class TaxCalculatorService {
     if (!taxInfo) return [];
 
     const suggestions = [];
-    const rate = taxType === 'personal' ? taxInfo.personal : 
+    const rate = taxType === 'personal' ? taxInfo.personal :
                  taxType === 'vat' ? taxInfo.vat : taxInfo.rate;
 
     // High tax rate warning
@@ -381,7 +381,7 @@ class TaxCalculatorService {
       const taxInfo = this.getTaxInfo(country);
       if (!taxInfo) return null;
 
-      const rate = taxType === 'personal' ? taxInfo.personal : 
+      const rate = taxType === 'personal' ? taxInfo.personal :
                    taxType === 'vat' ? taxInfo.vat : taxInfo.rate;
 
       return {
@@ -398,14 +398,14 @@ class TaxCalculatorService {
     const currentTaxInfo = this.getTaxInfo(currentCountry);
     if (!currentTaxInfo) return [];
 
-    const currentRate = taxType === 'personal' ? currentTaxInfo.personal : 
+    const currentRate = taxType === 'personal' ? currentTaxInfo.personal :
                        taxType === 'vat' ? currentTaxInfo.vat : currentTaxInfo.rate;
 
     const alternatives = this.getCountries()
       .filter(country => country !== currentCountry)
       .map(country => {
         const taxInfo = this.getTaxInfo(country);
-        const rate = taxType === 'personal' ? taxInfo.personal : 
+        const rate = taxType === 'personal' ? taxInfo.personal :
                     taxType === 'vat' ? taxInfo.vat : taxInfo.rate;
         return { country, rate };
       })
@@ -420,7 +420,7 @@ class TaxCalculatorService {
   updateTaxRate(country, newRates, adminApproved = false) {
     if (this.taxRates[country]) {
       const oldRates = { ...this.taxRates[country] };
-      
+
       this.taxRates[country] = {
         ...this.taxRates[country],
         ...newRates,
@@ -431,8 +431,8 @@ class TaxCalculatorService {
       // Log the change
       this.logTaxChange(country, oldRates, this.taxRates[country], adminApproved);
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         message: 'Tax rate updated successfully',
         country,
         oldRates,
@@ -450,9 +450,9 @@ class TaxCalculatorService {
 
     // Validate required fields
     if (!taxData.code || !taxData.vat) {
-      return { 
-        success: false, 
-        message: 'Missing required fields: code and vat rate are mandatory' 
+      return {
+        success: false,
+        message: 'Missing required fields: code and vat rate are mandatory'
       };
     }
 
@@ -467,8 +467,8 @@ class TaxCalculatorService {
       notes: taxData.notes || ''
     };
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Country added successfully',
       country,
       data: this.taxRates[country]
@@ -511,7 +511,7 @@ class TaxCalculatorService {
     if (suggestion.taxType === 'personal') updateData.personal = suggestion.suggestedRate;
 
     const result = this.updateTaxRate(suggestion.country, updateData, true);
-    
+
     if (result.success) {
       suggestion.status = 'approved';
       suggestion.approvedAt = new Date().toISOString();
@@ -548,7 +548,7 @@ class TaxCalculatorService {
         inputRate,
         expectedRate,
         difference: percentageDiff.toFixed(1),
-        message: `⚠️ CRITICAL: Input rate ${inputRate}% differs significantly from expected ${expectedRate}%`,
+        message: `CRITICAL: Input rate ${inputRate}% differs significantly from expected ${expectedRate}%`,
         recommendation: 'Verify with official tax authority before proceeding',
         timestamp: new Date().toISOString()
       };
@@ -561,7 +561,7 @@ class TaxCalculatorService {
 
   // Admin: Get all warnings
   getAdminWarnings() {
-    return this.adminWarnings.sort((a, b) => 
+    return this.adminWarnings.sort((a, b) =>
       new Date(b.timestamp) - new Date(a.timestamp)
     );
   }
@@ -571,9 +571,9 @@ class TaxCalculatorService {
     const taxInfo = this.getTaxInfo(country);
     if (!taxInfo) return 50;
 
-    const currentRate = taxType === 'vat' ? taxInfo.vat : 
+    const currentRate = taxType === 'vat' ? taxInfo.vat :
                        taxType === 'corporate' ? taxInfo.rate : taxInfo.personal;
-    
+
     const difference = Math.abs(suggestedRate - currentRate);
     const percentageDiff = (difference / currentRate) * 100;
 
@@ -594,7 +594,7 @@ class TaxCalculatorService {
       adminApproved,
       changes: this.getChangedFields(oldRates, newRates)
     };
-    
+
     // In production, this would save to a database
     console.log('Tax Change Log:', log);
     return log;
@@ -604,7 +604,7 @@ class TaxCalculatorService {
   getChangedFields(oldData, newData) {
     const changes = [];
     const fields = ['rate', 'personal', 'vat', 'notes'];
-    
+
     fields.forEach(field => {
       if (oldData[field] !== newData[field]) {
         changes.push({
@@ -614,7 +614,7 @@ class TaxCalculatorService {
         });
       }
     });
-    
+
     return changes;
   }
 

@@ -12,7 +12,7 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
     industryCode: '',
     reportingCurrency: 'USD',
     fiscalYearEnd: '12-31',
-    
+
     // Financial Inputs
     revenue: '',
     revenueGrowth: '',
@@ -20,17 +20,17 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
     taxRate: '',
     capex: '',
     workingCapital: '',
-    
+
     // Assumptions
     discountRate: '',
     terminalGrowthRate: '',
     projectionYears: 5,
-    
+
     // Entity Structure
     entityType: 'corporation', // corporation, partnership, sole_proprietor
     equityPercentage: 100,
     debtAmount: 0,
-    
+
     // Country & Compliance
     country: 'US',
     accountingStandard: 'GAAP', // GAAP, IFRS
@@ -95,11 +95,11 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
     e.preventDefault();
 
     if (!validateForm()) {
-      console.warn('❌ Form validation failed', errors);
+      console.warn('Form validation failed', errors);
       return;
     }
 
-    console.log('✅ Form validation passed, submitting model...', formData);
+    console.log('Form validation passed, submitting model...', formData);
     onSubmit(formData);
   };
 
@@ -133,8 +133,7 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
           className="example-button"
           onClick={loadExample}
           disabled={isLoading}
-        >
-          📋 Load Example
+        >Load Example
         </button>
       </div>
 
@@ -145,36 +144,32 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
             type="button"
             className={`section-tab ${activeSection === 'basic' ? 'active' : ''}`}
             onClick={() => setActiveSection('basic')}
-          >
-            Basic Info
+          >Basic Info
           </button>
           <button
             type="button"
             className={`section-tab ${activeSection === 'financial' ? 'active' : ''}`}
             onClick={() => setActiveSection('financial')}
-          >
-            Financial
+          >Financial
           </button>
           <button
             type="button"
             className={`section-tab ${activeSection === 'assumptions' ? 'active' : ''}`}
             onClick={() => setActiveSection('assumptions')}
-          >
-            Assumptions
+          >Assumptions
           </button>
           <button
             type="button"
             className={`section-tab ${activeSection === 'structure' ? 'active' : ''}`}
             onClick={() => setActiveSection('structure')}
-          >
-            Structure
+          >Structure
           </button>
         </div>
 
         {/* Basic Information Section */}
         {activeSection === 'basic' && (
           <div className="form-section active">
-            <h3>📝 Basic Information</h3>
+            <h3>Basic Information</h3>
 
             <div className="form-group">
               <label>Company Name *</label>
@@ -251,7 +246,7 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
         {/* Financial Inputs Section */}
         {activeSection === 'financial' && (
           <div className="form-section active">
-            <h3>💰 Financial Inputs</h3>
+            <h3>Financial Inputs</h3>
 
             <div className="form-group">
               <label>Annual Revenue ({formData.reportingCurrency}) *</label>
@@ -344,7 +339,7 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
         {/* Assumptions Section */}
         {activeSection === 'assumptions' && (
           <div className="form-section active">
-            <h3>📊 Valuation Assumptions</h3>
+            <h3>Valuation Assumptions</h3>
 
             <div className="form-group">
               <label>Discount Rate (WACC) (%) *</label>
@@ -396,7 +391,7 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
         {/* Entity Structure Section */}
         {activeSection === 'structure' && (
           <div className="form-section active">
-            <h3>🏢 Entity Structure</h3>
+            <h3>Entity Structure</h3>
 
             <div className="form-row">
               <div className="form-group">
@@ -485,7 +480,7 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
             className="btn-primary"
             disabled={isLoading}
           >
-            {isLoading ? '⏳ Calculating...' : '▶ Calculate Model'}
+            {isLoading ? 'Calculating...' : 'Calculate Model'}
           </button>
           <button
             type="button"
@@ -498,8 +493,7 @@ const ModelInputForm = ({ onSubmit, isLoading, initialData }) => {
               discountRate: '',
             })}
             disabled={isLoading}
-          >
-            Clear Form
+          >Clear Form
           </button>
         </div>
       </form>

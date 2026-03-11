@@ -1,9 +1,9 @@
 /**
  * Scenario Analysis Engine
- * 
+ *
  * Generates best-case, base-case, and worst-case scenarios for financial models.
  * Enables scenario comparison, probability analysis, and risk/reward assessment.
- * 
+ *
  * Features:
  * - Generate multiple scenarios with different assumptions
  * - Compare scenarios side-by-side
@@ -11,10 +11,10 @@
  * - Analyze risk/reward tradeoffs
  * - Sensitivity to key drivers
  * - Scenario probability estimation
- * 
+ *
  * Phase 4 Feature: Advanced scenario modeling and what-if analysis
  * Integrates with Phases 1-3 to extend analysis capabilities
- * 
+ *
  * @module scenarioEngine
  * @version 1.0.0
  */
@@ -28,7 +28,7 @@ import * as CalcEngine from '../calculation/calculationEngine';
 /**
  * Generate best-case scenario
  * Optimistic assumptions: high growth, cost efficiency, market expansion
- * 
+ *
  * @param {Object} baselineModel - Baseline model data
  * @param {Object} marketAssumptions - Market conditions
  * @returns {Object} Best-case scenario results
@@ -84,8 +84,7 @@ export function generateBestCaseScenario(baselineModel, marketAssumptions = {}) 
 
     // Calculate projected values
     if (baselineModel.forecast && Array.isArray(baselineModel.forecast)) {
-      scenario.projectedRevenue = baselineModel.forecast.map(val =>
-        CalcEngine.multiply(val, bestGrowth / (revenueGrowth || 0.1))
+      scenario.projectedRevenue = baselineModel.forecast.map(val =>CalcEngine.multiply(val, bestGrowth / (revenueGrowth || 0.1))
       );
       scenario.totalRevenue = CalcEngine.arraySum(scenario.projectedRevenue);
     }
@@ -114,7 +113,7 @@ export function generateBestCaseScenario(baselineModel, marketAssumptions = {}) 
 /**
  * Generate base-case scenario
  * Conservative assumptions based on historical performance and market trends
- * 
+ *
  * @param {Object} baselineModel - Baseline model data
  * @returns {Object} Base-case scenario results
  */
@@ -187,7 +186,7 @@ export function generateBaseCaseScenario(baselineModel) {
 /**
  * Generate worst-case scenario
  * Conservative assumptions: market slowdown, operational challenges, competition
- * 
+ *
  * @param {Object} baselineModel - Baseline model data
  * @returns {Object} Worst-case scenario results
  */
@@ -242,8 +241,7 @@ export function generateWorstCaseScenario(baselineModel) {
 
     // Calculate projected values
     if (baselineModel.forecast && Array.isArray(baselineModel.forecast)) {
-      scenario.projectedRevenue = baselineModel.forecast.map(val =>
-        CalcEngine.multiply(val, worstGrowth / (revenueGrowth || 0.1))
+      scenario.projectedRevenue = baselineModel.forecast.map(val =>CalcEngine.multiply(val, worstGrowth / (revenueGrowth || 0.1))
       );
       scenario.totalRevenue = CalcEngine.arraySum(scenario.projectedRevenue);
     }
@@ -276,7 +274,7 @@ export function generateWorstCaseScenario(baselineModel) {
 /**
  * Compare multiple scenarios
  * Provides side-by-side analysis with key metrics and divergence analysis
- * 
+ *
  * @param {Object[]} scenarios - Array of scenario results
  * @param {Object} baselineMetrics - Baseline for comparison
  * @returns {Object} Scenario comparison analysis
@@ -298,7 +296,7 @@ export function compareScenarios(scenarios = [], baselineMetrics = {}) {
     // Analyze each scenario
     for (const scen of scenarios) {
       const scenData = scen.scenario || scen;
-      
+
       comparison.scenarios.push({
         name: scenData.name,
         probability: scenData.probability || 0,
@@ -388,7 +386,7 @@ export function compareScenarios(scenarios = [], baselineMetrics = {}) {
 /**
  * Calculate probability-weighted scenario outcome
  * Combines scenarios based on probability to get expected value
- * 
+ *
  * @param {Object[]} scenarios - Array of scenarios with probabilities
  * @returns {Object} Weighted outcome analysis
  */
@@ -446,7 +444,7 @@ export function calculateProbabilityWeightedOutcome(scenarios = []) {
 /**
  * Analyze upside and downside risk/reward
  * Calculates asymmetry and risk/reward ratios
- * 
+ *
  * @param {Object[]} scenarios - Array of scenarios
  * @param {number} baselineValue - Baseline/midpoint value
  * @returns {Object} Risk/reward analysis
@@ -512,7 +510,7 @@ export function analyzeRiskRewardAsymmetry(scenarios = [], baselineValue = 0) {
 /**
  * Generate custom scenario with specified assumptions
  * Allows user-defined parameter overrides
- * 
+ *
  * @param {Object} baselineModel - Baseline model
  * @param {Object} customAssumptions - Custom parameter overrides
  * @param {string} name - Scenario name
@@ -555,8 +553,7 @@ export function generateCustomScenario(baselineModel, customAssumptions = {}, na
     // Calculate projected values
     if (baselineModel.forecast && Array.isArray(baselineModel.forecast)) {
       const growthMultiplier = scenario.assumptions.revenueGrowth / (baseAssumptions.revenueGrowth || 0.1);
-      scenario.projectedRevenue = baselineModel.forecast.map(val =>
-        CalcEngine.multiply(val, growthMultiplier)
+      scenario.projectedRevenue = baselineModel.forecast.map(val =>CalcEngine.multiply(val, growthMultiplier)
       );
       scenario.totalRevenue = CalcEngine.arraySum(scenario.projectedRevenue);
     }
@@ -590,7 +587,7 @@ export function generateCustomScenario(baselineModel, customAssumptions = {}, na
 /**
  * Stress test a scenario by varying key parameters
  * Shows resilience to assumption changes
- * 
+ *
  * @param {Object} scenario - Base scenario
  * @param {Object} stressParameters - Parameters to stress test
  * @returns {Object} Stress test results
@@ -699,7 +696,7 @@ export function stressTestScenario(scenario, stressParameters = {}) {
 /**
  * Generate comprehensive scenario analysis report
  * Combines all scenario analyses into single report
- * 
+ *
  * @param {Object} scenarioAnalysis - Complete scenario analysis data
  * @returns {Object} Formatted report
  */

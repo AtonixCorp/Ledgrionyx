@@ -1,6 +1,6 @@
 /**
  * Financial Model Templates
- * 
+ *
  * Standard templates for all 6 model types:
  * 1. Forecasting Models
  * 2. Valuation Models
@@ -8,7 +8,7 @@
  * 4. Scenario & Sensitivity Models
  * 5. Consolidation Models
  * 6. Personal Finance Models
- * 
+ *
  * Each template defines:
  * - Input structure (what data is needed)
  * - Calculation logic (what formulas to use)

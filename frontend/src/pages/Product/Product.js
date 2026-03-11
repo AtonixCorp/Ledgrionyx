@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaWallet, FaGlobe, FaShieldAlt, FaRocket, FaBuilding, FaHandshake } from 'react-icons/fa';
+
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
@@ -12,8 +12,7 @@ const Product = () => {
       <section className="product-hero">
         <div className="hero-content">
           <h1>Next-Generation Financial Platform</h1>
-          <p>
-            Atonix Capital redefines financial management with sovereign-grade security,
+          <p>Atonix Capital redefines financial management with sovereign-grade security,
             AI-powered intelligence, and comprehensive multi-asset capabilities.
           </p>
           <div className="hero-stats">
@@ -39,11 +38,10 @@ const Product = () => {
           <div className="product-grid">
             <div className="product-card">
               <div className="product-icon">
-                <FaWallet />
+
               </div>
               <h3>Personal Finance</h3>
-              <p>
-                Take control of your personal finances with intelligent budgeting,
+              <p>Take control of your personal finances with intelligent budgeting,
                 expense tracking, and investment management tools.
               </p>
               <ul className="product-features">
@@ -56,11 +54,10 @@ const Product = () => {
 
             <div className="product-card">
               <div className="product-icon">
-                <FaBuilding />
+
               </div>
               <h3>Enterprise Solutions</h3>
-              <p>
-                Powerful tools for businesses to manage complex financial operations
+              <p>Powerful tools for businesses to manage complex financial operations
                 across multiple entities and jurisdictions.
               </p>
               <ul className="product-features">
@@ -73,11 +70,10 @@ const Product = () => {
 
             <div className="product-card">
               <div className="product-icon">
-                <FaGlobe />
+
               </div>
               <h3>Global Reach</h3>
-              <p>
-                Operate seamlessly across borders with comprehensive international
+              <p>Operate seamlessly across borders with comprehensive international
                 financial management and regulatory compliance.
               </p>
               <ul className="product-features">
@@ -90,11 +86,10 @@ const Product = () => {
 
             <div className="product-card">
               <div className="product-icon">
-                <FaShieldAlt />
+
               </div>
               <h3>Bank-Grade Security</h3>
-              <p>
-                Your financial data is protected with military-grade encryption,
+              <p>Your financial data is protected with military-grade encryption,
                 biometric authentication, and advanced threat detection.
               </p>
               <ul className="product-features">
@@ -107,11 +102,10 @@ const Product = () => {
 
             <div className="product-card">
               <div className="product-icon">
-                <FaRocket />
+
               </div>
               <h3>AI-Powered Insights</h3>
-              <p>
-                Leverage artificial intelligence for financial predictions,
+              <p>Leverage artificial intelligence for financial predictions,
                 anomaly detection, and personalized recommendations.
               </p>
               <ul className="product-features">
@@ -124,11 +118,10 @@ const Product = () => {
 
             <div className="product-card">
               <div className="product-icon">
-                <FaHandshake />
+
               </div>
               <h3>Expert Support</h3>
-              <p>
-                Get help from our team of financial experts and dedicated
+              <p>Get help from our team of financial experts and dedicated
                 support specialists whenever you need assistance.
               </p>
               <ul className="product-features">
@@ -147,11 +140,9 @@ const Product = () => {
           <h2>Ready to Transform Your Financial Management?</h2>
           <p>Join thousands of users who trust Atonix Capital for their financial needs.</p>
           <div className="cta-buttons">
-            <Link to="/register" className="btn-primary btn-large">
-              Start Free Trial
+            <Link to="/register" className="btn-primary btn-large">Start Free Trial
             </Link>
-            <Link to="/features" className="btn-outline btn-large">
-              Explore Features
+            <Link to="/features" className="btn-outline btn-large">Explore Features
             </Link>
           </div>
         </div>

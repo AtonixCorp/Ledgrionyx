@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaUsers, FaPlus, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const mockCustomers = [
   { id: 'C-001', name: 'Acme Corp', email: 'billing@acme.com', phone: '+1 (555) 100-2000', balance: '$12,500.00', status: 'Active' },
@@ -13,10 +12,10 @@ const columns = [
   { key: 'id', header: 'ID' },
   { key: 'name', header: 'Customer Name' },
   { key: 'email', header: 'Email', render: (row) => (
-    <a href={`mailto:${row.email}`} style={{ color: '#667eea' }}><FaEnvelope style={{ marginRight: 4 }} />{row.email}</a>
+    <a href={`mailto:${row.email}`} style={{ color: '#667eea' }}>{row.email}</a>
   )},
   { key: 'phone', header: 'Phone', render: (row) => (
-    <span><FaPhone style={{ marginRight: 4, color: '#7a8fa6' }} />{row.phone}</span>
+    <span>{row.phone}</span>
   )},
   { key: 'balance', header: 'Balance' },
   { key: 'status', header: 'Status', render: (row) => (
@@ -34,10 +33,8 @@ export default function Customers() {
       <PageHeader
         title="Customers"
         subtitle="Manage your customer directory and accounts receivable contacts"
-        icon={<FaUsers />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            Add Customer
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Add Customer
           </Button>
         }
       />

@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { FaGlobe } from 'react-icons/fa';
 
 const EntityDashboard = () => {
   const { entityId } = useParams();
   const navigate = useNavigate();
   const enterpriseContext = useEnterprise();
-  
+
   // Safely destructure with fallbacks
   const {
     entities = [],
@@ -173,7 +172,7 @@ const EntityDashboard = () => {
         <div className="entity-info">
           <h1>{entity.name}</h1>
           <div className="entity-meta">
-            <span className="country"><FaGlobe /> {entity.country}</span>
+            <span className="country"> {entity.country}</span>
             <span className="type">{entity.entity_type}</span>
             <span className={`status ${entity.status}`}>{entity.status}</span>
           </div>
@@ -188,50 +187,42 @@ const EntityDashboard = () => {
         <button
           className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
-        >
-          Overview
+        >Overview
         </button>
         <button
           className={`tab-btn ${activeTab === 'expenses' ? 'active' : ''}`}
           onClick={() => setActiveTab('expenses')}
-        >
-          Expenses ({expenses.length})
+        >Expenses ({expenses.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'income' ? 'active' : ''}`}
           onClick={() => setActiveTab('income')}
-        >
-          Income ({income.length})
+        >Income ({income.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'budgets' ? 'active' : ''}`}
           onClick={() => setActiveTab('budgets')}
-        >
-          Budgets ({budgets.length})
+        >Budgets ({budgets.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
           onClick={() => setActiveTab('staff')}
-        >
-          Staff & HR ({staff.length})
+        >Staff & HR ({staff.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'structure' ? 'active' : ''}`}
           onClick={() => setActiveTab('structure')}
-        >
-          Company Structure
+        >Company Structure
         </button>
         <button
           className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
           onClick={() => setActiveTab('financial')}
-        >
-          Financial Tracking
+        >Financial Tracking
         </button>
         <button
           className={`tab-btn ${activeTab === 'bookkeeping' ? 'active' : ''}`}
           onClick={() => setActiveTab('bookkeeping')}
-        >
-          📚 Bookkeeping
+        >Bookkeeping
         </button>
       </div>
 
@@ -243,109 +234,109 @@ const EntityDashboard = () => {
             <h3>Quick Access</h3>
             <div className="quick-access-grid">
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/expenses`)}>
-                <div className="card-icon expenses">💸</div>
+                <div className="card-icon expenses"></div>
                 <h4>Expenses</h4>
                 <p>{expenses.length} transactions</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/income`)}>
-                <div className="card-icon income">💰</div>
+                <div className="card-icon income"></div>
                 <h4>Income</h4>
                 <p>{income.length} records</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/budgets`)}>
-                <div className="card-icon budgets">📊</div>
+                <div className="card-icon budgets"></div>
                 <h4>Budgets</h4>
                 <p>{budgets.length} budgets</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}>
-                <div className="card-icon bookkeeping">📚</div>
+                <div className="card-icon bookkeeping"></div>
                 <h4>Bookkeeping</h4>
                 <p>Full accounting</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/cashflow-treasury`)}>
-                <div className="card-icon treasury">💰</div>
+                <div className="card-icon treasury"></div>
                 <h4>Cashflow & Treasury</h4>
                 <p>Real-time visibility</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => setActiveTab('staff')}>
-                <div className="card-icon staff">👥</div>
+                <div className="card-icon staff"></div>
                 <h4>Staff & HR</h4>
                 <p>{staff.length} members</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => setActiveTab('structure')}>
-                <div className="card-icon structure">🏢</div>
+                <div className="card-icon structure"></div>
                 <h4>Structure</h4>
                 <p>Accounts & docs</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/chart-of-accounts`)}>
-                <div className="card-icon" style={{ background: '#ebf4ff', color: '#3182ce' }}>📋</div>
+                <div className="card-icon" style={{ background: '#ebf4ff', color: '#3182ce' }}></div>
                 <h4>Chart of Accounts</h4>
                 <p>COA & account codes</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/general-ledger`)}>
-                <div className="card-icon" style={{ background: '#e9d8fd', color: '#6b46c1' }}>📒</div>
+                <div className="card-icon" style={{ background: '#e9d8fd', color: '#6b46c1' }}></div>
                 <h4>General Ledger</h4>
                 <p>All posted entries</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/journal-entries`)}>
-                <div className="card-icon" style={{ background: '#fefcbf', color: '#d69e2e' }}>✏️</div>
+                <div className="card-icon" style={{ background: '#fefcbf', color: '#d69e2e' }}></div>
                 <h4>Journal Entries</h4>
                 <p>Debits & credits</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/accounts-receivable`)}>
-                <div className="card-icon" style={{ background: '#c6f6d5', color: '#276749' }}>📥</div>
+                <div className="card-icon" style={{ background: '#c6f6d5', color: '#276749' }}></div>
                 <h4>Accounts Receivable</h4>
                 <p>Customers & invoices</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/accounts-payable`)}>
-                <div className="card-icon" style={{ background: '#fed7d7', color: '#9b2c2c' }}>📤</div>
+                <div className="card-icon" style={{ background: '#fed7d7', color: '#9b2c2c' }}></div>
                 <h4>Accounts Payable</h4>
                 <p>Vendors & bills</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/inventory`)}>
-                <div className="card-icon" style={{ background: '#feebc8', color: '#c05621' }}>📦</div>
+                <div className="card-icon" style={{ background: '#feebc8', color: '#c05621' }}></div>
                 <h4>Inventory</h4>
                 <p>Items, COGS & movements</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bank-reconciliation`)}>
-                <div className="card-icon" style={{ background: '#e6fffa', color: '#276749' }}>🏦</div>
+                <div className="card-icon" style={{ background: '#e6fffa', color: '#276749' }}></div>
                 <h4>Bank Reconciliation</h4>
                 <p>Match bank statements</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/revenue-recognition`)}>
-                <div className="card-icon" style={{ background: '#e9d8fd', color: '#553c9a' }}>📈</div>
+                <div className="card-icon" style={{ background: '#e9d8fd', color: '#553c9a' }}></div>
                 <h4>Revenue Recognition</h4>
                 <p>Deferred & scheduled</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/period-close`)}>
-                <div className="card-icon" style={{ background: '#fed7d7', color: '#c53030' }}>🔒</div>
+                <div className="card-icon" style={{ background: '#fed7d7', color: '#c53030' }}></div>
                 <h4>Period Close</h4>
                 <p>Close ledger periods</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/fx-accounting`)}>
-                <div className="card-icon" style={{ background: '#bee3f8', color: '#2b6cb0' }}>🌐</div>
+                <div className="card-icon" style={{ background: '#bee3f8', color: '#2b6cb0' }}></div>
                 <h4>FX Accounting</h4>
                 <p>Exchange rates & FX P&L</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/notifications`)}>
-                <div className="card-icon" style={{ background: '#fefcbf', color: '#d69e2e' }}>🔔</div>
+                <div className="card-icon" style={{ background: '#fefcbf', color: '#d69e2e' }}></div>
                 <h4>Notifications</h4>
                 <p>Alerts & preferences</p>
                 <span className="card-arrow">→</span>
@@ -432,14 +423,13 @@ const EntityDashboard = () => {
               <h3>Expense Management</h3>
               <p>Track and manage all business expenses with detailed categorization</p>
             </div>
-            <button 
+            <button
               className="manage-btn"
               onClick={() => navigate(`/enterprise/entity/${entityId}/expenses`)}
-            >
-              Open Expense Manager
+            >Open Expense Manager
             </button>
           </div>
-          
+
           <div className="data-table">
             <table>
               <thead>
@@ -464,16 +454,14 @@ const EntityDashboard = () => {
             {expenses.length === 0 && <p className="no-data">No expenses recorded for this entity</p>}
             {expenses.length > 10 && (
               <div className="table-footer">
-                <p>
-                  Showing 10 of {expenses.length} expenses.{' '}
+                <p>Showing 10 of {expenses.length} expenses.{''}
                   <a
                     href={`/enterprise/entity/${entityId}/expenses`}
                     onClick={(e) => {
                       e.preventDefault();
                       navigate(`/enterprise/entity/${entityId}/expenses`);
                     }}
-                  >
-                    View all →
+                  >View all →
                   </a>
                 </p>
               </div>
@@ -490,11 +478,10 @@ const EntityDashboard = () => {
               <h3>Income Management</h3>
               <p>Track revenue streams and analyze income sources</p>
             </div>
-            <button 
+            <button
               className="manage-btn"
               onClick={() => navigate(`/enterprise/entity/${entityId}/income`)}
-            >
-              Open Income Manager
+            >Open Income Manager
             </button>
           </div>
 
@@ -522,16 +509,14 @@ const EntityDashboard = () => {
             {income.length === 0 && <p className="no-data">No income recorded for this entity</p>}
             {income.length > 10 && (
               <div className="table-footer">
-                <p>
-                  Showing 10 of {income.length} income records.{' '}
+                <p>Showing 10 of {income.length} income records.{''}
                   <a
                     href={`/enterprise/entity/${entityId}/income`}
                     onClick={(e) => {
                       e.preventDefault();
                       navigate(`/enterprise/entity/${entityId}/income`);
                     }}
-                  >
-                    View all →
+                  >View all →
                   </a>
                 </p>
               </div>
@@ -548,11 +533,10 @@ const EntityDashboard = () => {
               <h3>Budget Management</h3>
               <p>Set spending limits and monitor budget utilization across categories</p>
             </div>
-            <button 
+            <button
               className="manage-btn"
               onClick={() => navigate(`/enterprise/entity/${entityId}/budgets`)}
-            >
-              Open Budget Manager
+            >Open Budget Manager
             </button>
           </div>
 
@@ -585,7 +569,7 @@ const EntityDashboard = () => {
                       </td>
                       <td>
                         <span className={`status-badge ${status}`}>
-                          {status === 'under' ? '✅ Under' : '⚠️ Over'}
+                          {status === 'under' ? 'Under' : 'Over'}
                         </span>
                       </td>
                     </tr>
@@ -797,7 +781,7 @@ const EntityDashboard = () => {
                 <div className="total-cash">
                   <h4>Total Cash Position</h4>
                   <p className="amount large">
-                    ${(bankAccounts.reduce((sum, acc) => sum + parseFloat(acc.balance), 0) + 
+                    ${(bankAccounts.reduce((sum, acc) => sum + parseFloat(acc.balance), 0) +
                        wallets.reduce((sum, w) => sum + parseFloat(w.balance), 0)).toFixed(2)}
                   </p>
                 </div>
@@ -833,13 +817,12 @@ const EntityDashboard = () => {
         <div className="tab-content">
           <div className="bookkeeping-section">
             <div className="section-info">
-              <h3>📚 Bookkeeping Module</h3>
+              <h3>Bookkeeping Module</h3>
               <p>Track all financial transactions, manage accounts, categories, and generate reports.</p>
               <button
                 className="setup-btn"
                 onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}
-              >
-                Open Bookkeeping Dashboard
+              >Open Bookkeeping Dashboard
               </button>
             </div>
 
@@ -848,7 +831,7 @@ const EntityDashboard = () => {
                 className="feature-card clickable"
                 onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/transactions`)}
               >
-                <div className="feature-icon">💰</div>
+                <div className="feature-icon"></div>
                 <h4>Transaction Management</h4>
                 <p>Record income and expenses with detailed categorization</p>
                 <div className="feature-action">
@@ -860,7 +843,7 @@ const EntityDashboard = () => {
                 className="feature-card clickable"
                 onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}
               >
-                <div className="feature-icon">📊</div>
+                <div className="feature-icon"></div>
                 <h4>Financial Reports</h4>
                 <p>P&L statements, cashflow, and category breakdowns</p>
                 <div className="feature-action">
@@ -872,7 +855,7 @@ const EntityDashboard = () => {
                 className="feature-card clickable"
                 onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/accounts`)}
               >
-                <div className="feature-icon">🏦</div>
+                <div className="feature-icon"></div>
                 <h4>Account Tracking</h4>
                 <p>Monitor bank accounts, wallets, and cash balances</p>
                 <div className="feature-action">
@@ -884,7 +867,7 @@ const EntityDashboard = () => {
                 className="feature-card clickable"
                 onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/categories`)}
               >
-                <div className="feature-icon">📝</div>
+                <div className="feature-icon"></div>
                 <h4>Categories & Audit</h4>
                 <p>Manage categories and view audit logs</p>
                 <div className="feature-action">

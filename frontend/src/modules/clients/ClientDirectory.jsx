@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaUsers, FaPlus } from 'react-icons/fa';
 
 const mockClients = [
   { id: 'CLI-001', name: 'Acme Corporation', industry: 'Manufacturing', entities: 3, engagement: 'Full Service', contact: 'John Smith', email: 'jsmith@acme.com', status: 'Active' },
@@ -29,10 +28,8 @@ export default function ClientDirectory() {
       <PageHeader
         title="Client Directory"
         subtitle="Manage client accounts, engagement types, and contact information"
-        icon={<FaUsers />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            Add Client
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Add Client
           </Button>
         }
       />

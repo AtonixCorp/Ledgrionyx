@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaShieldAlt, FaPlus, FaEdit, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaRobot, FaDatabase } from 'react-icons/fa';
+
 import taxCalculatorService from '../../services/taxCalculatorService';
 
 const TaxAdmin = () => {
@@ -116,43 +116,41 @@ const TaxAdmin = () => {
     <div className="tax-admin-page">
       <div className="page-header">
         <h1 className="page-title">
-          <FaShieldAlt /> Tax Rate Administration
+          Tax Rate Administration
         </h1>
-        <p className="page-subtitle">
-          Manage global tax rates, approve AI suggestions, and monitor system warnings
+        <p className="page-subtitle">Manage global tax rates, approve AI suggestions, and monitor system warnings
         </p>
       </div>
 
       {/* AI Suggestions Panel */}
       {pendingSuggestions.length > 0 && (
         <div className="admin-card suggestions-panel">
-          <h2><FaRobot /> Pending AI Suggestions ({pendingSuggestions.length})</h2>
+          <h2>Pending AI Suggestions ({pendingSuggestions.length})</h2>
           <div className="suggestions-list">
             {pendingSuggestions.map(suggestion => (
               <div key={suggestion.id} className="suggestion-item">
                 <div className="suggestion-info">
                   <h4>{suggestion.country}</h4>
                   <p className="suggestion-detail">
-                    <strong>{suggestion.taxType}</strong>: 
+                    <strong>{suggestion.taxType}</strong>:
                     {suggestion.currentRate}% → {suggestion.suggestedRate}%
                   </p>
                   <p className="suggestion-reason">{suggestion.reason}</p>
-                  <span className={`confidence-badge confidence-${Math.floor(suggestion.confidence / 20)}`}>
-                    Confidence: {suggestion.confidence}%
+                  <span className={`confidence-badge confidence-${Math.floor(suggestion.confidence / 20)}`}>Confidence: {suggestion.confidence}%
                   </span>
                 </div>
                 <div className="suggestion-actions">
-                  <button 
+                  <button
                     onClick={() => handleApproveSuggestion(suggestion.id)}
                     className="btn-approve"
                   >
-                    <FaCheckCircle /> Approve
+                    Approve
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleRejectSuggestion(suggestion.id)}
                     className="btn-reject"
                   >
-                    <FaTimesCircle /> Reject
+                    Reject
                   </button>
                 </div>
               </div>
@@ -164,11 +162,11 @@ const TaxAdmin = () => {
       {/* Warnings Panel */}
       {warnings.length > 0 && (
         <div className="admin-card warnings-panel">
-          <h2><FaExclamationTriangle /> System Warnings ({warnings.length})</h2>
+          <h2>System Warnings ({warnings.length})</h2>
           <div className="warnings-list">
             {warnings.slice(0, 5).map(warning => (
               <div key={warning.id} className={`warning-item warning-${warning.type}`}>
-                <FaExclamationTriangle className="warning-icon" />
+
                 <div className="warning-content">
                   <h4>{warning.country} - {warning.taxType}</h4>
                   <p>{warning.message}</p>
@@ -184,10 +182,10 @@ const TaxAdmin = () => {
       {/* Actions Bar */}
       <div className="actions-bar">
         <button onClick={() => setShowAddForm(true)} className="btn-primary">
-          <FaPlus /> Add New Country
+          Add New Country
         </button>
         <button onClick={exportData} className="btn-secondary">
-          <FaDatabase /> Export Data
+          Export Data
         </button>
       </div>
 
@@ -195,7 +193,7 @@ const TaxAdmin = () => {
       {showAddForm && (
         <div className="modal-overlay" onClick={() => setShowAddForm(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2><FaPlus /> Add New Country</h2>
+            <h2>Add New Country</h2>
             <form onSubmit={handleAddCountry}>
               <div className="form-group">
                 <label>Country Name *</label>
@@ -268,8 +266,7 @@ const TaxAdmin = () => {
               </div>
               <div className="form-actions">
                 <button type="submit" className="btn-primary">Add Country</button>
-                <button type="button" onClick={() => setShowAddForm(false)} className="btn-secondary">
-                  Cancel
+                <button type="button" onClick={() => setShowAddForm(false)} className="btn-secondary">Cancel
                 </button>
               </div>
             </form>
@@ -281,7 +278,7 @@ const TaxAdmin = () => {
       {showEditForm && (
         <div className="modal-overlay" onClick={() => setShowEditForm(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2><FaEdit /> Edit Tax Rates - {formData.country}</h2>
+            <h2>Edit Tax Rates - {formData.country}</h2>
             <form onSubmit={handleUpdateCountry}>
               <div className="form-row">
                 <div className="form-group">
@@ -328,8 +325,7 @@ const TaxAdmin = () => {
               </div>
               <div className="form-actions">
                 <button type="submit" className="btn-primary">Update Country</button>
-                <button type="button" onClick={() => setShowEditForm(false)} className="btn-secondary">
-                  Cancel
+                <button type="button" onClick={() => setShowEditForm(false)} className="btn-secondary">Cancel
                 </button>
               </div>
             </form>
@@ -339,7 +335,7 @@ const TaxAdmin = () => {
 
       {/* Countries Table */}
       <div className="admin-card countries-table">
-        <h2><FaDatabase /> All Countries ({countries.length})</h2>
+        <h2>All Countries ({countries.length})</h2>
         <div className="table-wrapper">
           <table>
             <thead>
@@ -365,17 +361,17 @@ const TaxAdmin = () => {
                   <td>{country.lastUpdated}</td>
                   <td>
                     {country.aiVerified ? (
-                      <span className="status-verified"><FaCheckCircle /> Verified</span>
+                      <span className="status-verified">Verified</span>
                     ) : (
-                      <span className="status-pending"><FaExclamationTriangle /> Pending</span>
+                      <span className="status-pending">Pending</span>
                     )}
                   </td>
                   <td>
-                    <button 
+                    <button
                       onClick={() => handleEditClick(country)}
                       className="btn-edit"
                     >
-                      <FaEdit /> Edit
+                      Edit
                     </button>
                   </td>
                 </tr>

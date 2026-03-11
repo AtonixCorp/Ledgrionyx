@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaPlug, FaPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 const integrations = [
   { id: 'INT-001', name: 'Chase Bank (Direct Feed)', type: 'Banking', method: 'Plaid API', lastSync: '2025-01-31 06:02', status: 'Connected' },
@@ -18,10 +17,7 @@ const columns = [
   { key: 'lastSync', header: 'Last Sync' },
   { key: 'status', header: 'Status', render: (row) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      {row.status === 'Connected'
-        ? <FaCheckCircle style={{ color: '#27ae60' }} />
-        : <FaTimesCircle style={{ color: '#95a5a6' }} />
-      }
+
       <span className="status-badge" style={{ background: STATUS_COLORS[row.status] }}>{row.status}</span>
     </div>
   )},
@@ -35,10 +31,8 @@ export default function IntegrationsList() {
       <PageHeader
         title="Integrations"
         subtitle="Connect your accounting platform with banks, payment processors, and third-party tools"
-        icon={<FaPlug />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            Add Integration
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Add Integration
           </Button>
         }
       />
@@ -72,7 +66,7 @@ export default function IntegrationsList() {
         </div>
         <div className="modal-footer">
           <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="primary" icon={<FaPlug />}>Connect</Button>
+          <Button variant="primary">Connect</Button>
         </div>
       </Modal>
     </div>

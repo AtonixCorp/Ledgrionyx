@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
-import { FaFileInvoiceDollar, FaPlus, FaDownload } from 'react-icons/fa';
 
 const mockAR = [
   { invoice: 'INV-0001', customer: 'Acme Corp', invoiceDate: '2025-01-15', dueDate: '2025-02-15', original: '$12,500.00', balance: '$12,500.00', aging: '0-30', status: 'Current' },
@@ -31,12 +30,10 @@ export default function AccountsReceivable() {
       <PageHeader
         title="Accounts Receivable"
         subtitle="Track all outstanding customer invoices and aging balances"
-        icon={<FaFileInvoiceDollar />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Aging Report</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              New Invoice
+            <Button variant="secondary" size="small">Aging Report</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>New Invoice
             </Button>
           </>
         }

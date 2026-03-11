@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaTag, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+
 import { useEnterprise } from '../../../context/EnterpriseContext';
 
 const CategoryManager = () => {
   const { entityId } = useParams();
-  const { 
+  const {
     fetchBookkeepingCategories,
     createBookkeepingCategory,
     createDefaultCategories,
-    entities 
+    entities
   } = useEnterprise();
-  
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -20,7 +20,7 @@ const CategoryManager = () => {
     type: 'expense',
     description: ''
   });
-  
+
   const entity = entities.find(e => e.id === parseInt(entityId));
 
   const loadCategories = useCallback(async () => {
@@ -29,18 +29,18 @@ const CategoryManager = () => {
     setCategories(data.results || data);
     setLoading(false);
   }, [entityId, fetchBookkeepingCategories]);
-  
+
   useEffect(() => {
     loadCategories();
   }, [loadCategories]);
-  
+
   const handleCreateDefaults = async () => {
     if (categories.length > 0) {
       if (!window.confirm('Default categories may already exist. Create them anyway?')) {
         return;
       }
     }
-    
+
     try {
       await createDefaultCategories(entityId);
       alert('Default categories created successfully!');
@@ -49,10 +49,10 @@ const CategoryManager = () => {
       alert('Failed to create default categories: ' + err.message);
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       await createBookkeepingCategory({
         entity: parseInt(entityId),
@@ -66,10 +66,10 @@ const CategoryManager = () => {
       alert('Failed to create category: ' + err.message);
     }
   };
-  
+
   const incomeCategories = categories.filter(c => c.type === 'income');
   const expenseCategories = categories.filter(c => c.type === 'expense');
-  
+
   if (loading) {
     return (
       <div className="category-manager">
@@ -77,37 +77,37 @@ const CategoryManager = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="category-manager">
       {/* Header */}
       <div className="page-header">
         <div className="header-left">
-          <h1><FaTag /> Categories</h1>
+          <h1>Categories</h1>
           <p>{entity?.name} • {categories.length} categories</p>
         </div>
         <div className="header-right">
           {categories.length === 0 && (
             <button className="btn-secondary" onClick={handleCreateDefaults}>
-              <FaPlus /> Create Defaults
+              Create Defaults
             </button>
           )}
           <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <FaPlus /> New Category
+            New Category
           </button>
         </div>
       </div>
-      
+
       {/* Categories Grid */}
       <div className="categories-grid">
         {/* Income Categories */}
         <div className="category-section">
           <div className="section-header income">
-            <FaArrowUp />
+
             <h3>Income Categories</h3>
             <span className="count">{incomeCategories.length}</span>
           </div>
-          
+
           <div className="category-list">
             {incomeCategories.length > 0 ? (
               incomeCategories.map(category => (
@@ -130,11 +130,11 @@ const CategoryManager = () => {
                   </div>
                   <div className="category-actions">
                     <button className="btn-icon" title="Edit category">
-                      <FaEdit />
+
                     </button>
                     {!category.is_default && (
                       <button className="btn-icon btn-delete" title="Delete category">
-                        <FaTrash />
+
                       </button>
                     )}
                   </div>
@@ -147,15 +147,15 @@ const CategoryManager = () => {
             )}
           </div>
         </div>
-        
+
         {/* Expense Categories */}
         <div className="category-section">
           <div className="section-header expense">
-            <FaArrowDown />
+
             <h3>Expense Categories</h3>
             <span className="count">{expenseCategories.length}</span>
           </div>
-          
+
           <div className="category-list">
             {expenseCategories.length > 0 ? (
               expenseCategories.map(category => (
@@ -178,11 +178,11 @@ const CategoryManager = () => {
                   </div>
                   <div className="category-actions">
                     <button className="btn-icon" title="Edit category">
-                      <FaEdit />
+
                     </button>
                     {!category.is_default && (
                       <button className="btn-icon btn-delete" title="Delete category">
-                        <FaTrash />
+
                       </button>
                     )}
                   </div>
@@ -196,7 +196,7 @@ const CategoryManager = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Create Category Form Modal */}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
@@ -205,7 +205,7 @@ const CategoryManager = () => {
               <h3>Create New Category</h3>
               <button className="btn-close" onClick={() => setShowForm(false)}>×</button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Category Name *</label>
@@ -217,7 +217,7 @@ const CategoryManager = () => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Type *</label>
                 <select
@@ -229,7 +229,7 @@ const CategoryManager = () => {
                   <option value="expense">Expense</option>
                 </select>
               </div>
-              
+
               <div className="form-group">
                 <label>Description (Optional)</label>
                 <textarea
@@ -239,13 +239,11 @@ const CategoryManager = () => {
                   rows="3"
                 />
               </div>
-              
+
               <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
-                  Cancel
+                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel
                 </button>
-                <button type="submit" className="btn-primary">
-                  Create Category
+                <button type="submit" className="btn-primary">Create Category
                 </button>
               </div>
             </form>

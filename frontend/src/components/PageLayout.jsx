@@ -1,10 +1,10 @@
 import React from 'react';
 import { PageHeader, Card } from '../../../components/ui';
 
-const PageLayout = ({ 
-  title, 
-  subtitle, 
-  actions, 
+const PageLayout = ({
+  title,
+  subtitle,
+  actions,
   children,
   sidebar,
   tabs,
@@ -13,8 +13,8 @@ const PageLayout = ({
 }) => {
   return (
     <div className="page-layout">
-      <PageHeader 
-        title={title} 
+      <PageHeader
+        title={title}
         subtitle={subtitle}
         actions={actions}
       />

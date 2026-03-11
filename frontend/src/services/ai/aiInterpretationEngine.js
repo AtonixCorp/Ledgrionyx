@@ -1,17 +1,17 @@
 /**
  * AI Interpretation Engine
- * 
+ *
  * Calls calculation engine functions, interprets results, and generates
  * human-readable insights and explanations. Acts as the bridge between
  * calculations and user-facing insights.
- * 
+ *
  * Does NOT do calculations - ALWAYS calls calculationEngine
  * ALWAYS documents which calculation produced each output
  * ALWAYS validates model reference for transparency
- * 
+ *
  * Phase 3 Foundation: AI interpretation pipeline
  * Phase 5 Dependencies: Reports use these interpretations
- * 
+ *
  * Strict Rule: Every insight must reference the model and calculation that produced it
  */
 
@@ -24,7 +24,7 @@ import * as EntityEngine from './entityStructureEngine';
 
 /**
  * Result Interpretation
- * 
+ *
  * @typedef {Object} InterpretedResult
  * @property {string} modelType - Which model was run
  * @property {Object} rawResults - Original calculation results
@@ -37,11 +37,11 @@ import * as EntityEngine from './entityStructureEngine';
 /**
  * Interpret forecasting model results
  * Explains revenue/expense projections and trends
- * 
+ *
  * @param {Object} results - Raw forecasting results
  * @param {Object} historicalData - Historical comparison data
  * @returns {Object} Interpreted results with insights
- * 
+ *
  * @example
  * const interpreted = interpretForecastingResults(
  *   { years: [1000000, 1150000, 1322500, ...], averageGrowth: 15 },
@@ -129,9 +129,9 @@ export function interpretForecastingResults(results, historicalData) {
 
   // Compare to historical if available
   if (historicalData && historicalData.lastYearGrowth) {
-    const projectedAverage = results.averageGrowth || 
+    const projectedAverage = results.averageGrowth ||
       (yoyGrowthRates.length > 0 ? yoyGrowthRates.reduce((a, b) => a + b, 0) / yoyGrowthRates.length : 0);
-    
+
     if (projectedAverage > historicalData.lastYearGrowth) {
       const acceleration = CalcEngine.subtract(projectedAverage, historicalData.lastYearGrowth);
       interpretation.insights.push(
@@ -148,7 +148,7 @@ export function interpretForecastingResults(results, historicalData) {
 /**
  * Interpret valuation model results
  * Explains business value and key value drivers
- * 
+ *
  * @param {Object} results - Raw valuation results (DCF)
  * @param {Object} inputs - Model inputs for context
  * @returns {Object} Interpreted results with insights
@@ -198,7 +198,7 @@ export function interpretValuationResults(results, inputs) {
       CalcEngine.multiply(CalcEngine.subtract(range.high, range.low), 100),
       range.low
     );
-    
+
     interpretation.warnings.push(
       `Valuation sensitive to discount rate assumptions. ` +
       `±1% rate change: ${CalcEngine.round(rangePercent / 2, 0)}% valuation swing`
@@ -223,7 +223,7 @@ export function interpretValuationResults(results, inputs) {
 /**
  * Interpret risk model results
  * Explains tax exposure, concentration risk, and mitigation opportunities
- * 
+ *
  * @param {Object} results - Raw risk analysis results
  * @param {Object} entities - Entity data for context
  * @returns {Object} Interpreted results with insights
@@ -295,7 +295,7 @@ export function interpretRiskResults(results, entities) {
   if (results.jurisdictionRisks) {
     const highRiskCount = Object.values(results.jurisdictionRisks)
       .filter(r => r.riskLevel === 'HIGH').length;
-    
+
     if (highRiskCount > 0) {
       interpretation.warnings.push(
         `${highRiskCount} high-risk jurisdiction(s) identified. ` +
@@ -310,7 +310,7 @@ export function interpretRiskResults(results, entities) {
 /**
  * Interpret personal finance results
  * Explains financial health, retirement readiness, areas for improvement
- * 
+ *
  * @param {Object} results - Personal finance analysis results
  * @returns {Object} Interpreted results with insights
  */
@@ -439,7 +439,7 @@ export function interpretPersonalFinanceResults(results) {
 /**
  * Interpret scenario analysis results
  * Explains differences between best/base/worst case scenarios
- * 
+ *
  * @param {Object} baselineResults - Baseline scenario results
  * @param {Object} scenarios - Alternative scenarios (optimistic, pessimistic, etc.)
  * @returns {Object} Interpreted scenario comparison
@@ -509,7 +509,7 @@ export function interpretScenarioResults(baselineResults, scenarios) {
 /**
  * Generate comprehensive interpretation report
  * Summarizes all results, insights, and recommendations
- * 
+ *
  * @param {Object} allInterpretations - All interpretations from different models
  * @param {Object} inputs - Original model inputs
  * @returns {string} Formatted comprehensive report
@@ -524,8 +524,8 @@ export function generateComprehensiveInterpretation(allInterpretations, inputs) 
   report += `Analysis Date: ${inputs?.analysisDate || new Date().toISOString().split('T')[0]}\n\n`;
 
   // Summary of confidence levels
-  const interpretations = Array.isArray(allInterpretations) 
-    ? allInterpretations 
+  const interpretations = Array.isArray(allInterpretations)
+    ? allInterpretations
     : Object.values(allInterpretations);
 
   const avgConfidence = interpretations.length > 0
@@ -554,7 +554,7 @@ export function generateComprehensiveInterpretation(allInterpretations, inputs) 
     if (interp.warnings && interp.warnings.length > 0) {
       report += 'WARNINGS:\n';
       for (const warning of interp.warnings) {
-        report += `⚠ ${warning}\n`;
+        report += `${warning}\n`;
       }
       report += '\n';
     }
@@ -577,12 +577,12 @@ export function generateComprehensiveInterpretation(allInterpretations, inputs) 
 /**
  * Explain a single calculation
  * Shows the formula, inputs, and how result was derived
- * 
+ *
  * @param {string} calculationName - Name of calculation
  * @param {Object} inputs - Input values
  * @param {*} result - Calculated result
  * @returns {string} Human-readable explanation
- * 
+ *
  * @example
  * const explanation = explainCalculation(
  *   'calculateNetIncome',
@@ -601,7 +601,7 @@ export function explainCalculation(calculationName, inputs, result) {
 
   explanation += 'INPUTS:\n';
   for (const [key, value] of Object.entries(inputs || {})) {
-    explanation += `  ${key}: ${value}\n`;
+    explanation += `${key}: ${value}\n`;
   }
   explanation += '\n';
 

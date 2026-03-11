@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaGlobe, FaBuilding, FaArrowRight, FaClipboardList, FaUsers, FaChartBar } from 'react-icons/fa';
 
 const EnterpriseOrgOverview = () => {
   const navigate = useNavigate();
@@ -44,7 +43,7 @@ const EnterpriseOrgOverview = () => {
       {/* Executive Summary */}
       <section className="executive-summary">
         <h2 className="section-title">Executive Summary</h2>
-        
+
         <div className="metrics-grid">
           {/* Net Position Card */}
           <div className="metric-card primary">
@@ -77,7 +76,7 @@ const EnterpriseOrgOverview = () => {
           <div className="metric-card info">
             <div className="metric-header">
               <h3>Active Jurisdictions</h3>
-              <FaGlobe className="header-icon" />
+
             </div>
             <div className="metric-value">{active_jurisdictions}</div>
             <div className="metric-label">countries</div>
@@ -87,7 +86,7 @@ const EnterpriseOrgOverview = () => {
           <div className="metric-card success">
             <div className="metric-header">
               <h3>Active Entities</h3>
-              <FaBuilding className="header-icon" />
+
             </div>
             <div className="metric-value">{active_entities}</div>
             <div className="metric-label">legal entities</div>
@@ -103,7 +102,7 @@ const EnterpriseOrgOverview = () => {
           {/* Cash Positions */}
           <div className="position-card cash">
             <div className="position-header">
-              <div className="position-icon">💰</div>
+              <div className="position-icon"></div>
               <h4>Cash & Equivalents</h4>
             </div>
             <div className="position-value">$0</div>
@@ -116,7 +115,7 @@ const EnterpriseOrgOverview = () => {
           {/* Investment Positions */}
           <div className="position-card investments">
             <div className="position-header">
-              <div className="position-icon">📈</div>
+              <div className="position-icon"></div>
               <h4>Investments</h4>
             </div>
             <div className="position-value">$0</div>
@@ -129,7 +128,7 @@ const EnterpriseOrgOverview = () => {
           {/* Real Estate Positions */}
           <div className="position-card real-estate">
             <div className="position-header">
-              <div className="position-icon">🏢</div>
+              <div className="position-icon"></div>
               <h4>Real Estate</h4>
             </div>
             <div className="position-value">$0</div>
@@ -155,7 +154,7 @@ const EnterpriseOrgOverview = () => {
           {/* Derivatives Positions */}
           <div className="position-card derivatives">
             <div className="position-header">
-              <div className="position-icon">📊</div>
+              <div className="position-icon"></div>
               <h4>Derivatives</h4>
             </div>
             <div className="position-value">$0</div>
@@ -168,7 +167,7 @@ const EnterpriseOrgOverview = () => {
           {/* Private Equity */}
           <div className="position-card private-equity">
             <div className="position-header">
-              <div className="position-icon">🏛️</div>
+              <div className="position-icon"></div>
               <h4>Private Equity</h4>
             </div>
             <div className="position-value">$0</div>
@@ -183,54 +182,54 @@ const EnterpriseOrgOverview = () => {
       {/* Quick Actions */}
       <section className="quick-actions">
         <h3 className="section-title">Quick Actions</h3>
-        
+
         <div className="actions-grid">
-          <button 
+          <button
             className="action-button entities"
             onClick={() => handleNavigate('/app/enterprise/entities')}
           >
-            <div className="action-icon"><FaBuilding /></div>
+            <div className="action-icon"></div>
             <div className="action-content">
               <h4>View All Entities</h4>
               <p>Manage and monitor all legal entities</p>
             </div>
-            <FaArrowRight className="action-arrow" />
+
           </button>
 
-          <button 
+          <button
             className="action-button compliance"
             onClick={() => handleNavigate('/app/enterprise/tax-compliance')}
           >
-            <div className="action-icon"><FaClipboardList /></div>
+            <div className="action-icon"></div>
             <div className="action-content">
               <h4>Tax Compliance</h4>
               <p>Track deadlines and obligations</p>
             </div>
-            <FaArrowRight className="action-arrow" />
+
           </button>
 
-          <button 
+          <button
             className="action-button team"
             onClick={() => handleNavigate('/app/enterprise/team')}
           >
-            <div className="action-icon"><FaUsers /></div>
+            <div className="action-icon"></div>
             <div className="action-content">
               <h4>Manage Team</h4>
               <p>Control access and permissions</p>
             </div>
-            <FaArrowRight className="action-arrow" />
+
           </button>
 
-          <button 
+          <button
             className="action-button reports"
             onClick={() => handleNavigate('/app/enterprise/reports')}
           >
-            <div className="action-icon"><FaChartBar /></div>
+            <div className="action-icon"></div>
             <div className="action-content">
               <h4>View Reports</h4>
               <p>Generate and export reports</p>
             </div>
-            <FaArrowRight className="action-arrow" />
+
           </button>
         </div>
       </section>

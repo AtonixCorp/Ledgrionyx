@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaBell, FaCog, FaCheck, FaTrash, FaFilter } from 'react-icons/fa';
+
 import { notificationsAPI, notificationPreferencesAPI } from '../../../services/api';
 
 const TABS = [
-  { id: 'inbox', label: 'Inbox', icon: <FaBell /> },
-  { id: 'preferences', label: 'Preferences', icon: <FaCog /> },
+  { id: 'inbox', label: 'Inbox', },
+  { id: 'preferences', label: 'Preferences', },
 ];
 
 const TYPE_COLORS = {
@@ -13,7 +13,7 @@ const TYPE_COLORS = {
   period_close: '#667eea', fx_alert: '#e53e3e', system: '#a0aec0', info: '#4299e1', warning: '#ed8936', error: '#e53e3e'
 };
 
-// ─── Inbox Tab ────────────────────────────────────────────────────────────────
+//  Inbox Tab
 const InboxTab = ({ entityId }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,7 @@ const InboxTab = ({ entityId }) => {
     <div>
       <div className="tab-toolbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <FaFilter style={{ color: '#a0aec0' }} />
+
           <select className="acct-select" value={filter} onChange={e => setFilter(e.target.value)}>
             <option value="all">All Notifications</option>
             <option value="unread">Unread Only</option>
@@ -72,14 +72,14 @@ const InboxTab = ({ entityId }) => {
         </div>
         {unreadCount > 0 && (
           <button className="btn-info btn-sm" onClick={handleMarkAllRead} disabled={markingAll}>
-            {markingAll ? '...' : <><FaCheck /> Mark All Read ({unreadCount})</>}
+            {markingAll ? '...' : <>Mark All Read ({unreadCount})</>}
           </button>
         )}
       </div>
 
       {loading ? <div className="acct-loading">Loading notifications...</div> : notifications.length === 0 ? (
         <div className="acct-empty">
-          <FaBell style={{ fontSize: '2rem', color: '#e2e8f0', marginBottom: 8 }} />
+
           <div>{filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}</div>
         </div>
       ) : (
@@ -91,7 +91,7 @@ const InboxTab = ({ entityId }) => {
               <div className="notif-body">
                 <div className="notif-title">
                   <span style={{ color: TYPE_COLORS[notif.notification_type] || '#4299e1', fontSize: '0.7rem', background: (TYPE_COLORS[notif.notification_type] || '#4299e1') + '22', padding: '1px 7px', borderRadius: 10, marginRight: 8, fontWeight: 600, textTransform: 'capitalize' }}>
-                    {notif.notification_type?.replace(/_/g, ' ') || 'notification'}
+                    {notif.notification_type?.replace(/_/g, '') || 'notification'}
                   </span>
                   {notif.title}
                 </div>
@@ -99,8 +99,8 @@ const InboxTab = ({ entityId }) => {
                 <div className="notif-time">{timeAgo(notif.created_at)}</div>
               </div>
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                {!notif.is_read && <button className="btn-icon" title="Mark as read" onClick={() => handleMarkRead(notif.id)}><FaCheck /></button>}
-                <button className="btn-icon btn-icon-danger" title="Delete" onClick={() => handleDelete(notif.id)}><FaTrash /></button>
+                {!notif.is_read && <button className="btn-icon" title="Mark as read" onClick={() => handleMarkRead(notif.id)}></button>}
+                <button className="btn-icon btn-icon-danger" title="Delete" onClick={() => handleDelete(notif.id)}></button>
               </div>
             </div>
           ))}
@@ -110,7 +110,7 @@ const InboxTab = ({ entityId }) => {
   );
 };
 
-// ─── Preferences Tab ──────────────────────────────────────────────────────────
+//  Preferences Tab
 const PreferencesTab = ({ entityId }) => {
   const [prefs, setPrefs] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -151,7 +151,7 @@ const PreferencesTab = ({ entityId }) => {
     <div>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <p style={{ color: '#718096', margin: 0, fontSize: '0.875rem' }}>Configure which notifications you receive for this entity</p>
-        <button className="btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : saved ? <><FaCheck /> Saved!</> : 'Save Preferences'}</button>
+        <button className="btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : saved ? <>Saved!</> : 'Save Preferences'}</button>
       </div>
       <div style={{ display: 'grid', gap: 12 }}>
         {PREF_LABELS.filter(({ key }) => key in prefs).map(({ key, label, desc }) => (
@@ -173,7 +173,7 @@ const PreferencesTab = ({ entityId }) => {
   );
 };
 
-// ─── Main Notifications Center ────────────────────────────────────────────────
+//  Main Notifications Center
 const NotificationsCenter = () => {
   const { entityId } = useParams();
   const [activeTab, setActiveTab] = useState('inbox');
@@ -190,7 +190,7 @@ const NotificationsCenter = () => {
       <div className="acct-header">
         <div>
           <h1>
-            <FaBell /> Notifications
+            Notifications
             {unreadCount > 0 && <span style={{ background: '#e53e3e', color: 'white', borderRadius: '50%', fontSize: '0.7rem', padding: '2px 7px', marginLeft: 8, fontWeight: 700 }}>{unreadCount}</span>}
           </h1>
           <p>Stay on top of your accounting activity — alerts, reminders, and events</p>

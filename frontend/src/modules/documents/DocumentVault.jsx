@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaArchive, FaPlus, FaDownload, FaSearch } from 'react-icons/fa';
 
 const mockDocs = [
   { id: 'DOC-001', name: 'Audit Report FY2024.pdf', type: 'Audit', size: '2.4 MB', uploaded: '2025-01-20', uploader: 'Sarah Johnson', tags: 'audit, FY2024' },
@@ -33,12 +32,10 @@ export default function DocumentVault() {
       <PageHeader
         title="Document Vault"
         subtitle="Secure storage for financial documents, contracts, and compliance files"
-        icon={<FaArchive />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Download All</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              Upload Document
+            <Button variant="secondary" size="small">Download All</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Upload Document
             </Button>
           </>
         }
@@ -61,7 +58,7 @@ export default function DocumentVault() {
 
       <Card>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <FaSearch style={{ color: '#7a8fa6' }} />
+
           <input
             type="text"
             placeholder="Search documents by name, type, or tag..."
@@ -84,8 +81,7 @@ export default function DocumentVault() {
           <Input label="Notes" />
         </div>
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>
-            File
+          <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>File
           </label>
           <input type="file" style={{ fontSize: 13 }} />
         </div>

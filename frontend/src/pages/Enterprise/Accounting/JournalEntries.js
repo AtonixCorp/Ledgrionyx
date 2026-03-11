@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  FaFileAlt, FaPlus, FaCheckCircle, FaUndo, FaSearch,
-  FaDownload, FaTimes, FaSave, FaClock, FaBan
-} from 'react-icons/fa';
+
 import { journalEntriesAPI } from '../../../services/api';
 
 const STATUS_COLORS = { draft: '#ed8936', posted: '#48bb78', reversed: '#a0aec0' };
@@ -71,12 +68,12 @@ const JournalEntries = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaFileAlt /> Journal Entries</h1>
+          <h1>Journal Entries</h1>
           <p>Record, approve and manage all financial transactions as double-entry journal entries</p>
         </div>
         <div className="acct-header-actions">
-          <button className="btn-secondary"><FaDownload /> Export</button>
-          <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Entry</button>
+          <button className="btn-secondary">Export</button>
+          <button className="btn-primary" onClick={() => setShowForm(true)}>New Entry</button>
         </div>
       </div>
 
@@ -103,7 +100,7 @@ const JournalEntries = () => {
       {/* Filters */}
       <div className="acct-filters">
         <div className="acct-search">
-          <FaSearch className="search-icon" />
+
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search entries..." />
         </div>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="acct-select">
@@ -132,10 +129,8 @@ const JournalEntries = () => {
                   <td>{e.posting_date}</td>
                   <td>
                     <span className="status-badge" style={{ background: STATUS_COLORS[e.status] || '#e2e8f0', color: 'white' }}>
-                      {e.status === 'draft' && <FaClock />}
-                      {e.status === 'posted' && <FaCheckCircle />}
-                      {e.status === 'reversed' && <FaBan />}
-                      {' '}{e.status}
+
+                      {''}{e.status}
                     </span>
                   </td>
                   <td>{e.created_by_name || '—'}</td>
@@ -143,12 +138,12 @@ const JournalEntries = () => {
                   <td className="acct-actions-row">
                     {e.status === 'draft' && (
                       <button className="btn-sm btn-success" onClick={() => handleApprove(e.id)} title="Approve & Post">
-                        <FaCheckCircle /> Post
+                        Post
                       </button>
                     )}
                     {e.status === 'posted' && (
                       <button className="btn-sm btn-warning" onClick={() => handleReverse(e.id)} title="Reverse">
-                        <FaUndo /> Reverse
+                        Reverse
                       </button>
                     )}
                   </td>
@@ -165,7 +160,7 @@ const JournalEntries = () => {
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>New Journal Entry</h2>
-              <button onClick={() => setShowForm(false)}><FaTimes /></button>
+              <button onClick={() => setShowForm(false)}></button>
             </div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
@@ -188,13 +183,13 @@ const JournalEntries = () => {
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} placeholder="Describe this journal entry..." />
               </div>
               <div className="form-note">
-                <strong>Note:</strong> After creating the journal entry, add debit/credit postings via the General Ledger.
+                <strong>Note:</strong>After creating the journal entry, add debit/credit postings via the General Ledger.
               </div>
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
               <button onClick={handleSave} disabled={saving} className="btn-primary">
-                {saving ? 'Saving...' : <><FaSave /> Create Entry</>}
+                {saving ? 'Saving...' : <>Create Entry</>}
               </button>
             </div>
           </div>

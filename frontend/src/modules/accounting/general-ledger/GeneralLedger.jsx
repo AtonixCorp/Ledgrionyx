@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Card, PageHeader, Table, Input } from '../../../components/ui';
-import { FaDownload, FaFilter } from 'react-icons/fa';
 
 const GeneralLedger = () => {
   const columns = [
@@ -21,8 +20,8 @@ const GeneralLedger = () => {
         subtitle="View all posted transactions"
         actions={
           <>
-            <Button variant="secondary" icon={FaFilter}>Filter</Button>
-            <Button variant="secondary" icon={FaDownload}>Export</Button>
+            <Button variant="secondary">Filter</Button>
+            <Button variant="secondary">Export</Button>
           </>
         }
       />
@@ -37,8 +36,7 @@ const GeneralLedger = () => {
 
       <Card>
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>
-            No transactions found
+          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No transactions found
           </p>
         ) : (
           <Table columns={columns} data={data} />

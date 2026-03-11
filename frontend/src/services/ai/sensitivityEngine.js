@@ -1,9 +1,9 @@
 /**
  * Sensitivity Analysis Engine
- * 
+ *
  * Analyzes how changes in key assumptions impact model outputs.
  * Enables what-if analysis, tornado diagrams, and driver identification.
- * 
+ *
  * Features:
  * - Tornado diagram data generation
  * - Sensitivity tables and impact analysis
@@ -11,10 +11,10 @@
  * - Critical driver identification
  * - What-if analysis
  * - Break-even analysis
- * 
+ *
  * Phase 4 Feature: Advanced sensitivity and what-if analysis
  * Complements Scenario Engine for comprehensive scenario planning
- * 
+ *
  * @module sensitivityEngine
  * @version 1.0.0
  */
@@ -28,7 +28,7 @@ import * as CalcEngine from '../calculation/calculationEngine';
 /**
  * Generate tornado diagram data
  * Ranks key drivers by impact on output value
- * 
+ *
  * @param {Object} baselineModel - Baseline model with current value
  * @param {Array<string>} parameterNames - Parameters to analyze
  * @param {number} variationPercent - % to vary each parameter (default: 20%)
@@ -146,7 +146,7 @@ const calculateAdjustedValue = (baseValue, parameter, newValue, oldValue) => {
 /**
  * Generate sensitivity table
  * Two-dimensional analysis showing output for combinations of two parameters
- * 
+ *
  * @param {Object} baselineModel - Baseline model
  * @param {string} param1 - First parameter name
  * @param {string} param2 - Second parameter name
@@ -195,8 +195,8 @@ export function generateSensitivityTable(
     const table = {
       param1,
       param2,
-      param1Range: param1Range.map(v => CalcEngine.round(v, 4)),
-      param2Range: param2Range.map(v => CalcEngine.round(v, 4)),
+      param1Range: param1Range.map(v =>CalcEngine.round(v, 4)),
+      param2Range: param2Range.map(v =>CalcEngine.round(v, 4)),
       values: []
     };
 
@@ -282,7 +282,7 @@ const calculateAdjustedValueTwoParam = (baseValue, p1Name, p1Value, p2Name, p2Va
 /**
  * Identify critical value drivers
  * Ranks parameters by their impact on final valuation
- * 
+ *
  * @param {Object} baselineModel - Baseline model
  * @param {Object} options - Analysis options
  * @returns {Object} Critical driver analysis
@@ -372,7 +372,7 @@ export function identifyCriticalDrivers(baselineModel, options = {}) {
 /**
  * Calculate break-even point for a parameter
  * Finds value where output equals target (e.g., zero value, target return)
- * 
+ *
  * @param {Object} baselineModel - Baseline model
  * @param {string} parameter - Parameter to solve for
  * @param {number} targetValue - Target output value
@@ -456,7 +456,7 @@ export function calculateBreakEvenPoint(baselineModel, parameter, targetValue = 
 /**
  * Perform what-if analysis
  * Applies custom assumptions and calculates impact
- * 
+ *
  * @param {Object} baselineModel - Baseline model
  * @param {Array<Object>} scenarios - Array of what-if scenarios
  * @returns {Object} What-if analysis results
@@ -527,7 +527,7 @@ export function performWhatIfAnalysis(baselineModel, scenarios = []) {
 /**
  * Generate comprehensive sensitivity analysis report
  * Combines tornado, tables, critical drivers, and what-if analysis
- * 
+ *
  * @param {Object} sensitivityData - Complete sensitivity analysis data
  * @returns {Object} Formatted sensitivity report
  */

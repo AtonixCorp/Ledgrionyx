@@ -1,10 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import {
-  FaUsers, FaChartBar, FaTasks, FaUserTie, FaCheckCircle,
-  FaExclamationCircle, FaClock, FaFileInvoiceDollar, FaSearch,
-  FaSync, FaStar, FaBuilding
-} from 'react-icons/fa';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
@@ -97,7 +92,7 @@ const FirmDashboard = () => {
     return (
       <div className="firm-dashboard">
         <div className="empty-state">
-          <FaBuilding size={48} />
+
           <h2>No Organization Selected</h2>
           <p>Please create or select an organization to view the Firm Dashboard.</p>
         </div>
@@ -110,21 +105,21 @@ const FirmDashboard = () => {
       {/* Header */}
       <div className="fd-header">
         <div className="fd-header-left">
-          <h1><FaChartBar /> Firm Dashboard</h1>
+          <h1>Firm Dashboard</h1>
           <p>{currentOrganization.name} &mdash; Command Center</p>
         </div>
         <button className="btn-refresh" onClick={fetchDashboard} disabled={loading}>
-          <FaSync className={loading ? 'spin' : ''} /> Refresh
+          Refresh
         </button>
       </div>
 
-      {error && <div className="alert-warning"><FaExclamationCircle /> Demo mode: {error}</div>}
+      {error && <div className="alert-warning">Demo mode: {error}</div>}
 
       {/* KPI Strip */}
       {data && (
         <div className="fd-kpi-strip">
           <div className="kpi-card kpi-blue">
-            <div className="kpi-icon"><FaUsers /></div>
+            <div className="kpi-icon"></div>
             <div className="kpi-body">
               <div className="kpi-value">{data.clients.total}</div>
               <div className="kpi-label">Total Clients</div>
@@ -132,7 +127,7 @@ const FirmDashboard = () => {
             </div>
           </div>
           <div className="kpi-card kpi-purple">
-            <div className="kpi-icon"><FaTasks /></div>
+            <div className="kpi-icon"></div>
             <div className="kpi-body">
               <div className="kpi-value">{data.workload.total}</div>
               <div className="kpi-label">Total Tasks</div>
@@ -140,7 +135,7 @@ const FirmDashboard = () => {
             </div>
           </div>
           <div className="kpi-card kpi-green">
-            <div className="kpi-icon"><FaUserTie /></div>
+            <div className="kpi-icon"></div>
             <div className="kpi-body">
               <div className="kpi-value">{data.staff.total}</div>
               <div className="kpi-label">Staff Members</div>
@@ -148,7 +143,7 @@ const FirmDashboard = () => {
             </div>
           </div>
           <div className="kpi-card kpi-orange">
-            <div className="kpi-icon"><FaFileInvoiceDollar /></div>
+            <div className="kpi-icon"></div>
             <div className="kpi-body">
               <div className="kpi-value">${(data.billing.total_invoiced / 1000).toFixed(0)}K</div>
               <div className="kpi-label">Total Invoiced</div>
@@ -161,10 +156,10 @@ const FirmDashboard = () => {
       {/* Tab Navigation */}
       <div className="fd-tabs">
         {[
-          { key: 'overview', label: 'Overview', icon: <FaChartBar /> },
-          { key: 'clients', label: 'All Clients', icon: <FaUsers /> },
-          { key: 'workload', label: 'Workload', icon: <FaTasks /> },
-          { key: 'staff', label: 'Staff Performance', icon: <FaUserTie /> },
+          { key: 'overview', label: 'Overview', },
+          { key: 'clients', label: 'All Clients', },
+          { key: 'workload', label: 'Workload', },
+          { key: 'staff', label: 'Staff Performance', },
         ].map(tab => (
           <button
             key={tab.key}
@@ -176,16 +171,16 @@ const FirmDashboard = () => {
         ))}
       </div>
 
-      {loading && <div className="fd-loading"><div className="spinner" /> Loading dashboard...</div>}
+      {loading && <div className="fd-loading"><div className="spinner" />Loading dashboard...</div>}
 
       {!loading && data && (
         <>
-          {/* ── OVERVIEW TAB ── */}
+          {/*  OVERVIEW TAB  */}
           {activeTab === 'overview' && (
             <div className="fd-grid">
               {/* Workload summary donut-like bar */}
               <div className="fd-card fd-workload-summary">
-                <h3><FaTasks /> Workload Overview</h3>
+                <h3>Workload Overview</h3>
                 <div className="workload-bars">
                   {[
                     { label: 'Pending', value: data.workload.pending, color: '#f59e0b', total: data.workload.total },
@@ -218,7 +213,7 @@ const FirmDashboard = () => {
 
               {/* Top Clients */}
               <div className="fd-card fd-recent-clients">
-                <h3><FaUsers /> Recent Clients</h3>
+                <h3>Recent Clients</h3>
                 <div className="client-list">
                   {data.clients.recent.slice(0, 5).map(client => (
                     <div className="client-row" key={client.id}>
@@ -235,7 +230,7 @@ const FirmDashboard = () => {
 
               {/* Staff Top Performers */}
               <div className="fd-card fd-staff-top">
-                <h3><FaStar /> Top Performers</h3>
+                <h3>Top Performers</h3>
                 <div className="staff-list">
                   {[...data.staff.performance]
                     .sort((a, b) => b.tasks_completed - a.tasks_completed)
@@ -258,7 +253,7 @@ const FirmDashboard = () => {
 
               {/* Billing */}
               <div className="fd-card fd-billing">
-                <h3><FaFileInvoiceDollar /> Billing Summary</h3>
+                <h3>Billing Summary</h3>
                 <div className="billing-metric">
                   <span>Total Invoiced</span>
                   <strong>${data.billing.total_invoiced.toLocaleString()}</strong>
@@ -280,19 +275,19 @@ const FirmDashboard = () => {
                 </div>
                 {data.billing.overdue_count > 0 && (
                   <div className="billing-alert">
-                    <FaExclamationCircle /> {data.billing.overdue_count} overdue invoice(s)
+                     {data.billing.overdue_count} overdue invoice(s)
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* ── CLIENTS TAB ── */}
+          {/*  CLIENTS TAB  */}
           {activeTab === 'clients' && (
             <div className="fd-section">
               <div className="fd-section-toolbar">
                 <div className="search-box">
-                  <FaSearch className="search-icon" />
+
                   <input
                     type="text"
                     placeholder="Search clients..."
@@ -348,15 +343,15 @@ const FirmDashboard = () => {
             </div>
           )}
 
-          {/* ── WORKLOAD TAB ── */}
+          {/*  WORKLOAD TAB  */}
           {activeTab === 'workload' && (
             <div className="fd-section">
               <div className="workload-grid">
                 {[
-                  { label: 'Pending', value: data.workload.pending, color: '#f59e0b', icon: <FaClock /> },
-                  { label: 'In Progress', value: data.workload.in_progress, color: '#3b82f6', icon: <FaTasks /> },
-                  { label: 'Completed', value: data.workload.completed, color: '#10b981', icon: <FaCheckCircle /> },
-                  { label: 'Overdue', value: data.workload.overdue, color: '#ef4444', icon: <FaExclamationCircle /> },
+                  { label: 'Pending', value: data.workload.pending, color: '#f59e0b', },
+                  { label: 'In Progress', value: data.workload.in_progress, color: '#3b82f6', },
+                  { label: 'Completed', value: data.workload.completed, color: '#10b981', },
+                  { label: 'Overdue', value: data.workload.overdue, color: '#ef4444', },
                 ].map(item => (
                   <div className="wl-stat-card" key={item.label} style={{ borderTop: `4px solid ${item.color}` }}>
                     <div className="wl-icon" style={{ color: item.color }}>{item.icon}</div>
@@ -383,7 +378,7 @@ const FirmDashboard = () => {
             </div>
           )}
 
-          {/* ── STAFF PERFORMANCE TAB ── */}
+          {/*  STAFF PERFORMANCE TAB  */}
           {activeTab === 'staff' && (
             <div className="fd-section">
               <div className="staff-perf-grid">

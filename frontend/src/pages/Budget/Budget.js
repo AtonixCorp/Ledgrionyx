@@ -4,9 +4,9 @@ import { useLanguage } from '../../context/LanguageContext';
 
 const Budget = () => {
   const { t, language } = useLanguage();
-  const { 
-    budgets, 
-    addBudget, 
+  const {
+    budgets,
+    addBudget,
     deleteBudget,
     expenses,
     financialSummary,
@@ -138,11 +138,10 @@ const Budget = () => {
               <div key={budget.id} className="card budget-card">
                 <div className="budget-header">
                   <h3>{budget.category}</h3>
-                  <button 
+                  <button
                     className="btn-danger btn-small"
                     onClick={() => deleteBudget(budget.id)}
-                  >
-                    Delete
+                  >Delete
                   </button>
                 </div>
 
@@ -164,9 +163,9 @@ const Budget = () => {
                 </div>
 
                 <div className="progress-bar">
-                  <div 
+                  <div
                     className="progress-fill"
-                    style={{ 
+                    style={{
                       width: `${Math.min(percentage, 100)}%`,
                       backgroundColor: statusColor
                     }}
@@ -179,12 +178,12 @@ const Budget = () => {
 
                 {utilization.isOverBudget && (
                   <div className="budget-warning">
-                    ⚠️ {t('labels.overBudget')} ${Math.abs(remaining).toFixed(2)}!
+                     {t('labels.overBudget')} ${Math.abs(remaining).toFixed(2)}!
                   </div>
                 )}
                 {!utilization.isOverBudget && percentage >= 90 && (
                   <div className="budget-warning">
-                    ⚠️ {t('labels.approachingLimit')}!
+                     {t('labels.approachingLimit')}!
                   </div>
                 )}
               </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
-import { FaChartBar, FaDownload } from 'react-icons/fa';
 
 const mockVariance = [
   { account: 'Service Revenue', budget: '$280,000', actual: '$284,000', variance: '+$4,000', pct: '+1.4%', type: 'Favorable' },
@@ -35,9 +34,8 @@ export default function VarianceAnalysis() {
       <PageHeader
         title="Variance Analysis"
         subtitle="Budget vs actual performance by account and cost center"
-        icon={<FaChartBar />}
         actions={
-          <Button variant="secondary" size="small" icon={<FaDownload />}>Export Analysis</Button>
+          <Button variant="secondary" size="small">Export Analysis</Button>
         }
       />
 

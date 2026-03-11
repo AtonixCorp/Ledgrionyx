@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import { financialDNAService } from '../../services/financialDNAService';
-import { FaDna, FaBullseye, FaCreditCard, FaDice, FaUniversity, FaChartBar, FaBitcoin, FaFlask } from 'react-icons/fa';
 
 const FinancialDNA = () => {
   const { transactions, mockPortfolio } = useFinance();
@@ -25,7 +24,7 @@ const FinancialDNA = () => {
       <div className="financial-dna-page">
         <div className="loading-container">
           <div className="dna-loader">
-            <div className="dna-helix"><FaDna /></div>
+            <div className="dna-helix"></div>
             <p>Analyzing your Financial DNA...</p>
           </div>
         </div>
@@ -36,15 +35,15 @@ const FinancialDNA = () => {
   return (
     <div className="financial-dna-page">
       <div className="page-header">
-        <h1><FaDna /> Your Financial DNA Profile</h1>
+        <h1>Your Financial DNA Profile</h1>
         <p>A personalized analysis of your unique financial personality</p>
       </div>
 
       {/* Overall Profile Summary */}
       <div className="dna-hero-card">
         <div className="profile-badge">
-          <div className="badge-icon"><FaBullseye /></div>
-          <h2>{dnaProfile.overallProfile.type.replace(/-/g, ' ').toUpperCase()}</h2>
+          <div className="badge-icon"></div>
+          <h2>{dnaProfile.overallProfile.type.replace(/-/g, '').toUpperCase()}</h2>
           <p>{dnaProfile.overallProfile.description}</p>
           <div className="overall-score">
             <span className="score-label">Overall Financial Health Score</span>
@@ -57,15 +56,15 @@ const FinancialDNA = () => {
 
         <div className="profile-highlights">
           <div className="highlight-section">
-            <h3>💪 Your Strengths</h3>
+            <h3>Your Strengths</h3>
             <ul>
               {dnaProfile.overallProfile.strengths.map((strength, index) => (
-                <li key={index}>✓ {strength}</li>
+                <li key={index}> {strength}</li>
               ))}
             </ul>
           </div>
           <div className="highlight-section">
-            <h3>📈 Growth Areas</h3>
+            <h3>Growth Areas</h3>
             <ul>
               {dnaProfile.overallProfile.growthAreas.map((area, index) => (
                 <li key={index}>→ {area}</li>
@@ -80,15 +79,15 @@ const FinancialDNA = () => {
         {/* Spending Personality */}
         <div className="trait-card spending-card">
           <div className="trait-header">
-            <span className="trait-icon"><FaCreditCard /></span>
+            <span className="trait-icon"></span>
             <h3>Spending Personality</h3>
           </div>
           <div className="trait-type">{dnaProfile.spendingPersonality.type.toUpperCase()}</div>
           <p className="trait-description">{dnaProfile.spendingPersonality.description}</p>
-          
+
           <div className="trait-score">
             <div className="score-bar">
-              <div 
+              <div
                 className="score-fill"
                 style={{ width: `${dnaProfile.spendingPersonality.score}%` }}
               ></div>
@@ -113,15 +112,15 @@ const FinancialDNA = () => {
         {/* Risk Tolerance */}
         <div className="trait-card risk-card">
           <div className="trait-header">
-            <span className="trait-icon"><FaDice /></span>
+            <span className="trait-icon"></span>
             <h3>Risk Tolerance</h3>
           </div>
           <div className="trait-type">{dnaProfile.riskTolerance.level.toUpperCase()}</div>
           <p className="trait-description">{dnaProfile.riskTolerance.description}</p>
-          
+
           <div className="trait-score">
             <div className="score-bar">
-              <div 
+              <div
                 className="score-fill risk"
                 style={{ width: `${dnaProfile.riskTolerance.score}%` }}
               ></div>
@@ -132,7 +131,7 @@ const FinancialDNA = () => {
           <div className="trait-details">
             <p><strong>High-Risk Allocation:</strong> {dnaProfile.riskTolerance.highRiskPercentage}%</p>
             <div className="recommendation-box">
-              <span>💡</span>
+              <span></span>
               <p>{dnaProfile.riskTolerance.recommendation}</p>
             </div>
           </div>
@@ -141,15 +140,15 @@ const FinancialDNA = () => {
         {/* Savings Discipline */}
         <div className="trait-card savings-card">
           <div className="trait-header">
-            <span className="trait-icon"><FaUniversity /></span>
+            <span className="trait-icon"></span>
             <h3>Savings Discipline</h3>
           </div>
           <div className="trait-type">{dnaProfile.savingsDiscipline.level.toUpperCase()}</div>
           <p className="trait-description">{dnaProfile.savingsDiscipline.description}</p>
-          
+
           <div className="trait-score">
             <div className="score-bar">
-              <div 
+              <div
                 className="score-fill savings"
                 style={{ width: `${dnaProfile.savingsDiscipline.score}%` }}
               ></div>
@@ -161,7 +160,7 @@ const FinancialDNA = () => {
             <p><strong>Savings Rate:</strong> {dnaProfile.savingsDiscipline.savingsRate}%</p>
             <p><strong>Monthly Savings:</strong> ${dnaProfile.savingsDiscipline.monthlySavings}</p>
             <div className="recommendation-box">
-              <span>💡</span>
+              <span></span>
               <p>{dnaProfile.savingsDiscipline.recommendation}</p>
             </div>
           </div>
@@ -170,12 +169,12 @@ const FinancialDNA = () => {
         {/* Investment Archetype */}
         <div className="trait-card archetype-card">
           <div className="trait-header">
-            <span className="trait-icon"><FaChartBar /></span>
+            <span className="trait-icon"></span>
             <h3>Investment Archetype</h3>
           </div>
-          <div className="trait-type">{dnaProfile.investmentArchetype.type.replace(/-/g, ' ').toUpperCase()}</div>
+          <div className="trait-type">{dnaProfile.investmentArchetype.type.replace(/-/g, '').toUpperCase()}</div>
           <p className="trait-description">{dnaProfile.investmentArchetype.description}</p>
-          
+
           <div className="archetype-traits">
             <strong>Your Investment Traits:</strong>
             <div className="traits-badges">
@@ -192,7 +191,7 @@ const FinancialDNA = () => {
                 <div key={index} className="asset-item">
                   <span>{asset.type}</span>
                   <div className="asset-bar">
-                    <div 
+                    <div
                       className="asset-fill"
                       style={{ width: `${asset.percentage}%` }}
                     ></div>
@@ -208,15 +207,15 @@ const FinancialDNA = () => {
         {/* Crypto Comfort Level */}
         <div className="trait-card crypto-card">
           <div className="trait-header">
-            <span className="trait-icon"><FaBitcoin /></span>
+            <span className="trait-icon"></span>
             <h3>Crypto Volatility Comfort</h3>
           </div>
           <div className="trait-type">{dnaProfile.cryptoComfort.level.toUpperCase()}</div>
           <p className="trait-description">{dnaProfile.cryptoComfort.description}</p>
-          
+
           <div className="trait-score">
             <div className="score-bar">
-              <div 
+              <div
                 className="score-fill crypto"
                 style={{ width: `${dnaProfile.cryptoComfort.score}%` }}
               ></div>
@@ -238,7 +237,7 @@ const FinancialDNA = () => {
               </div>
             )}
             <div className="recommendation-box">
-              <span>💡</span>
+              <span></span>
               <p>{dnaProfile.cryptoComfort.recommendation}</p>
             </div>
           </div>
@@ -246,7 +245,7 @@ const FinancialDNA = () => {
       </div>
 
       <div className="dna-footer">
-        <p><FaFlask /> Profile generated on {new Date(dnaProfile.generatedAt).toLocaleString()}</p>
+        <p>Profile generated on {new Date(dnaProfile.generatedAt).toLocaleString()}</p>
         <p>Your Financial DNA updates dynamically as your behavior changes.</p>
       </div>
     </div>

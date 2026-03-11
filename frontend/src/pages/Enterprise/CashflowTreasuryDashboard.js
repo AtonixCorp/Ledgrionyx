@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  FaWallet, FaChartLine, FaCoins, FaClock, FaExclamationTriangle, FaCheckCircle,
-  FaArrowDown, FaExchangeAlt, FaPiggyBank, FaCreditCard, FaDownload
-} from 'react-icons/fa';
+
 import { useEnterprise } from '../../context/EnterpriseContext';
 
 const CashflowTreasuryDashboard = () => {
@@ -113,10 +110,10 @@ const CashflowTreasuryDashboard = () => {
 
   const getAlertIcon = (type) => {
     switch (type) {
-      case 'critical': return <FaExclamationTriangle className="alert-critical" />;
-      case 'warning': return <FaExclamationTriangle className="alert-warning" />;
-      case 'info': return <FaCheckCircle className="alert-info" />;
-      default: return <FaCheckCircle className="alert-info" />;
+      case 'critical': return ;
+      case 'warning': return ;
+      case 'info': return ;
+      default: return ;
     }
   };
 
@@ -174,7 +171,7 @@ const CashflowTreasuryDashboard = () => {
           </select>
 
           <button className="export-btn">
-            <FaDownload /> Export
+            Export
           </button>
         </div>
       </div>
@@ -183,7 +180,7 @@ const CashflowTreasuryDashboard = () => {
       <div className="kpi-row">
         <div className="kpi-card">
           <div className="kpi-icon">
-            <FaWallet />
+
           </div>
           <div className="kpi-content">
             <p className="kpi-label">Cash on Hand</p>
@@ -194,7 +191,7 @@ const CashflowTreasuryDashboard = () => {
 
         <div className="kpi-card">
           <div className="kpi-icon">
-            <FaChartLine />
+
           </div>
           <div className="kpi-content">
             <p className="kpi-label">Net Cashflow</p>
@@ -205,7 +202,7 @@ const CashflowTreasuryDashboard = () => {
 
         <div className="kpi-card">
           <div className="kpi-icon">
-            <FaCoins />
+
           </div>
           <div className="kpi-content">
             <p className="kpi-label">Liquidity Ratio</p>
@@ -216,7 +213,7 @@ const CashflowTreasuryDashboard = () => {
 
         <div className="kpi-card">
           <div className="kpi-icon">
-            <FaArrowDown />
+
           </div>
           <div className="kpi-content">
             <p className="kpi-label">Monthly Burn Rate</p>
@@ -227,7 +224,7 @@ const CashflowTreasuryDashboard = () => {
 
         <div className="kpi-card">
           <div className="kpi-icon">
-            <FaClock />
+
           </div>
           <div className="kpi-content">
             <p className="kpi-label">Runway</p>
@@ -246,20 +243,17 @@ const CashflowTreasuryDashboard = () => {
               <button
                 className={`timeline-btn ${timelineView === 'daily' ? 'active' : ''}`}
                 onClick={() => setTimelineView('daily')}
-              >
-                Daily
+              >Daily
               </button>
               <button
                 className={`timeline-btn ${timelineView === 'weekly' ? 'active' : ''}`}
                 onClick={() => setTimelineView('weekly')}
-              >
-                Weekly
+              >Weekly
               </button>
               <button
                 className={`timeline-btn ${timelineView === 'monthly' ? 'active' : ''}`}
                 onClick={() => setTimelineView('monthly')}
-              >
-                Monthly
+              >Monthly
               </button>
             </div>
           </div>
@@ -489,16 +483,14 @@ const CashflowTreasuryDashboard = () => {
         <div className="insights-card">
           <div className="card-header">
             <h3>AI Insights</h3>
-            <FaPiggyBank className="card-icon" />
+
           </div>
 
           <div className="insights-list">
             {dashboardData.insights.map((insight, index) => (
               <div key={index} className={`insight-item ${insight.type}`}>
                 <div className="insight-icon">
-                  {insight.type === 'warning' && <FaExclamationTriangle />}
-                  {insight.type === 'info' && <FaCheckCircle />}
-                  {insight.type === 'success' && <FaCheckCircle />}
+
                 </div>
                 <div className="insight-content">
                   <p className="insight-message">{insight.message}</p>
@@ -513,7 +505,7 @@ const CashflowTreasuryDashboard = () => {
         <div className="alerts-card">
           <div className="card-header">
             <h3>Alerts</h3>
-            <FaExclamationTriangle className="card-icon" />
+
           </div>
 
           <div className="alerts-list">
@@ -537,24 +529,24 @@ const CashflowTreasuryDashboard = () => {
         <div className="operations-card">
           <div className="card-header">
             <h3>Treasury Operations</h3>
-            <FaExchangeAlt className="card-icon" />
+
           </div>
 
           <div className="operations-grid">
             <button className="operation-btn">
-              <FaExchangeAlt className="operation-icon" />
+
               <span>Internal Transfer</span>
             </button>
             <button className="operation-btn">
-              <FaCoins className="operation-icon" />
+
               <span>FX Conversion</span>
             </button>
             <button className="operation-btn">
-              <FaPiggyBank className="operation-icon" />
+
               <span>Investment Allocation</span>
             </button>
             <button className="operation-btn">
-              <FaCreditCard className="operation-icon" />
+
               <span>Sweep Rules</span>
             </button>
           </div>

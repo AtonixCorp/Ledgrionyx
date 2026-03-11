@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 
 const Income = () => {
-  const { 
-    income, 
-    addIncome, 
-    deleteIncome, 
+  const {
+    income,
+    addIncome,
+    deleteIncome,
     financialSummary,
     validationResults,
     userCountry,
@@ -17,7 +17,6 @@ const Income = () => {
     amount: '',
     date: new Date().toISOString().split('T')[0]
   });
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -173,10 +172,10 @@ const Income = () => {
               <span>${monthlyIncome.toFixed(2)}</span>
             </div>
           </div>
-          
+
           {validationResults?.warnings && validationResults.warnings.length > 0 && (
             <div className="validation-warnings">
-              <h4>⚠️ Warnings:</h4>
+              <h4>Warnings:</h4>
               {validationResults.warnings.map((warning, index) => (
                 <p key={index} className="warning-text">{warning}</p>
               ))}
@@ -208,11 +207,10 @@ const Income = () => {
                     <td>{incomeItem.source}</td>
                     <td className="amount-income">${incomeItem.amount.toFixed(2)}</td>
                     <td>
-                      <button 
+                      <button
                         className="btn-danger"
                         onClick={() => deleteIncome(incomeItem.id)}
-                      >
-                        Delete
+                      >Delete
                       </button>
                     </td>
                   </tr>

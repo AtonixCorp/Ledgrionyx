@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaBoxes, FaExchangeAlt, FaChartBar, FaPlus, FaSearch, FaTimes, FaSave, FaDownload } from 'react-icons/fa';
+
 import { inventoryItemsAPI, inventoryTransactionsAPI, inventoryCOGSAPI } from '../../../services/api';
 
 const fmt = (v, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
 
 const TABS = [
-  { id: 'items', label: 'Inventory Items', icon: <FaBoxes /> },
-  { id: 'transactions', label: 'Transactions', icon: <FaExchangeAlt /> },
-  { id: 'cogs', label: 'COGS Report', icon: <FaChartBar /> },
+  { id: 'items', label: 'Inventory Items', },
+  { id: 'transactions', label: 'Transactions', },
+  { id: 'cogs', label: 'COGS Report', },
 ];
 
-// ─── Items Tab ────────────────────────────────────────────────────────────────
+//  Items Tab
 const ItemsTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,8 +60,8 @@ const ItemsTab = ({ entityId }) => {
         <div className="acct-stat-card"><div className="acct-stat-label">Active Items</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{items.filter(i => i.status === 'active').length}</div></div>
       </div>
       <div className="tab-toolbar">
-        <div className="acct-search"><FaSearch className="search-icon" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by SKU or name..." /></div>
-        <button className="btn-primary" onClick={handleNew}><FaPlus /> Add Item</button>
+        <div className="acct-search"><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by SKU or name..." /></div>
+        <button className="btn-primary" onClick={handleNew}>Add Item</button>
       </div>
       {loading ? <div className="acct-loading">Loading inventory items...</div> : (
         <table className="acct-table">
@@ -86,7 +86,7 @@ const ItemsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>{editing ? 'Edit Item' : 'New Inventory Item'}</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>{editing ? 'Edit Item' : 'New Inventory Item'}</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -109,7 +109,7 @@ const ItemsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Save</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Save</>}</button>
             </div>
           </div>
         </div>
@@ -118,7 +118,7 @@ const ItemsTab = ({ entityId }) => {
   );
 };
 
-// ─── Transactions Tab ─────────────────────────────────────────────────────────
+//  Transactions Tab
 const TransactionsTab = ({ entityId }) => {
   const [transactions, setTransactions] = useState([]);
   const [items, setItems] = useState([]);
@@ -163,7 +163,7 @@ const TransactionsTab = ({ entityId }) => {
           <option value="transfer">Transfer</option>
           <option value="return">Return</option>
         </select>
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Transaction</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>New Transaction</button>
       </div>
       {loading ? <div className="acct-loading">Loading transactions...</div> : (
         <table className="acct-table">
@@ -186,7 +186,7 @@ const TransactionsTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Inventory Transaction</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Inventory Transaction</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row"><label>Item *</label><select value={form.inventory_item} onChange={e => setForm(p => ({ ...p, inventory_item: e.target.value }))}><option value="">Select item</option>{items.map(i => <option key={i.id} value={i.id}>{i.sku} — {i.item_name}</option>)}</select></div>
@@ -202,7 +202,7 @@ const TransactionsTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Record</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Record</>}</button>
             </div>
           </div>
         </div>
@@ -211,7 +211,7 @@ const TransactionsTab = ({ entityId }) => {
   );
 };
 
-// ─── COGS Tab ─────────────────────────────────────────────────────────────────
+//  COGS Tab
 const COGSTab = ({ entityId }) => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -253,7 +253,7 @@ const COGSTab = ({ entityId }) => {
   );
 };
 
-// ─── Main Inventory Module ────────────────────────────────────────────────────
+//  Main Inventory Module
 const Inventory = () => {
   const { entityId } = useParams();
   const [activeTab, setActiveTab] = useState('items');
@@ -262,10 +262,10 @@ const Inventory = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaBoxes /> Inventory Management</h1>
+          <h1>Inventory Management</h1>
           <p>Track inventory items, movements, and cost of goods sold</p>
         </div>
-        <button className="btn-secondary"><FaDownload /> Export</button>
+        <button className="btn-secondary">Export</button>
       </div>
 
       <div className="module-tabs">

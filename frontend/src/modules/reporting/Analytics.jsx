@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Button } from '../../components/ui';
-import { FaChartLine, FaDownload } from 'react-icons/fa';
 
 const reports = [
   { id: 1, title: 'Income Statement', desc: 'Revenue, expenses, and net income by period', category: 'Financials' },
@@ -35,9 +34,8 @@ export default function Analytics() {
       <PageHeader
         title="Reports & Analytics"
         subtitle="Access and run all pre-built financial reports"
-        icon={<FaChartLine />}
         actions={
-          <Button variant="secondary" size="small" icon={<FaDownload />}>Scheduled Reports</Button>
+          <Button variant="secondary" size="small">Scheduled Reports</Button>
         }
       />
 

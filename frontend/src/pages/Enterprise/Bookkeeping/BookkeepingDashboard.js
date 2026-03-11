@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaMoneyBillWave, FaWallet, FaChartLine, FaFileInvoiceDollar, FaPlus, FaFilter, FaDownload, FaList, FaTag, FaUniversity, FaFileAlt, FaUsers } from 'react-icons/fa';
+
 import { useEnterprise } from '../../../context/EnterpriseContext';
 import TransactionForm from './TransactionForm';
 
@@ -8,23 +8,23 @@ const BookkeepingDashboard = () => {
   const { entityId } = useParams();
   const navigate = useNavigate();
   const { fetchBookkeepingSummary, fetchTransactions, entities } = useEnterprise();
-  
+
   const [summary, setSummary] = useState(null);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState('month');
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
-  
+
   const entity = entities.find(e => e.id === parseInt(entityId));
-  
+
   const loadData = useCallback(async () => {
     setLoading(true);
-    
+
     // Calculate date range
     const today = new Date();
     let startDate;
-    
+
     if (dateFilter === 'week') {
       startDate = new Date(today);
       startDate.setDate(today.getDate() - 7);
@@ -38,33 +38,33 @@ const BookkeepingDashboard = () => {
       startDate = new Date(today);
       startDate.setFullYear(today.getFullYear() - 1);
     }
-    
+
     const filters = startDate ? {
       start_date: startDate.toISOString().split('T')[0]
     } : {};
-    
+
     // Fetch summary
     const summaryData = await fetchBookkeepingSummary(entityId, filters);
     setSummary(summaryData);
-    
+
     // Fetch recent transactions (last 10)
     const transactionsData = await fetchTransactions(entityId, filters);
     setRecentTransactions((transactionsData.results || transactionsData).slice(0, 10));
-    
+
     setLoading(false);
   }, [dateFilter, entityId, fetchBookkeepingSummary, fetchTransactions]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
-  
+
   const formatCurrency = (amount, currency = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency
     }).format(amount);
   };
-  
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -72,23 +72,23 @@ const BookkeepingDashboard = () => {
       day: 'numeric'
     });
   };
-  
+
   const handleNewTransaction = () => {
     setEditingTransaction(null);
     setShowTransactionForm(true);
   };
-  
+
   const handleCloseForm = () => {
     setShowTransactionForm(false);
     setEditingTransaction(null);
   };
-  
+
   const handleSaveTransaction = async () => {
     // Reload data after saving
     await loadData();
     handleCloseForm();
   };
-  
+
   if (loading) {
     return (
       <div className="bookkeeping-dashboard">
@@ -96,7 +96,7 @@ const BookkeepingDashboard = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="bookkeeping-dashboard">
       {/* Header */}
@@ -106,8 +106,8 @@ const BookkeepingDashboard = () => {
           <p>{entity?.name}</p>
         </div>
         <div className="header-right">
-          <select 
-            value={dateFilter} 
+          <select
+            value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
             className="date-filter"
           >
@@ -118,40 +118,40 @@ const BookkeepingDashboard = () => {
             <option value="all">All Time</option>
           </select>
           <button className="btn-primary" onClick={handleNewTransaction}>
-            <FaPlus /> New Transaction
+            New Transaction
           </button>
         </div>
       </div>
-      
+
       {/* Quick Navigation */}
       <div className="quick-nav">
         <button className="nav-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/transactions`)}>
-          <FaList className="nav-icon" />
+
           <span>All Transactions</span>
         </button>
         <button className="nav-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/categories`)}>
-          <FaTag className="nav-icon" />
+
           <span>Categories</span>
         </button>
         <button className="nav-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/accounts`)}>
-          <FaUniversity className="nav-icon" />
+
           <span>Accounts</span>
         </button>
         <button className="nav-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/reports`)}>
-          <FaFileAlt className="nav-icon" />
+
           <span>Reports</span>
         </button>
         <button className="nav-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/staff-hr`)}>
-          <FaUsers className="nav-icon" />
+
           <span>Staff & HR</span>
         </button>
       </div>
-      
+
       {/* Summary Cards */}
       <div className="summary-cards">
         <div className="summary-card income">
           <div className="card-icon">
-            <FaMoneyBillWave />
+
           </div>
           <div className="card-content">
             <p className="card-label">Total Income</p>
@@ -159,10 +159,10 @@ const BookkeepingDashboard = () => {
             <p className="card-count">{summary?.transaction_count || 0} transactions</p>
           </div>
         </div>
-        
+
         <div className="summary-card expense">
           <div className="card-icon">
-            <FaWallet />
+
           </div>
           <div className="card-content">
             <p className="card-label">Total Expenses</p>
@@ -170,23 +170,23 @@ const BookkeepingDashboard = () => {
             <p className="card-count">{summary?.transaction_count || 0} transactions</p>
           </div>
         </div>
-        
+
         <div className="summary-card profit">
           <div className="card-icon">
-            <FaChartLine />
+
           </div>
           <div className="card-content">
             <p className="card-label">Net Profit</p>
             <h2 className="card-value">{formatCurrency(summary?.net_profit || 0, entity?.local_currency)}</h2>
             <p className="card-count">
-              {summary?.net_profit >= 0 ? '✓ Positive' : '⚠ Negative'}
+              {summary?.net_profit >= 0 ? 'Positive' : 'Negative'}
             </p>
           </div>
         </div>
-        
+
         <div className="summary-card payroll">
           <div className="card-icon">
-            <FaFileInvoiceDollar />
+
           </div>
           <div className="card-content">
             <p className="card-label">Payroll</p>
@@ -195,14 +195,14 @@ const BookkeepingDashboard = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Charts Row */}
       <div className="charts-row">
         {/* Category Breakdown */}
         <div className="chart-card">
           <div className="chart-header">
             <h3>Top Categories</h3>
-            <FaDownload className="icon-btn" />
+
           </div>
           <div className="category-list">
             {summary?.category_breakdown && summary.category_breakdown.length > 0 ? (
@@ -227,12 +227,12 @@ const BookkeepingDashboard = () => {
             )}
           </div>
         </div>
-        
+
         {/* Monthly Trend */}
         <div className="chart-card">
           <div className="chart-header">
             <h3>Monthly Trend</h3>
-            <FaFilter className="icon-btn" />
+
           </div>
           <div className="trend-chart">
             {summary?.monthly_trend && summary.monthly_trend.length > 0 ? (
@@ -252,14 +252,14 @@ const BookkeepingDashboard = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Recent Transactions */}
       <div className="recent-transactions">
         <div className="section-header">
           <h3>Recent Transactions</h3>
           <button className="btn-secondary">View All</button>
         </div>
-        
+
         <div className="transactions-table">
           <table>
             <thead>
@@ -302,7 +302,7 @@ const BookkeepingDashboard = () => {
           </table>
         </div>
       </div>
-      
+
       {/* Transaction Form Modal */}
       {showTransactionForm && (
         <TransactionForm

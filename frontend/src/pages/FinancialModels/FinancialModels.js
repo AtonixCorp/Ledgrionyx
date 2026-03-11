@@ -105,14 +105,14 @@ const FinancialModels = () => {
       setActiveTab('results');
 
       // Log successful calculation
-      console.log('✅ Model calculation completed', {
+      console.log('Model calculation completed', {
         modelId: createdModel.id,
         timestamp: new Date().toISOString(),
         resultsKeys: Object.keys(results.results || {}),
       });
     } catch (err) {
       setCalculationError(err.message);
-      console.error('❌ Model calculation error:', err);
+      console.error('Model calculation error:', err);
     } finally {
       setIsCalculating(false);
     }
@@ -177,14 +177,14 @@ const FinancialModels = () => {
       setActiveTab('scenarios');
 
       // Log successful scenario analysis
-      console.log('✅ Scenario analysis completed', {
+      console.log('Scenario analysis completed', {
         modelId: selectedModel,
         scenariosCount: scenarioResults.length,
         timestamp: new Date().toISOString(),
       });
     } catch (err) {
       setCalculationError(err.message);
-      console.error('❌ Scenario analysis error:', err);
+      console.error('Scenario analysis error:', err);
     } finally {
       setIsCalculating(false);
     }
@@ -194,12 +194,12 @@ const FinancialModels = () => {
       setScenarioResults(scenarios);
       setActiveTab('scenarios');
 
-      console.log('✅ Scenario analysis completed', {
+      console.log('Scenario analysis completed', {
         scenarios: Object.keys(scenarios.scenarios || {}),
       });
     } catch (err) {
       setCalculationError(err.message);
-      console.error('❌ Scenario analysis error:', err);
+      console.error('Scenario analysis error:', err);
     } finally {
       setIsCalculating(false);
     }
@@ -241,13 +241,13 @@ const FinancialModels = () => {
       setReportData(report);
       setActiveTab('reports');
 
-      console.log('✅ Report generated', {
+      console.log('Report generated', {
         reportType,
         reportId: report.id,
       });
     } catch (err) {
       setCalculationError(err.message);
-      console.error('❌ Report generation error:', err);
+      console.error('Report generation error:', err);
     } finally {
       setIsCalculating(false);
     }
@@ -287,13 +287,13 @@ const FinancialModels = () => {
       setAnalyticsData(analytics);
       setActiveTab('analytics');
 
-      console.log('✅ Analytics loaded', {
+      console.log('Analytics loaded', {
         kpis: analytics.kpis?.length || 0,
         trends: Object.keys(analytics.trends || {}),
       });
     } catch (err) {
       setCalculationError(err.message);
-      console.error('❌ Analytics loading error:', err);
+      console.error('Analytics loading error:', err);
     } finally {
       setIsCalculating(false);
     }
@@ -350,10 +350,10 @@ const FinancialModels = () => {
         link.click();
       }
 
-      console.log('✅ Results exported', { format });
+      console.log('Results exported', { format });
     } catch (err) {
       setCalculationError(err.message);
-      console.error('❌ Export error:', err);
+      console.error('Export error:', err);
     }
   };
 
@@ -371,7 +371,7 @@ const FinancialModels = () => {
           </div>
           <div className="stat-card">
             <span className="stat-label">Current</span>
-            <span className="stat-value">{selectedModel ? '✓' : '-'}</span>
+            <span className="stat-value">{selectedModel ? '' : '-'}</span>
           </div>
         </div>
       </header>
@@ -383,7 +383,7 @@ const FinancialModels = () => {
           onClick={() => setActiveTab('input')}
           disabled={isCalculating}
         >
-          <span className="tab-icon">📝</span>
+          <span className="tab-icon"></span>
           <span className="tab-label">Input</span>
         </button>
 
@@ -392,7 +392,7 @@ const FinancialModels = () => {
           onClick={() => setActiveTab('results')}
           disabled={!calculationResults || isCalculating}
         >
-          <span className="tab-icon">📊</span>
+          <span className="tab-icon"></span>
           <span className="tab-label">Results</span>
         </button>
 
@@ -401,7 +401,7 @@ const FinancialModels = () => {
           onClick={() => setActiveTab('scenarios')}
           disabled={!calculationResults || isCalculating}
         >
-          <span className="tab-icon">🎯</span>
+          <span className="tab-icon"></span>
           <span className="tab-label">Scenarios</span>
         </button>
 
@@ -410,7 +410,7 @@ const FinancialModels = () => {
           onClick={() => setActiveTab('reports')}
           disabled={!calculationResults || isCalculating}
         >
-          <span className="tab-icon">📄</span>
+          <span className="tab-icon"></span>
           <span className="tab-label">Reports</span>
         </button>
 
@@ -419,7 +419,7 @@ const FinancialModels = () => {
           onClick={() => setActiveTab('analytics')}
           disabled={!calculationResults || isCalculating}
         >
-          <span className="tab-icon">📈</span>
+          <span className="tab-icon"></span>
           <span className="tab-label">Analytics</span>
         </button>
       </nav>
@@ -427,7 +427,7 @@ const FinancialModels = () => {
       {/* Error Display */}
       {(error || calculationError) && (
         <div className="error-banner">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon"></span>
           <div className="error-content">
             <h3>Error</h3>
             <p>{error || calculationError}</p>
@@ -438,7 +438,7 @@ const FinancialModels = () => {
               setCalculationError(null);
             }}
           >
-            ✕
+
           </button>
         </div>
       )}
@@ -519,7 +519,7 @@ const FinancialModels = () => {
           title="New Model"
           disabled={isCalculating}
         >
-          <span className="fab-icon">➕</span>
+          <span className="fab-icon"></span>
         </button>
       </div>
     </div>

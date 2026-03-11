@@ -14,8 +14,7 @@ const ProtectedRoute = ({ children }) => {
         minHeight: '100vh',
         fontSize: '1.5rem',
         color: '#667eea'
-      }}>
-        Loading...
+      }}>Loading...
       </div>
     );
   }

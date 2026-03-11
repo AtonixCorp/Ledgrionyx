@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button, Input } from '../../components/ui';
-import { FaCog, FaSave } from 'react-icons/fa';
 
 export default function FirmSettings() {
   const [form, setForm] = useState({
@@ -23,9 +22,8 @@ export default function FirmSettings() {
       <PageHeader
         title="Firm Settings"
         subtitle="Configure your organization's core details and preferences"
-        icon={<FaCog />}
         actions={
-          <Button variant="primary" size="small" icon={<FaSave />}>Save Changes</Button>
+          <Button variant="primary" size="small">Save Changes</Button>
         }
       />
 
@@ -45,8 +43,7 @@ export default function FirmSettings() {
         <Card title="Accounting Preferences">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>
-                Fiscal Year End Month
+              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Fiscal Year End Month
               </label>
               <select
                 value={form.fiscalYearEnd}
@@ -59,8 +56,7 @@ export default function FirmSettings() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>
-                Base Currency
+              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Base Currency
               </label>
               <select
                 value={form.currency}
@@ -74,8 +70,7 @@ export default function FirmSettings() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>
-                Accounting Standard
+              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Accounting Standard
               </label>
               <select
                 style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 13 }}

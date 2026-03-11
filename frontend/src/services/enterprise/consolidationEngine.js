@@ -1,8 +1,8 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════════════
+ *
  * CONSOLIDATION ENGINE - Phase 5 Enterprise Feature
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
+ *
+ *
  * Comprehensive multi-entity financial consolidation engine supporting:
  * - Full consolidation with eliminations
  * - Intercompany transaction elimination
@@ -12,7 +12,7 @@
  * - Full P&L, Balance Sheet, and Cash Flow consolidation
  * - Push-down accounting support
  * - Consolidation reporting and audit trail
- * 
+ *
  * @author Enterprise Finance Team
  * @version 2.0
  * @since Phase 5
@@ -82,7 +82,7 @@ export function generateConsolidatedStatements(entities, parentEntity, options =
         aggregatedBS,
         aggregatedCF
       );
-      
+
       consolidation.eliminationDetails = eliminationResult.details;
       totalEliminatedTransactions = eliminationResult.transactionCount;
       eliminationLog.push(...eliminationResult.log);
@@ -111,7 +111,7 @@ export function generateConsolidatedStatements(entities, parentEntity, options =
       aggregatedBS,
       pushDownAccounting
     );
-    
+
     applyAdjustments(aggregatedPL, adjustments.plAdjustments);
     applyAdjustments(aggregatedBS, adjustments.bsAdjustments);
     applyAdjustments(aggregatedCF, adjustments.cfAdjustments);
@@ -311,11 +311,11 @@ export function calculateMinorityInterest(entities, pl, bs) {
   entities.forEach(entity => {
     if (entity.ownership < 1.0) { // Less than 100% owned
       const minorityPercent = 1 - entity.ownership;
-      
+
       // Minority share of net income
       const entityNetIncome = entity.financials?.pl?.netIncome || 0;
       const minorityIncomeShare = entityNetIncome * minorityPercent;
-      
+
       // Minority share of equity
       const entityEquity = entity.financials?.bs?.totalEquity || 0;
       const minorityEquityShare = entityEquity * minorityPercent;
@@ -363,18 +363,18 @@ export function generateConsolidationAdjustments(parentEntity, entities, consoli
     if (entity.acquisition) {
       const { goodwill = 0, otherIntangibles = 0, acquiredAt } = entity.acquisition;
       const acquisitionYears = calculateYears(acquiredAt);
-      
+
       // Annual amortization
       const goodwillAmortization = goodwill / 10; // 10-year useful life
       const intangibleAmortization = otherIntangibles / 5; // 5-year useful life
       const totalEntityAmortization = goodwillAmortization + intangibleAmortization;
-      
+
       plAdjustments['amortizationExpense'] = (plAdjustments['amortizationExpense'] || 0) + totalEntityAmortization;
       bsAdjustments['goodwill'] = (bsAdjustments['goodwill'] || 0) - goodwillAmortization;
       bsAdjustments['otherIntangibles'] = (bsAdjustments['otherIntangibles'] || 0) - intangibleAmortization;
-      
+
       totalAmortization += totalEntityAmortization;
-      
+
       summary.push({
         type: 'AMORTIZATION',
         entity: entity.name,
@@ -395,7 +395,7 @@ export function generateConsolidationAdjustments(parentEntity, entities, consoli
     entities.forEach(entity => {
       if (entity.fairValueAdjustments) {
         const fvAdjustments = entity.fairValueAdjustments;
-        
+
         // Apply fair value step-ups
         Object.keys(fvAdjustments).forEach(account => {
           const adjustment = fvAdjustments[account];
@@ -421,10 +421,10 @@ export function generateConsolidationAdjustments(parentEntity, entities, consoli
       const investmentAccount = `Investment-${entity.name}`;
       const entityNetIncome = entity.financials?.pl?.netIncome || 0;
       const pickupAmount = entityNetIncome * entity.ownership;
-      
+
       plAdjustments['equityIncomePick'] = (plAdjustments['equityIncomePick'] || 0) + pickupAmount;
       bsAdjustments[investmentAccount] = (bsAdjustments[investmentAccount] || 0) + pickupAmount;
-      
+
       summary.push({
         type: 'EQUITY_PICKUP',
         entity: entity.name,
@@ -540,9 +540,9 @@ export function generateConsolidationAuditTrail(consolidation, sourceDocuments =
   return auditTrail;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+//
 // HELPER FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────────
+//
 
 function initializeFinancialStatement(type) {
   const base = {

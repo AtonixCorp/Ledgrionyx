@@ -1,8 +1,8 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════════════
+ *
  * AUDIT TRAIL & COMPLIANCE ENGINE - Phase 5 Enterprise Feature
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
+ *
+ *
  * Comprehensive audit trail and compliance verification system for:
  * - Complete change tracking and history
  * - Data lineage and traceability
@@ -11,7 +11,7 @@
  * - Change justification and approval tracking
  * - Variance analysis and anomaly detection
  * - Compliance reporting
- * 
+ *
  * @author Enterprise Finance Team
  * @version 2.0
  * @since Phase 5
@@ -445,7 +445,7 @@ export function detectAnomalies(changes) {
     const changeDate = new Date(change.timestamp);
     const hour = changeDate.getHours();
     const dayOfWeek = changeDate.getDay();
-    
+
     if (hour < 6 || hour > 18 || dayOfWeek === 0 || dayOfWeek === 6) {
       patterns.unusualTiming.push({
         account: change.account,
@@ -460,8 +460,8 @@ export function detectAnomalies(changes) {
     if (index > 0) {
       const prevChange = changes[index - 1];
       const daysDiff = (new Date(change.timestamp) - new Date(prevChange.timestamp)) / (1000 * 60 * 60 * 24);
-      
-      if (prevChange.account === change.account && 
+
+      if (prevChange.account === change.account &&
           Math.abs(prevChange.newValue + change.variance) < 1000 &&
           daysDiff <= 5) {
         patterns.suspiciousAdjustments.push({
@@ -488,9 +488,9 @@ export function detectAnomalies(changes) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+//
 // HELPER FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────────
+//
 
 function generateAuditId() {
   return `AUD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -533,7 +533,7 @@ function estimateAssumptionImpact(category, changePercent) {
 
 function calculateTopChangedAccounts(changes) {
   const accountVariances = {};
-  
+
   changes.forEach(change => {
     if (!accountVariances[change.account]) {
       accountVariances[change.account] = { total: 0, count: 0 };
@@ -566,7 +566,7 @@ function validateAuditChain(events) {
 function verifyEventHashes(events) {
   // Simplified hash verification
   let previousHash = null;
-  
+
   for (const event of events) {
     if (event.dataIntegrity) {
       if (previousHash && event.dataIntegrity.previousHash !== previousHash) {
@@ -580,15 +580,15 @@ function verifyEventHashes(events) {
 
 function generateAuditRecommendations(eventCategories, auditContext) {
   const recommendations = [];
-  
+
   if (eventCategories.errors.length > 0) {
     recommendations.push('Review and document resolution of audit errors');
   }
-  
+
   if (eventCategories.complianceIssues.length > 0) {
     recommendations.push('Address flagged compliance issues before close');
   }
-  
+
   if (eventCategories.approvalsPending > 0) {
     recommendations.push('Obtain pending approvals for material changes');
   }
@@ -598,27 +598,27 @@ function generateAuditRecommendations(eventCategories, auditContext) {
 
 function calculateStdDev(values) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const squareDiffs = values.map(v => Math.pow(v - mean, 2));
+  const squareDiffs = values.map(v =>Math.pow(v - mean, 2));
   return Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / values.length);
 }
 
 function detectOutliers(values) {
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
   const stdDev = calculateStdDev(values);
-  return values.filter(v => Math.abs(v - mean) > 2 * stdDev);
+  return values.filter(v =>Math.abs(v - mean) > 2 * stdDev);
 }
 
 function generateAnomalyRecommendations(patterns) {
   const recommendations = [];
-  
+
   if (patterns.largeOneTimeChanges.length > 0) {
     recommendations.push('Investigate large one-time changes for proper documentation');
   }
-  
+
   if (patterns.unusualTiming.length > 0) {
     recommendations.push('Review changes made outside standard business hours');
   }
-  
+
   if (patterns.suspiciousAdjustments.length > 0) {
     recommendations.push('Review reversing entries for proper authorization');
   }

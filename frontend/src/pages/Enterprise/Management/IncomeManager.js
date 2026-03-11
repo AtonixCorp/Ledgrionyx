@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useEnterprise } from '../../../context/EnterpriseContext';
-import { FaPlus, FaEdit, FaTrash, FaDownload, FaChartLine } from 'react-icons/fa';
 
 const IncomeManager = () => {
   const { entityId } = useParams();
   const { fetchEntityIncome, createEntityIncome, entities } = useEnterprise();
-  
+
   const [income, setIncome] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -25,8 +24,8 @@ const IncomeManager = () => {
 
   // Income sources
   const sources = [
-    'Product Sales', 'Service Revenue', 'Consulting', 'Investment Income', 
-    'Grants', 'Royalties', 'Licensing', 'Subscriptions', 'Commissions', 
+    'Product Sales', 'Service Revenue', 'Consulting', 'Investment Income',
+    'Grants', 'Royalties', 'Licensing', 'Subscriptions', 'Commissions',
     'Interest', 'Dividends', 'Rental Income', 'Other'
   ];
 
@@ -137,7 +136,7 @@ const IncomeManager = () => {
 
   // Calculate totals
   const totalIncome = filteredIncome.reduce((sum, inc) => sum + parseFloat(inc.amount), 0);
-  
+
   // Source breakdown
   const sourceBreakdown = filteredIncome.reduce((acc, inc) => {
     if (!acc[inc.source]) {
@@ -170,10 +169,10 @@ const IncomeManager = () => {
         </div>
         <div className="header-actions">
           <button className="btn-icon" onClick={handleExportCSV} title="Export CSV">
-            <FaDownload /> Export
+            Export
           </button>
           <button className="btn-primary" onClick={() => setShowForm(true)}>
-            <FaPlus /> Add Income
+            Add Income
           </button>
         </div>
       </div>
@@ -242,18 +241,17 @@ const IncomeManager = () => {
             placeholder="To Date"
             className="filter-input"
           />
-          <button 
+          <button
             className="btn-clear-filters"
             onClick={() => setFilters({ source: '', type: '', dateFrom: '', dateTo: '', minAmount: '', maxAmount: '', search: '' })}
-          >
-            Clear Filters
+          >Clear Filters
           </button>
         </div>
       </div>
 
       {/* Type Breakdown */}
       <div className="type-breakdown">
-        <h3><FaChartLine /> Revenue by Type</h3>
+        <h3>Revenue by Type</h3>
         <div className="type-grid">
           {Object.entries(typeBreakdown)
             .sort(([, a], [, b]) => b.amount - a.amount)
@@ -281,7 +279,7 @@ const IncomeManager = () => {
                 <p className="amount">${data.amount.toFixed(2)}</p>
                 <p className="count-mini">{data.count} transactions</p>
                 <div className="percentage-bar income">
-                  <div 
+                  <div
                     className="percentage-fill"
                     style={{ width: `${(data.amount / totalIncome * 100).toFixed(0)}%` }}
                   />
@@ -314,14 +312,14 @@ const IncomeManager = () => {
                 <td><span className="badge-type">{incomeTypes.find(t => t.value === inc.income_type)?.label}</span></td>
                 <td>{inc.client || '-'}</td>
                 <td>{inc.invoice_number || '-'}</td>
-                <td className="payment-method">{inc.payment_method?.replace('_', ' ')}</td>
+                <td className="payment-method">{inc.payment_method?.replace('_', '')}</td>
                 <td className="amount positive">${parseFloat(inc.amount).toFixed(2)}</td>
                 <td className="actions">
                   <button className="btn-icon-small" title="Edit" onClick={() => handleEdit(inc)}>
-                    <FaEdit />
+
                   </button>
                   <button className="btn-icon-small delete" title="Delete">
-                    <FaTrash />
+
                   </button>
                 </td>
               </tr>
@@ -448,8 +446,7 @@ const IncomeManager = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
-                  Cancel
+                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel
                 </button>
                 <button type="submit" className="btn-primary">
                   {editingIncome ? 'Update' : 'Create'} Income

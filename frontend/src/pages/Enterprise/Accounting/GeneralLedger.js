@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaBook, FaSearch, FaDownload, FaFilter } from 'react-icons/fa';
+
 import { generalLedgerAPI } from '../../../services/api';
 
 const GeneralLedger = () => {
@@ -42,10 +42,10 @@ const GeneralLedger = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaBook /> General Ledger</h1>
+          <h1>General Ledger</h1>
           <p>Complete double-entry ledger — all debit and credit postings in one view</p>
         </div>
-        <button className="btn-secondary"><FaDownload /> Export</button>
+        <button className="btn-secondary">Export</button>
       </div>
 
       {/* Summary */}
@@ -65,7 +65,7 @@ const GeneralLedger = () => {
         <div className="acct-stat-card" style={{ borderTop: `3px solid ${Math.abs(totalDebits - totalCredits) < 0.01 ? '#48bb78' : '#e53e3e'}` }}>
           <div className="acct-stat-label">Balance Check</div>
           <div className="acct-stat-balance" style={{ color: Math.abs(totalDebits - totalCredits) < 0.01 ? '#48bb78' : '#e53e3e' }}>
-            {Math.abs(totalDebits - totalCredits) < 0.01 ? '✓ Balanced' : `Diff: $${fmt(totalDebits - totalCredits)}`}
+            {Math.abs(totalDebits - totalCredits) < 0.01 ? 'Balanced' : `Diff: $${fmt(totalDebits - totalCredits)}`}
           </div>
         </div>
       </div>
@@ -73,7 +73,7 @@ const GeneralLedger = () => {
       {/* Filters */}
       <div className="acct-filters">
         <div className="acct-search">
-          <FaSearch className="search-icon" />
+
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by account or entry..." />
         </div>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="acct-select">
@@ -84,7 +84,7 @@ const GeneralLedger = () => {
         </select>
         <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="acct-date" placeholder="From date" />
         <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="acct-date" placeholder="To date" />
-        <button onClick={load} className="btn-secondary"><FaFilter /> Filter</button>
+        <button onClick={load} className="btn-secondary">Filter</button>
       </div>
 
       {/* Table */}

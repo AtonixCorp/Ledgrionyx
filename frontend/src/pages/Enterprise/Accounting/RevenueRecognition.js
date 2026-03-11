@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaChartLine, FaCalendarCheck, FaPlus, FaTimes, FaSave, FaDownload } from 'react-icons/fa';
+
 import { deferredRevenuesAPI, revenueRecognitionSchedulesAPI } from '../../../services/api';
 
 const fmt = (v, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
 
 const TABS = [
-  { id: 'deferred', label: 'Deferred Revenue', icon: <FaChartLine /> },
-  { id: 'schedules', label: 'Recognition Schedules', icon: <FaCalendarCheck /> },
+  { id: 'deferred', label: 'Deferred Revenue', },
+  { id: 'schedules', label: 'Recognition Schedules', },
 ];
 
 const STATUS_COLORS = { active: '#38a169', completed: '#667eea', cancelled: '#e53e3e', pending: '#ed8936', recognized: '#38a169' };
 
-// ─── Deferred Revenue Tab ─────────────────────────────────────────────────────
+//  Deferred Revenue Tab
 const DeferredRevenueTab = ({ entityId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,7 @@ const DeferredRevenueTab = ({ entityId }) => {
         <div className="acct-stat-card"><div className="acct-stat-label">Active Contracts</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{items.filter(i => i.status === 'active').length}</div></div>
       </div>
       <div className="tab-toolbar">
-        <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus /> New Contract</button>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>New Contract</button>
       </div>
       {loading ? <div className="acct-loading">Loading deferred revenue contracts...</div> : (
         <table className="acct-table">
@@ -64,7 +64,7 @@ const DeferredRevenueTab = ({ entityId }) => {
                 <td style={{ color: '#38a169', fontWeight: 600 }}>{fmt(item.recognized_amount)}</td>
                 <td style={{ color: '#ed8936', fontWeight: 600 }}>{fmt(item.deferred_amount)}</td>
                 <td style={{ fontSize: '0.8rem', color: '#718096' }}>{item.start_date} — {item.end_date}</td>
-                <td><span className="tag tag-type">{item.recognition_method?.replace(/_/g,' ')}</span></td>
+                <td><span className="tag tag-type">{item.recognition_method?.replace(/_/g,'')}</span></td>
                 <td><span className="status-badge" style={{ background: STATUS_COLORS[item.status] || '#a0aec0', color: 'white' }}>{item.status}</span></td>
               </tr>
             ))}
@@ -74,7 +74,7 @@ const DeferredRevenueTab = ({ entityId }) => {
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>New Deferred Revenue Contract</h2><button onClick={() => setShowForm(false)}><FaTimes /></button></div>
+            <div className="modal-header"><h2>New Deferred Revenue Contract</h2><button onClick={() => setShowForm(false)}></button></div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
               <div className="form-row-2">
@@ -91,7 +91,7 @@ const DeferredRevenueTab = ({ entityId }) => {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <><FaSave /> Create</>}</button>
+              <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Saving...' : <>Create</>}</button>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@ const DeferredRevenueTab = ({ entityId }) => {
   );
 };
 
-// ─── Recognition Schedules Tab ────────────────────────────────────────────────
+//  Recognition Schedules Tab
 const SchedulesTab = ({ entityId }) => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -157,7 +157,7 @@ const SchedulesTab = ({ entityId }) => {
   );
 };
 
-// ─── Main Revenue Recognition Module ─────────────────────────────────────────
+//  Main Revenue Recognition Module
 const RevenueRecognition = () => {
   const { entityId } = useParams();
   const [activeTab, setActiveTab] = useState('deferred');
@@ -166,10 +166,10 @@ const RevenueRecognition = () => {
     <div className="acct-page">
       <div className="acct-header">
         <div>
-          <h1><FaChartLine /> Revenue Recognition</h1>
+          <h1>Revenue Recognition</h1>
           <p>Manage deferred revenue contracts and recognition schedules (ASC 606 / IFRS 15)</p>
         </div>
-        <button className="btn-secondary"><FaDownload /> Export</button>
+        <button className="btn-secondary">Export</button>
       </div>
 
       <div className="module-tabs">

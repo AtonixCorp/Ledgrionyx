@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { FaShieldAlt, FaGlobe, FaClock, FaSignature, FaEyeSlash, FaLock, FaChartLine, FaRocket, FaRobot, FaBuilding, FaGem, FaUniversity } from 'react-icons/fa';
 
 const SecurityVaults = () => {
   const [activeTab, setActiveTab] = useState('security');
@@ -11,7 +10,6 @@ const SecurityVaults = () => {
   const securityFeatures = [
     {
       id: 1,
-      icon: <FaGlobe />,
       title: 'Geo-Locked Transactions',
       description: 'Restrict transactions to specific geographic locations',
       enabled: geoLockEnabled,
@@ -20,7 +18,6 @@ const SecurityVaults = () => {
     },
     {
       id: 2,
-      icon: <FaClock />,
       title: 'Time-Locked Withdrawals',
       description: 'Add mandatory waiting periods for large withdrawals',
       enabled: true,
@@ -28,7 +25,6 @@ const SecurityVaults = () => {
     },
     {
       id: 3,
-      icon: <FaSignature />,
       title: 'Multi-Signature Approvals',
       description: 'Require multiple approvals for high-value transfers',
       enabled: true,
@@ -36,7 +32,6 @@ const SecurityVaults = () => {
     },
     {
       id: 4,
-      icon: <FaEyeSlash />,
       title: 'Invisible Decoy Mode',
       description: 'Show fake low balance when under pressure',
       enabled: decoyModeEnabled,
@@ -45,7 +40,6 @@ const SecurityVaults = () => {
     },
     {
       id: 5,
-      icon: <FaLock />,
       title: 'Encrypted Transaction Notes',
       description: 'All notes are end-to-end encrypted',
       enabled: true,
@@ -57,7 +51,6 @@ const SecurityVaults = () => {
     {
       id: 1,
       name: 'Trading Vault',
-      icon: <FaChartLine />,
       balance: 15000,
       minDeposit: 1000,
       lockPeriod: 'None',
@@ -69,7 +62,6 @@ const SecurityVaults = () => {
     {
       id: 2,
       name: 'Space Research Vault',
-      icon: <FaRocket />,
       balance: 5000,
       minDeposit: 500,
       lockPeriod: '12 months',
@@ -81,7 +73,6 @@ const SecurityVaults = () => {
     {
       id: 3,
       name: 'AI Research Vault',
-      icon: <FaRobot />,
       balance: 8000,
       minDeposit: 500,
       lockPeriod: '6 months',
@@ -93,7 +84,6 @@ const SecurityVaults = () => {
     {
       id: 4,
       name: 'Real Estate Vault',
-      icon: <FaBuilding />,
       balance: 25000,
       minDeposit: 5000,
       lockPeriod: '24 months',
@@ -105,7 +95,6 @@ const SecurityVaults = () => {
     {
       id: 5,
       name: 'DeFi Yield Vault',
-      icon: <FaGem />,
       balance: 10000,
       minDeposit: 500,
       lockPeriod: 'Flexible',
@@ -117,7 +106,6 @@ const SecurityVaults = () => {
     {
       id: 6,
       name: 'Treasury Vault',
-      icon: <FaUniversity />,
       balance: 50000,
       minDeposit: 1000,
       lockPeriod: '3 months',
@@ -137,22 +125,22 @@ const SecurityVaults = () => {
   return (
     <div className="security-vaults-page">
       <div className="page-header">
-        <h1><FaShieldAlt /> Security & Investment Vaults</h1>
+        <h1>Security & Investment Vaults</h1>
         <p>Sovereign security features and modular investment management</p>
       </div>
 
       <div className="tabs">
-        <button 
+        <button
           className={`tab ${activeTab === 'security' ? 'active' : ''}`}
           onClick={() => setActiveTab('security')}
         >
-          <FaShieldAlt /> Security Layer
+          Security Layer
         </button>
-        <button 
+        <button
           className={`tab ${activeTab === 'vaults' ? 'active' : ''}`}
           onClick={() => setActiveTab('vaults')}
         >
-          <FaUniversity /> Investment Vaults
+          Investment Vaults
         </button>
       </div>
 
@@ -174,8 +162,8 @@ const SecurityVaults = () => {
                   </div>
                   {feature.toggle && (
                     <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={feature.enabled}
                         onChange={feature.toggle}
                       />
@@ -196,7 +184,7 @@ const SecurityVaults = () => {
           </div>
 
           <div className="security-summary">
-            <h3><FaLock /> Security Score</h3>
+            <h3>Security Score</h3>
             <div className="security-score-display">
               <div className="score-circle-lg">
                 <span className="score">95</span>
@@ -206,10 +194,10 @@ const SecurityVaults = () => {
                 <p><strong>Excellent Security Posture</strong></p>
                 <p>Your account has multi-layered protection with sovereign-grade security features.</p>
                 <ul>
-                  <li>✓ 5 of 5 security features active</li>
-                  <li>✓ Geo-locking configured</li>
-                  <li>✓ Multi-signature enabled</li>
-                  <li>✓ Time-locked withdrawals active</li>
+                  <li> 5 of 5 security features active</li>
+                  <li>Geo-locking configured</li>
+                  <li>Multi-signature enabled</li>
+                  <li>Time-locked withdrawals active</li>
                 </ul>
               </div>
             </div>
@@ -245,8 +233,8 @@ const SecurityVaults = () => {
 
           <div className="vaults-grid">
             {investmentVaults.map(vault => (
-              <div 
-                key={vault.id} 
+              <div
+                key={vault.id}
                 className="vault-card"
                 style={{ borderLeftColor: vault.color }}
                 onClick={() => setSelectedVault(vault)}
@@ -265,7 +253,7 @@ const SecurityVaults = () => {
 
                 <div className="vault-details">
                   <p className="vault-description">{vault.description}</p>
-                  
+
                   <div className="vault-metrics">
                     <div className="metric">
                       <span className="metric-label">Expected Return</span>
@@ -280,9 +268,9 @@ const SecurityVaults = () => {
                   <div className="risk-indicator">
                     <span className="risk-label">Risk Level:</span>
                     <div className="risk-bar">
-                      <div 
+                      <div
                         className="risk-fill"
-                        style={{ 
+                        style={{
                           width: `${(vault.riskScore / 10) * 100}%`,
                           background: getRiskColor(vault.riskScore)
                         }}

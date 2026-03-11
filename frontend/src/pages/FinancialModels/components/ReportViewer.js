@@ -29,11 +29,11 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
   };
 
   const sections = [
-    { id: 'executive', label: '📋 Executive Summary', icon: '📋' },
-    { id: 'valuation', label: '💎 Valuation Analysis', icon: '💎' },
-    { id: 'financial', label: '📊 Financial Analysis', icon: '📊' },
-    { id: 'scenarios', label: '🎯 Scenario Analysis', icon: '🎯' },
-    { id: 'recommendations', label: '💡 Recommendations', icon: '💡' },
+    { id: 'executive', label: 'Executive Summary', icon: '' },
+    { id: 'valuation', label: 'Valuation Analysis', icon: '' },
+    { id: 'financial', label: 'Financial Analysis', icon: '' },
+    { id: 'scenarios', label: 'Scenario Analysis', icon: '' },
+    { id: 'recommendations', label: 'Recommendations', icon: '' },
   ];
 
   return (
@@ -55,22 +55,19 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
               className={`size-btn ${fontSize === 'small' ? 'active' : ''}`}
               onClick={() => setFontSize('small')}
               title="Reduce text size"
-            >
-              A
+            >A
             </button>
             <button
               className={`size-btn ${fontSize === 'medium' ? 'active' : ''}`}
               onClick={() => setFontSize('medium')}
               title="Normal text size"
-            >
-              A
+            >A
             </button>
             <button
               className={`size-btn ${fontSize === 'large' ? 'active' : ''}`}
               onClick={() => setFontSize('large')}
               title="Increase text size"
-            >
-              A
+            >A
             </button>
           </div>
 
@@ -80,24 +77,21 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
               onClick={() => onExport('json')}
               disabled={isLoading}
               title="Export as JSON"
-            >
-              💾 JSON
+            >JSON
             </button>
             <button
               className="btn-secondary"
               onClick={() => onExport('csv')}
               disabled={isLoading}
               title="Export as CSV"
-            >
-              📊 CSV
+            >CSV
             </button>
             <button
               className="btn-secondary"
               onClick={() => window.print()}
               disabled={isLoading}
               title="Print report"
-            >
-              🖨️ Print
+            >Print
             </button>
           </div>
         </div>
@@ -126,26 +120,26 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
             <h2>Executive Summary</h2>
 
             <div className="summary-box">
-              <h3>📊 Key Findings</h3>
+              <h3>Key Findings</h3>
               <div className="findings-list">
                 <div className="finding-item">
-                  <span className="finding-icon">✓</span>
+                  <span className="finding-icon"></span>
                   <div className="finding-text">
-                    <strong>Enterprise Valuation:</strong>{' '}
+                    <strong>Enterprise Valuation:</strong>{''}
                     {formatCurrency(report?.summary?.enterpriseValue)}
                   </div>
                 </div>
                 <div className="finding-item">
-                  <span className="finding-icon">✓</span>
+                  <span className="finding-icon"></span>
                   <div className="finding-text">
-                    <strong>Expected IRR:</strong>{' '}
+                    <strong>Expected IRR:</strong>{''}
                     {formatPercent(report?.summary?.expectedIrr)}
                   </div>
                 </div>
                 <div className="finding-item">
-                  <span className="finding-icon">✓</span>
+                  <span className="finding-icon"></span>
                   <div className="finding-text">
-                    <strong>Investment Multiple:</strong>{' '}
+                    <strong>Investment Multiple:</strong>{''}
                     {(report?.summary?.moic || 0).toFixed(2)}x
                   </div>
                 </div>
@@ -153,7 +147,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
             </div>
 
             <div className="summary-box">
-              <h3>💡 Highlights</h3>
+              <h3>Highlights</h3>
               <ul className="highlights-list">
                 {report?.summary?.highlights?.map((highlight, idx) => (
                   <li key={idx}>{highlight}</li>
@@ -162,7 +156,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
             </div>
 
             <div className="summary-box">
-              <h3>⚠️ Key Risks</h3>
+              <h3>Key Risks</h3>
               <ul className="risks-list">
                 {report?.summary?.risks?.map((risk, idx) => (
                   <li key={idx}>{risk}</li>
@@ -171,7 +165,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
             </div>
 
             <div className="summary-box">
-              <h3>✅ Recommendations</h3>
+              <h3>Recommendations</h3>
               <ul className="recommendations-list">
                 {report?.summary?.recommendations?.map((rec, idx) => (
                   <li key={idx}>{rec}</li>
@@ -233,7 +227,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
                   <div className="detail-row">
                     <span>Range (Min-Max)</span>
                     <strong>
-                      {formatCurrency(report?.valuation?.comps?.minValue)} -{' '}
+                      {formatCurrency(report?.valuation?.comps?.minValue)} -{''}
                       {formatCurrency(report?.valuation?.comps?.maxValue)}
                     </strong>
                   </div>
@@ -264,8 +258,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
                     </tr>
                   ))}
                   <tr className="total-row">
-                    <td colSpan="3" className="highlight">
-                      Blended Valuation
+                    <td colSpan="3" className="highlight">Blended Valuation
                     </td>
                     <td className="highlight">
                       {formatCurrency(report?.valuation?.blendedValue)}
@@ -371,9 +364,9 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
               {['worst', 'base', 'best'].map(scenario => (
                 <div key={scenario} className="scenario-box">
                   <h3>
-                    {scenario === 'worst' && '📉 Downside Case'}
-                    {scenario === 'base' && '📊 Base Case'}
-                    {scenario === 'best' && '📈 Upside Case'}
+                    {scenario === 'worst' && 'Downside Case'}
+                    {scenario === 'base' && 'Base Case'}
+                    {scenario === 'best' && 'Upside Case'}
                   </h3>
                   <div className="scenario-metrics">
                     <div className="metric">
@@ -427,7 +420,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
 
             <div className="recommendations-section">
               <div className="recommendation-box">
-                <h3>🎯 Action Items</h3>
+                <h3>Action Items</h3>
                 <ol className="action-items">
                   {report?.recommendations?.actions?.map((action, idx) => (
                     <li key={idx}>{action}</li>
@@ -436,7 +429,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
               </div>
 
               <div className="recommendation-box">
-                <h3>⚡ Critical Issues</h3>
+                <h3>Critical Issues</h3>
                 <ul className="critical-issues">
                   {report?.recommendations?.issues?.map((issue, idx) => (
                     <li key={idx}>
@@ -448,7 +441,7 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
               </div>
 
               <div className="recommendation-box">
-                <h3>📈 Growth Opportunities</h3>
+                <h3>Growth Opportunities</h3>
                 <ul className="opportunities">
                   {report?.recommendations?.opportunities?.map((opp, idx) => (
                     <li key={idx}>{opp}</li>
@@ -464,12 +457,11 @@ const ReportViewer = ({ report, onExport, isLoading }) => {
       <footer className="report-footer">
         <div className="footer-content">
           <p>
-            <strong>Disclaimer:</strong> This report is for informational purposes only and
+            <strong>Disclaimer:</strong>This report is for informational purposes only and
             should not be considered as investment advice. Please consult with financial
             advisors before making investment decisions.
           </p>
-          <p className="footer-timestamp">
-            Generated: {report?.generatedDate
+          <p className="footer-timestamp">Generated: {report?.generatedDate
               ? new Date(report.generatedDate).toLocaleString()
               : 'N/A'}
           </p>

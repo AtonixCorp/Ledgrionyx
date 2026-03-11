@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  FaBook, FaPlus, FaEdit, FaTrash, FaSearch, FaDownload,
-  FaLayerGroup, FaChevronRight, FaChevronDown, FaCheckCircle,
-  FaBan, FaArchive, FaTimes, FaSave
-} from 'react-icons/fa';
+
 import { chartOfAccountsAPI } from '../../../services/api';
 
 const ACCOUNT_TYPES = [
@@ -16,9 +12,9 @@ const ACCOUNT_TYPES = [
 ];
 
 const ACCOUNT_STATUS = [
-  { value: 'active', label: 'Active', icon: <FaCheckCircle color="#48bb78" /> },
-  { value: 'inactive', label: 'Inactive', icon: <FaBan color="#fc8181" /> },
-  { value: 'archived', label: 'Archived', icon: <FaArchive color="#a0aec0" /> },
+  { value: 'active', label: 'Active'},
+  { value: 'inactive', label: 'Inactive'},
+  { value: 'archived', label: 'Archived'},
 ];
 
 const defaultForm = {
@@ -114,12 +110,12 @@ const ChartOfAccounts = () => {
       {/* Header */}
       <div className="acct-header">
         <div>
-          <h1><FaBook /> Chart of Accounts</h1>
+          <h1>Chart of Accounts</h1>
           <p>Manage your account hierarchy — assets, liabilities, equity, revenue, and expenses</p>
         </div>
         <div className="acct-header-actions">
-          <button className="btn-secondary"><FaDownload /> Export</button>
-          <button className="btn-primary" onClick={handleNew}><FaPlus /> New Account</button>
+          <button className="btn-secondary">Export</button>
+          <button className="btn-primary" onClick={handleNew}>New Account</button>
         </div>
       </div>
 
@@ -137,7 +133,7 @@ const ChartOfAccounts = () => {
       {/* Filters */}
       <div className="acct-filters">
         <div className="acct-search">
-          <FaSearch className="search-icon" />
+
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search accounts..." />
         </div>
         <select value={filterType} onChange={e => setFilterType(e.target.value)} className="acct-select">
@@ -156,7 +152,7 @@ const ChartOfAccounts = () => {
             return (
               <div key={t.value} className="acct-group">
                 <div className="acct-group-header" onClick={() => setExpandedTypes(p => ({ ...p, [t.value]: !isExpanded }))}>
-                  {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+
                   <span className="acct-type-badge" style={{ background: t.color }}>{t.label}</span>
                   <span className="acct-group-count">{items.length} accounts</span>
                   <span className="acct-group-balance">${formatCurrency(items.reduce((s, a) => s + parseFloat(a.current_balance || a.opening_balance || 0), 0))}</span>
@@ -181,8 +177,8 @@ const ChartOfAccounts = () => {
                             <span className={`status-badge status-${a.status}`}>{a.status}</span>
                           </td>
                           <td className="acct-actions">
-                            <button onClick={() => handleEdit(a)} className="btn-icon" title="Edit"><FaEdit /></button>
-                            <button onClick={() => handleDelete(a.id)} className="btn-icon btn-icon-danger" title="Delete"><FaTrash /></button>
+                            <button onClick={() => handleEdit(a)} className="btn-icon" title="Edit"></button>
+                            <button onClick={() => handleDelete(a.id)} className="btn-icon btn-icon-danger" title="Delete"></button>
                           </td>
                         </tr>
                       ))}
@@ -192,7 +188,7 @@ const ChartOfAccounts = () => {
               </div>
             );
           })}
-          {filtered.length === 0 && <div className="acct-empty"><FaLayerGroup /><p>No accounts found. Create your first account.</p></div>}
+          {filtered.length === 0 && <div className="acct-empty"><p>No accounts found. Create your first account.</p></div>}
         </div>
       )}
 
@@ -202,7 +198,7 @@ const ChartOfAccounts = () => {
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingAccount ? 'Edit Account' : 'New Account'}</h2>
-              <button onClick={() => setShowForm(false)}><FaTimes /></button>
+              <button onClick={() => setShowForm(false)}></button>
             </div>
             {error && <div className="modal-error">{error}</div>}
             <div className="modal-body">
@@ -257,7 +253,7 @@ const ChartOfAccounts = () => {
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
               <button onClick={handleSave} disabled={saving} className="btn-primary">
-                {saving ? 'Saving...' : <><FaSave /> Save Account</>}
+                {saving ? 'Saving...' : <>Save Account</>}
               </button>
             </div>
           </div>

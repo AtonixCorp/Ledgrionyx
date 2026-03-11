@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { 
-  FaCog, FaShieldAlt, FaBell, FaPlug, 
-  FaLink, FaToggleOn, FaToggleOff,
-  FaSlack, FaGoogle, FaMicrosoft, FaSave, FaCheck, FaInfo,
-  FaDatabase, FaLock, FaServer
-} from 'react-icons/fa';
 
 // Comprehensive list of countries served by Atonix Capital
 const COUNTRIES_SERVED = [
@@ -18,7 +12,7 @@ const COUNTRIES_SERVED = [
   { code: 'TG', name: 'Togo', region: 'West Africa', currency: 'XOF' },
   { code: 'LR', name: 'Liberia', region: 'West Africa', currency: 'LRD' },
   { code: 'SL', name: 'Sierra Leone', region: 'West Africa', currency: 'SLL' },
-  
+
   // Africa - East
   { code: 'KE', name: 'Kenya', region: 'East Africa', currency: 'KES' },
   { code: 'TZ', name: 'Tanzania', region: 'East Africa', currency: 'TZS' },
@@ -26,7 +20,7 @@ const COUNTRIES_SERVED = [
   { code: 'ET', name: 'Ethiopia', region: 'East Africa', currency: 'ETB' },
   { code: 'RW', name: 'Rwanda', region: 'East Africa', currency: 'RWF' },
   { code: 'MZ', name: 'Mozambique', region: 'East Africa', currency: 'MZN' },
-  
+
   // Africa - Southern
   { code: 'ZA', name: 'South Africa', region: 'Southern Africa', currency: 'ZAR' },
   { code: 'BW', name: 'Botswana', region: 'Southern Africa', currency: 'BWP' },
@@ -34,12 +28,12 @@ const COUNTRIES_SERVED = [
   { code: 'NA', name: 'Namibia', region: 'Southern Africa', currency: 'NAD' },
   { code: 'MW', name: 'Malawi', region: 'Southern Africa', currency: 'MWK' },
   { code: 'ZM', name: 'Zambia', region: 'Southern Africa', currency: 'ZMW' },
-  
+
   // Africa - Central
   { code: 'CM', name: 'Cameroon', region: 'Central Africa', currency: 'XAF' },
   { code: 'CG', name: 'Congo', region: 'Central Africa', currency: 'XAF' },
   { code: 'GA', name: 'Gabon', region: 'Central Africa', currency: 'XAF' },
-  
+
   // Europe
   { code: 'GB', name: 'United Kingdom', region: 'Europe', currency: 'GBP' },
   { code: 'DE', name: 'Germany', region: 'Europe', currency: 'EUR' },
@@ -53,11 +47,11 @@ const COUNTRIES_SERVED = [
   { code: 'SE', name: 'Sweden', region: 'Europe', currency: 'SEK' },
   { code: 'CH', name: 'Switzerland', region: 'Europe', currency: 'CHF' },
   { code: 'LU', name: 'Luxembourg', region: 'Europe', currency: 'EUR' },
-  
+
   // North America
   { code: 'US', name: 'United States', region: 'North America', currency: 'USD' },
   { code: 'CA', name: 'Canada', region: 'North America', currency: 'CAD' },
-  
+
   // Asia Pacific
   { code: 'SG', name: 'Singapore', region: 'Asia Pacific', currency: 'SGD' },
   { code: 'HK', name: 'Hong Kong', region: 'Asia Pacific', currency: 'HKD' },
@@ -144,7 +138,7 @@ const EnterpriseSettings = () => {
 
   const handleOrgSettingChange = (field, value) => {
     let updates = { [field]: value };
-    
+
     // If country is changed, automatically set the currency
     if (field === 'orgCountry') {
       const selectedCountry = COUNTRIES_SERVED.find(c => c.name === value);
@@ -152,7 +146,7 @@ const EnterpriseSettings = () => {
         updates.currency = selectedCountry.currency;
       }
     }
-    
+
     setOrgSettings({ ...orgSettings, ...updates });
     setSaved(false);
     setSaveError(null);
@@ -257,7 +251,7 @@ const EnterpriseSettings = () => {
     <div className="page-container enterprise-settings">
       <div className="settings-header">
         <h1 className="page-title">
-          <FaCog /> Settings & Integrations
+          Settings & Integrations
         </h1>
         <p className="subtitle">Manage organization settings, integrations, and security</p>
       </div>
@@ -265,13 +259,13 @@ const EnterpriseSettings = () => {
       {/* Save Confirmation */}
       {saved && (
         <div className="save-confirmation">
-          <FaCheck /> Settings saved successfully
+          Settings saved successfully
         </div>
       )}
 
       {saveError && (
         <div className="save-confirmation">
-          <FaInfo /> {saveError}
+           {saveError}
         </div>
       )}
 
@@ -282,25 +276,25 @@ const EnterpriseSettings = () => {
             className={`settings-tab ${activeTab === 'organization' ? 'active' : ''}`}
             onClick={() => setActiveTab('organization')}
           >
-            <FaCog /> Organization
+            Organization
           </button>
           <button
             className={`settings-tab ${activeTab === 'integrations' ? 'active' : ''}`}
             onClick={() => setActiveTab('integrations')}
           >
-            <FaLink /> Integrations
+            Integrations
           </button>
           <button
             className={`settings-tab ${activeTab === 'notifications' ? 'active' : ''}`}
             onClick={() => setActiveTab('notifications')}
           >
-            <FaBell /> Notifications
+            Notifications
           </button>
           <button
             className={`settings-tab ${activeTab === 'security' ? 'active' : ''}`}
             onClick={() => setActiveTab('security')}
           >
-            <FaShieldAlt /> Security & Privacy
+            Security & Privacy
           </button>
         </aside>
 
@@ -310,7 +304,7 @@ const EnterpriseSettings = () => {
           {activeTab === 'organization' && (
             <div className="settings-section">
               <h2>Organization Settings</h2>
-              
+
               <div className="settings-card">
                 <h3>Basic Information</h3>
                 <div className="form-group">
@@ -332,43 +326,43 @@ const EnterpriseSettings = () => {
                     >
                       <option value="">-- Select Country --</option>
                       {/* Africa - West */}
-                      <optgroup label="🌍 Africa - West">
+                      <optgroup label="Africa - West">
                         {COUNTRIES_SERVED.filter(c => c.region === 'West Africa').map(country => (
                           <option key={country.code} value={country.name}>{country.name}</option>
                         ))}
                       </optgroup>
                       {/* Africa - East */}
-                      <optgroup label="🌍 Africa - East">
+                      <optgroup label="Africa - East">
                         {COUNTRIES_SERVED.filter(c => c.region === 'East Africa').map(country => (
                           <option key={country.code} value={country.name}>{country.name}</option>
                         ))}
                       </optgroup>
                       {/* Africa - Southern */}
-                      <optgroup label="🌍 Africa - Southern">
+                      <optgroup label="Africa - Southern">
                         {COUNTRIES_SERVED.filter(c => c.region === 'Southern Africa').map(country => (
                           <option key={country.code} value={country.name}>{country.name}</option>
                         ))}
                       </optgroup>
                       {/* Africa - Central */}
-                      <optgroup label="🌍 Africa - Central">
+                      <optgroup label="Africa - Central">
                         {COUNTRIES_SERVED.filter(c => c.region === 'Central Africa').map(country => (
                           <option key={country.code} value={country.name}>{country.name}</option>
                         ))}
                       </optgroup>
                       {/* Europe */}
-                      <optgroup label="🇪🇺 Europe">
+                      <optgroup label="Europe">
                         {COUNTRIES_SERVED.filter(c => c.region === 'Europe').map(country => (
                           <option key={country.code} value={country.name}>{country.name}</option>
                         ))}
                       </optgroup>
                       {/* North America */}
-                      <optgroup label="🇺🇸 North America">
+                      <optgroup label="North America">
                         {COUNTRIES_SERVED.filter(c => c.region === 'North America').map(country => (
                           <option key={country.code} value={country.name}>{country.name}</option>
                         ))}
                       </optgroup>
                       {/* Asia Pacific */}
-                      <optgroup label="🌏 Asia Pacific">
+                      <optgroup label="Asia Pacific">
                         {COUNTRIES_SERVED.filter(c => c.region === 'Asia Pacific').map(country => (
                           <option key={country.code} value={country.name}>{country.name}</option>
                         ))}
@@ -429,7 +423,7 @@ const EnterpriseSettings = () => {
               </div>
 
               <button className="btn-primary" onClick={handleSaveSettings}>
-                <FaSave /> Save Organization Settings
+                Save Organization Settings
               </button>
             </div>
           )}
@@ -444,13 +438,13 @@ const EnterpriseSettings = () => {
                 {/* Slack Integration */}
                 <div className="integration-card">
                   <div className="integration-header">
-                    <FaSlack className="integration-icon slack" />
+
                     <h3>Slack</h3>
                   </div>
                   <p>Get tax alerts and compliance reminders in Slack</p>
                   <div className="integration-status">
                     {integrations.slack.connected ? (
-                      <span className="status-connected">✓ Connected</span>
+                      <span className="status-connected">Connected</span>
                     ) : (
                       <span className="status-disconnected">Not connected</span>
                     )}
@@ -459,7 +453,7 @@ const EnterpriseSettings = () => {
                     className={`btn-integration ${integrations.slack.enabled ? 'enabled' : 'disabled'}`}
                     onClick={() => handleIntegrationToggle('slack')}
                   >
-                    {integrations.slack.enabled ? <FaToggleOn /> : <FaToggleOff />}
+
                     {integrations.slack.enabled ? 'Enabled' : 'Disabled'}
                   </button>
                 </div>
@@ -467,13 +461,13 @@ const EnterpriseSettings = () => {
                 {/* Google Integration */}
                 <div className="integration-card">
                   <div className="integration-header">
-                    <FaGoogle className="integration-icon google" />
+
                     <h3>Google Drive</h3>
                   </div>
                   <p>Auto-sync documents to your Google Drive</p>
                   <div className="integration-status">
                     {integrations.google.connected ? (
-                      <span className="status-connected">✓ Connected</span>
+                      <span className="status-connected">Connected</span>
                     ) : (
                       <span className="status-disconnected">Not connected</span>
                     )}
@@ -482,7 +476,7 @@ const EnterpriseSettings = () => {
                     className={`btn-integration ${integrations.google.enabled ? 'enabled' : 'disabled'}`}
                     onClick={() => handleIntegrationToggle('google')}
                   >
-                    {integrations.google.enabled ? <FaToggleOn /> : <FaToggleOff />}
+
                     {integrations.google.enabled ? 'Enabled' : 'Disabled'}
                   </button>
                 </div>
@@ -490,13 +484,13 @@ const EnterpriseSettings = () => {
                 {/* Microsoft Integration */}
                 <div className="integration-card">
                   <div className="integration-header">
-                    <FaMicrosoft className="integration-icon microsoft" />
+
                     <h3>Microsoft 365</h3>
                   </div>
                   <p>Integrate with OneDrive and Teams</p>
                   <div className="integration-status">
                     {integrations.microsoft.connected ? (
-                      <span className="status-connected">✓ Connected</span>
+                      <span className="status-connected">Connected</span>
                     ) : (
                       <span className="status-disconnected">Not connected</span>
                     )}
@@ -505,7 +499,7 @@ const EnterpriseSettings = () => {
                     className={`btn-integration ${integrations.microsoft.enabled ? 'enabled' : 'disabled'}`}
                     onClick={() => handleIntegrationToggle('microsoft')}
                   >
-                    {integrations.microsoft.enabled ? <FaToggleOn /> : <FaToggleOff />}
+
                     {integrations.microsoft.enabled ? 'Enabled' : 'Disabled'}
                   </button>
                 </div>
@@ -513,16 +507,15 @@ const EnterpriseSettings = () => {
 
               {/* API Configuration */}
               <div className="settings-card">
-                <h3><FaPlug /> API Configuration</h3>
+                <h3>API Configuration</h3>
                 <p>Use the API key to programmatically access your organization data</p>
-                
+
                 <div className="api-config">
                   <div className="api-key-section">
                     <label>API Key</label>
                     <div className="api-key-display">
                       <code>{integrations.api.apiKey}</code>
-                      <button className="btn-small" onClick={handleRegenerateApiKey}>
-                        Regenerate
+                      <button className="btn-small" onClick={handleRegenerateApiKey}>Regenerate
                       </button>
                     </div>
                     <small>Keep your API key confidential. Anyone with this key can access your organization data.</small>
@@ -546,7 +539,7 @@ const EnterpriseSettings = () => {
 
               <div className="settings-card">
                 <h3>Alert Types</h3>
-                
+
                 <div className="notification-group">
                   <div className="notification-item">
                     <div className="notification-info">
@@ -557,7 +550,7 @@ const EnterpriseSettings = () => {
                       className={`toggle-btn ${notifications.taxDeadlineAlerts ? 'on' : 'off'}`}
                       onClick={() => handleNotificationChange('taxDeadlineAlerts')}
                     >
-                      {notifications.taxDeadlineAlerts ? <FaToggleOn /> : <FaToggleOff />}
+
                     </button>
                   </div>
 
@@ -570,7 +563,7 @@ const EnterpriseSettings = () => {
                       className={`toggle-btn ${notifications.complianceReminders ? 'on' : 'off'}`}
                       onClick={() => handleNotificationChange('complianceReminders')}
                     >
-                      {notifications.complianceReminders ? <FaToggleOn /> : <FaToggleOff />}
+
                     </button>
                   </div>
 
@@ -583,7 +576,7 @@ const EnterpriseSettings = () => {
                       className={`toggle-btn ${notifications.teamNotifications ? 'on' : 'off'}`}
                       onClick={() => handleNotificationChange('teamNotifications')}
                     >
-                      {notifications.teamNotifications ? <FaToggleOn /> : <FaToggleOff />}
+
                     </button>
                   </div>
 
@@ -596,7 +589,7 @@ const EnterpriseSettings = () => {
                       className={`toggle-btn ${notifications.reportGeneration ? 'on' : 'off'}`}
                       onClick={() => handleNotificationChange('reportGeneration')}
                     >
-                      {notifications.reportGeneration ? <FaToggleOn /> : <FaToggleOff />}
+
                     </button>
                   </div>
 
@@ -609,7 +602,7 @@ const EnterpriseSettings = () => {
                       className={`toggle-btn ${notifications.securityAlerts ? 'on' : 'off'}`}
                       onClick={() => handleNotificationChange('securityAlerts')}
                     >
-                      {notifications.securityAlerts ? <FaToggleOn /> : <FaToggleOff />}
+
                     </button>
                   </div>
 
@@ -622,13 +615,13 @@ const EnterpriseSettings = () => {
                       className={`toggle-btn ${notifications.monthlyDigest ? 'on' : 'off'}`}
                       onClick={() => handleNotificationChange('monthlyDigest')}
                     >
-                      {notifications.monthlyDigest ? <FaToggleOn /> : <FaToggleOff />}
+
                     </button>
                   </div>
                 </div>
 
                 <button className="btn-primary" onClick={handleSaveSettings}>
-                  <FaSave /> Save Notification Settings
+                  Save Notification Settings
                 </button>
               </div>
             </div>
@@ -641,44 +634,44 @@ const EnterpriseSettings = () => {
               <p className="section-description">Protect your organization's data and manage access</p>
 
               <div className="settings-card security-features">
-                <h3><FaShieldAlt /> Security Features</h3>
-                
+                <h3>Security Features</h3>
+
                 <div className="security-feature">
                   <div className="feature-info">
-                    <h4><FaLock /> Two-Factor Authentication</h4>
+                    <h4>Two-Factor Authentication</h4>
                     <p>Require 2FA for all team members</p>
                   </div>
                   <button
                     className={`toggle-btn ${security.twoFactorAuth ? 'on' : 'off'}`}
                     onClick={() => handleSecurityChange('twoFactorAuth', !security.twoFactorAuth)}
                   >
-                    {security.twoFactorAuth ? <FaToggleOn /> : <FaToggleOff />}
+
                   </button>
                 </div>
 
                 <div className="security-feature">
                   <div className="feature-info">
-                    <h4><FaDatabase /> Data Encryption</h4>
+                    <h4>Data Encryption</h4>
                     <p>End-to-end encryption for all data at rest and in transit</p>
                   </div>
                   <button
                     className={`toggle-btn ${security.dataEncryption ? 'on' : 'off'}`}
                     onClick={() => handleSecurityChange('dataEncryption', !security.dataEncryption)}
                   >
-                    {security.dataEncryption ? <FaToggleOn /> : <FaToggleOff />}
+
                   </button>
                 </div>
 
                 <div className="security-feature">
                   <div className="feature-info">
-                    <h4><FaServer /> Audit Logging</h4>
+                    <h4>Audit Logging</h4>
                     <p>Track all changes and access to organization data</p>
                   </div>
                   <button
                     className={`toggle-btn ${security.auditLogging ? 'on' : 'off'}`}
                     onClick={() => handleSecurityChange('auditLogging', !security.auditLogging)}
                   >
-                    {security.auditLogging ? <FaToggleOn /> : <FaToggleOff />}
+
                   </button>
                 </div>
 
@@ -707,17 +700,17 @@ const EnterpriseSettings = () => {
                     className={`toggle-btn ${security.apiRateLimiting ? 'on' : 'off'}`}
                     onClick={() => handleSecurityChange('apiRateLimiting', !security.apiRateLimiting)}
                   >
-                    {security.apiRateLimiting ? <FaToggleOn /> : <FaToggleOff />}
+
                   </button>
                 </div>
               </div>
 
               <div className="settings-card info-box">
-                <FaInfo /> <strong>Privacy Notice:</strong> Your data is encrypted and never shared with third parties. We comply with GDPR, CCPA, and local data protection regulations.
+                 <strong>Privacy Notice:</strong>Your data is encrypted and never shared with third parties. We comply with GDPR, CCPA, and local data protection regulations.
               </div>
 
               <button className="btn-primary" onClick={handleSaveSettings}>
-                <FaSave /> Save Security Settings
+                Save Security Settings
               </button>
             </div>
           )}

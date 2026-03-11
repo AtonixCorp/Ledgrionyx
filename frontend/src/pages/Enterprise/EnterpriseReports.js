@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaFileAlt, FaDownload, FaCalendar } from 'react-icons/fa';
 
 const EnterpriseReports = () => {
   const { currentOrganization } = useEnterprise();
@@ -81,7 +80,7 @@ const EnterpriseReports = () => {
       {/* Header */}
       <div className="reports-header">
         <div className="header-left">
-          <h1><FaFileAlt /> Reports & Exports</h1>
+          <h1>Reports & Exports</h1>
           <p>Generate comprehensive financial and compliance reports</p>
         </div>
       </div>
@@ -114,7 +113,7 @@ const EnterpriseReports = () => {
                   <>
                     <h2>{reports.find(r => r.id === selectedReport)?.name}</h2>
                     <p>{reports.find(r => r.id === selectedReport)?.description}</p>
-                    
+
                     <div className="report-sections">
                       <h3>Report Sections:</h3>
                       <ul>
@@ -129,7 +128,7 @@ const EnterpriseReports = () => {
 
               {/* Configuration Options */}
               <div className="config-card">
-                <h3><FaCalendar /> Report Period</h3>
+                <h3>Report Period</h3>
                 <div className="date-inputs">
                   <div className="input-group">
                     <label>From</label>
@@ -157,20 +156,17 @@ const EnterpriseReports = () => {
                   <button
                     className={`format-btn ${format === 'pdf' ? 'selected' : ''}`}
                     onClick={() => setFormat('pdf')}
-                  >
-                    PDF
+                  >PDF
                   </button>
                   <button
                     className={`format-btn ${format === 'excel' ? 'selected' : ''}`}
                     onClick={() => setFormat('excel')}
-                  >
-                    Excel
+                  >Excel
                   </button>
                   <button
                     className={`format-btn ${format === 'csv' ? 'selected' : ''}`}
                     onClick={() => setFormat('csv')}
-                  >
-                    CSV
+                  >CSV
                   </button>
                 </div>
               </div>
@@ -182,13 +178,12 @@ const EnterpriseReports = () => {
                   onClick={handleGenerateReport}
                   disabled={generating}
                 >
-                  <FaDownload /> {generating ? 'Generating...' : 'Generate & Download'}
+                   {generating ? 'Generating...' : 'Generate & Download'}
                 </button>
                 <button
                   className="btn-secondary"
                   onClick={() => handleDownloadSample(selectedReport)}
-                >
-                  Download Sample
+                >Download Sample
                 </button>
               </div>
 
@@ -242,7 +237,7 @@ const EnterpriseReports = () => {
               </div>
               <div className="report-actions">
                 <button className="btn-icon" title="Download">
-                  <FaDownload />
+
                 </button>
                 <button className="btn-icon" title="Share">
                   ↗

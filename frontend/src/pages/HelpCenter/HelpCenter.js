@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaBook, FaVideo, FaQuestionCircle, FaChevronDown, FaChevronUp, FaFileAlt, FaPlay } from 'react-icons/fa';
+
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 
@@ -38,7 +38,6 @@ const HelpCenter = () => {
   const categories = [
     {
       title: "Getting Started",
-      icon: <FaBook />,
       articles: [
         "Creating Your Account",
         "Setting Up Security",
@@ -48,7 +47,6 @@ const HelpCenter = () => {
     },
     {
       title: "Trading & Investing",
-      icon: <FaFileAlt />,
       articles: [
         "How to Place Orders",
         "Understanding Order Types",
@@ -58,7 +56,6 @@ const HelpCenter = () => {
     },
     {
       title: "Account Management",
-      icon: <FaQuestionCircle />,
       articles: [
         "Updating Personal Information",
         "Payment Methods",
@@ -68,7 +65,6 @@ const HelpCenter = () => {
     },
     {
       title: "Security & Privacy",
-      icon: <FaFileAlt />,
       articles: [
         "Two-Factor Authentication",
         "Password Security",
@@ -116,7 +112,7 @@ const HelpCenter = () => {
             <h1>Help Center</h1>
             <p>Find answers, guides, and tutorials to make the most of Atonix Capital</p>
             <div className="search-box">
-              <FaSearch className="search-icon" />
+
               <input
                 type="text"
                 placeholder="Search for help articles, guides, or FAQs..."
@@ -134,19 +130,19 @@ const HelpCenter = () => {
         <div className="container">
           <div className="links-grid">
             <Link to="#faqs" className="quick-link">
-              <FaQuestionCircle />
+
               <span>FAQs</span>
             </Link>
             <Link to="#guides" className="quick-link">
-              <FaBook />
+
               <span>Guides</span>
             </Link>
             <Link to="#videos" className="quick-link">
-              <FaVideo />
+
               <span>Videos</span>
             </Link>
             <Link to="#contact" className="quick-link">
-              <FaQuestionCircle />
+
               <span>Contact Support</span>
             </Link>
           </div>
@@ -165,7 +161,7 @@ const HelpCenter = () => {
                   onClick={() => toggleFaq(index)}
                 >
                   <span>{faq.question}</span>
-                  {expandedFaq === index ? <FaChevronUp /> : <FaChevronDown />}
+
                 </button>
                 {expandedFaq === index && (
                   <div className="faq-answer">
@@ -214,14 +210,13 @@ const HelpCenter = () => {
             {tutorials.map((tutorial, index) => (
               <div key={index} className="tutorial-card">
                 <div className="tutorial-thumbnail">
-                  <FaPlay className="play-icon" />
+
                   <span className="duration">{tutorial.duration}</span>
                 </div>
                 <div className="tutorial-content">
                   <h3>{tutorial.title}</h3>
                   <p>{tutorial.description}</p>
                   <button className="watch-btn">
-                    <FaPlay />
                     Watch Now
                   </button>
                 </div>
@@ -237,8 +232,7 @@ const HelpCenter = () => {
           <h2>Still Need Help?</h2>
           <div className="contact-content">
             <div className="contact-text">
-              <p>
-                Can't find what you're looking for? Our support team is here to help.
+              <p>Can't find what you're looking for? Our support team is here to help.
                 Contact us through any of the channels below.
               </p>
               <div className="contact-options">
@@ -261,7 +255,7 @@ const HelpCenter = () => {
             </div>
             <div className="contact-image">
               <div className="image-placeholder">
-                <FaQuestionCircle size={64} />
+
                 <span>24/7 Support</span>
               </div>
             </div>

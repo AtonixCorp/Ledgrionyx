@@ -1,12 +1,12 @@
 /**
  * Country Tax Rule Library
- * 
+ *
  * Comprehensive tax rules database with country-specific:
  * - Tax rates (personal, corporate, VAT)
  * - Filing requirements and deadlines
  * - Compliance rules
  * - Tax-specific logic
- * 
+ *
  * Strict Rule: Tax rules must be sourced from official regulations.
  * This library represents our current knowledge - updates required quarterly.
  */
@@ -21,7 +21,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'Nigeria',
     region: 'West Africa',
     currency: 'NGN',
-    
+
     // Corporate Income Tax
     corporateTax: {
       standardRate: 30, // 30% standard rate
@@ -102,7 +102,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'Ghana',
     region: 'West Africa',
     currency: 'GHS',
-    
+
     corporateTax: {
       standardRate: 25,
       smallBusinessRate: 15,
@@ -161,7 +161,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'Kenya',
     region: 'East Africa',
     currency: 'KES',
-    
+
     corporateTax: {
       standardRate: 30,
       smallBusinessRate: 0,
@@ -221,7 +221,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'South Africa',
     region: 'Southern Africa',
     currency: 'ZAR',
-    
+
     corporateTax: {
       standardRate: 28,
       smallBusinessRate: 0,
@@ -286,7 +286,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'United Kingdom',
     region: 'Europe',
     currency: 'GBP',
-    
+
     corporateTax: {
       standardRate: 25, // From April 2023 for profits > £250k
       smallBusinessRate: 19, // For profits ≤ £250k
@@ -348,7 +348,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'Germany',
     region: 'Europe',
     currency: 'EUR',
-    
+
     corporateTax: {
       standardRate: 30, // Includes trade tax
       effectiveFrom: '2024-01-01'
@@ -408,7 +408,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'United States',
     region: 'North America',
     currency: 'USD',
-    
+
     federalCorporateTax: {
       standardRate: 21,
       effectiveFrom: '2024-01-01'
@@ -461,7 +461,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'Canada',
     region: 'North America',
     currency: 'CAD',
-    
+
     federalCorporateTax: {
       standardRate: 15,
       smallBusinessRate: 9,
@@ -516,7 +516,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'Singapore',
     region: 'Asia Pacific',
     currency: 'SGD',
-    
+
     corporateTax: {
       standardRate: 17,
       effectiveFrom: '2024-01-01'
@@ -568,7 +568,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'India',
     region: 'Asia Pacific',
     currency: 'INR',
-    
+
     corporateTax: {
       standardRate: 30,
       effectiveFrom: '2024-01-01'
@@ -616,7 +616,7 @@ export const COUNTRY_TAX_RULES = {
     name: 'Australia',
     region: 'Asia Pacific',
     currency: 'AUD',
-    
+
     corporateTax: {
       standardRate: 30,
       smallBusinessRate: 25,

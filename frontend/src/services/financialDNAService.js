@@ -32,21 +32,21 @@ export const financialDNAService = {
 function analyzeSpendingPersonality(transactions) {
   const expenses = transactions.filter(t => t.type === 'expense');
   const totalSpent = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  
+
   const categorySpending = {};
   expenses.forEach(t => {
     categorySpending[t.category] = (categorySpending[t.category] || 0) + Math.abs(t.amount);
   });
 
   const luxuryCategories = ['entertainment', 'shopping', 'dining'];
-  
+
   const luxurySpending = luxuryCategories.reduce((sum, cat) => sum + (categorySpending[cat] || 0), 0);
-  
+
   const luxuryRatio = (luxurySpending / totalSpent) * 100;
 
   let personality = 'balanced';
   let description = 'You maintain a healthy balance between enjoying life and being responsible.';
-  
+
   if (luxuryRatio > 40) {
     personality = 'indulgent';
     description = 'You enjoy treating yourself and prioritize experiences and quality of life.';
@@ -92,7 +92,7 @@ function analyzeRiskTolerance(portfolio) {
     description,
     score,
     highRiskPercentage: highRiskPercentage.toFixed(1),
-    recommendation: tolerance === 'aggressive' 
+    recommendation: tolerance === 'aggressive'
       ? 'Consider adding some stable assets for downside protection.'
       : tolerance === 'conservative'
       ? 'You might benefit from slightly more growth-oriented investments.'
@@ -134,7 +134,7 @@ function analyzeSavingsDiscipline(transactions) {
     score,
     savingsRate: savingsRate.toFixed(1),
     monthlySavings: ((income - expenses) / 3).toFixed(2),
-    recommendation: savingsRate < 10 
+    recommendation: savingsRate < 10
       ? 'Aim to save at least 10-15% of your income.'
       : savingsRate < 20
       ? 'Try to increase savings to 20% for better financial security.'
@@ -175,10 +175,10 @@ function analyzeInvestmentArchetype(portfolio) {
     type: archetype,
     description,
     traits,
-    assetMix: Object.entries(assetTypes).map(([type, count]) => ({ 
-      type, 
-      count, 
-      percentage: ((count / portfolio.length) * 100).toFixed(1) 
+    assetMix: Object.entries(assetTypes).map(([type, count]) => ({
+      type,
+      count,
+      percentage: ((count / portfolio.length) * 100).toFixed(1)
     })),
     diversificationLevel: portfolio.length > 10 ? 'high' : portfolio.length > 5 ? 'moderate' : 'low'
   };

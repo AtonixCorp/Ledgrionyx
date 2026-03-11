@@ -54,7 +54,7 @@ const Analytics = () => {
   // Monthly trend
   const monthlyData = useMemo(() => {
     const months = {};
-    
+
     expenses.forEach(expense => {
       const month = new Date(expense.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
       if (!months[month]) {
@@ -139,7 +139,7 @@ const Analytics = () => {
       {/* Key Metrics */}
       <div className="grid-4">
         <div className="card metric-card">
-          <div className="metric-icon">📊</div>
+          <div className="metric-icon"></div>
           <div className="metric-content">
             <h4>Savings Rate</h4>
             <p className="metric-value">{savingsRate}%</p>
@@ -147,7 +147,7 @@ const Analytics = () => {
         </div>
 
         <div className="card metric-card">
-          <div className="metric-icon">💰</div>
+          <div className="metric-icon"></div>
           <div className="metric-content">
             <h4>Total Balance</h4>
             <p className={`metric-value ${balance >= 0 ? 'positive' : 'negative'}`}>
@@ -157,7 +157,7 @@ const Analytics = () => {
         </div>
 
         <div className="card metric-card">
-          <div className="metric-icon">📈</div>
+          <div className="metric-icon"></div>
           <div className="metric-content">
             <h4>Total Income</h4>
             <p className="metric-value positive">${totalIncome.toFixed(2)}</p>
@@ -165,7 +165,7 @@ const Analytics = () => {
         </div>
 
         <div className="card metric-card">
-          <div className="metric-icon">📉</div>
+          <div className="metric-icon"></div>
           <div className="metric-content">
             <h4>Total Expenses</h4>
             <p className="metric-value negative">${totalExpenses.toFixed(2)}</p>

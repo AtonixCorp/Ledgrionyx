@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Card, PageHeader, Input, Modal, Table } from '../../../components/ui';
-import { FaPlus } from 'react-icons/fa';
 
 const ChartOfAccounts = () => {
   const [showModal, setShowModal] = React.useState(false);
@@ -21,20 +20,17 @@ const ChartOfAccounts = () => {
         title="Chart of Accounts"
         subtitle="Manage your account structure"
         actions={
-          <Button 
-            variant="primary" 
-            icon={FaPlus}
+          <Button
+            variant="primary"
             onClick={() => setShowModal(true)}
-          >
-            New Account
+          >New Account
           </Button>
         }
       />
 
       <Card>
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>
-            No accounts yet. Create your first account to get started.
+          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No accounts yet. Create your first account to get started.
           </p>
         ) : (
           <Table columns={columns} data={data} />
@@ -50,7 +46,7 @@ const ChartOfAccounts = () => {
         <Input label="Account Code" required />
         <Input label="Account Name" required />
         <Input label="Account Type" required />
-        
+
         <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'flex-end' }}>
           <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
           <Button variant="primary">Create Account</Button>

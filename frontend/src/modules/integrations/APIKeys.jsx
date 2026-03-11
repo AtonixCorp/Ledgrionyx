@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaKey, FaPlus, FaTrash, FaEye } from 'react-icons/fa';
 
 const mockKeys = [
   { id: 'key_live_***4f8a', name: 'Production API', created: '2024-09-15', lastUsed: '2025-01-31', permissions: 'Read + Write', status: 'Active' },
@@ -27,18 +26,16 @@ export default function APIKeys() {
       <PageHeader
         title="API Keys"
         subtitle="Create and manage API keys for external integrations"
-        icon={<FaKey />}
         actions={
-          <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-            Generate New Key
+          <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Generate New Key
           </Button>
         }
       />
 
       <Card style={{ marginBottom: 16, padding: '12px 20px', background: '#fffbf0', border: '1px solid #f39c12' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#e67e22' }}>
-          <FaEye />
-          <span><strong>Security Notice:</strong> API keys provide full access to your account data. Never share keys publicly or commit them to source control.</span>
+
+          <span><strong>Security Notice:</strong>API keys provide full access to your account data. Never share keys publicly or commit them to source control.</span>
         </div>
       </Card>
 
@@ -55,7 +52,7 @@ export default function APIKeys() {
         </div>
         <div className="modal-footer">
           <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="primary" icon={<FaKey />}>Generate Key</Button>
+          <Button variant="primary">Generate Key</Button>
         </div>
       </Modal>
     </div>

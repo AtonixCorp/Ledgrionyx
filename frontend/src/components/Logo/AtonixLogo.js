@@ -31,10 +31,10 @@ const AtonixLogo = ({ size = 'medium' }) => {
         <g className="logo-symbol">
           {/* Left upward line of A */}
           <line x1="70" y1="130" x2="85" y2="60" stroke="white" strokeWidth="8" strokeLinecap="round" />
-          
+
           {/* Right upward line of A */}
           <line x1="130" y1="130" x2="115" y2="60" stroke="white" strokeWidth="8" strokeLinecap="round" />
-          
+
           {/* Horizontal bar of A */}
           <line x1="75" y1="105" x2="125" y2="105" stroke="white" strokeWidth="7" strokeLinecap="round" />
 
@@ -43,7 +43,7 @@ const AtonixLogo = ({ size = 'medium' }) => {
             {/* Arrow line */}
             <line x1="0" y1="15" x2="0" y2="-5" stroke="url(#accentGradient)" strokeWidth="6" strokeLinecap="round" />
             <line x1="0" y1="-5" x2="15" y2="-5" stroke="url(#accentGradient)" strokeWidth="6" strokeLinecap="round" />
-            
+
             {/* Arrow head */}
             <polygon points="0,-5 5,-12 -5,-12" fill="url(#accentGradient)" />
             <polygon points="15,-5 22,0 15,5" fill="url(#accentGradient)" />
@@ -64,7 +64,7 @@ const AtonixLogo = ({ size = 'medium' }) => {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-5px); }
         }
-        
+
         .atonix-logo.animated .logo-svg {
           animation: logoFloat 3s ease-in-out infinite;
         }

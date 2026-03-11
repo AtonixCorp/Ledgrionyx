@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useFinance } from '../../context/FinanceContext';
 import taxCalculatorService from '../../services/taxCalculatorService';
-import { FaGlobe, FaPercentage, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 const FinancialSettings = () => {
-  const { 
-    userCountry, 
-    userTaxRate, 
+  const {
+    userCountry,
+    userTaxRate,
     userTaxType,
-    updateUserCountry, 
+    updateUserCountry,
     updateUserTaxType,
     updateUserTaxRate,
     financialSummary,
@@ -89,15 +88,14 @@ const FinancialSettings = () => {
 
       {saved && (
         <div className="save-notification">
-          <FaCheckCircle /> Settings saved successfully! All calculations have been updated.
+          Settings saved successfully! All calculations have been updated.
         </div>
       )}
 
       {/* Country Selection */}
       <div className="card settings-card">
-        <h2><FaGlobe /> Country & Location</h2>
-        <p className="setting-description">
-          Select your country to automatically apply the correct tax rates and currency.
+        <h2>Country & Location</h2>
+        <p className="setting-description">Select your country to automatically apply the correct tax rates and currency.
         </p>
 
         <div className="form-group">
@@ -134,7 +132,7 @@ const FinancialSettings = () => {
             </div>
             {taxInfo.aiVerified && (
               <div className="info-row">
-                <span className="ai-badge"><FaCheckCircle /> AI Verified</span>
+                <span className="ai-badge">AI Verified</span>
               </div>
             )}
           </div>
@@ -143,9 +141,8 @@ const FinancialSettings = () => {
 
       {/* Tax Settings */}
       <div className="card settings-card">
-        <h2><FaPercentage /> Tax Configuration</h2>
-        <p className="setting-description">
-          Choose your tax type and rate. This affects all income and expense calculations.
+        <h2>Tax Configuration</h2>
+        <p className="setting-description">Choose your tax type and rate. This affects all income and expense calculations.
         </p>
 
         <div className="form-group">
@@ -191,22 +188,21 @@ const FinancialSettings = () => {
             step="0.1"
             className="form-control"
           />
-          <small className="form-hint">
-            Adjust if your actual rate differs from the standard rate
+          <small className="form-hint">Adjust if your actual rate differs from the standard rate
           </small>
         </div>
 
         {validation && (
           <div className={`validation-message ${validation.isValid ? 'valid' : 'invalid'}`}>
             {validation.isValid ? (
-              <span><FaCheckCircle /> Valid tax rate</span>
+              <span>Valid tax rate</span>
             ) : (
-              <span><FaExclamationTriangle /> {validation.errors.join(', ')}</span>
+              <span> {validation.errors.join(', ')}</span>
             )}
             {validation.warnings && validation.warnings.length > 0 && (
               <div className="warnings">
                 {validation.warnings.map((warning, index) => (
-                  <p key={index}><FaExclamationTriangle /> {warning}</p>
+                  <p key={index}> {warning}</p>
                 ))}
               </div>
             )}
@@ -247,11 +243,10 @@ const FinancialSettings = () => {
 
       {/* Save Button */}
       <div className="settings-actions">
-        <button 
+        <button
           className="btn-primary btn-large"
           onClick={handleSave}
-        >
-          Save Settings
+        >Save Settings
         </button>
       </div>
 

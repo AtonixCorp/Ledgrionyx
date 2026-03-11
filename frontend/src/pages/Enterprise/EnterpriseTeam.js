@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { FaUsers, FaPlus, FaTrash, FaEdit, FaCheck } from 'react-icons/fa';
 
 const EnterpriseTeam = () => {
   const { currentOrganization } = useEnterprise();
@@ -85,7 +84,7 @@ const EnterpriseTeam = () => {
       {/* Header */}
       <div className="team-header">
         <div className="header-left">
-          <h1><FaUsers /> Team & Permissions</h1>
+          <h1>Team & Permissions</h1>
           <p>Manage team members and their access levels</p>
         </div>
         <button className="btn-primary" onClick={() => {
@@ -93,7 +92,7 @@ const EnterpriseTeam = () => {
           setFormData({ email: '', role: 'viewer', entities: [] });
           setShowModal(true);
         }}>
-          <FaPlus /> Invite Team Member
+          Invite Team Member
         </button>
       </div>
 
@@ -126,7 +125,7 @@ const EnterpriseTeam = () => {
               <div className="col-permission">{perm.name}</div>
               {roles.map(role => (
                 <div key={role.code} className="col-role">
-                  {perm.permissions.includes(role.code) && <FaCheck style={{color: '#10b981'}} />}
+
                 </div>
               ))}
             </div>
@@ -137,7 +136,7 @@ const EnterpriseTeam = () => {
       {/* Team Members List */}
       <div className="team-members-section">
         <h2>Team Members ({team.length})</h2>
-        
+
         {loading ? (
           <div className="loading">Loading team...</div>
         ) : team.length === 0 ? (
@@ -164,33 +163,32 @@ const EnterpriseTeam = () => {
 
                 <div className="member-status">
                   <span className={`status-badge ${member.status}`}>
-                    {member.status === 'active' ? '✓ Active' : '◯ Pending'}
+                    {member.status === 'active' ? 'Active' : 'Pending'}
                   </span>
                   {member.joinedDate && <div className="joined-date">{member.joinedDate}</div>}
                 </div>
 
                 {member.status === 'pending' && (
                   <div className="pending-actions">
-                    <button className="btn-link" onClick={() => handleAcceptInvite(member.email)}>
-                      Invite Sent
+                    <button className="btn-link" onClick={() => handleAcceptInvite(member.email)}>Invite Sent
                     </button>
                   </div>
                 )}
 
                 <div className="member-actions">
-                  <button 
-                    className="btn-icon" 
+                  <button
+                    className="btn-icon"
                     title="Edit"
                     onClick={() => handleEditTeamMember(member)}
                   >
-                    <FaEdit />
+
                   </button>
-                  <button 
-                    className="btn-icon delete" 
+                  <button
+                    className="btn-icon delete"
                     title="Remove"
                     onClick={() => handleDeleteTeamMember(member.id)}
                   >
-                    <FaTrash />
+
                   </button>
                 </div>
               </div>
@@ -237,8 +235,7 @@ const EnterpriseTeam = () => {
               <button className="btn-primary" onClick={handleAddTeamMember}>
                 {editingId ? 'Update' : 'Send Invite'}
               </button>
-              <button className="btn-secondary" onClick={() => setShowModal(false)}>
-                Cancel
+              <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancel
               </button>
             </div>
           </div>

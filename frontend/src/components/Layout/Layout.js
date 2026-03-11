@@ -3,16 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import {
-  FaChartBar, FaUniversity, FaExchangeAlt, FaCreditCard,
-  FaLandmark, FaCog, FaLifeRing, FaSignOutAlt, FaBars, FaTimes,
-  FaChevronDown, FaUsers, FaFileAlt, FaShieldAlt, FaSitemap, FaBuilding,
-  FaChartLine, FaCheckCircle, FaUsersCog, FaPlug, FaStore, FaPalette,
-  FaExclamationTriangle, FaHome, FaBell, FaClipboardList,
-  FaBook, FaPencilAlt, FaList, FaFile, FaDollarSign, FaCalendar, FaSync,
-  FaChartPie, FaPercent, FaLock,
-  FaArchive, FaDatabase, FaRobot, FaKey, FaGlobe, FaHeadset, FaQuestion, FaTools
-} from 'react-icons/fa';
 
 const BANKING_MODES = [
   { id: 'retail',   label: 'Retail',   short: 'R' },
@@ -42,99 +32,98 @@ const Layout = ({ children }) => {
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
 
-  // ── Navigation definitions ──────────────────────────────
-  
+  //  Navigation definitions
+
   const overviewNav = [
-    { to: '/app/firm/enterprise-branches',    icon: <FaHome />,         label: 'Dashboard' },
-    { to: '/app/overview/notifications',  icon: <FaBell />,         label: 'Notifications' },
-    { to: '/app/overview/tasks',          icon: <FaClipboardList />, label: 'Tasks' },
+    { to: '/app/firm/enterprise-branches',    label: 'Dashboard' },
+    { to: '/app/overview/notifications',  label: 'Notifications' },
+    { to: '/app/overview/tasks',          label: 'Tasks' },
   ];
 
   const accountingNav = [
-    { to: '/app/accounting/chart-of-accounts', icon: <FaBook />,         label: 'Chart of Accounts' },
-    { to: '/app/accounting/general-ledger', icon: <FaList />,            label: 'General Ledger' },
-    { to: '/app/accounting/journal-entries', icon: <FaPencilAlt />,      label: 'Journal Entries' },
-    { 
+    { to: '/app/accounting/chart-of-accounts', label: 'Chart of Accounts' },
+    { to: '/app/accounting/general-ledger', label: 'General Ledger' },
+    { to: '/app/accounting/journal-entries', label: 'Journal Entries' },
+    {
       label: 'Sub-Ledgers',
-      icon: <FaList />,
       submenu: [
-        { to: '/app/subledgers/accounts-receivable', icon: <FaDollarSign />,  label: 'Accounts Receivable' },
-        { to: '/app/subledgers/accounts-payable',    icon: <FaFileAlt />,     label: 'Accounts Payable' },
-        { to: '/app/subledgers/cash-bank',           icon: <FaUniversity />,  label: 'Cash & Bank' },
-        { to: '/app/subledgers/fixed-assets',        icon: <FaBuilding />,    label: 'Fixed Assets' },
-        { to: '/app/subledgers/inventory',           icon: <FaArchive />,     label: 'Inventory' },
-        { to: '/app/subledgers/payroll',             icon: <FaUsersCog />,    label: 'Payroll' },
-        { to: '/app/subledgers/tax',                 icon: <FaPercent />,     label: 'Tax' },
+        { to: '/app/subledgers/accounts-receivable', label: 'Accounts Receivable' },
+        { to: '/app/subledgers/accounts-payable',    label: 'Accounts Payable' },
+        { to: '/app/subledgers/cash-bank',           label: 'Cash & Bank' },
+        { to: '/app/subledgers/fixed-assets',        label: 'Fixed Assets' },
+        { to: '/app/subledgers/inventory',           label: 'Inventory' },
+        { to: '/app/subledgers/payroll',             label: 'Payroll' },
+        { to: '/app/subledgers/tax',                 label: 'Tax' },
       ]
     },
-    { to: '/app/accounting/reconciliation', icon: <FaSync />,            label: 'Reconciliation' },
+    { to: '/app/accounting/reconciliation', label: 'Reconciliation' },
   ];
 
   const billingNav = [
-    { to: '/app/billing/invoices',        icon: <FaFile />,         label: 'Invoices' },
-    { to: '/app/billing/bills',           icon: <FaFileAlt />,      label: 'Bills' },
-    { to: '/app/billing/customers',       icon: <FaUsers />,        label: 'Customers' },
-    { to: '/app/billing/vendors',         icon: <FaBuilding />,     label: 'Vendors' },
-    { to: '/app/billing/payment-scheduling', icon: <FaCalendar />,  label: 'Payment Scheduling' },
-    { to: '/app/billing/collections',     icon: <FaChartLine />,    label: 'Collections' },
+    { to: '/app/billing/invoices',        label: 'Invoices' },
+    { to: '/app/billing/bills',           label: 'Bills' },
+    { to: '/app/billing/customers',       label: 'Customers' },
+    { to: '/app/billing/vendors',         label: 'Vendors' },
+    { to: '/app/billing/payment-scheduling', label: 'Payment Scheduling' },
+    { to: '/app/billing/collections',     label: 'Collections' },
   ];
 
   const reportingNav = [
-    { to: '/app/reporting/statements',    icon: <FaChartBar />,     label: 'Financial Statements' },
-    { to: '/app/reporting/trial-balance', icon: <FaList />,         label: 'Trial Balance' },
-    { to: '/app/reporting/analytics',     icon: <FaChartPie />,     label: 'Reports & Analytics' },
+    { to: '/app/reporting/statements',    label: 'Financial Statements' },
+    { to: '/app/reporting/trial-balance', label: 'Trial Balance' },
+    { to: '/app/reporting/analytics',     label: 'Reports & Analytics' },
   ];
 
   const budgetingNav = [
-    { to: '/app/budgeting/budgets',       icon: <FaChartBar />,     label: 'Budgets' },
-    { to: '/app/budgeting/forecasts',     icon: <FaChartLine />,    label: 'Forecasts' },
-    { to: '/app/budgeting/variance-analysis', icon: <FaPercent />,  label: 'Variance Analysis' },
+    { to: '/app/budgeting/budgets',       label: 'Budgets' },
+    { to: '/app/budgeting/forecasts',     label: 'Forecasts' },
+    { to: '/app/budgeting/variance-analysis', label: 'Variance Analysis' },
   ];
 
   const complianceNav = [
-    { to: '/app/compliance/tax-center',   icon: <FaCheckCircle />,  label: 'Tax Center' },
-    { to: '/app/compliance/audit-trail',  icon: <FaShieldAlt />,    label: 'Audit Trail' },
-    { to: '/app/compliance/period-close', icon: <FaLock />,         label: 'Period Close' },
+    { to: '/app/compliance/tax-center',   label: 'Tax Center' },
+    { to: '/app/compliance/audit-trail',  label: 'Audit Trail' },
+    { to: '/app/compliance/period-close', label: 'Period Close' },
   ];
 
   const documentsNav = [
-    { to: '/app/documents/vault',         icon: <FaArchive />,      label: 'Document Vault' },
-    { to: '/app/documents/receipts',      icon: <FaFile />,         label: 'Receipts' },
+    { to: '/app/documents/vault',         label: 'Document Vault' },
+    { to: '/app/documents/receipts',      label: 'Receipts' },
   ];
 
   const clientsNav = [
-    { to: '/app/clients/directory',       icon: <FaUsers />,        label: 'Clients' },
-    { to: '/app/clients/portal',          icon: <FaGlobe />,        label: 'Client Portal' },
+    { to: '/app/clients/directory',       label: 'Clients' },
+    { to: '/app/clients/portal',          label: 'Client Portal' },
   ];
 
   const automationNav = [
-    { to: '/app/automation/rules',        icon: <FaRobot />,        label: 'Automation Rules' },
-    { to: '/app/automation/recurring',    icon: <FaSync />,         label: 'Recurring Entries' },
-    { to: '/app/automation/ai-insights',  icon: <FaChartLine />,    label: 'AI Insights' },
+    { to: '/app/automation/rules',        label: 'Automation Rules' },
+    { to: '/app/automation/recurring',    label: 'Recurring Entries' },
+    { to: '/app/automation/ai-insights',  label: 'AI Insights' },
   ];
 
   const integrationsNav = [
-    { to: '/app/integrations/api-keys',   icon: <FaKey />,          label: 'API Keys' },
-    { to: '/app/integrations/list',       icon: <FaPlug />,         label: 'Connected Apps' },
+    { to: '/app/integrations/api-keys',   label: 'API Keys' },
+    { to: '/app/integrations/list',       label: 'Connected Apps' },
   ];
 
   const settingsNav = [
-    { to: '/app/settings/firm',           icon: <FaBuilding />,     label: 'Firm Settings' },
-    { to: '/app/settings/entities',       icon: <FaUniversity />,   label: 'Entity Management' },
-    { to: '/app/settings/team',           icon: <FaUsers />,        label: 'Team & Permissions' },
-    { to: '/app/settings/security',       icon: <FaShieldAlt />,    label: 'Security' },
-    { to: '/app/settings/branding',       icon: <FaPalette />,      label: 'Branding' },
-    { to: '/app/settings/subscription',   icon: <FaCreditCard />,   label: 'Subscription' },
+    { to: '/app/settings/firm',           label: 'Firm Settings' },
+    { to: '/app/settings/entities',       label: 'Entity Management' },
+    { to: '/app/settings/team',           label: 'Team & Permissions' },
+    { to: '/app/settings/security',       label: 'Security' },
+    { to: '/app/settings/branding',       label: 'Branding' },
+    { to: '/app/settings/subscription',   label: 'Subscription' },
   ];
 
   const supportNav = [
-    { to: '/app/support/help',            icon: <FaQuestion />,     label: 'Help Center' },
-    { to: '/app/support/tickets',         icon: <FaHeadset />,      label: 'Support Tickets' },
+    { to: '/app/support/help',            label: 'Help Center' },
+    { to: '/app/support/tickets',         label: 'Support Tickets' },
   ];
 
   const bottomNav = [
-    { to: '/app/enterprise/settings',     icon: <FaCog />,          label: 'Settings' },
-    { to: '/support',                     icon: <FaLifeRing />,     label: 'Support' },
+    { to: '/app/enterprise/settings',     label: 'Settings' },
+    { to: '/support',                     label: 'Support' },
   ];
 
   const toggleSubMenu = (label) => {
@@ -159,7 +148,7 @@ const Layout = ({ children }) => {
               {!sidebarMinimized && (
                 <>
                   <span className="nav-label">{item.label}</span>
-                  <FaChevronDown className={`chevron ${isExpanded ? 'expanded' : ''}`} />
+
                 </>
               )}
             </button>
@@ -181,7 +170,7 @@ const Layout = ({ children }) => {
           </li>
         );
       }
-      
+
       const { to, icon, label } = item;
       return (
         <li key={to}>
@@ -199,12 +188,8 @@ const Layout = ({ children }) => {
 
   return (
     <div className="layout">
-      {/* ── SIDEBAR ── */}
+      {/*  SIDEBAR  */}
       <nav className={`sidebar${sidebarMinimized ? ' minimized' : ''}`} aria-label="Main navigation">
-
-
-
-
 
         {/* Navigation */}
         <ul className="nav-menu" role="list">
@@ -279,13 +264,13 @@ const Layout = ({ children }) => {
             )}
           </div>
           <button onClick={handleLogout} className="logout-btn" title="Sign out">
-            <FaSignOutAlt className="logout-icon" />
+
             {!sidebarMinimized && <span>Sign Out</span>}
           </button>
         </div>
       </nav>
 
-      {/* ── MAIN CONTENT ── */}
+      {/*  MAIN CONTENT  */}
       <div className={`main-wrapper${sidebarMinimized ? ' sidebar-minimized' : ''}`}>
         {/* Top Bar */}
         <header className="topbar">

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
-import { FaBoxes, FaPlus, FaDownload } from 'react-icons/fa';
 
 const mockInventory = [
   { sku: 'SKU-001', name: 'Enterprise License - Annual', category: 'Software', qty: 142, unitCost: '$4,800.00', totalValue: '$681,600.00', reorderLevel: 10, status: 'In Stock' },
@@ -31,12 +30,10 @@ export default function InventoryModule() {
       <PageHeader
         title="Inventory"
         subtitle="Track inventory levels, valuations, and reorder points"
-        icon={<FaBoxes />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Valuation Report</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              Add Item
+            <Button variant="secondary" size="small">Valuation Report</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>Add Item
             </Button>
           </>
         }

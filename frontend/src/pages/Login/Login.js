@@ -79,13 +79,12 @@ const Login = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  '{showPassword ? "Hide" : "Show"}'
                 </button>
               </div>
             </div>
 
-            <button type="submit" className="btn-primary btn-full">
-              Sign In
+            <button type="submit" className="btn-primary btn-full">Sign In
             </button>
           </form>
 

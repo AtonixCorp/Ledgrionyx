@@ -2,38 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, PageHeader } from '../../components/ui';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import {
-  FaArrowDown,
-  FaArrowUp,
-  FaBell,
-  FaCheck,
-  FaCheckCircle,
-  FaClock,
-  FaDownload,
-  FaExchangeAlt,
-  FaFileAlt,
-  FaFilter,
-  FaLock,
-  FaRobot,
-  FaWallet,
-} from 'react-icons/fa';
-
-const trendIconMap = {
-  up: FaArrowUp,
-  down: FaArrowDown,
-  flat: FaClock,
-};
-
-const kpiIconMap = {
-  wallet: FaWallet,
-  file: FaFileAlt,
-  clock: FaClock,
-  arrowUp: FaArrowUp,
-  exchange: FaExchangeAlt,
-  robot: FaRobot,
-};
-
-// Icon styling moved to CSS class .kpi-widget-icon
 
 const emptyDashboard = {
   summary: {
@@ -82,7 +50,7 @@ const formatPoints = (series) => {
       const y = 100 - ((point - min) / range) * 78 - 10;
       return `${x},${y}`;
     })
-    .join(' ');
+    .join('');
 };
 
 const GridContainer = ({ className = '', children }) => <div className={className}>{children}</div>;
@@ -99,21 +67,16 @@ const SectionCard = ({ title, actions, children }) => (
 );
 
 const KPIWidget = ({ item, active, onSelect }) => {
-  const TrendIcon = trendIconMap[item.trend?.direction] || FaClock;
-  const Icon = kpiIconMap[item.iconKey] || FaWallet;
 
   return (
     <div className={`kpi-widget ${active ? 'active' : ''}`} onClick={() => onSelect(item.id)}>
       <div className="kpi-widget-header">
         <span className="kpi-widget-label">{item.label}</span>
-        <span className="kpi-widget-icon">
-          <Icon />
-        </span>
+        <span className="kpi-widget-icon"></span>
       </div>
       <div className="kpi-widget-value">{item.value}</div>
       <div className="kpi-widget-meta">
         <span className={`kpi-trend ${item.trend?.direction || 'flat'}`}>
-          <TrendIcon />
           {item.trend?.value || '0%'}
         </span>
         <span className="kpi-widget-sub">{item.sublabel}</span>
@@ -178,7 +141,7 @@ const CashFlowGraph = ({ period, onChangePeriod, series }) => (
 );
 
 const ActivityFeed = ({ filter, onFilterChange, items, onSelectContext }) => (
-  <SectionCard title="Recent Transactions Feed" actions={<Button variant="secondary" size="small" icon={FaFilter}>Filter</Button>}>
+  <SectionCard title="Recent Transactions Feed" actions={<Button variant="secondary" size="small">Filter</Button>}>
     <div className="feed-filters">
       {['All', 'Bank', 'Journals', 'AR', 'AP'].map((item) => (
         <button
@@ -207,7 +170,7 @@ const ActivityFeed = ({ filter, onFilterChange, items, onSelectContext }) => (
 );
 
 const ReconciliationStatus = ({ items, onSelectContext }) => (
-  <SectionCard title="Reconciliation Status" actions={<Button variant="secondary" size="small" icon={FaCheckCircle}>Review</Button>}>
+  <SectionCard title="Reconciliation Status" actions={<Button variant="secondary" size="small">Review</Button>}>
     <div className="recon-list">
       {items.length ? items.map((item) => (
         <div key={item.name} className="recon-item" onClick={() => onSelectContext('cash')}>
@@ -229,7 +192,7 @@ const TaskList = ({ items, onSelectContext }) => (
       {items.length ? items.map((item) => (
         <div key={item.id} className="task-item" onClick={() => onSelectContext(item.context)}>
           <div className={`task-checkbox ${item.done ? 'done' : ''}`}>
-            {item.done ? <FaCheck style={{ color: '#ffffff', fontSize: 10 }} /> : null}
+            
           </div>
           <div className="task-body">
             <div className={`task-title ${item.done ? 'done' : ''}`}>{item.title}</div>
@@ -243,11 +206,11 @@ const TaskList = ({ items, onSelectContext }) => (
 );
 
 const AlertList = ({ items, onSelectContext }) => (
-  <SectionCard title="Compliance & Audit Alerts" actions={<Button variant="secondary" size="small" icon={FaBell}>View All</Button>}>
+  <SectionCard title="Compliance & Audit Alerts" actions={<Button variant="secondary" size="small">View All</Button>}>
     <div className="alert-list">
       {items.length ? items.map((item) => (
         <div key={item.id} className={`alert-item ${item.level}`} onClick={() => onSelectContext(item.context)}>
-          <FaBell className="alert-icon" />
+
           <div className="alert-content">
             <div className="alert-title">{item.title}</div>
             <div className="alert-desc">{item.desc}</div>
@@ -260,11 +223,11 @@ const AlertList = ({ items, onSelectContext }) => (
 );
 
 const DocumentRequests = ({ items, onSelectContext }) => (
-  <SectionCard title="Document Requests" actions={<Button variant="secondary" size="small" icon={FaFileAlt}>Workspace</Button>}>
+  <SectionCard title="Document Requests" actions={<Button variant="secondary" size="small">Workspace</Button>}>
     <div className="doc-list">
       {items.length ? items.map((item) => (
         <div key={item.id} className="doc-item" onClick={() => onSelectContext(item.context)}>
-          <FaFileAlt className="doc-item-icon" />
+
           <div className="doc-item-info">
             <div className="doc-item-name">{item.name}</div>
             <div className="doc-item-sub">{item.sub}</div>
@@ -385,7 +348,7 @@ const OverviewDashboard = () => {
         subtitle={`Financial health, activity and workflows`}
         actions={
           <div className="dashboard-header-actions">
-            <Button variant="primary" size="small" icon={FaLock}>Open Close Workspace</Button>
+            <Button variant="primary" size="small">Open Close Workspace</Button>
           </div>
         }
       />

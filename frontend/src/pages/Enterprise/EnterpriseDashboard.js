@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import {
-  FaGlobe, FaBuilding, FaMapMarkerAlt, FaDollarSign,
-  FaArrowUp, FaArrowDown, FaSync, FaExclamationTriangle,
-  FaFilter, FaSitemap
-} from 'react-icons/fa';
+
 import { Button } from '../../components/ui';
 
 const REGION_MAP = {
@@ -100,7 +96,7 @@ const EnterpriseDashboard = () => {
     return (
       <div className="page-shell">
         <div className="ed-empty-state">
-          <FaSitemap size={48} />
+
           <h2>No Organization Selected</h2>
           <p>Create or select an organization to view the Enterprise Dashboard.</p>
         </div>
@@ -111,7 +107,7 @@ const EnterpriseDashboard = () => {
   return (
     <div className="page-shell">
 
-      {/* ── Page Header ── */}
+      {/*  Page Header  */}
       <div className="page-shell-header">
         <div>
           <h1 className="page-shell-title">Enterprise Dashboard</h1>
@@ -123,61 +119,57 @@ const EnterpriseDashboard = () => {
           <Button
             variant="secondary"
             size="small"
-            icon={FaBuilding}
             onClick={() => navigate('/app/enterprise/entities')}
-          >
-            Manage Entities
+          >Manage Entities
           </Button>
           <Button
             variant="primary"
             size="small"
-            icon={FaSync}
             onClick={() => {
               fetchOrgOverview(currentOrganization.id);
               fetchEntities(currentOrganization.id);
             }}
-          >
-            Refresh
+          >Refresh
           </Button>
         </div>
       </div>
 
-      {/* ══ BAND 1 — Financial Health KPIs ══ */}
+      {/*  BAND 1 — Financial Health KPIs  */}
       <section className="ed-band">
         <div className="grid-kpi-6">
           <div className="kpi-card">
-            <div className="ed-kpi-icon-wrap kpi-icon--blue"><FaGlobe /></div>
+            <div className="ed-kpi-icon-wrap kpi-icon--blue"></div>
             <p className="kpi-card-label">Jurisdictions</p>
             <p className="kpi-card-value numeric">
               {orgOverview?.active_jurisdictions || branchData.length}
             </p>
           </div>
           <div className="kpi-card">
-            <div className="ed-kpi-icon-wrap kpi-icon--purple"><FaBuilding /></div>
+            <div className="ed-kpi-icon-wrap kpi-icon--purple"></div>
             <p className="kpi-card-label">Active Entities</p>
             <p className="kpi-card-value numeric">
               {orgOverview?.active_entities || branchData.length}
             </p>
           </div>
           <div className="kpi-card">
-            <div className="ed-kpi-icon-wrap kpi-icon--green"><FaArrowUp /></div>
+            <div className="ed-kpi-icon-wrap kpi-icon--green"></div>
             <p className="kpi-card-label">Total Revenue</p>
             <p className="kpi-card-value numeric">{fmt(totalRevenue)}</p>
           </div>
           <div className="kpi-card">
-            <div className="ed-kpi-icon-wrap kpi-icon--teal"><FaDollarSign /></div>
+            <div className="ed-kpi-icon-wrap kpi-icon--teal"></div>
             <p className="kpi-card-label">Net Profit</p>
             <p className={`kpi-card-value numeric ${totalProfit >= 0 ? 'kpi-val-positive' : 'kpi-val-negative'}`}>
               {fmt(Math.abs(totalProfit))}
             </p>
           </div>
           <div className="kpi-card">
-            <div className="ed-kpi-icon-wrap kpi-icon--orange"><FaExclamationTriangle /></div>
+            <div className="ed-kpi-icon-wrap kpi-icon--orange"></div>
             <p className="kpi-card-label">Tax Exposure</p>
             <p className="kpi-card-value numeric">{fmt(totalTax)}</p>
           </div>
           <div className="kpi-card">
-            <div className="ed-kpi-icon-wrap kpi-icon--red"><FaExclamationTriangle /></div>
+            <div className="ed-kpi-icon-wrap kpi-icon--red"></div>
             <p className="kpi-card-label">Pending Returns</p>
             <p className="kpi-card-value numeric">{orgOverview?.pending_tax_returns || 0}</p>
           </div>
@@ -191,18 +183,18 @@ const EnterpriseDashboard = () => {
             className={`vt-btn ${viewMode === 'branches' ? 'active' : ''}`}
             onClick={() => setViewMode('branches')}
           >
-            <FaBuilding /> Branch View
+            Branch View
           </button>
           <button
             className={`vt-btn ${viewMode === 'regions' ? 'active' : ''}`}
             onClick={() => setViewMode('regions')}
           >
-            <FaGlobe /> Regional View
+            Regional View
           </button>
         </div>
         {viewMode === 'branches' && (
           <div className="toolbar-right ed-sort">
-            <FaFilter />
+
             <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
               <option value="revenue">Sort by Revenue</option>
               <option value="profit">Sort by Profit</option>
@@ -214,31 +206,28 @@ const EnterpriseDashboard = () => {
 
       {loading && (
         <div className="ed-loading">
-          <div className="spinner" /> Loading enterprise data…
+          <div className="spinner" />Loading enterprise data…
         </div>
       )}
 
       {!loading && branchData.length === 0 && (
         <div className="ed-empty-state">
-          <FaBuilding size={32} />
+
           <h3>No entities yet</h3>
           <p>Add entities to see your multi-branch dashboard.</p>
           <Button
             variant="primary"
             size="small"
-            icon={FaBuilding}
             onClick={() => navigate('/app/enterprise/entities')}
-          >
-            Add First Entity
+          >Add First Entity
           </Button>
         </div>
       )}
 
-      {/* ══ BAND 2 — Activity & Money Movement — Branch View ══ */}
+      {/*  BAND 2 — Activity & Money Movement — Branch View  */}
       {!loading && viewMode === 'branches' && branchData.length > 0 && (
         <section className="ed-band">
-          <h2 className="section-sub-heading">
-            Branch Overview ({branchData.length} entities)
+          <h2 className="section-sub-heading">Branch Overview ({branchData.length} entities)
           </h2>
 
           {/* Revenue by branch — performance bars */}
@@ -267,7 +256,7 @@ const EnterpriseDashboard = () => {
                   <div className="pbr-values">
                     <span className="pbr-rev">{fmt(branch.revenue)}</span>
                     <span className={`pbr-profit ${branch.profit >= 0 ? 'pos' : 'neg'}`}>
-                      {branch.profit >= 0 ? <FaArrowUp /> : <FaArrowDown />}
+
                       {fmt(Math.abs(branch.profit))}
                     </span>
                   </div>
@@ -286,12 +275,12 @@ const EnterpriseDashboard = () => {
                 >
                   <div className="ebc-header">
                     <div className="ebc-flag">
-                      <FaMapMarkerAlt /> {branch.country}
+                       {branch.country}
                     </div>
                     <span className={`status-pill ${branch.status}`}>{branch.status}</span>
                   </div>
                   <div className="ebc-name">{branch.name}</div>
-                  <div className="ebc-type">{branch.entity_type?.replace('_', ' ')}</div>
+                  <div className="ebc-type">{branch.entity_type?.replace('_', '')}</div>
                   <div className="ebc-region">{branch.region}</div>
                   <div className="ebc-metrics">
                     <div className="ebc-metric">
@@ -331,11 +320,10 @@ const EnterpriseDashboard = () => {
         </section>
       )}
 
-      {/* ══ BAND 2 — Activity & Money Movement — Regional View ══ */}
+      {/*  BAND 2 — Activity & Money Movement — Regional View  */}
       {!loading && viewMode === 'regions' && Object.keys(regionData).length > 0 && (
         <section className="ed-band">
-          <h2 className="section-sub-heading">
-            Regional Operations ({Object.keys(regionData).length} regions)
+          <h2 className="section-sub-heading">Regional Operations ({Object.keys(regionData).length} regions)
           </h2>
           <div className="grid-12">
             {Object.values(regionData)
@@ -344,7 +332,7 @@ const EnterpriseDashboard = () => {
                 <div className="col-4" key={region.region}>
                   <div className="ent-card ent-card--clickable">
                     <div className="erc-header">
-                      <div className="erc-icon"><FaGlobe /></div>
+                      <div className="erc-icon"></div>
                       <div>
                         <div className="erc-name">{region.region}</div>
                         <div className="erc-meta">
@@ -387,7 +375,7 @@ const EnterpriseDashboard = () => {
                             key={b.id}
                             onClick={() => navigate(`/app/enterprise/entities/${b.id}/dashboard`)}
                           >
-                            <FaMapMarkerAlt /> {b.name}
+                             {b.name}
                           </div>
                         ))}
                     </div>
@@ -398,37 +386,35 @@ const EnterpriseDashboard = () => {
         </section>
       )}
 
-      {/* ══ BAND 3 — Alerts & Workflows ══ */}
+      {/*  BAND 3 — Alerts & Workflows  */}
       {orgOverview && (orgOverview.pending_tax_returns > 0 || orgOverview.missing_data_entities > 0) && (
         <section className="ed-band">
           <div className="ent-card">
             <div className="ent-card-header">
               <h3 className="ent-card-title ent-card-title--with-icon">
-                <FaExclamationTriangle /> Action Required
+                Action Required
               </h3>
             </div>
             <div className="ed-alert-list">
               {orgOverview.pending_tax_returns > 0 && (
                 <div className="ed-alert-item warning">
-                  <FaExclamationTriangle />
+
                   <span>{orgOverview.pending_tax_returns} tax return(s) pending. Review compliance status.</span>
                   <button
                     className="btn-alert-action"
                     onClick={() => navigate('/app/enterprise/tax-compliance')}
-                  >
-                    View →
+                  >View →
                   </button>
                 </div>
               )}
               {orgOverview.missing_data_entities > 0 && (
                 <div className="ed-alert-item info">
-                  <FaExclamationTriangle />
+
                   <span>{orgOverview.missing_data_entities} entity(ies) have incomplete data.</span>
                   <button
                     className="btn-alert-action"
                     onClick={() => navigate('/app/enterprise/entities')}
-                  >
-                    Fix →
+                  >Fix →
                   </button>
                 </div>
               )}

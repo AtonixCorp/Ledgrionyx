@@ -2,19 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { countries, getBanksByCountryCode } from '../../utils/countries';
-import { FaPlus, FaEdit, FaTrash, FaGlobe, FaBuilding, FaCheckCircle, FaTimesCircle, FaChartBar } from 'react-icons/fa';
 
 const EnterpriseEntities = () => {
   const navigate = useNavigate();
-  const { 
-    currentOrganization, 
-    entities, 
-    fetchEntities, 
+  const {
+    currentOrganization,
+    entities,
+    fetchEntities,
     createEntity,
-    hasPermission, 
+    hasPermission,
     PERMISSIONS,
     loading,
-    error 
+    error
   } = useEnterprise();
 
   const [showModal, setShowModal] = useState(false);
@@ -74,7 +73,7 @@ const EnterpriseEntities = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Auto-populate currency and banks when country is selected
     if (name === 'country' && value) {
       const selectedCountry = countries.find(country => country.name === value);
@@ -82,10 +81,10 @@ const EnterpriseEntities = () => {
         // Extract currency code from currency object
         const currencyCode = selectedCountry.currency?.code || selectedCountry.currency || 'USD';
         const banks = selectedCountry.banks || [];
-        
+
         console.log('Selected country:', selectedCountry.name, 'Currency:', currencyCode);
-        
-        setFormData(prev => ({ 
+
+        setFormData(prev => ({
           ...prev,
           [name]: value,
           local_currency: currencyCode,
@@ -102,7 +101,7 @@ const EnterpriseEntities = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!currentOrganization) {
       alert('No organization selected. Please ensure an organization is loaded.');
       console.error('currentOrganization is null/undefined:', currentOrganization);
@@ -161,8 +160,8 @@ const EnterpriseEntities = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'active': return <FaCheckCircle className="status-icon active" />;
-      case 'dormant': return <FaTimesCircle className="status-icon dormant" />;
+      case 'active': return ;
+      case 'dormant': return ;
       default: return null;
     }
   };
@@ -176,7 +175,7 @@ const EnterpriseEntities = () => {
         </div>
         {hasPermission(PERMISSIONS.CREATE_ENTITY) && (
           <button className="btn-primary" onClick={() => handleOpenModal()}>
-            <FaPlus /> Add Entity
+            Add Entity
           </button>
         )}
       </div>
@@ -189,7 +188,7 @@ const EnterpriseEntities = () => {
         <div className="hierarchy-tree">
           {entities.length === 0 ? (
             <div className="empty-state">
-              <FaBuilding size={48} className="empty-icon" />
+
               <p>No entities yet. Create your first entity to get started.</p>
             </div>
           ) : (
@@ -198,7 +197,7 @@ const EnterpriseEntities = () => {
               .map(entity => (
                 <div key={entity.id} className="hierarchy-node">
                   <div className="node-content">
-                    <FaBuilding className="node-icon" />
+
                     <div className="node-info">
                       <div className="node-name">{entity.name}</div>
                       <div className="node-meta">
@@ -218,7 +217,7 @@ const EnterpriseEntities = () => {
       {/* Entities Table */}
       <section className="entities-table-section">
         <h3 className="section-title">All Entities</h3>
-        
+
         {loading ? (
           <div className="loading">Loading entities...</div>
         ) : entities.length === 0 ? (
@@ -244,7 +243,7 @@ const EnterpriseEntities = () => {
                   <tr key={entity.id} className={`row-${entity.status}`}>
                     <td className="cell-entity">
                       <div className="entity-cell">
-                        <FaBuilding className="entity-icon" />
+
                         <div>
                           <div className="entity-name">{entity.name}</div>
                           {entity.registration_number && (
@@ -255,7 +254,7 @@ const EnterpriseEntities = () => {
                     </td>
                     <td>
                       <div className="country-cell">
-                        <FaGlobe className="country-icon" />
+
                         {entity.country}
                       </div>
                     </td>
@@ -270,24 +269,24 @@ const EnterpriseEntities = () => {
                       {entity.next_filing_date ? new Date(entity.next_filing_date).toLocaleDateString() : '-'}
                     </td>
                     <td className="cell-actions">
-                      <button 
-                        className="btn-sm btn-view" 
+                      <button
+                        className="btn-sm btn-view"
                         onClick={() => navigate(`/app/enterprise/entities/${entity.id}/dashboard`)}
                         title="View entity dashboard"
                       >
-                        <FaChartBar />
+
                       </button>
                       {hasPermission(PERMISSIONS.EDIT_ENTITY) && (
-                        <button 
-                          className="btn-sm btn-edit" 
+                        <button
+                          className="btn-sm btn-edit"
                           onClick={() => handleOpenModal(entity)}
                           title="Edit entity"
                         >
-                          <FaEdit />
+
                         </button>
                       )}
                       {hasPermission(PERMISSIONS.DELETE_ENTITY) && (
-                        <button 
+                        <button
                           className="btn-sm btn-delete"
                           title="Delete entity"
                           onClick={() => {
@@ -296,7 +295,7 @@ const EnterpriseEntities = () => {
                             }
                           }}
                         >
-                          <FaTrash />
+
                         </button>
                       )}
                     </td>
@@ -316,7 +315,7 @@ const EnterpriseEntities = () => {
               <h3>{editingEntity ? 'Edit Entity' : 'Add New Entity'}</h3>
               <button className="btn-close" onClick={handleCloseModal}>×</button>
             </div>
-            
+
             <form className="entity-form" onSubmit={handleSubmit}>
               <div className="form-grid">
                 <div className="form-group">

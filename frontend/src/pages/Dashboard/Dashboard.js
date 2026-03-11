@@ -7,11 +7,11 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const Dashboard = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { 
-    totalIncome, 
-    totalExpenses, 
-    balance, 
-    expenses, 
+  const {
+    totalIncome,
+    totalExpenses,
+    balance,
+    expenses,
     budgets,
     monthlySummary,
     selectedMonth,
@@ -20,12 +20,12 @@ const Dashboard = () => {
     financialSummary,
     validationResults
   } = useFinance();
-  
+
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'all-time'
-  
+
   // Get month name
   const getMonthName = (month) => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
     return months[month];
   };
@@ -87,27 +87,27 @@ const Dashboard = () => {
     <div className="page-container" key={language}>
       <div className="dashboard-header">
         <h1 className="page-title">{t('dashboard.title')}</h1>
-        
+
         {/* View Mode Toggle */}
         <div className="view-toggle">
-          <button 
+          <button
             className={`toggle-btn ${viewMode === 'monthly' ? 'active' : ''}`}
             onClick={() => setViewMode('monthly')}
           >
             {t('dashboard.monthlyView')}
           </button>
-          <button 
+          <button
             className={`toggle-btn ${viewMode === 'all-time' ? 'active' : ''}`}
             onClick={() => setViewMode('all-time')}
           >
             {t('dashboard.allTime')}
           </button>
         </div>
-        
+
         {/* Month Selector (only in monthly view) */}
         {viewMode === 'monthly' && availableMonths.length > 0 && (
           <div className="month-selector">
-            <select 
+            <select
               value={`${selectedMonth.year}-${selectedMonth.month}`}
               onChange={(e) => {
                 const [year, month] = e.target.value.split('-');
@@ -124,29 +124,29 @@ const Dashboard = () => {
           </div>
         )}
       </div>
-      
+
       {/* Quick Access Navigation Cards */}
       <div className="grid-3 quick-access-cards">
         <div className="card nav-card dashboard-card" onClick={() => navigate('/dashboard')}>
-          <div className="nav-icon">📊</div>
+          <div className="nav-icon"></div>
           <div className="nav-content">
             <h3>Dashboard</h3>
             <p>Real-time overview</p>
           </div>
           <div className="nav-arrow">→</div>
         </div>
-        
+
         <div className="card nav-card expenses-card" onClick={() => navigate('/expenses')}>
-          <div className="nav-icon">💸</div>
+          <div className="nav-icon"></div>
           <div className="nav-content">
             <h3>Expenses</h3>
             <p>Track spending</p>
           </div>
           <div className="nav-arrow">→</div>
         </div>
-        
+
         <div className="card nav-card budgets-card" onClick={() => navigate('/budget')}>
-          <div className="nav-icon">🎯</div>
+          <div className="nav-icon"></div>
           <div className="nav-content">
             <h3>Budgets</h3>
             <p>Set limits</p>
@@ -154,7 +154,7 @@ const Dashboard = () => {
           <div className="nav-arrow">→</div>
         </div>
       </div>
-      
+
       {/* Health Score (if available) */}
       {validationResults && (
         <div className={`card health-score ${
@@ -165,15 +165,15 @@ const Dashboard = () => {
           <div className="health-content">
             <h3>Financial Health Score</h3>
             <div className="health-bar">
-              <div 
-                className="health-fill" 
+              <div
+                className="health-fill"
                 style={{ width: `${validationResults.healthScore}%` }}
               />
             </div>
             <p className="health-value">{validationResults.healthScore.toFixed(0)}%</p>
             {validationResults.recommendations && validationResults.recommendations.length > 0 && (
               <div className="health-tips">
-                <strong>💡 Tips:</strong>
+                <strong>Tips:</strong>
                 <ul>
                   {validationResults.recommendations.slice(0, 2).map((rec, idx) => (
                     <li key={idx}>{rec}</li>
@@ -184,11 +184,11 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-      
+
       {/* Summary Cards */}
       <div className="grid-4 summary-cards">
         <div className="card summary-card income">
-          <div className="summary-icon">💵</div>
+          <div className="summary-icon"></div>
           <div className="summary-content">
             <h3>
               {viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.income')}
@@ -205,9 +205,9 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        
+
         <div className="card summary-card expense">
-          <div className="summary-icon">💸</div>
+          <div className="summary-icon"></div>
           <div className="summary-content">
             <h3>
               {viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.expenses')}
@@ -224,9 +224,9 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        
+
         <div className="card summary-card tax">
-          <div className="summary-icon">🏛️</div>
+          <div className="summary-icon"></div>
           <div className="summary-content">
             <h3>{viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.tax')}</h3>
             <p className="summary-amount">${displayData.tax.toFixed(2)}</p>
@@ -235,16 +235,16 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        
+
         <div className={`card summary-card ${displayData.balance >= 0 ? 'balance-positive' : 'balance-negative'}`}>
-          <div className="summary-icon">💰</div>
+          <div className="summary-icon"></div>
           <div className="summary-content">
             <h3>{viewMode === 'monthly' ? 'Monthly' : 'Net'} {t('labels.balance')}</h3>
             <p className="summary-amount">${displayData.balance.toFixed(2)}</p>
             {viewMode === 'monthly' && monthlySummary?.budgetAnalysis && (
               <p className="summary-detail">
-                {monthlySummary.budgetAnalysis.overallStatus === 'under' ? '✅' : '⚠️'}
-                {' '}{monthlySummary.budgetAnalysis.overallStatus} budget
+                ''
+                {''}{monthlySummary.budgetAnalysis.overallStatus} budget
               </p>
             )}
           </div>
@@ -289,14 +289,14 @@ const Dashboard = () => {
                   <Legend wrapperStyle={{ color: THEME.muted }} />
                 </PieChart>
               </ResponsiveContainer>
-              
+
               {viewMode === 'monthly' && Array.isArray(monthlySummary?.categories) && monthlySummary.categories.length > 0 && (
                 <div className="category-details">
                   <h4>Top Spending Categories:</h4>
                   <ul>
                     {monthlySummary.categories.slice(0, 3).map((cat, idx) => (
                       <li key={idx}>
-                        <strong>{cat.category}:</strong> ${(cat.amount || 0).toFixed(2)} 
+                        <strong>{cat.category}:</strong> ${(cat.amount || 0).toFixed(2)}
                         ({(cat.percentage || 0).toFixed(1)}%)
                       </li>
                     ))}
@@ -344,17 +344,17 @@ const Dashboard = () => {
                   <Bar dataKey="budget" fill={THEME.primary} name={t('labels.budget')} animationDuration={150} />
                 </BarChart>
               </ResponsiveContainer>
-              
+
               {viewMode === 'monthly' && monthlySummary?.budgetAnalysis && (
                 <div className="budget-status">
                   <p>
-                    <strong>Status:</strong> {(monthlySummary.budgetAnalysis.totalRemaining || 0) >= 0 ? '✅' : '⚠️'}
-                    {' '}{(monthlySummary.budgetAnalysis.totalRemaining || 0) >= 0 ? 'Under' : 'Over'} {t('labels.budget')} by 
+                    <strong>Status:</strong> ''
+                    {''}{(monthlySummary.budgetAnalysis.totalRemaining || 0) >= 0 ? 'Under' : 'Over'} {t('labels.budget')} by
                     ${Math.abs(monthlySummary.budgetAnalysis.totalRemaining || 0).toFixed(2)}
                   </p>
                   {Array.isArray(monthlySummary.budgetAnalysis.overBudgetCategories) && monthlySummary.budgetAnalysis.overBudgetCategories.length > 0 && (
                     <div className="warning-box">
-                      <strong>⚠️ {t('labels.overBudget')}:</strong>
+                      <strong> {t('labels.overBudget')}:</strong>
                       <ul>
                         {monthlySummary.budgetAnalysis.overBudgetCategories.map((cat, idx) => (
                           <li key={idx}>{cat.category} (${ (cat.over || 0).toFixed(2)} over)</li>
@@ -370,7 +370,7 @@ const Dashboard = () => {
           )}
         </div>
       </div>
-      
+
       {/* Spending Patterns (Monthly View Only) */}
       {viewMode === 'monthly' && monthlySummary?.patterns?.weeklySpending && (
         <div className="card">
@@ -411,16 +411,15 @@ const Dashboard = () => {
               />
             </LineChart>
           </ResponsiveContainer>
-          
+
           {monthlySummary.patterns?.highestSpendingDay && (
             <div className="pattern-insights">
               <p>
-                <strong>📊 Insights:</strong> Highest spending day was{' '}
+                <strong>Insights:</strong>Highest spending day was{''}
                 <strong>{monthlySummary.patterns.highestSpendingDay.date}</strong>
-                {' '}with <strong>${(monthlySummary.patterns.highestSpendingDay.amount || 0).toFixed(2)}</strong>
+                {''}with <strong>${(monthlySummary.patterns.highestSpendingDay.amount || 0).toFixed(2)}</strong>
               </p>
-              <p>
-                Daily average: <strong>${(monthlySummary.patterns.dailyAverage || 0).toFixed(2)}</strong>
+              <p>Daily average: <strong>${(monthlySummary.patterns.dailyAverage || 0).toFixed(2)}</strong>
               </p>
             </div>
           )}
@@ -461,7 +460,7 @@ const Dashboard = () => {
               {viewMode === 'monthly' ? 'No transactions this month' : 'No transactions yet'}
             </p>
           )}
-          
+
           {viewMode === 'monthly' && monthlySummary && (
             <div className="monthly-summary-footer">
               <div className="summary-stats">
@@ -476,7 +475,7 @@ const Dashboard = () => {
                 <div className="stat">
                   <span className="stat-label">Savings Rate:</span>
                   <span className="stat-value">
-                    {monthlySummary.totals?.totalIncome > 0 
+                    {monthlySummary.totals?.totalIncome > 0
                       ? (((monthlySummary.totals?.remainingBalance || 0) / monthlySummary.totals.totalIncome) * 100).toFixed(1)
                       : '0.0'
                     }%
@@ -487,11 +486,11 @@ const Dashboard = () => {
           )}
         </div>
       </div>
-      
+
       {/* AI Insights */}
       {validationResults?.anomalies && validationResults.anomalies.length > 0 && (
         <div className="card anomaly-card">
-          <h2 className="chart-title">🤖 AI-Detected Anomalies</h2>
+          <h2 className="chart-title">AI-Detected Anomalies</h2>
           <div className="anomalies-list">
             {validationResults.anomalies.map((anomaly, idx) => (
               <div key={idx} className={`anomaly-item severity-${anomaly.severity}`}>
@@ -501,7 +500,7 @@ const Dashboard = () => {
                 </div>
                 <p className="anomaly-message">{anomaly.message}</p>
                 {anomaly.suggestion && (
-                  <p className="anomaly-suggestion">💡 {anomaly.suggestion}</p>
+                  <p className="anomaly-suggestion"> {anomaly.suggestion}</p>
                 )}
               </div>
             ))}

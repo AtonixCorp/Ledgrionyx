@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
-import { FaFileInvoice, FaPlus, FaDownload, FaFilter } from 'react-icons/fa';
 
 const STATUS_COLORS = {
   paid: '#27ae60',
@@ -47,12 +46,10 @@ export default function Invoices() {
       <PageHeader
         title="Invoices"
         subtitle="Create and manage customer invoices"
-        icon={<FaFileInvoice />}
         actions={
           <>
-            <Button variant="secondary" size="small" icon={<FaDownload />}>Export</Button>
-            <Button variant="primary" size="small" icon={<FaPlus />} onClick={() => setShowModal(true)}>
-              New Invoice
+            <Button variant="secondary" size="small">Export</Button>
+            <Button variant="primary" size="small" onClick={() => setShowModal(true)}>New Invoice
             </Button>
           </>
         }
@@ -75,7 +72,7 @@ export default function Invoices() {
 
       <Card>
         <div className="filter-bar">
-          <FaFilter style={{ color: '#7a8fa6' }} />
+
           {['all', 'paid', 'pending', 'overdue', 'draft'].map((f) => (
             <button
               key={f}

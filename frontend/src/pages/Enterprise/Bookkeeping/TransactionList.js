@@ -1,26 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaDownload, FaFilter, FaSearch, FaFileUpload } from 'react-icons/fa';
+
 import { useEnterprise } from '../../../context/EnterpriseContext';
 import TransactionForm from './TransactionForm';
 
 const TransactionList = () => {
   const { entityId } = useParams();
-  const { 
-    fetchTransactions, 
+  const {
+    fetchTransactions,
     deleteTransaction,
     fetchBookkeepingCategories,
     fetchBookkeepingAccounts,
-    entities 
+    entities
   } = useEnterprise();
-  
+
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
-  
+
   // Filters
   const [filters, setFilters] = useState({
     startDate: '',
@@ -32,7 +32,7 @@ const TransactionList = () => {
     maxAmount: '',
     search: ''
   });
-  
+
   const entity = entities.find(e => e.id === parseInt(entityId));
 
   const buildQueryParams = useCallback(() => {
@@ -63,20 +63,20 @@ const TransactionList = () => {
     setCategories(cats.results || cats);
     setAccounts(accs.results || accs);
   }, [entityId, fetchBookkeepingAccounts, fetchBookkeepingCategories]);
-  
+
   useEffect(() => {
     loadData();
     loadFiltersData();
   }, [loadData, loadFiltersData]);
-  
+
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
-  
+
   const handleApplyFilters = () => {
     loadData();
   };
-  
+
   const handleClearFilters = () => {
     setFilters({
       startDate: '',
@@ -90,12 +90,12 @@ const TransactionList = () => {
     });
     setTimeout(loadData, 100);
   };
-  
+
   const handleEdit = (transaction) => {
     setEditingTransaction(transaction);
     setShowTransactionForm(true);
   };
-  
+
   const handleDelete = async (transactionId) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
@@ -107,13 +107,13 @@ const TransactionList = () => {
       }
     }
   };
-  
+
   const handleExportCSV = () => {
     if (transactions.length === 0) {
       alert('No transactions to export');
       return;
     }
-    
+
     // Create CSV content
     const headers = ['Date', 'Type', 'Category', 'Account', 'Amount', 'Currency', 'Description', 'Reference'];
     const rows = transactions.map(t => [
@@ -126,12 +126,12 @@ const TransactionList = () => {
       t.description,
       t.reference_number || ''
     ]);
-    
+
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
-    
+
     // Download
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -141,29 +141,29 @@ const TransactionList = () => {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-  
+
   const handleNewTransaction = () => {
     setEditingTransaction(null);
     setShowTransactionForm(true);
   };
-  
+
   const handleCloseForm = () => {
     setShowTransactionForm(false);
     setEditingTransaction(null);
   };
-  
+
   const handleSaveTransaction = async () => {
     await loadData();
     handleCloseForm();
   };
-  
+
   const formatCurrency = (amount, currency = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency
     }).format(amount);
   };
-  
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -171,7 +171,7 @@ const TransactionList = () => {
       day: 'numeric'
     });
   };
-  
+
   if (loading) {
     return (
       <div className="transaction-list-container">
@@ -179,7 +179,7 @@ const TransactionList = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="transaction-list-container">
       {/* Header */}
@@ -190,27 +190,27 @@ const TransactionList = () => {
         </div>
         <div className="header-right">
           <button className="btn-secondary" onClick={handleExportCSV}>
-            <FaDownload /> Export CSV
+            Export CSV
           </button>
           <button className="btn-primary" onClick={handleNewTransaction}>
-            <FaPlus /> New Transaction
+            New Transaction
           </button>
         </div>
       </div>
-      
+
       {/* Filters Panel */}
       <div className="filters-panel">
         <div className="filters-header">
-          <h3><FaFilter /> Filters</h3>
+          <h3>Filters</h3>
           <button className="btn-link" onClick={handleClearFilters}>Clear All</button>
         </div>
-        
+
         <div className="filters-grid">
           {/* Search */}
           <div className="filter-group">
             <label>Search</label>
             <div className="search-input">
-              <FaSearch className="search-icon" />
+
               <input
                 type="text"
                 placeholder="Search description..."
@@ -219,7 +219,7 @@ const TransactionList = () => {
               />
             </div>
           </div>
-          
+
           {/* Date Range */}
           <div className="filter-group">
             <label>Start Date</label>
@@ -229,7 +229,7 @@ const TransactionList = () => {
               onChange={(e) => handleFilterChange('startDate', e.target.value)}
             />
           </div>
-          
+
           <div className="filter-group">
             <label>End Date</label>
             <input
@@ -238,7 +238,7 @@ const TransactionList = () => {
               onChange={(e) => handleFilterChange('endDate', e.target.value)}
             />
           </div>
-          
+
           {/* Type */}
           <div className="filter-group">
             <label>Type</label>
@@ -248,7 +248,7 @@ const TransactionList = () => {
               <option value="expense">Expense</option>
             </select>
           </div>
-          
+
           {/* Category */}
           <div className="filter-group">
             <label>Category</label>
@@ -261,7 +261,7 @@ const TransactionList = () => {
               ))}
             </select>
           </div>
-          
+
           {/* Account */}
           <div className="filter-group">
             <label>Account</label>
@@ -274,7 +274,7 @@ const TransactionList = () => {
               ))}
             </select>
           </div>
-          
+
           {/* Amount Range */}
           <div className="filter-group">
             <label>Min Amount</label>
@@ -285,7 +285,7 @@ const TransactionList = () => {
               onChange={(e) => handleFilterChange('minAmount', e.target.value)}
             />
           </div>
-          
+
           <div className="filter-group">
             <label>Max Amount</label>
             <input
@@ -296,14 +296,13 @@ const TransactionList = () => {
             />
           </div>
         </div>
-        
+
         <div className="filters-actions">
-          <button className="btn-primary" onClick={handleApplyFilters}>
-            Apply Filters
+          <button className="btn-primary" onClick={handleApplyFilters}>Apply Filters
           </button>
         </div>
       </div>
-      
+
       {/* Transactions Table */}
       <div className="transactions-table-container">
         <table className="transactions-table">
@@ -341,27 +340,27 @@ const TransactionList = () => {
                   </td>
                   <td className="text-center">
                     <div className="action-buttons">
-                      <button 
-                        className="btn-icon btn-edit" 
+                      <button
+                        className="btn-icon btn-edit"
                         onClick={() => handleEdit(transaction)}
                         title="Edit transaction"
                       >
-                        <FaEdit />
+
                       </button>
-                      <button 
-                        className="btn-icon btn-delete" 
+                      <button
+                        className="btn-icon btn-delete"
                         onClick={() => handleDelete(transaction.id)}
                         title="Delete transaction"
                       >
-                        <FaTrash />
+
                       </button>
                       {transaction.attachment_url && (
-                        <button 
-                          className="btn-icon btn-view" 
+                        <button
+                          className="btn-icon btn-view"
                           onClick={() => window.open(transaction.attachment_url, '_blank')}
                           title="View attachment"
                         >
-                          <FaFileUpload />
+
                         </button>
                       )}
                     </div>
@@ -370,15 +369,14 @@ const TransactionList = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="no-data">
-                  No transactions found. Try adjusting your filters or create a new transaction.
+                <td colSpan="8" className="no-data">No transactions found. Try adjusting your filters or create a new transaction.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      
+
       {/* Transaction Summary */}
       {transactions.length > 0 && (
         <div className="table-summary">
@@ -404,7 +402,7 @@ const TransactionList = () => {
             <span>Net:</span>
             <strong>
               {formatCurrency(
-                transactions.reduce((sum, t) => 
+                transactions.reduce((sum, t) =>
                   sum + (t.type === 'income' ? parseFloat(t.amount) : -parseFloat(t.amount)), 0
                 ),
                 entity?.local_currency
@@ -413,7 +411,7 @@ const TransactionList = () => {
           </div>
         </div>
       )}
-      
+
       {/* Transaction Form Modal */}
       {showTransactionForm && (
         <TransactionForm

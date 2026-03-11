@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaChartBar, FaSearch, FaClipboardList, FaLandmark, FaBuilding, FaUser, FaCoins, FaLink } from 'react-icons/fa';
+
 import { taxAPI } from '../../services/api';
 import localCountries from '../../data/tax/countries.json';
 
@@ -33,8 +33,7 @@ const GlobalTax = () => {
         <div className="tax-hero-content">
           <h1 className="tax-hero-title">Global Tax Directory</h1>
           <p className="tax-hero-subtitle">Comprehensive tax guidance for 200+ jurisdictions worldwide</p>
-          <p className="tax-hero-description">
-            Access verified tax authority information, payment portals, and expert summaries from PwC, Deloitte, and EY. 
+          <p className="tax-hero-description">Access verified tax authority information, payment portals, and expert summaries from PwC, Deloitte, and EY.
             No login required.
           </p>
         </div>
@@ -44,7 +43,7 @@ const GlobalTax = () => {
       <div className="tax-search-section">
         <div className="tax-search-container">
           <div className="search-input-wrapper">
-            <FaSearch className="search-icon" />
+
             <input
               className="tax-search-input"
               placeholder="Search by country name or code (e.g., United States, US)"
@@ -101,7 +100,7 @@ const GlobalTax = () => {
             <div className="tax-details-wrapper">
               {!selected ? (
                 <div className="empty-panel">
-                  <div className="empty-icon"><FaClipboardList /></div>
+                  <div className="empty-icon"></div>
                   <h3>Select a Jurisdiction</h3>
                   <p>Choose a country from the list to view comprehensive tax information</p>
                 </div>
@@ -118,20 +117,18 @@ const GlobalTax = () => {
 
                   {/* Tax Authority */}
                   <div className="section-card authority-card">
-                    <h4 className="section-title"><FaLandmark /> Tax Authority</h4>
+                    <h4 className="section-title">Tax Authority</h4>
                     <div className="authority-info">
                       <div className="info-row">
                         <span className="label">Official Name:</span>
                         <span className="value">{selected.tax_authority?.name || '—'}</span>
                       </div>
                       {selected.tax_authority?.website && (
-                        <a href={selected.tax_authority.website} target="_blank" rel="noreferrer" className="primary-link">
-                          Visit Tax Authority Website →
+                        <a href={selected.tax_authority.website} target="_blank" rel="noreferrer" className="primary-link">Visit Tax Authority Website →
                         </a>
                       )}
                       {selected.tax_authority?.payment_portal && (
-                        <a href={selected.tax_authority.payment_portal} target="_blank" rel="noreferrer" className="secondary-link">
-                          Payment Portal →
+                        <a href={selected.tax_authority.payment_portal} target="_blank" rel="noreferrer" className="secondary-link">Payment Portal →
                         </a>
                       )}
                     </div>
@@ -139,23 +136,23 @@ const GlobalTax = () => {
 
                   {/* Tax Summaries */}
                   <div className="section-card summaries-card">
-                    <h4 className="section-title"><FaChartBar /> Tax Summaries</h4>
+                    <h4 className="section-title">Tax Summaries</h4>
                     <div className="summaries-grid">
                       {selected.links?.corporate_tax_summary && (
                         <a href={selected.links.corporate_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
-                          <span className="icon"><FaBuilding /></span>
+                          <span className="icon"></span>
                           <span>Corporate Tax</span>
                         </a>
                       )}
                       {selected.links?.personal_income_tax_summary && (
                         <a href={selected.links.personal_income_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
-                          <span className="icon"><FaUser /></span>
+                          <span className="icon"></span>
                           <span>Personal Tax</span>
                         </a>
                       )}
                       {selected.links?.vat_or_indirect_tax_summary && (
                         <a href={selected.links.vat_or_indirect_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
-                          <span className="icon"><FaCoins /></span>
+                          <span className="icon"></span>
                           <span>VAT / GST</span>
                         </a>
                       )}
@@ -168,7 +165,7 @@ const GlobalTax = () => {
                     <div className="references-list">
                       {selected.links?.global_references?.map((r, i) => (
                         <a key={i} href={r.url} target="_blank" rel="noreferrer" className="reference-link">
-                          <span className="ref-icon"><FaLink /></span>
+                          <span className="ref-icon"></span>
                           <span>{r.label}</span>
                         </a>
                       ))}
@@ -186,13 +183,11 @@ const GlobalTax = () => {
                             target="_blank"
                             rel="noreferrer"
                             className="action-btn primary-btn"
-                          >
-                            Pay Tax Online
+                          >Pay Tax Online
                           </a>
                         )}
                         {selected.supported_tasks?.includes('basic_tax_estimator') && (
-                          <button className="action-btn secondary-btn" onClick={() => alert('Basic estimator coming soon for ' + selected.name)}>
-                            Estimate Tax
+                          <button className="action-btn secondary-btn" onClick={() => alert('Basic estimator coming soon for ' + selected.name)}>Estimate Tax
                           </button>
                         )}
                       </div>

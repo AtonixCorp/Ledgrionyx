@@ -1,6 +1,5 @@
 import React from 'react';
 import { PageHeader, Card, Table, Button } from '../../components/ui';
-import { FaCalendar, FaCheckCircle } from 'react-icons/fa';
 
 const mockSchedule = [
   { id: 'PAY-001', type: 'Invoice', ref: 'INV-0001', party: 'Acme Corp', amount: '$12,500.00', date: '2025-02-15', method: 'ACH', status: 'Scheduled' },
@@ -30,9 +29,8 @@ export default function PaymentScheduling() {
       <PageHeader
         title="Payment Scheduling"
         subtitle="Schedule, approve and track outgoing and incoming payments"
-        icon={<FaCalendar />}
         actions={
-          <Button variant="primary" size="small" icon={<FaCheckCircle />}>Approve Selected</Button>
+          <Button variant="primary" size="small">Approve Selected</Button>
         }
       />
 
