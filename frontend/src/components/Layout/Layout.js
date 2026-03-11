@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import './Layout.css';
 import {
   FaChartBar, FaUniversity, FaExchangeAlt, FaCreditCard,
   FaLandmark, FaCog, FaLifeRing, FaSignOutAlt, FaBars, FaTimes,

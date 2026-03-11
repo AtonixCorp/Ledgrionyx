@@ -43,7 +43,7 @@ export default function PeriodClose() {
         }
       />
 
-      <div className="two-col-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <Card title="Close Checklist — January 2025">
           <div style={{ marginBottom: 12, color: '#7a8fa6', fontSize: 13 }}>
             {completedCount}/{items.length} tasks completed

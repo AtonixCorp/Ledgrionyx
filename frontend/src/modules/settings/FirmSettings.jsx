@@ -29,7 +29,7 @@ export default function FirmSettings() {
         }
       />
 
-      <div className="two-col-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <Card title="Organization Details">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <Input label="Firm Display Name" value={form.firmName} onChange={handleChange('firmName')} />
