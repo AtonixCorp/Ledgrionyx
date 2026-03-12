@@ -125,11 +125,11 @@ const GlobalTax = () => {
                         <span className="value">{selected.tax_authority?.name || '—'}</span>
                       </div>
                       {selected.tax_authority?.website && (
-                        <a href={selected.tax_authority.website} target="_blank" rel="noreferrer" className="primary-link">Visit Tax Authority Website →
+                        <a href={selected.tax_authority.website} rel="noreferrer" className="primary-link">Visit Tax Authority Website →
                         </a>
                       )}
                       {selected.tax_authority?.payment_portal && (
-                        <a href={selected.tax_authority.payment_portal} target="_blank" rel="noreferrer" className="secondary-link">Payment Portal →
+                        <a href={selected.tax_authority.payment_portal} rel="noreferrer" className="secondary-link">Payment Portal →
                         </a>
                       )}
                     </div>
@@ -140,19 +140,19 @@ const GlobalTax = () => {
                     <h4 className="section-title">Tax Summaries</h4>
                     <div className="summaries-grid">
                       {selected.links?.corporate_tax_summary && (
-                        <a href={selected.links.corporate_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
+                        <a href={selected.links.corporate_tax_summary} rel="noreferrer" className="summary-link">
                           <span className="icon"></span>
                           <span>Corporate Tax</span>
                         </a>
                       )}
                       {selected.links?.personal_income_tax_summary && (
-                        <a href={selected.links.personal_income_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
+                        <a href={selected.links.personal_income_tax_summary} rel="noreferrer" className="summary-link">
                           <span className="icon"></span>
                           <span>Personal Tax</span>
                         </a>
                       )}
                       {selected.links?.vat_or_indirect_tax_summary && (
-                        <a href={selected.links.vat_or_indirect_tax_summary} target="_blank" rel="noreferrer" className="summary-link">
+                        <a href={selected.links.vat_or_indirect_tax_summary} rel="noreferrer" className="summary-link">
                           <span className="icon"></span>
                           <span>VAT / GST</span>
                         </a>
@@ -165,7 +165,7 @@ const GlobalTax = () => {
                     <h4 className="section-title">Expert References</h4>
                     <div className="references-list">
                       {selected.links?.global_references?.map((r, i) => (
-                        <a key={i} href={r.url} target="_blank" rel="noreferrer" className="reference-link">
+                        <a key={i} href={r.url} rel="noreferrer" className="reference-link">
                           <span className="ref-icon"></span>
                           <span>{r.label}</span>
                         </a>
@@ -181,7 +181,6 @@ const GlobalTax = () => {
                         {selected.supported_tasks?.includes('open_tax_payment_portal') && selected.tax_authority?.payment_portal && (
                           <a
                             href={selected.tax_authority.payment_portal}
-                            target="_blank"
                             rel="noreferrer"
                             className="action-btn primary-btn"
                           >Pay Tax Online

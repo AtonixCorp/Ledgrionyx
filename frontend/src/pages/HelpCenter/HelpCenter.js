@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
+import './HelpCenter.css';
 
 const HelpCenter = () => {
   const [searchTerm, setSearchTerm] = useState('');

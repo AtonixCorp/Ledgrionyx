@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
+import './Pricing.css';
 
 const Pricing = () => {
   const [billingCycle, setBillingCycle] = useState('monthly');

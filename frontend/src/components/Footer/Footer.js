@@ -54,7 +54,7 @@ const Footer = () => {
             <div className="footer-links">
               <Link to="/privacy">Privacy Policy</Link>
               <Link to="/contact">Contact</Link>
-              <a href="/global-tax" target="_blank" rel="noopener noreferrer">Global Tax</a>
+              <Link to="/global-tax">Global Tax</Link>
             </div>
           </div>
         </div>
@@ -66,7 +66,7 @@ const Footer = () => {
             <span className="separator">•</span>
             <Link to="/contact">Terms</Link>
             <span className="separator">•</span>
-            <a href="/global-tax" target="_blank" rel="noopener noreferrer">Tax Information</a>
+            <Link to="/global-tax">Tax Information</Link>
           </div>
         </div>
       </div>

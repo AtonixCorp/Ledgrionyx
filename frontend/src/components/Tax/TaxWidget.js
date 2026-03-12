@@ -49,18 +49,18 @@ const TaxWidget = () => {
             <strong>Region:</strong> <span>{selected.region || '—'}</span>
           </div>
           <div className="detail-row">
-            <strong>Tax Authority:</strong> <a href={selected.tax_authority?.website || '#'} target="_blank" rel="noreferrer">{selected.tax_authority?.name || '—'}</a>
+            <strong>Tax Authority:</strong> <a href={selected.tax_authority?.website || '#'} rel="noreferrer">{selected.tax_authority?.name || '—'}</a>
           </div>
           <div className="detail-row">
-            <strong>Payment Portal:</strong> {selected.tax_authority?.payment_portal ? (<a href={selected.tax_authority.payment_portal} target="_blank" rel="noreferrer">Open Portal</a>) : 'Not available'}
+            <strong>Payment Portal:</strong> {selected.tax_authority?.payment_portal ? (<a href={selected.tax_authority.payment_portal} rel="noreferrer">Open Portal</a>) : 'Not available'}
           </div>
 
           <div className="links-section">
             <h5>Tax Summaries</h5>
             <ul>
-              {selected.links?.corporate_tax_summary && <li><a href={selected.links.corporate_tax_summary} target="_blank" rel="noreferrer">Corporate Tax Summary</a></li>}
-              {selected.links?.personal_income_tax_summary && <li><a href={selected.links.personal_income_tax_summary} target="_blank" rel="noreferrer">Personal Income Tax Summary</a></li>}
-              {selected.links?.vat_or_indirect_tax_summary && <li><a href={selected.links.vat_or_indirect_tax_summary} target="_blank" rel="noreferrer">VAT / Indirect Tax Summary</a></li>}
+              {selected.links?.corporate_tax_summary && <li><a href={selected.links.corporate_tax_summary} rel="noreferrer">Corporate Tax Summary</a></li>}
+              {selected.links?.personal_income_tax_summary && <li><a href={selected.links.personal_income_tax_summary} rel="noreferrer">Personal Income Tax Summary</a></li>}
+              {selected.links?.vat_or_indirect_tax_summary && <li><a href={selected.links.vat_or_indirect_tax_summary} rel="noreferrer">VAT / Indirect Tax Summary</a></li>}
             </ul>
           </div>
 
@@ -68,7 +68,7 @@ const TaxWidget = () => {
             <h5>Actions</h5>
             <div className="tasks-list">
               {selected.supported_tasks?.includes('open_tax_payment_portal') && (
-                <a className="task-btn" href={selected.tax_authority?.payment_portal} target="_blank" rel="noreferrer">Pay Tax Online</a>
+                <a className="task-btn" href={selected.tax_authority?.payment_portal} rel="noreferrer">Pay Tax Online</a>
               )}
               {selected.supported_tasks?.includes('basic_tax_estimator') && (
                 <button className="task-btn" onClick={() => alert('Basic tax estimator coming soon for ' + selected.name)}>Estimate Tax</button>
@@ -86,7 +86,7 @@ const TaxWidget = () => {
             <h5>Global References</h5>
             <ul>
               {selected.links?.global_references?.map((r, i) => (
-                <li key={i}><a href={r.url} target="_blank" rel="noreferrer">{r.label}</a></li>
+                <li key={i}><a href={r.url} rel="noreferrer">{r.label}</a></li>
               ))}
             </ul>
           </div>
