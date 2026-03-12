@@ -1,17 +1,17 @@
 /**
- * ATC CAPITAL - GLOBAL DESIGN SYSTEM
- * Enterprise-Grade Styling Framework
- * Three-Color Palette System with Institutional Standards
- * 
- * Color System:
- * - Imperial Midnight (#0B0C10) — Headers, footers, institutional weight
- * - Quantum Cyan (#00B5E2) — Highlights, buttons, interactive elements, primary actions
- * - Neutral Silver (#C5C6C7) — Backgrounds, dividers, secondary text
- * 
- * Font: Inter (primary), SF Pro Display (secondary)
- * Spacing: 4px base unit — all spacing must follow strict 4/8/12/16/20/24/32/40/48/56/64px grid
- * Border Radius: Minimal — 0px standard, 4px for soft elements only
- * Shadows: Minimal institutional depth only
+ * ATC CAPITAL — GLOBAL DESIGN SYSTEM
+ * Bank-Grade Enterprise Design System v2.0
+ *
+ * Primary Brand: Navy Blue #003B73 (--primary-600)
+ * Hover:         Navy Accent #0052A2 (--primary-500)
+ * Light BG:      #E6F0FA (--primary-100)
+ *
+ * Neutral scale: gray-900 → gray-50 (institutional grays)
+ * Semantic:      success #059669 | warning #D97706 | error #DC2626
+ *
+ * Font: Inter (primary), SF Pro, Segoe UI, Roboto
+ * Base size: 14px | Labels: 12px | Page title: 24px | Section title: 18px
+ * Spacing: 4px base unit
  */
 
 /* =============================================================================
@@ -23,28 +23,45 @@
   --color-midnight-light: #1a1b20;
   --color-midnight-lighter: #2d2f35;
   
-  --color-cyan: #00B5E2;          /* Primary interactive color — Quantum Cyan */
-  --color-cyan-hover: #0099C9;    /* Darker cyan for hover states */
-  --color-cyan-dark: #007EB0;     /* Dark cyan for accessible text on white */
-  --color-cyan-text: #006B94;     /* WCAG AA-compliant text color (~4.5:1 on white) */
-  --color-cyan-light: #E0F7FC;    /* Light cyan for backgrounds */
-  --color-cyan-very-light: #F0FBFF;
+  /* Primary brand palette — ATC Capital Navy Blue */
+  --primary-600: #003B73;         /* Primary actions, links, highlights */
+  --primary-500: #0052A2;         /* Hover states, accents */
+  --primary-100: #E6F0FA;         /* Light backgrounds, subtle emphasis */
+
+  /* Legacy tokens mapped to primary palette */
+  --color-cyan: #003B73;          /* → --primary-600 */
+  --color-cyan-hover: #0052A2;    /* → --primary-500 */
+  --color-cyan-dark: #003366;     /* Pressed / deep navy */
+  --color-cyan-text: #003B73;     /* WCAG AAA on white */
+  --color-cyan-light: #E6F0FA;    /* → --primary-100 */
+  --color-cyan-very-light: #F0F6FF;
   
-  --color-silver: #C5C6C7;       /* Secondary text and dividers */
-  --color-silver-dark: #9CA3AF;
-  --color-silver-light: #E5E7EB;
-  --color-silver-very-light: #F3F4F6;
-  --color-silver-white: #F9FAFB;
+  /* Institutional Gray Palette */
+  --gray-900: #111827;            /* Titles, strong text */
+  --gray-700: #374151;            /* Labels, secondary text */
+  --gray-500: #6B7280;            /* Tertiary text */
+  --gray-300: #D1D5DB;            /* Borders */
+  --gray-100: #F3F4F6;            /* Backgrounds */
+
+  --color-silver: #C5C6C7;        /* Secondary text and dividers */
+  --color-silver-dark: #6B7280;   /* gray-500 — tertiary text */
+  --color-silver-light: #D1D5DB;  /* gray-300 — borders */
+  --color-silver-very-light: #F3F4F6; /* gray-100 */
+  --color-silver-white: #F9FAFB;  /* gray-50 */
   
   --color-white: #FFFFFF;
   --color-black: #000000;
   
-  /* Semantic colors */
-  --color-success: #10B981;
+  /* Semantic colors (bank-grade) */
+  --success-600: #059669;          /* Approved, success */
+  --warning-600: #D97706;          /* Pending, caution */
+  --error-600: #DC2626;            /* Errors, failures */
+
+  --color-success: #059669;
   --color-success-light: #ECFDF5;
-  --color-warning: #F59E0B;
-  --color-warning-light: #FFFBEB;
-  --color-error: #EF4444;
+  --color-warning: #D97706;
+  --color-warning-light: #FEF3C7;
+  --color-error: #DC2626;
   --color-error-light: #FEE2E2;
   --color-info: #3B82F6;
   --color-info-light: #EFF6FF;
@@ -55,9 +72,9 @@
   --font-mono: 'IBM Plex Mono', 'Monaco', 'Courier New', monospace;
   
   /* Font sizes — strict scale */
-  --font-size-xs: 11px;      /* 0.6875rem — small labels */
+  --font-size-xs: 12px;      /* 0.75rem — labels */
   --font-size-sm: 13px;      /* 0.8125rem — secondary text */
-  --font-size-base: 15px;    /* 0.9375rem — body text standard */
+  --font-size-base: 14px;    /* 0.875rem — body text */
   --font-size-lg: 18px;      /* 1.125rem — large body text */
   --font-size-xl: 20px;      /* 1.25rem — section titles */
   --font-size-2xl: 24px;     /* 1.5rem — page titles */
@@ -221,13 +238,24 @@ input[type="search"],
 textarea,
 select {
   width: 100%;
-  padding: var(--space-base) var(--space-lg);
   background: var(--color-white);
   border: var(--border-width-thin) solid var(--border-color-default);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
+  border-radius: var(--radius-md);
+  font-size: 14px;
   color: var(--color-midnight);
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="search"],
+select {
+  height: 40px;
+  padding: 0 12px;
 }
 
 input[type="text"]:focus,
@@ -245,6 +273,7 @@ select:focus {
 }
 
 textarea {
+  padding: 10px 12px;
   resize: vertical;
   min-height: 120px;
 }
@@ -258,13 +287,15 @@ button, .btn {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  height: 40px;
   font-family: var(--font-family);
-  font-weight: var(--font-weight-semibold);
-  padding: var(--space-base) var(--space-xl);
-  border-radius: var(--radius-none);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  padding: 0 16px;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   user-select: none;
   white-space: nowrap;
   text-decoration: none;
@@ -279,12 +310,10 @@ button, .btn {
 
 .btn-primary:hover, .btn.btn-primary:hover {
   background: var(--color-cyan-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  background: var(--color-cyan-dark);
 }
 
 .btn-secondary, .btn.btn-secondary {
@@ -295,7 +324,6 @@ button, .btn {
 
 .btn-secondary:hover, .btn.btn-secondary:hover {
   background: var(--color-cyan-light);
-  transform: translateY(-1px);
 }
 
 .btn-outline, .btn.btn-outline {
@@ -328,9 +356,9 @@ button, .btn {
 }
 
 .btn-medium {
-  padding: var(--space-base) var(--space-xl);
-  font-size: var(--font-size-base);
-  height: 42px;
+  padding: 0 20px;
+  font-size: 14px;
+  height: 40px;
 }
 
 .btn-small {
@@ -351,15 +379,12 @@ button:disabled, .btn:disabled {
 .card {
   background: var(--color-white);
   border: 1px solid var(--border-color-default);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
   padding: var(--space-2xl);
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
-  border-color: var(--color-cyan);
-  box-shadow: var(--shadow-md);
+  border-color: var(--color-silver-dark);
 }
 
 .card-header {
@@ -403,30 +428,26 @@ button:disabled, .btn:disabled {
 }
 
 .ui-table th {
-  padding: var(--space-base) var(--space-lg);
+  padding: 0 16px;
+  height: 44px;
   text-align: left;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-midnight);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  color: #374151;
   white-space: nowrap;
-  border-right: 1px solid var(--border-color-default);
-}
-
-.ui-table th:last-child {
-  border-right: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .ui-table td {
-  padding: var(--space-base) var(--space-lg);
+  padding: 0 16px;
+  height: 48px;
   border-bottom: 1px solid var(--border-color-default);
-  border-right: 1px solid var(--border-color-default);
-}
-
-.ui-table td:last-child {
-  border-right: none;
+  vertical-align: middle;
 }
 
 .ui-table tbody tr:hover {
-  background: var(--color-silver-very-light);
+  background: #F3F4F6;
 }
 
 .ui-table tbody tr.clickable {
@@ -539,9 +560,9 @@ button:disabled, .btn:disabled {
 }
 
 .input-label {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  color: var(--color-midnight);
+  font-weight: var(--font-weight-medium);
+  font-size: 12px;
+  color: #374151;
 }
 
 .required {
@@ -572,7 +593,7 @@ input.error {
 }
 
 .page-title {
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-midnight);
   margin: 0 0 var(--space-sm) 0;
@@ -709,8 +730,8 @@ input.error {
   border-width: 0;
 }
 
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 2px solid var(--color-cyan-dark);
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--primary-500);
   outline-offset: 2px;
 }
 
@@ -774,13 +795,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 24px;
-  padding: 2px 10px;
+  min-height: 22px;
+  padding: 2px 8px;
   border: 1px solid transparent;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   line-height: 1.2;
-  border-radius: var(--radius-none);
+  border-radius: var(--radius-sm);
   color: var(--color-white);
   background: var(--color-silver-dark);
 }
@@ -816,8 +837,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .progress-bar {
   position: relative;
-  height: 8px;
-  border-radius: var(--radius-none);
+  height: 6px;
+  border-radius: 3px;
   background: var(--color-cyan);
   min-width: 90px;
   max-width: 180px;
@@ -1445,7 +1466,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .drilldown-big-value {
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-midnight);
 }
