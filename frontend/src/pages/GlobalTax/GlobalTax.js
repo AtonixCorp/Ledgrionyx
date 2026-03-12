@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { taxAPI } from '../../services/api';
 import localCountries from '../../data/tax/countries.json';
+import './GlobalTax.css';
 
 const GlobalTax = () => {
   const [countries, setCountries] = useState([]);

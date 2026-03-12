@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/globals.css';
+import './styles/pages.css';
 import App from './App';
 
 // Suppress harmless ResizeObserver error

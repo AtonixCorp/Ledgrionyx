@@ -1,0 +1,546 @@
+/* =============================================================================
+   ATC CAPITAL - FRONTEND PAGES
+   Shared body and layout styling for public/auth/page-level screens.
+   ============================================================================= */
+
+/* Global body foundation for all frontend routes */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-silver-white);
+  color: var(--color-midnight);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+/* Shared wrappers used across pages */
+.page-container,
+.page-shell,
+.about-page,
+.contact-page,
+.features-page,
+.pricing-page,
+.product-page,
+.privacy-page,
+.support-page,
+.help-center-page,
+.auth-page,
+.global-tax-page,
+.tax-calculator-page,
+.security-vaults-page,
+.tax-admin-page,
+.achievements-page,
+.ai-insights-page,
+.financial-dna-page,
+.financial-models-container,
+.wl-container,
+.firm-dashboard,
+.entities-container,
+.team-container {
+  min-height: 100vh;
+  background: var(--color-silver-white);
+  color: var(--color-midnight);
+}
+
+/* Standard centered content container for page sections */
+.about-page .container,
+.contact-page .container,
+.features-page .container,
+.pricing-page .container,
+.product-page .container,
+.privacy-page .container,
+.support-page .container,
+.help-center-page .container,
+.global-tax-page .container,
+.tax-calculator-page .container,
+.security-vaults-page .container,
+.tax-admin-page .container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-left: var(--space-xl);
+  padding-right: var(--space-xl);
+  box-sizing: border-box;
+}
+
+/* Shared section rhythm */
+.about-page section,
+.contact-page section,
+.features-page section,
+.pricing-page section,
+.product-page section,
+.privacy-page section,
+.support-page section,
+.help-center-page section,
+.global-tax-page section,
+.tax-calculator-page section,
+.security-vaults-page section,
+.tax-admin-page section {
+  padding-top: var(--space-4xl);
+  padding-bottom: var(--space-4xl);
+  border-bottom: 1px solid var(--border-color-default);
+}
+
+/* Keep hero regions brighter for visual hierarchy */
+.about-hero,
+.contact-hero,
+.features-hero,
+.pricing-hero,
+.product-hero,
+.privacy-hero,
+.support-hero,
+.help-hero,
+.tax-hero {
+  background: var(--color-white);
+}
+
+/* Dark narrative sections */
+.about-future-section,
+.pricing-cta,
+.features-cta,
+.product-cta,
+.contact-hero {
+  background: var(--color-midnight);
+  color: var(--color-white);
+}
+
+.about-future-section h2,
+.about-future-section p,
+.pricing-cta h2,
+.pricing-cta p,
+.features-cta h2,
+.features-cta p,
+.product-cta h2,
+.product-cta p,
+.contact-hero h1,
+.contact-hero p {
+  color: var(--color-white);
+}
+
+/* Shared typography treatment */
+.hero-content,
+.about-hero-inner,
+.about-section-header,
+.section-header,
+.overview-content,
+.contact-content,
+.hours-content,
+.status-content,
+.future-inner,
+.about-cta-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hero-content h1,
+.about-hero-inner h1,
+.future-inner h2,
+.about-cta-inner h2,
+.features-showcase h2,
+.pricing-features h2,
+.pricing-faq h2,
+.product-overview h2,
+.contact-form h2,
+.offices-section h2,
+.privacy-overview h2,
+.privacy-sections h2,
+.privacy-details h2,
+.help-center-page h2,
+.support-page h2 {
+  margin: 0 0 var(--space-base);
+  font-size: clamp(1.75rem, 2.4vw, 2.5rem);
+  line-height: 1.2;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-midnight);
+}
+
+.hero-content p,
+.about-hero-sub,
+.about-section-sub,
+.section-subtitle,
+.overview-content p,
+.contact-info > p,
+.future-sub,
+.about-cta-inner > p,
+.features-cta p,
+.pricing-cta p,
+.product-cta p,
+.help-center-page p,
+.support-page p,
+.privacy-page p,
+.contact-page p {
+  color: var(--color-silver-dark);
+  max-width: 72ch;
+}
+
+/* Grid helpers reused by many public pages */
+.features-list,
+.showcase-grid,
+.plans-grid,
+.faq-grid,
+.features-grid,
+.offices-grid,
+.links-grid,
+.categories-grid,
+.tutorials-grid,
+.help-grid,
+.topics-grid,
+.contact-grid,
+.sections-grid,
+.details-grid,
+.compliance-grid,
+.product-grid,
+.about-pillars-grid,
+.future-grid,
+.brand-voice-grid {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.features-list,
+.plans-grid,
+.product-grid,
+.about-pillars-grid,
+.details-grid,
+.sections-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.showcase-grid,
+.faq-grid,
+.features-grid,
+.offices-grid,
+.help-grid,
+.compliance-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.links-grid,
+.categories-grid,
+.tutorials-grid,
+.topics-grid,
+.contact-grid,
+.future-grid,
+.brand-voice-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* Shared surface cards */
+.feature-card,
+.showcase-item,
+.plan-card,
+.feature-item,
+.faq-item,
+.office-card,
+.help-card,
+.topic-category,
+.contact-method,
+.status-content,
+.quick-link,
+.category-card,
+.tutorial-card,
+.privacy-section-card,
+.detail-card,
+.compliance-item,
+.product-card,
+.about-pillar-card,
+.ux-feelings,
+.brand-value-tile,
+.brand-voice-card,
+.brand-promise-card,
+.brand-taglines-card,
+.future-item,
+.map-placeholder,
+.hours-content,
+.contact-form,
+.contact-info {
+  background: var(--color-white);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xl);
+  box-sizing: border-box;
+}
+
+/* Emphasized cards */
+.plan-card.popular,
+.kpi-widget.active,
+.ed-panel {
+  border-color: var(--color-cyan);
+}
+
+/* List treatment */
+.feature-details,
+.plan-features,
+.article-list,
+.product-features,
+.problem-grid,
+.ux-qualities {
+  margin: var(--space-base) 0 0;
+  padding-left: var(--space-xl);
+}
+
+.feature-details li,
+.plan-features li,
+.article-list li,
+.product-features li,
+.problem-grid li,
+.ux-qualities li {
+  margin-bottom: var(--space-xs);
+  color: var(--color-silver-dark);
+}
+
+/* Link/button consistency in page bodies */
+.about-page a,
+.contact-page a,
+.features-page a,
+.pricing-page a,
+.product-page a,
+.privacy-page a,
+.support-page a,
+.help-center-page a,
+.global-tax-page a,
+.tax-calculator-page a,
+.security-vaults-page a,
+.tax-admin-page a,
+.auth-page a {
+  color: var(--color-cyan-text);
+}
+
+.about-page a:hover,
+.contact-page a:hover,
+.features-page a:hover,
+.pricing-page a:hover,
+.product-page a:hover,
+.privacy-page a:hover,
+.support-page a:hover,
+.help-center-page a:hover,
+.global-tax-page a:hover,
+.tax-calculator-page a:hover,
+.security-vaults-page a:hover,
+.tax-admin-page a:hover,
+.auth-page a:hover {
+  color: var(--color-cyan-dark);
+}
+
+/* Auth screens (login/register) */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4xl) var(--space-xl);
+  background: linear-gradient(180deg, var(--color-silver-white) 0%, var(--color-white) 100%);
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 460px;
+}
+
+.auth-header {
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+.auth-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--color-midnight);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.auth-card {
+  background: var(--color-white);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+}
+
+.auth-card h1 {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-2xl);
+}
+
+.auth-subtitle {
+  margin: 0 0 var(--space-base);
+  color: var(--color-silver-dark);
+}
+
+.auth-error {
+  background: var(--color-error-light);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: var(--color-error);
+  padding: var(--space-sm) var(--space-base);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-base);
+}
+
+.auth-form .form-group {
+  margin-bottom: var(--space-base);
+}
+
+.auth-form label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-midnight);
+}
+
+.auth-form input,
+.auth-form select,
+.phone-input,
+.country-select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--border-color-default);
+  background: var(--color-white);
+  color: var(--color-midnight);
+  padding: 0 var(--space-base);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+}
+
+.auth-form input:focus,
+.auth-form select:focus,
+.phone-input:focus,
+.country-select:focus {
+  outline: 2px solid rgba(0, 126, 176, 0.15);
+  border-color: var(--color-cyan-dark);
+}
+
+.password-input-wrapper,
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.password-toggle,
+.btn-link {
+  border: 1px solid var(--border-color-default);
+  background: var(--color-white);
+  color: var(--color-cyan-text);
+  min-height: 38px;
+  padding: 0 var(--space-base);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.password-toggle:hover,
+.btn-link:hover {
+  border-color: var(--color-cyan);
+  color: var(--color-cyan-dark);
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.step-indicator {
+  display: flex;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-base);
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-silver-light);
+}
+
+.step-dot.active,
+.step-dot.completed {
+  background: var(--color-cyan);
+}
+
+.auth-footer {
+  margin-top: var(--space-base);
+  color: var(--color-silver-dark);
+  font-size: var(--font-size-sm);
+}
+
+/* Small screen tightening */
+@media (max-width: 1024px) {
+  .about-page section,
+  .contact-page section,
+  .features-page section,
+  .pricing-page section,
+  .product-page section,
+  .privacy-page section,
+  .support-page section,
+  .help-center-page section,
+  .global-tax-page section,
+  .tax-calculator-page section,
+  .security-vaults-page section,
+  .tax-admin-page section {
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-3xl);
+  }
+
+  .about-page .container,
+  .contact-page .container,
+  .features-page .container,
+  .pricing-page .container,
+  .product-page .container,
+  .privacy-page .container,
+  .support-page .container,
+  .help-center-page .container,
+  .global-tax-page .container,
+  .tax-calculator-page .container,
+  .security-vaults-page .container,
+  .tax-admin-page .container {
+    padding-left: var(--space-base);
+    padding-right: var(--space-base);
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-page {
+    padding: var(--space-xl) var(--space-base);
+  }
+
+  .auth-card {
+    padding: var(--space-base);
+  }
+
+  .feature-card,
+  .showcase-item,
+  .plan-card,
+  .feature-item,
+  .faq-item,
+  .office-card,
+  .help-card,
+  .topic-category,
+  .contact-method,
+  .quick-link,
+  .category-card,
+  .tutorial-card,
+  .privacy-section-card,
+  .detail-card,
+  .compliance-item,
+  .product-card,
+  .about-pillar-card,
+  .ux-feelings,
+  .brand-value-tile,
+  .brand-voice-card,
+  .brand-promise-card,
+  .brand-taglines-card,
+  .future-item,
+  .map-placeholder,
+  .hours-content,
+  .contact-form,
+  .contact-info {
+    padding: var(--space-base);
+  }
+}
