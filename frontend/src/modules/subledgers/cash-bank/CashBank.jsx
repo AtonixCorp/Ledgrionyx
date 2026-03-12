@@ -8,7 +8,7 @@ const mockAccounts = [
   { account: 'Money Market - Fidelity', type: 'Investment', balance: '$1,200,000.00', lastReconciled: '2025-01-31', transactions: 2, status: 'Reconciled' },
 ];
 
-const STATUS_COLORS = { Reconciled: '#27ae60', Pending: '#f39c12', Unreconciled: '#e74c3c' };
+const STATUS_COLORS = { Reconciled: 'var(--color-success)', Pending: 'var(--color-warning)', Unreconciled: 'var(--color-error)' };
 
 const columns = [
   { key: 'account', header: 'Account' },
@@ -45,11 +45,11 @@ export default function CashBank() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Accounts Reconciled</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>3 / 4</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>3 / 4</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Unreconciled Txns</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>4</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>4</div>
         </Card>
       </div>
 

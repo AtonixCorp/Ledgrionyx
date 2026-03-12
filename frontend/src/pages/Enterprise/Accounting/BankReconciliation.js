@@ -5,7 +5,7 @@ import { bankReconciliationsAPI } from '../../../services/api';
 
 const fmt = (v, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
 
-const STATUS_COLORS = { pending: '#ed8936', in_progress: '#4299e1', reconciled: '#38a169' };
+const STATUS_COLORS = { pending: 'var(--color-warning)', in_progress: 'var(--color-cyan)', reconciled: 'var(--color-success)' };
 
 const BankReconciliation = () => {
   const { entityId } = useParams();
@@ -59,9 +59,9 @@ const BankReconciliation = () => {
 
       <div className="acct-stat-cards">
         <div className="acct-stat-card"><div className="acct-stat-label">Total Records</div><div className="acct-stat-count">{records.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Pending</div><div className="acct-stat-count" style={{ color: '#ed8936' }}>{pendingCount}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Reconciled</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{reconciledCount}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Unreconciled</div><div className="acct-stat-count" style={{ color: '#e53e3e' }}>{records.filter(r => r.status !== 'reconciled').length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Pending</div><div className="acct-stat-count" style={{ color: 'var(--color-warning)' }}>{pendingCount}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Reconciled</div><div className="acct-stat-count" style={{ color: 'var(--color-success)' }}>{reconciledCount}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Unreconciled</div><div className="acct-stat-count" style={{ color: 'var(--color-error)' }}>{records.filter(r => r.status !== 'reconciled').length}</div></div>
       </div>
 
       {loading ? <div className="acct-loading">Loading reconciliations...</div> : (
@@ -73,26 +73,26 @@ const BankReconciliation = () => {
               <div key={rec.id} className="recon-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                   <div>
-                    <h3 style={{ margin: 0, color: '#2d3748', fontSize: '1rem' }}>{rec.bank_account}</h3>
-                    <small style={{ color: '#718096' }}>Reconciliation Date: {rec.reconciliation_date}</small>
+                    <h3 style={{ margin: 0, color: 'var(--color-midnight)', fontSize: '1rem' }}>{rec.bank_account}</h3>
+                    <small style={{ color: 'var(--color-silver-dark)' }}>Reconciliation Date: {rec.reconciliation_date}</small>
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <span className="status-badge" style={{ background: STATUS_COLORS[rec.status] || '#a0aec0', color: 'white' }}>{rec.status?.replace('_', '')}</span>
+                    <span className="status-badge" style={{ background: STATUS_COLORS[rec.status] || 'var(--color-silver-dark)', color: 'white' }}>{rec.status?.replace('_', '')}</span>
                     {!isReconciled && (
                       <button className="btn-success btn-sm" onClick={() => handleReconcile(rec.id)} disabled={reconciling === rec.id}>
                         {reconciling === rec.id ? 'Processing...' : <>Reconcile</>}
                       </button>
                     )}
-                    {isReconciled && <span style={{ color: '#38a169', fontSize: '0.85rem', fontWeight: 600 }}>Reconciled {rec.reconciled_at?.split('T')[0]}</span>}
+                    {isReconciled && <span style={{ color: 'var(--color-success)', fontSize: '0.85rem', fontWeight: 600 }}>Reconciled {rec.reconciled_at?.split('T')[0]}</span>}
                   </div>
                 </div>
                 <div className="recon-variance">
                   <div className="mini-stat"><span>Bank Statement Balance</span><strong>{fmt(rec.bank_statement_balance)}</strong></div>
                   <div className="mini-stat"><span>Book Balance</span><strong>{fmt(rec.book_balance)}</strong></div>
-                  <div className="mini-stat"><span>Variance</span><strong style={{ color: Math.abs(variance) < 0.01 ? '#38a169' : '#e53e3e' }}>{fmt(variance)}</strong></div>
-                  {Math.abs(variance) < 0.01 && <span style={{ color: '#38a169', fontSize: '0.85rem', fontWeight: 600 }}>Balanced</span>}
+                  <div className="mini-stat"><span>Variance</span><strong style={{ color: Math.abs(variance) < 0.01 ? 'var(--color-success)' : 'var(--color-error)' }}>{fmt(variance)}</strong></div>
+                  {Math.abs(variance) < 0.01 && <span style={{ color: 'var(--color-success)', fontSize: '0.85rem', fontWeight: 600 }}>Balanced</span>}
                 </div>
-                {rec.notes && <p style={{ color: '#718096', fontSize: '0.85rem', margin: 0 }}>{rec.notes}</p>}
+                {rec.notes && <p style={{ color: 'var(--color-silver-dark)', fontSize: '0.85rem', margin: 0 }}>{rec.notes}</p>}
               </div>
             );
           })}

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-import AtonixLogo from '../Logo/AtonixLogo';
+import './Footer.css';
 
 const Footer = () => {
   return (
@@ -10,7 +9,6 @@ const Footer = () => {
         <div className="footer-top">
           <div className="footer-section footer-brand">
             <div className="footer-logo">
-              <AtonixLogo size="extra-small" />
               <span>Atonix Capital</span>
             </div>
             <p className="footer-tagline">Atonix Capital envisions a world where financial power is no longer constrained by geography,

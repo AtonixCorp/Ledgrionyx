@@ -3,66 +3,165 @@ import { Link } from 'react-router-dom';
 
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
+import './Landing.css';
 
 const Landing = () => {
   return (
     <div className="landing-page">
       <Header />
 
-      <section className="hero-section">
-        {/*  HERO  */}
-        <div className="hero-content">
-          <div className="hero-eyebrow">The Financial Operating System</div>
-          <h1 className="hero-title">One Platform.<br />
-            <span className="hero-highlight">Every Financial Operation.</span>
-          </h1>
-          <p className="hero-description">ATC Capital is not an accounting tool. It is not a bookkeeping app. It is a unified
-            Financial Operating System — built to transform how accounting firms, businesses, and
-            financial institutions manage data, automate workflows, and integrate modern banking.
-          </p>
-          <div className="hero-buttons">
-            <Link to="/register" className="btn-primary btn-large">Request Access
-            </Link>
-            <Link to="/login" className="btn-outline btn-large">Sign In
-            </Link>
+      {/* ── HERO SECTION ─────────────────────────────────────────── */}
+      <section className="atc-hero" aria-label="Hero">
+        <div className="atc-hero-inner">
+
+          {/* Left — Text content */}
+          <div className="atc-hero-text">
+            <h1 className="atc-hero-headline">
+              Accounting Built for<br />Global Confidence
+            </h1>
+            <p className="atc-hero-sub">
+              AtcCapital delivers secure accounts, global transfers, and
+              institution-grade financial tools designed for individuals
+              and businesses worldwide.
+            </p>
+            <div className="atc-hero-actions">
+              <Link to="/register" className="atc-hero-btn-primary">
+                Open Your Account
+              </Link>
+              <Link to="/features" className="atc-hero-btn-secondary">
+                Explore Products
+              </Link>
+            </div>
           </div>
-          <div className="hero-tagline-row">
-            <span className="hero-tag">Real-Time Finance</span>
-            <span className="hero-tag">Multi-Tenant Architecture</span>
-            <span className="hero-tag">API-Driven Banking</span>
+
+          {/* Right — Institutional product card */}
+          <div className="atc-hero-card-wrap">
+            <div className="atc-product-card" role="presentation">
+              <div className="atc-card-header">
+                <span className="atc-card-label">Account Overview</span>
+                <span className="atc-card-live">
+                  <span className="atc-live-dot" aria-hidden="true" />
+                  Live
+                </span>
+              </div>
+
+              <div className="atc-card-balance">$2,847,392.00</div>
+              <div className="atc-card-currency">USD · Multi-Currency Ready</div>
+
+              <div className="atc-card-divider" />
+
+              <div className="atc-card-metrics">
+                <div className="atc-card-metric">
+                  <span className="atc-metric-label">Inflow (30d)</span>
+                  <span className="atc-metric-value atc-metric-up">+$184,720</span>
+                </div>
+                <div className="atc-card-metric">
+                  <span className="atc-metric-label">Outflow (30d)</span>
+                  <span className="atc-metric-value atc-metric-down">−$62,410</span>
+                </div>
+                <div className="atc-card-metric">
+                  <span className="atc-metric-label">Entities</span>
+                  <span className="atc-metric-value">12</span>
+                </div>
+              </div>
+
+              <div className="atc-card-divider" />
+
+              <div className="atc-card-activity">
+                <span className="atc-activity-label">Recent Activity</span>
+                {[
+                  { desc: 'Wire Transfer — HSBC London',     amount: '−$12,000', time: '2m ago',  up: false },
+                  { desc: 'Invoice Settlement — Acme Corp',  amount: '+$45,200', time: '1h ago',  up: true  },
+                  { desc: 'FX Conversion — EUR/USD',         amount: '+$8,340',  time: '3h ago',  up: true  },
+                ].map((tx, i) => (
+                  <div className="atc-activity-row" key={i}>
+                    <div>
+                      <div className="atc-activity-desc">{tx.desc}</div>
+                      <div className="atc-activity-time">{tx.time}</div>
+                    </div>
+                    <span className={`atc-activity-amount ${tx.up ? 'atc-metric-up' : 'atc-metric-down'}`}>
+                      {tx.amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="hero-image">
-          <Link to="/dashboard" className="hero-card card-1" style={{ textDecoration: 'none' }}>
-            <div className="card-icon"></div>
-            <div className="card-content">
-              <h4>Live Dashboard</h4>
-              <p>Real-time financial command center</p>
-            </div>
-          </Link>
-          <Link to="/expenses" className="hero-card card-2" style={{ textDecoration: 'none' }}>
-            <div className="card-icon"></div>
-            <div className="card-content">
-              <h4>Bank Reconciliation</h4>
-              <p>Auto-match, auto-post</p>
-            </div>
-          </Link>
-          <Link to="/budget" className="hero-card card-3" style={{ textDecoration: 'none' }}>
-            <div className="card-icon"></div>
-            <div className="card-content">
-              <h4>General Ledger</h4>
-              <p>Multi-entity double-entry</p>
-            </div>
-          </Link>
-          <Link to="/global-tax" className="hero-card card-4" style={{ textDecoration: 'none' }}>
-            <div className="card-icon"></div>
-            <div className="card-content">
-              <h4>Global Compliance</h4>
-              <p>KYC · KYB · AML</p>
-            </div>
-          </Link>
         </div>
       </section>
+
+      {/* ── SECTION DIVIDER ────────────────────────────────────────── */}
+      <div className="atc-section-divider" />
+
+      {/* ── THREE-CARD FEATURE ROW ─────────────────────────────────── */}
+      <section className="atc-feature-section" aria-label="Choose a product">
+        <div className="atc-feature-inner">
+          <h2 className="atc-feature-title">Choose What's Right for You</h2>
+          <div className="atc-feature-cards">
+
+            {/* Card 1 — Personal Banking */}
+            <div className="atc-feature-card">
+              <div className="atc-feature-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="11" r="5" stroke="var(--color-cyan)" strokeWidth="2"/>
+                  <path d="M6 27c0-5.523 4.477-10 10-10s10 4.477 10 10"
+                        stroke="var(--color-cyan)" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <h3 className="atc-feature-card-title">AtcCapital Personal Banking</h3>
+              <p className="atc-feature-card-desc">
+                Open your everyday account with full access to global transfers,
+                savings tools, and real-time financial visibility.
+              </p>
+              <Link to="/register" className="atc-feature-card-cta">Get Started →</Link>
+            </div>
+
+            {/* Card 2 — Business Banking */}
+            <div className="atc-feature-card">
+              <div className="atc-feature-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <rect x="4" y="10" width="24" height="18" stroke="var(--color-cyan)" strokeWidth="2"/>
+                  <path d="M11 10V6h10v4" stroke="var(--color-cyan)" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 18h2M18 18h2M12 23h2M18 23h2"
+                        stroke="var(--color-cyan)" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <h3 className="atc-feature-card-title">AtcCapital Business Banking</h3>
+              <p className="atc-feature-card-desc">
+                Power your business with secure banking tools, multi-entity management,
+                and institution-grade compliance infrastructure.
+              </p>
+              <Link to="/features" className="atc-feature-card-cta">Explore Business →</Link>
+            </div>
+
+            {/* Card 3 — Global Transfers */}
+            <div className="atc-feature-card">
+              <div className="atc-feature-icon" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="11" stroke="var(--color-cyan)" strokeWidth="2"/>
+                  <path d="M5 16h22M16 5c-2.5 3-4 6.5-4 11s1.5 8 4 11M16 5c2.5 3 4 6.5 4 11s-1.5 8-4 11"
+                        stroke="var(--color-cyan)" strokeWidth="2"/>
+                  <path d="M20 12l3 4-3 4" stroke="var(--color-cyan)" strokeWidth="2"
+                        strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3 className="atc-feature-card-title">AtcCapital Global Transfers</h3>
+              <p className="atc-feature-card-desc">
+                Send money across borders with confidence. Multi-currency, low cost,
+                and real-time settlement to over 150 countries.
+              </p>
+              <Link to="/global-tax" className="atc-feature-card-cta">Transfer Now →</Link>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION DIVIDER ────────────────────────────────────────── */}
+      <div className="atc-section-divider" />
 
       {/*  PROBLEM STRIP  */}
       <section className="problem-strip">
@@ -219,7 +318,7 @@ const Landing = () => {
         <div className="vision-container">
           <div className="section-header">
             <p className="section-eyebrow" style={{ color: 'rgba(255,255,255,0.7)' }}>Platform Vision</p>
-            <h2 className="section-title" style={{ color: '#fff' }}>
+            <h2 className="section-title" style={{ color: 'var(--color-white)' }}>
               "One Platform. All Financial Operations. Fully Connected."
             </h2>
           </div>

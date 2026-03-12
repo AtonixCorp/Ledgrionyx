@@ -9,7 +9,7 @@ const mockTaxCenter = [
   { tax: 'Annual 1099 Filing', jurisdiction: 'USA', dueDate: '2025-02-28', amount: 'N/A', status: 'Action Required', filedDate: '—' },
 ];
 
-const STATUS_COLORS = { Filed: '#27ae60', Upcoming: '#667eea', 'Action Required': '#e74c3c', Overdue: '#e74c3c' };
+const STATUS_COLORS = { Filed: 'var(--color-success)', Upcoming: 'var(--color-cyan)', 'Action Required': 'var(--color-error)', Overdue: 'var(--color-error)' };
 
 const columns = [
   { key: 'tax', header: 'Tax Obligation' },
@@ -47,11 +47,11 @@ export default function TaxCenter() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Upcoming Deadlines</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>3</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>3</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Action Required</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>1</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>1</div>
         </Card>
       </div>
 

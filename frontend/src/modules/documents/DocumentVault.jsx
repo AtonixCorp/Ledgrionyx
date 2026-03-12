@@ -65,7 +65,7 @@ export default function DocumentVault() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
-              flex: 1, padding: '8px 12px', border: '1px solid #e2e8f0',
+              flex: 1, padding: '8px 12px', border: '1px solid var(--border-color-default)',
               borderRadius: 6, fontSize: 13, outline: 'none',
             }}
           />
@@ -81,7 +81,7 @@ export default function DocumentVault() {
           <Input label="Notes" />
         </div>
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>File
+          <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-midnight)', display: 'block', marginBottom: 6 }}>File
           </label>
           <input type="file" style={{ fontSize: 13 }} />
         </div>

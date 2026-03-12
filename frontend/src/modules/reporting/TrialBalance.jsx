@@ -44,7 +44,7 @@ export default function TrialBalance() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Difference</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>$29,080.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>$29,080.00</div>
         </Card>
       </div>
 

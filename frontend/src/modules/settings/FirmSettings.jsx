@@ -43,12 +43,12 @@ export default function FirmSettings() {
         <Card title="Accounting Preferences">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Fiscal Year End Month
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-midnight)', display: 'block', marginBottom: 6 }}>Fiscal Year End Month
               </label>
               <select
                 value={form.fiscalYearEnd}
                 onChange={handleChange('fiscalYearEnd')}
-                style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 13 }}
+                style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color-default)', borderRadius: 6, fontSize: 13 }}
               >
                 {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
                   <option key={i} value={String(i + 1)}>{m}</option>
@@ -56,12 +56,12 @@ export default function FirmSettings() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Base Currency
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-midnight)', display: 'block', marginBottom: 6 }}>Base Currency
               </label>
               <select
                 value={form.currency}
                 onChange={handleChange('currency')}
-                style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 13 }}
+                style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color-default)', borderRadius: 6, fontSize: 13 }}
               >
                 <option value="USD">USD — US Dollar</option>
                 <option value="EUR">EUR — Euro</option>
@@ -70,10 +70,10 @@ export default function FirmSettings() {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Accounting Standard
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-midnight)', display: 'block', marginBottom: 6 }}>Accounting Standard
               </label>
               <select
-                style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 13 }}
+                style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color-default)', borderRadius: 6, fontSize: 13 }}
               >
                 <option>GAAP (US Generally Accepted)</option>
                 <option>IFRS (International)</option>

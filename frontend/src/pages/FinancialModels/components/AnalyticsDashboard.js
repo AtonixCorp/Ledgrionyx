@@ -35,15 +35,15 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
   const getStatusColor = status => {
     switch (status) {
       case 'CRITICAL':
-        return '#d63031';
+        return 'var(--color-error)';
       case 'WARNING':
-        return '#fdcb6e';
+        return 'var(--color-warning)';
       case 'ON_TARGET':
-        return '#00b894';
+        return 'var(--color-success)';
       case 'NORMAL':
-        return '#74b9ff';
+        return 'var(--color-cyan)';
       default:
-        return '#2d3436';
+        return 'var(--color-midnight)';
     }
   };
 

@@ -65,13 +65,13 @@ const Dashboard = () => {
   };
 
   const THEME = {
-    base: '#FFFFFF',
-    panel: '#F2F2F7',
-    border: '#E5E7EB',
-    text: '#1C1C1E',
-    muted: '#6B7280',
-    primary: '#4B5DFF',
-    accent: '#5AC8FA'
+    base: 'var(--color-white)',
+    panel: 'var(--color-silver-white)',
+    border: 'var(--border-color-default)',
+    text: 'var(--color-midnight)',
+    muted: 'var(--color-silver-dark)',
+    primary: 'var(--color-cyan-dark)',
+    accent: 'var(--color-cyan)'
   };
 
   const COLORS = [

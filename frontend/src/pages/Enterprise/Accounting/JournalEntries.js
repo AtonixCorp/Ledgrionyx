@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import { journalEntriesAPI } from '../../../services/api';
 
-const STATUS_COLORS = { draft: '#ed8936', posted: '#48bb78', reversed: '#a0aec0' };
+const STATUS_COLORS = { draft: 'var(--color-warning)', posted: 'var(--color-success)', reversed: 'var(--color-silver-dark)' };
 const ENTRY_TYPES = ['manual', 'automated', 'reversal', 'adjusting'];
 
 const defaultForm = {
@@ -79,20 +79,20 @@ const JournalEntries = () => {
 
       {/* Stats */}
       <div className="acct-stat-cards">
-        <div className="acct-stat-card" style={{ borderTop: '3px solid #4299e1' }}>
-          <div className="acct-stat-label" style={{ color: '#4299e1' }}>Total</div>
+        <div className="acct-stat-card" style={{ borderTop: '3px solid var(--color-cyan)' }}>
+          <div className="acct-stat-label" style={{ color: 'var(--color-cyan)' }}>Total</div>
           <div className="acct-stat-count">{stats.total}</div>
         </div>
-        <div className="acct-stat-card" style={{ borderTop: '3px solid #ed8936' }}>
-          <div className="acct-stat-label" style={{ color: '#ed8936' }}>Draft</div>
+        <div className="acct-stat-card" style={{ borderTop: '3px solid var(--color-warning)' }}>
+          <div className="acct-stat-label" style={{ color: 'var(--color-warning)' }}>Draft</div>
           <div className="acct-stat-count">{stats.draft}</div>
         </div>
-        <div className="acct-stat-card" style={{ borderTop: '3px solid #48bb78' }}>
-          <div className="acct-stat-label" style={{ color: '#48bb78' }}>Posted</div>
+        <div className="acct-stat-card" style={{ borderTop: '3px solid var(--color-success)' }}>
+          <div className="acct-stat-label" style={{ color: 'var(--color-success)' }}>Posted</div>
           <div className="acct-stat-count">{stats.posted}</div>
         </div>
-        <div className="acct-stat-card" style={{ borderTop: '3px solid #a0aec0' }}>
-          <div className="acct-stat-label" style={{ color: '#a0aec0' }}>Reversed</div>
+        <div className="acct-stat-card" style={{ borderTop: '3px solid var(--color-silver-dark)' }}>
+          <div className="acct-stat-label" style={{ color: 'var(--color-silver-dark)' }}>Reversed</div>
           <div className="acct-stat-count">{stats.reversed}</div>
         </div>
       </div>
@@ -128,7 +128,7 @@ const JournalEntries = () => {
                   <td>{e.description}</td>
                   <td>{e.posting_date}</td>
                   <td>
-                    <span className="status-badge" style={{ background: STATUS_COLORS[e.status] || '#e2e8f0', color: 'white' }}>
+                    <span className="status-badge" style={{ background: STATUS_COLORS[e.status] || 'var(--border-color-default)', color: 'white' }}>
 
                       {''}{e.status}
                     </span>

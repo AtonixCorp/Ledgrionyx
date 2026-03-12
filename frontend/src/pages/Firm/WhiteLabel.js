@@ -6,9 +6,9 @@ const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 const defaultBranding = {
   portal_name: '',
   portal_description: '',
-  primary_color: '#3b82f6',
-  secondary_color: '#8b5cf6',
-  accent_color: '#10b981',
+  primary_color: 'var(--color-cyan)',
+  secondary_color: 'var(--color-cyan-dark)',
+  accent_color: 'var(--color-success)',
   font_family: 'Inter',
   custom_domain: '',
   support_email: '',
@@ -44,9 +44,9 @@ const WhiteLabel = () => {
           setBranding({
             portal_name: b.portal_name || currentOrganization.name,
             portal_description: b.portal_description || '',
-            primary_color: b.primary_color || '#3b82f6',
-            secondary_color: b.secondary_color || '#8b5cf6',
-            accent_color: b.accent_color || '#10b981',
+            primary_color: b.primary_color || 'var(--color-cyan)',
+            secondary_color: b.secondary_color || 'var(--color-cyan-dark)',
+            accent_color: b.accent_color || 'var(--color-success)',
             font_family: b.font_family || 'Inter',
             custom_domain: b.custom_domain || '',
             support_email: b.support_email || '',
@@ -319,7 +319,7 @@ const WhiteLabel = () => {
                   </div>
                   <div className="preview-body">
                     <div className="preview-sidebar" style={{ borderRight: `3px solid ${branding.secondary_color}` }}>
-                      <div className="preview-menu-item" style={{ background: branding.primary_color, color: '#fff' }}>Overview</div>
+                      <div className="preview-menu-item" style={{ background: branding.primary_color, color: 'var(--color-white)' }}>Overview</div>
                       <div className="preview-menu-item">Clients</div>
                       <div className="preview-menu-item">Reports</div>
                     </div>

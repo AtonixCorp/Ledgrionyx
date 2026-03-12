@@ -21,7 +21,7 @@ const Tasks = () => {
 
       <Card>
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No tasks yet
+          <p style={{ textAlign: 'center', color: 'var(--color-silver-dark)', padding: '32px 0' }}>No tasks yet
           </p>
         ) : (
           <Table columns={columns} data={data} />

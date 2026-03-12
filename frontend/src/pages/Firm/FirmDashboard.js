@@ -183,10 +183,10 @@ const FirmDashboard = () => {
                 <h3>Workload Overview</h3>
                 <div className="workload-bars">
                   {[
-                    { label: 'Pending', value: data.workload.pending, color: '#f59e0b', total: data.workload.total },
-                    { label: 'In Progress', value: data.workload.in_progress, color: '#3b82f6', total: data.workload.total },
-                    { label: 'Completed', value: data.workload.completed, color: '#10b981', total: data.workload.total },
-                    { label: 'Overdue', value: data.workload.overdue, color: '#ef4444', total: data.workload.total },
+                    { label: 'Pending', value: data.workload.pending, color: 'var(--color-warning)', total: data.workload.total },
+                    { label: 'In Progress', value: data.workload.in_progress, color: 'var(--color-cyan)', total: data.workload.total },
+                    { label: 'Completed', value: data.workload.completed, color: 'var(--color-success)', total: data.workload.total },
+                    { label: 'Overdue', value: data.workload.overdue, color: 'var(--color-error)', total: data.workload.total },
                   ].map(item => (
                     <div className="workload-bar-row" key={item.label}>
                       <span className="wb-label">{item.label}</span>
@@ -348,10 +348,10 @@ const FirmDashboard = () => {
             <div className="fd-section">
               <div className="workload-grid">
                 {[
-                  { label: 'Pending', value: data.workload.pending, color: '#f59e0b', },
-                  { label: 'In Progress', value: data.workload.in_progress, color: '#3b82f6', },
-                  { label: 'Completed', value: data.workload.completed, color: '#10b981', },
-                  { label: 'Overdue', value: data.workload.overdue, color: '#ef4444', },
+                  { label: 'Pending', value: data.workload.pending, color: 'var(--color-warning)', },
+                  { label: 'In Progress', value: data.workload.in_progress, color: 'var(--color-cyan)', },
+                  { label: 'Completed', value: data.workload.completed, color: 'var(--color-success)', },
+                  { label: 'Overdue', value: data.workload.overdue, color: 'var(--color-error)', },
                 ].map(item => (
                   <div className="wl-stat-card" key={item.label} style={{ borderTop: `4px solid ${item.color}` }}>
                     <div className="wl-icon" style={{ color: item.color }}>{item.icon}</div>

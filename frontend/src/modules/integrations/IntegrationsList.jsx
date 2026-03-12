@@ -8,7 +8,7 @@ const integrations = [
   { id: 'INT-004', name: 'Salesforce CRM', type: 'CRM', method: 'OAuth 2.0', lastSync: '—', status: 'Disconnected' },
 ];
 
-const STATUS_COLORS = { Connected: '#27ae60', Disconnected: '#95a5a6', Error: '#e74c3c' };
+const STATUS_COLORS = { Connected: 'var(--color-success)', Disconnected: 'var(--color-silver-dark)', Error: 'var(--color-error)' };
 
 const columns = [
   { key: 'name', header: 'Integration' },
@@ -40,15 +40,15 @@ export default function IntegrationsList() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Connected</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>3</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>3</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Disconnected</div>
-          <div className="stat-value" style={{ color: '#95a5a6' }}>1</div>
+          <div className="stat-value" style={{ color: 'var(--color-silver-dark)' }}>1</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Sync Errors</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>0</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>0</div>
         </Card>
       </div>
 

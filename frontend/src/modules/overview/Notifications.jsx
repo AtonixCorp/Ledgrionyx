@@ -10,7 +10,7 @@ const Notifications = () => {
       />
 
       <Card>
-        <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No notifications at this time
+        <p style={{ textAlign: 'center', color: 'var(--color-silver-dark)', padding: '32px 0' }}>No notifications at this time
         </p>
       </Card>
     </div>

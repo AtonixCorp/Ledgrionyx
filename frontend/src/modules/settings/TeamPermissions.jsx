@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const ROLE_COLORS = { Admin: '#e74c3c', Manager: '#667eea', Editor: '#27ae60', Viewer: '#95a5a6' };
+const ROLE_COLORS = { Admin: 'var(--color-error)', Manager: 'var(--color-cyan)', Editor: 'var(--color-success)', Viewer: 'var(--color-silver-dark)' };
 
 const mockTeam = [
   { id: 'USR-001', name: 'Sarah Johnson', email: 'sarah@atc.com', role: 'Admin', entities: 'All', lastLogin: '2025-01-31', status: 'Active' },
@@ -19,7 +19,7 @@ const columns = [
   { key: 'entities', header: 'Entity Access' },
   { key: 'lastLogin', header: 'Last Login' },
   { key: 'status', header: 'Status', render: (row) => (
-    <span className="status-badge" style={{ background: '#27ae60' }}>{row.status}</span>
+    <span className="status-badge" style={{ background: 'var(--color-success)' }}>{row.status}</span>
   )},
 ];
 
@@ -44,11 +44,11 @@ export default function TeamPermissions() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Admins</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>1</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>1</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Active (Last 30 Days)</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>4</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>4</div>
         </Card>
       </div>
 
@@ -61,8 +61,8 @@ export default function TeamPermissions() {
           <Input label="Full Name" required />
           <Input label="Email Address" type="email" required />
           <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Role</label>
-            <select style={{ width: '100%', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 13 }}>
+            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-midnight)', display: 'block', marginBottom: 6 }}>Role</label>
+            <select style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border-color-default)', borderRadius: 6, fontSize: 13 }}>
               <option>Admin</option>
               <option>Manager</option>
               <option>Editor</option>

@@ -16,7 +16,7 @@ const columns = [
   { key: 'contact', header: 'Primary Contact' },
   { key: 'email', header: 'Email' },
   { key: 'status', header: 'Status', render: (row) => (
-    <span className="status-badge" style={{ background: row.status === 'Active' ? '#27ae60' : '#95a5a6' }}>{row.status}</span>
+    <span className="status-badge" style={{ background: row.status === 'Active' ? 'var(--color-success)' : 'var(--color-silver-dark)' }}>{row.status}</span>
   )},
 ];
 
@@ -41,7 +41,7 @@ export default function ClientDirectory() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Active</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>2</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>2</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Total Entities Managed</div>

@@ -7,14 +7,14 @@ const mockCollections = [
   { invoice: 'INV-0007', customer: 'Tyrell Inc', amount: '$2,100.00', overdueDays: 5, lastContact: '2025-01-28', nextAction: 'Email', priority: 'Medium' },
 ];
 
-const PRIORITY_COLORS = { Low: '#27ae60', Medium: '#f39c12', High: '#e67e22', Critical: '#e74c3c' };
+const PRIORITY_COLORS = { Low: 'var(--color-success)', Medium: 'var(--color-warning)', High: 'var(--color-warning)', Critical: 'var(--color-error)' };
 
 const columns = [
   { key: 'invoice', header: 'Invoice' },
   { key: 'customer', header: 'Customer' },
   { key: 'amount', header: 'Amount' },
   { key: 'overdueDays', header: 'Days Overdue', render: (row) => (
-    <span style={{ color: '#e74c3c', fontWeight: 600 }}>{row.overdueDays} days</span>
+    <span style={{ color: 'var(--color-error)', fontWeight: 600 }}>{row.overdueDays} days</span>
   )},
   { key: 'lastContact', header: 'Last Contact' },
   { key: 'nextAction', header: 'Next Action' },

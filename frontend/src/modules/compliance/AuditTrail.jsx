@@ -40,7 +40,7 @@ export default function AuditTrail() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Critical Events</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>2</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>2</div>
         </Card>
       </div>
 

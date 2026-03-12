@@ -30,7 +30,7 @@ const ChartOfAccounts = () => {
 
       <Card>
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No accounts yet. Create your first account to get started.
+          <p style={{ textAlign: 'center', color: 'var(--color-silver-dark)', padding: '32px 0' }}>No accounts yet. Create your first account to get started.
           </p>
         ) : (
           <Table columns={columns} data={data} />

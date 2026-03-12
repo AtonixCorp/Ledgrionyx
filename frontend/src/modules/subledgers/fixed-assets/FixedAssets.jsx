@@ -8,7 +8,7 @@ const mockAssets = [
   { id: 'FA-004', name: 'Leasehold Improvements', category: 'Improvements', cost: '$85,000.00', accumulated: '$85,000.00', netBook: '$0.00', method: 'Straight-line', life: '10 yrs', status: 'Fully Depreciated' },
 ];
 
-const STATUS_COLORS = { Active: '#27ae60', 'Fully Depreciated': '#95a5a6', Disposed: '#e74c3c' };
+const STATUS_COLORS = { Active: 'var(--color-success)', 'Fully Depreciated': 'var(--color-silver-dark)', Disposed: 'var(--color-error)' };
 
 const columns = [
   { key: 'id', header: 'Asset ID' },
@@ -52,7 +52,7 @@ export default function FixedAssets() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">YTD Depreciation</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>$85,400.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>$85,400.00</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Active Assets</div>

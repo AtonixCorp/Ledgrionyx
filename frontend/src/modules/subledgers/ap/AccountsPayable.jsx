@@ -7,7 +7,7 @@ const mockAP = [
   { bill: 'BILL-0004', vendor: 'Landlord LLC', billDate: '2025-01-01', dueDate: '2025-02-01', original: '$5,500.00', balance: '$0.00', aging: 'Paid', status: 'Paid' },
 ];
 
-const STATUS_COLORS = { Pending: '#f39c12', Overdue: '#e74c3c', Paid: '#95a5a6' };
+const STATUS_COLORS = { Pending: 'var(--color-warning)', Overdue: 'var(--color-error)', Paid: 'var(--color-silver-dark)' };
 
 const columns = [
   { key: 'bill', header: 'Bill #' },
@@ -46,7 +46,7 @@ export default function AccountsPayable() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Due This Month</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>$3,200.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>$3,200.00</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Overdue</div>
@@ -54,7 +54,7 @@ export default function AccountsPayable() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Paid (MTD)</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>$5,500.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>$5,500.00</div>
         </Card>
       </div>
 

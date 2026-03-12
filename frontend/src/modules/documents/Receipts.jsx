@@ -8,7 +8,7 @@ const mockReceipts = [
   { id: 'REC-004', merchant: 'Office Depot', date: '2025-01-25', amount: '$680.00', category: 'Supplies', status: 'Matched', bill: 'BILL-0002' },
 ];
 
-const STATUS_COLORS = { Matched: '#27ae60', Pending: '#f39c12', Rejected: '#e74c3c' };
+const STATUS_COLORS = { Matched: 'var(--color-success)', Pending: 'var(--color-warning)', Rejected: 'var(--color-error)' };
 
 const columns = [
   { key: 'id', header: 'Receipt ID' },
@@ -43,11 +43,11 @@ export default function Receipts() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Matched</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>2</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>2</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Pending Review</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>2</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>2</div>
         </Card>
       </div>
 
@@ -64,7 +64,7 @@ export default function Receipts() {
           <Input label="Notes" />
         </div>
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 13, fontWeight: 500, color: '#2c3e50', display: 'block', marginBottom: 6 }}>Receipt Image / PDF</label>
+          <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-midnight)', display: 'block', marginBottom: 6 }}>Receipt Image / PDF</label>
           <input type="file" accept="image/*,.pdf" style={{ fontSize: 13 }} />
         </div>
         <div className="modal-footer">

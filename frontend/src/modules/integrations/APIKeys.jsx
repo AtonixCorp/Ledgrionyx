@@ -14,7 +14,7 @@ const columns = [
   { key: 'lastUsed', header: 'Last Used' },
   { key: 'permissions', header: 'Permissions' },
   { key: 'status', header: 'Status', render: (row) => (
-    <span className="status-badge" style={{ background: '#27ae60' }}>{row.status}</span>
+    <span className="status-badge" style={{ background: 'var(--color-success)' }}>{row.status}</span>
   )},
 ];
 
@@ -32,8 +32,8 @@ export default function APIKeys() {
         }
       />
 
-      <Card style={{ marginBottom: 16, padding: '12px 20px', background: '#fffbf0', border: '1px solid #f39c12' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#e67e22' }}>
+      <Card style={{ marginBottom: 16, padding: '12px 20px', background: 'var(--color-warning-light)', border: '1px solid var(--color-warning)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--color-warning)' }}>
 
           <span><strong>Security Notice:</strong>API keys provide full access to your account data. Never share keys publicly or commit them to source control.</span>
         </div>

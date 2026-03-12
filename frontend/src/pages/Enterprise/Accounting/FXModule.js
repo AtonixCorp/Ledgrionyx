@@ -9,7 +9,7 @@ const fmt = (v, currency = 'USD') => {
 };
 const fmtChange = (v) => {
   const n = parseFloat(v || 0);
-  return <span style={{ color: n >= 0 ? '#38a169' : '#e53e3e', fontWeight: 600 }}>{n >= 0 ? '+' : ''}{n.toFixed(4)}</span>;
+  return <span style={{ color: n >= 0 ? 'var(--color-success)' : 'var(--color-error)', fontWeight: 600 }}>{n >= 0 ? '+' : ''}{n.toFixed(4)}</span>;
 };
 
 const TABS = [
@@ -76,8 +76,8 @@ const ExchangeRatesTab = ({ entityId }) => {
               <tr key={r.id}>
                 <td><strong style={{ fontFamily: 'monospace', fontSize: '1rem' }}>{r.base_currency} / {r.quote_currency}</strong></td>
                 <td>{r.rate_date}</td>
-                <td style={{ fontWeight: 700, color: '#667eea', fontFamily: 'monospace' }}>{parseFloat(r.rate).toFixed(6)}</td>
-                <td style={{ color: '#718096', fontFamily: 'monospace' }}>{(1 / parseFloat(r.rate)).toFixed(6)}</td>
+                <td style={{ fontWeight: 700, color: 'var(--color-cyan)', fontFamily: 'monospace' }}>{parseFloat(r.rate).toFixed(6)}</td>
+                <td style={{ color: 'var(--color-silver-dark)', fontFamily: 'monospace' }}>{(1 / parseFloat(r.rate)).toFixed(6)}</td>
                 <td><span className="tag">{r.rate_type}</span></td>
                 <td><span className="tag tag-type">{r.source}</span></td>
                 <td className="acct-actions">
@@ -153,9 +153,9 @@ const FXGainLossTab = ({ entityId }) => {
     <div>
       <div className="acct-stat-cards">
         <div className="acct-stat-card"><div className="acct-stat-label">Total Records</div><div className="acct-stat-count">{records.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Net FX Impact</div><div className="acct-stat-count" style={{ fontSize: '1.2rem', color: totalGain >= 0 ? '#38a169' : '#e53e3e' }}>{totalGain >= 0 ? '+' : ''}{totalGain.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">FX Gains</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{gains.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">FX Losses</div><div className="acct-stat-count" style={{ color: '#e53e3e' }}>{losses.length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Net FX Impact</div><div className="acct-stat-count" style={{ fontSize: '1.2rem', color: totalGain >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}>{totalGain >= 0 ? '+' : ''}{totalGain.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">FX Gains</div><div className="acct-stat-count" style={{ color: 'var(--color-success)' }}>{gains.length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">FX Losses</div><div className="acct-stat-count" style={{ color: 'var(--color-error)' }}>{losses.length}</div></div>
       </div>
       <div className="tab-toolbar">
         <button className="btn-primary" onClick={() => setShowForm(true)}>Record FX Gain/Loss</button>
@@ -172,7 +172,7 @@ const FXGainLossTab = ({ entityId }) => {
                 <td>{fmt(r.functional_amount_at_transaction, r.functional_currency)}</td>
                 <td>{fmt(r.functional_amount_at_settlement, r.functional_currency)}</td>
                 <td>{fmtChange(r.gain_loss_amount)}</td>
-                <td style={{ color: '#718096', maxWidth: 200 }}>{r.description || '—'}</td>
+                <td style={{ color: 'var(--color-silver-dark)', maxWidth: 200 }}>{r.description || '—'}</td>
               </tr>
             ))}
           </tbody>

@@ -9,7 +9,7 @@ const mockForecast = [
   { month: 'Jun 2025', revenue: '$345,000', expenses: '$190,000', netIncome: '$155,000', cashFlow: '$140,000', confidence: 'Low' },
 ];
 
-const CONFIDENCE_COLORS = { High: '#27ae60', Medium: '#f39c12', Low: '#e74c3c' };
+const CONFIDENCE_COLORS = { High: 'var(--color-success)', Medium: 'var(--color-warning)', Low: 'var(--color-error)' };
 
 const columns = [
   { key: 'month', header: 'Month' },
@@ -47,7 +47,7 @@ export default function Forecasts() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Forecast Accuracy (TTM)</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>94.2%</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>94.2%</div>
         </Card>
       </div>
 

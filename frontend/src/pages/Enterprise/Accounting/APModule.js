@@ -4,9 +4,9 @@ import { useParams } from 'react-router-dom';
 import { vendorsAPI, purchaseOrdersAPI, billsAPI, billPaymentsAPI } from '../../../services/api';
 
 const STATUS_COLORS = {
-  draft: '#a0aec0', sent: '#4299e1', acknowledged: '#667eea', received: '#48bb78', cancelled: '#e53e3e',
-  posted: '#4299e1', partially_paid: '#ed8936', paid: '#48bb78', overdue: '#e53e3e',
-  active: '#48bb78', inactive: '#a0aec0', blocked: '#e53e3e'
+  draft: 'var(--color-silver-dark)', sent: 'var(--color-cyan)', acknowledged: 'var(--color-cyan)', received: 'var(--color-success)', cancelled: 'var(--color-error)',
+  posted: 'var(--color-cyan)', partially_paid: 'var(--color-warning)', paid: 'var(--color-success)', overdue: 'var(--color-error)',
+  active: 'var(--color-success)', inactive: 'var(--color-silver-dark)', blocked: 'var(--color-error)'
 };
 const fmt = (v, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
 
@@ -152,8 +152,8 @@ const BillsTab = ({ entityId }) => {
       <div className="tab-toolbar">
         <div className="ar-summary-mini">
           <div className="mini-stat"><span>Total Bills</span><strong>{items.length}</strong></div>
-          <div className="mini-stat"><span>Outstanding AP</span><strong style={{ color: '#e53e3e' }}>{fmt(totalOutstanding)}</strong></div>
-          <div className="mini-stat"><span>Overdue</span><strong style={{ color: '#e53e3e' }}>{items.filter(i => i.status === 'overdue').length}</strong></div>
+          <div className="mini-stat"><span>Outstanding AP</span><strong style={{ color: 'var(--color-error)' }}>{fmt(totalOutstanding)}</strong></div>
+          <div className="mini-stat"><span>Overdue</span><strong style={{ color: 'var(--color-error)' }}>{items.filter(i => i.status === 'overdue').length}</strong></div>
         </div>
         <button className="btn-primary" onClick={() => setShowForm(true)}>New Bill</button>
       </div>
@@ -168,9 +168,9 @@ const BillsTab = ({ entityId }) => {
                 <td>{b.bill_date}</td>
                 <td>{b.due_date}</td>
                 <td>{fmt(b.total_amount)}</td>
-                <td style={{ color: '#48bb78' }}>{fmt(b.paid_amount)}</td>
-                <td style={{ color: parseFloat(b.outstanding_amount) > 0 ? '#e53e3e' : '#48bb78' }}>{fmt(b.outstanding_amount)}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[b.status] || '#a0aec0', color: 'white' }}>{b.status?.replace(/_/g,'')}</span></td>
+                <td style={{ color: 'var(--color-success)' }}>{fmt(b.paid_amount)}</td>
+                <td style={{ color: parseFloat(b.outstanding_amount) > 0 ? 'var(--color-error)' : 'var(--color-success)' }}>{fmt(b.outstanding_amount)}</td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[b.status] || 'var(--color-silver-dark)', color: 'white' }}>{b.status?.replace(/_/g,'')}</span></td>
               </tr>
             ))}
           </tbody>
@@ -194,7 +194,7 @@ const BillsTab = ({ entityId }) => {
                 <div className="form-row"><label>Subtotal</label><input type="number" step="0.01" value={form.subtotal} onChange={e => setForm(p => ({ ...p, subtotal: e.target.value, total_amount: (parseFloat(e.target.value || 0) + parseFloat(p.tax_amount || 0)).toFixed(2) }))} /></div>
                 <div className="form-row"><label>Tax Amount</label><input type="number" step="0.01" value={form.tax_amount} onChange={e => setForm(p => ({ ...p, tax_amount: e.target.value, total_amount: (parseFloat(p.subtotal || 0) + parseFloat(e.target.value || 0)).toFixed(2) }))} /></div>
               </div>
-              <div className="form-row"><label>Total Amount</label><input type="number" step="0.01" value={form.total_amount} readOnly style={{ background: '#f5f7fa' }} /></div>
+              <div className="form-row"><label>Total Amount</label><input type="number" step="0.01" value={form.total_amount} readOnly style={{ background: 'var(--color-silver-white)' }} /></div>
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
@@ -242,7 +242,7 @@ const BillPaymentsTab = ({ entityId }) => {
     <div>
       <div className="tab-toolbar">
         <div className="mini-stat"><span>Total Payments</span><strong>{items.length}</strong></div>
-        <div className="mini-stat"><span>Total Paid Out</span><strong style={{ color: '#fc8181' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
+        <div className="mini-stat"><span>Total Paid Out</span><strong style={{ color: 'var(--color-error)' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
         <button className="btn-primary" onClick={() => setShowForm(true)}>Pay Bill</button>
       </div>
       {loading ? <div className="acct-loading">Loading payments...</div> : (
@@ -254,10 +254,10 @@ const BillPaymentsTab = ({ entityId }) => {
                 <td>{p.payment_date}</td>
                 <td>{p.vendor_name || `Vendor ${p.vendor}`}</td>
                 <td><code className="acct-code">{p.bill_number || `BILL-${p.bill}`}</code></td>
-                <td style={{ color: '#fc8181' }}><strong>{fmt(p.amount)}</strong></td>
+                <td style={{ color: 'var(--color-error)' }}><strong>{fmt(p.amount)}</strong></td>
                 <td><span className="tag">{p.payment_method?.replace(/_/g,'')}</span></td>
                 <td>{p.reference_number || '—'}</td>
-                <td><span className="status-badge" style={{ background: '#4299e1', color: 'white' }}>{p.status}</span></td>
+                <td><span className="status-badge" style={{ background: 'var(--color-cyan)', color: 'white' }}>{p.status}</span></td>
               </tr>
             ))}
           </tbody>
@@ -358,7 +358,7 @@ const PurchaseOrdersTab = ({ entityId }) => {
     <div>
       <div className="tab-toolbar">
         <div className="mini-stat"><span>Total POs</span><strong>{items.length}</strong></div>
-        <div className="mini-stat"><span>Open</span><strong style={{ color: '#4299e1' }}>{items.filter(p => !['received','cancelled'].includes(p.status)).length}</strong></div>
+        <div className="mini-stat"><span>Open</span><strong style={{ color: 'var(--color-cyan)' }}>{items.filter(p => !['received','cancelled'].includes(p.status)).length}</strong></div>
         <button className="btn-primary" onClick={() => setShowForm(true)}>New PO</button>
       </div>
       {loading ? <div className="acct-loading">Loading purchase orders...</div> : (
@@ -372,7 +372,7 @@ const PurchaseOrdersTab = ({ entityId }) => {
                 <td>{p.po_date}</td>
                 <td>{p.expected_delivery_date || '—'}</td>
                 <td>{fmt(p.total_amount)}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || '#a0aec0', color: 'white' }}>{p.status}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || 'var(--color-silver-dark)', color: 'white' }}>{p.status}</span></td>
               </tr>
             ))}
           </tbody>

@@ -55,9 +55,9 @@ const ItemsTab = ({ entityId }) => {
     <div>
       <div className="acct-stat-cards">
         <div className="acct-stat-card"><div className="acct-stat-label">Total Items</div><div className="acct-stat-count">{items.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Total Value</div><div className="acct-stat-count" style={{ fontSize: '1.3rem', color: '#667eea' }}>{fmt(totalValue)}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Low Stock</div><div className="acct-stat-count" style={{ color: '#e53e3e' }}>{items.filter(i => parseFloat(i.quantity_on_hand || 0) <= parseFloat(i.reorder_level || 0)).length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Active Items</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{items.filter(i => i.status === 'active').length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Total Value</div><div className="acct-stat-count" style={{ fontSize: '1.3rem', color: 'var(--color-cyan)' }}>{fmt(totalValue)}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Low Stock</div><div className="acct-stat-count" style={{ color: 'var(--color-error)' }}>{items.filter(i => parseFloat(i.quantity_on_hand || 0) <= parseFloat(i.reorder_level || 0)).length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Active Items</div><div className="acct-stat-count" style={{ color: 'var(--color-success)' }}>{items.filter(i => i.status === 'active').length}</div></div>
       </div>
       <div className="tab-toolbar">
         <div className="acct-search"><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by SKU or name..." /></div>
@@ -73,10 +73,10 @@ const ItemsTab = ({ entityId }) => {
                 <td><strong>{item.item_name}</strong>{item.description && <div className="acct-desc">{item.description}</div>}</td>
                 <td>{item.unit_of_measure}</td>
                 <td><span className="tag tag-type">{item.cost_method?.toUpperCase()}</span></td>
-                <td style={{ color: parseFloat(item.quantity_on_hand || 0) <= parseFloat(item.reorder_level || 0) ? '#e53e3e' : '#2d3748', fontWeight: 600 }}>{item.quantity_on_hand}</td>
+                <td style={{ color: parseFloat(item.quantity_on_hand || 0) <= parseFloat(item.reorder_level || 0) ? 'var(--color-error)' : 'var(--color-midnight)', fontWeight: 600 }}>{item.quantity_on_hand}</td>
                 <td>{fmt(item.unit_cost)}</td>
-                <td style={{ fontWeight: 600, color: '#667eea' }}>{fmt(item.total_value)}</td>
-                <td style={{ color: '#a0aec0' }}>{item.reorder_level}</td>
+                <td style={{ fontWeight: 600, color: 'var(--color-cyan)' }}>{fmt(item.total_value)}</td>
+                <td style={{ color: 'var(--color-silver-dark)' }}>{item.reorder_level}</td>
                 <td><span className={`status-badge status-${item.status}`}>{item.status}</span></td>
               </tr>
             ))}
@@ -140,7 +140,7 @@ const TransactionsTab = ({ entityId }) => {
 
   useEffect(() => { load(); }, [load]);
 
-  const TX_COLORS = { purchase: '#48bb78', sale: '#e53e3e', adjustment: '#ed8936', transfer: '#4299e1', return: '#805ad5' };
+  const TX_COLORS = { purchase: 'var(--color-success)', sale: 'var(--color-error)', adjustment: 'var(--color-warning)', transfer: 'var(--color-cyan)', return: 'var(--color-cyan-dark)' };
   const filtered = transactions.filter(t => !typeFilter || t.transaction_type === typeFilter);
 
   const handleSave = async () => {
@@ -174,7 +174,7 @@ const TransactionsTab = ({ entityId }) => {
                 <td>{t.transaction_date}</td>
                 <td><strong>{t.item_name || `Item ${t.inventory_item}`}</strong></td>
                 <td><span className="tag" style={{ background: TX_COLORS[t.transaction_type] + '22', color: TX_COLORS[t.transaction_type] }}>{t.transaction_type}</span></td>
-                <td style={{ color: ['sale', 'adjustment'].includes(t.transaction_type) && parseFloat(t.quantity) < 0 ? '#e53e3e' : '#38a169', fontWeight: 600 }}>{t.quantity}</td>
+                <td style={{ color: ['sale', 'adjustment'].includes(t.transaction_type) && parseFloat(t.quantity) < 0 ? 'var(--color-error)' : 'var(--color-success)', fontWeight: 600 }}>{t.quantity}</td>
                 <td>{fmt(t.unit_cost)}</td>
                 <td style={{ fontWeight: 600 }}>{fmt(t.total_cost)}</td>
                 <td>{t.reference || '—'}</td>
@@ -230,7 +230,7 @@ const COGSTab = ({ entityId }) => {
     <div>
       <div className="acct-stat-cards">
         <div className="acct-stat-card"><div className="acct-stat-label">Total COGS Records</div><div className="acct-stat-count">{records.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Total COGS</div><div className="acct-stat-count" style={{ fontSize: '1.3rem', color: '#e53e3e' }}>{fmt(totalCOGS)}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Total COGS</div><div className="acct-stat-count" style={{ fontSize: '1.3rem', color: 'var(--color-error)' }}>{fmt(totalCOGS)}</div></div>
       </div>
       {loading ? <div className="acct-loading">Loading COGS data...</div> : (
         <table className="acct-table">
@@ -243,7 +243,7 @@ const COGSTab = ({ entityId }) => {
                 <td><span className="tag tag-type">{r.cost_method?.toUpperCase()}</span></td>
                 <td>{r.units_sold}</td>
                 <td>{fmt(r.average_unit_cost)}</td>
-                <td style={{ fontWeight: 700, color: '#e53e3e' }}>{fmt(r.cogs_amount)}</td>
+                <td style={{ fontWeight: 700, color: 'var(--color-error)' }}>{fmt(r.cogs_amount)}</td>
               </tr>
             ))}
           </tbody>

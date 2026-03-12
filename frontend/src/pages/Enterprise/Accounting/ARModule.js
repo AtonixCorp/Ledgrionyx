@@ -4,9 +4,9 @@ import { useParams } from 'react-router-dom';
 import { customersAPI, invoicesAPI, creditNotesAPI, paymentsAPI } from '../../../services/api';
 
 const STATUS_COLORS = {
-  draft: '#a0aec0', posted: '#4299e1', partially_paid: '#ed8936',
-  paid: '#48bb78', overdue: '#e53e3e', cancelled: '#718096',
-  active: '#48bb78', inactive: '#a0aec0', blacklisted: '#e53e3e'
+  draft: 'var(--color-silver-dark)', posted: 'var(--color-cyan)', partially_paid: 'var(--color-warning)',
+  paid: 'var(--color-success)', overdue: 'var(--color-error)', cancelled: 'var(--color-silver-dark)',
+  active: 'var(--color-success)', inactive: 'var(--color-silver-dark)', blacklisted: 'var(--color-error)'
 };
 
 const TABS = [
@@ -67,8 +67,8 @@ const CustomersTab = ({ entityId }) => {
       </div>
       <div className="ar-summary-mini">
         <div className="mini-stat"><span>Total</span><strong>{items.length}</strong></div>
-        <div className="mini-stat"><span>Active</span><strong style={{ color: '#48bb78' }}>{items.filter(c => c.status === 'active').length}</strong></div>
-        <div className="mini-stat"><span>Inactive</span><strong style={{ color: '#a0aec0' }}>{items.filter(c => c.status !== 'active').length}</strong></div>
+        <div className="mini-stat"><span>Active</span><strong style={{ color: 'var(--color-success)' }}>{items.filter(c => c.status === 'active').length}</strong></div>
+        <div className="mini-stat"><span>Inactive</span><strong style={{ color: 'var(--color-silver-dark)' }}>{items.filter(c => c.status !== 'active').length}</strong></div>
       </div>
       {loading ? <div className="acct-loading">Loading customers...</div> : (
         <table className="acct-table">
@@ -184,9 +184,9 @@ const InvoicesTab = ({ entityId }) => {
       </div>
       <div className="ar-summary-mini">
         <div className="mini-stat"><span>Total Invoices</span><strong>{items.length}</strong></div>
-        <div className="mini-stat"><span>Outstanding</span><strong style={{ color: '#e53e3e' }}>{fmt(totalOutstanding)}</strong></div>
-        <div className="mini-stat"><span>Collected</span><strong style={{ color: '#48bb78' }}>{fmt(totalPaid)}</strong></div>
-        <div className="mini-stat"><span>Overdue</span><strong style={{ color: '#e53e3e' }}>{items.filter(i => i.status === 'overdue').length}</strong></div>
+        <div className="mini-stat"><span>Outstanding</span><strong style={{ color: 'var(--color-error)' }}>{fmt(totalOutstanding)}</strong></div>
+        <div className="mini-stat"><span>Collected</span><strong style={{ color: 'var(--color-success)' }}>{fmt(totalPaid)}</strong></div>
+        <div className="mini-stat"><span>Overdue</span><strong style={{ color: 'var(--color-error)' }}>{items.filter(i => i.status === 'overdue').length}</strong></div>
       </div>
       {loading ? <div className="acct-loading">Loading invoices...</div> : (
         <table className="acct-table">
@@ -199,8 +199,8 @@ const InvoicesTab = ({ entityId }) => {
                 <td>{i.invoice_date}</td>
                 <td>{i.due_date}</td>
                 <td>{fmt(i.total_amount)}</td>
-                <td style={{ color: '#48bb78' }}>{fmt(i.paid_amount)}</td>
-                <td style={{ color: parseFloat(i.outstanding_amount) > 0 ? '#e53e3e' : '#48bb78' }}>{fmt(i.outstanding_amount)}</td>
+                <td style={{ color: 'var(--color-success)' }}>{fmt(i.paid_amount)}</td>
+                <td style={{ color: parseFloat(i.outstanding_amount) > 0 ? 'var(--color-error)' : 'var(--color-success)' }}>{fmt(i.outstanding_amount)}</td>
                 <td><span className="status-badge" style={{ background: STATUS_COLORS[i.status], color: 'white' }}>{i.status?.replace(/_/g,'')}</span></td>
                 <td className="acct-actions">{i.status === 'draft' && <button className="btn-sm btn-success" onClick={() => handlePost(i.id)}>Post</button>}</td>
               </tr>
@@ -276,7 +276,7 @@ const PaymentsTab = ({ entityId }) => {
     <div>
       <div className="tab-toolbar">
         <div className="mini-stat"><span>Total Payments</span><strong>{items.length}</strong></div>
-        <div className="mini-stat"><span>Total Received</span><strong style={{ color: '#48bb78' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
+        <div className="mini-stat"><span>Total Received</span><strong style={{ color: 'var(--color-success)' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
         <button className="btn-primary" onClick={() => setShowForm(true)}>Record Payment</button>
       </div>
       {loading ? <div className="acct-loading">Loading payments...</div> : (
@@ -288,10 +288,10 @@ const PaymentsTab = ({ entityId }) => {
                 <td>{p.payment_date}</td>
                 <td>{p.customer_name || `Customer ${p.customer}`}</td>
                 <td><code className="acct-code">{p.invoice_number || `INV-${p.invoice}`}</code></td>
-                <td style={{ color: '#48bb78' }}><strong>{fmt(p.amount)}</strong></td>
+                <td style={{ color: 'var(--color-success)' }}><strong>{fmt(p.amount)}</strong></td>
                 <td><span className="tag">{p.payment_method?.replace(/_/g,'')}</span></td>
                 <td>{p.reference_number || '—'}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || '#4299e1', color: 'white' }}>{p.status}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || 'var(--color-cyan)', color: 'white' }}>{p.status}</span></td>
               </tr>
             ))}
           </tbody>
@@ -350,9 +350,9 @@ const CreditNotesTab = ({ entityId }) => {
                 <td>{c.customer_name || `Customer ${c.customer}`}</td>
                 <td>{c.invoice_number || '—'}</td>
                 <td>{c.credit_note_date}</td>
-                <td style={{ color: '#ed8936' }}>{fmt(c.amount)}</td>
+                <td style={{ color: 'var(--color-warning)' }}>{fmt(c.amount)}</td>
                 <td>{c.reason}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[c.status] || '#a0aec0', color: 'white' }}>{c.status}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[c.status] || 'var(--color-silver-dark)', color: 'white' }}>{c.status}</span></td>
               </tr>
             ))}
           </tbody>

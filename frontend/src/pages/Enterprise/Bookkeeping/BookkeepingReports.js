@@ -302,7 +302,7 @@ const BookkeepingReports = () => {
                           className="trend-bar"
                           style={{
                             height: `${Math.max((Math.abs(item.total) / 10000) * 100, 10)}%`,
-                            backgroundColor: item.total >= 0 ? '#10b981' : '#ef4444'
+                            backgroundColor: item.total >= 0 ? 'var(--color-success)' : 'var(--color-error)'
                           }}
                         >
                           <span className="bar-value">

@@ -57,7 +57,7 @@ const SecurityVaults = () => {
       expectedReturn: '8-15%',
       riskScore: 7,
       description: 'Active trading with moderate risk and high potential returns',
-      color: '#3498db'
+      color: 'var(--color-cyan)'
     },
     {
       id: 2,
@@ -68,7 +68,7 @@ const SecurityVaults = () => {
       expectedReturn: '12-20%',
       riskScore: 8,
       description: 'Invest in cutting-edge space technology and research projects',
-      color: '#9b59b6'
+      color: 'var(--color-cyan-dark)'
     },
     {
       id: 3,
@@ -79,7 +79,7 @@ const SecurityVaults = () => {
       expectedReturn: '10-18%',
       riskScore: 7,
       description: 'Fund AI and machine learning breakthrough research',
-      color: '#e74c3c'
+      color: 'var(--color-error)'
     },
     {
       id: 4,
@@ -90,7 +90,7 @@ const SecurityVaults = () => {
       expectedReturn: '6-10%',
       riskScore: 4,
       description: 'Diversified real estate portfolio with stable returns',
-      color: '#27ae60'
+      color: 'var(--color-success)'
     },
     {
       id: 5,
@@ -101,7 +101,7 @@ const SecurityVaults = () => {
       expectedReturn: '5-25%',
       riskScore: 9,
       description: 'High-yield DeFi strategies with variable returns',
-      color: '#f39c12'
+      color: 'var(--color-warning)'
     },
     {
       id: 6,
@@ -112,14 +112,14 @@ const SecurityVaults = () => {
       expectedReturn: '3-5%',
       riskScore: 2,
       description: 'Ultra-safe government bonds and treasury securities',
-      color: '#34495e'
+      color: 'var(--color-midnight)'
     }
   ];
 
   const getRiskColor = (score) => {
-    if (score <= 3) return '#27ae60';
-    if (score <= 6) return '#f39c12';
-    return '#e74c3c';
+    if (score <= 3) return 'var(--color-success)';
+    if (score <= 6) return 'var(--color-warning)';
+    return 'var(--color-error)';
   };
 
   return (

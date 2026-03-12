@@ -8,7 +8,7 @@ const mockRules = [
   { id: 'AUTO-004', name: 'Bank sync - Chase Operating', trigger: 'Daily at 06:00 UTC', action: 'Import new bank transactions', runs: 365, lastRun: '2025-01-31', status: 'Active' },
 ];
 
-const STATUS_COLORS = { Active: '#27ae60', Paused: '#f39c12', Error: '#e74c3c' };
+const STATUS_COLORS = { Active: 'var(--color-success)', Paused: 'var(--color-warning)', Error: 'var(--color-error)' };
 
 const columns = [
   { key: 'name', header: 'Rule Name' },
@@ -38,11 +38,11 @@ export default function AutomationRules() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Active Rules</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>3</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>3</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Paused</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>1</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>1</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Total Runs (All Time)</div>

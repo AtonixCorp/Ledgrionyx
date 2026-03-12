@@ -8,7 +8,7 @@ const mockRecurring = [
   { name: 'Bi-Weekly Payroll JE', type: 'Journal Entry', frequency: 'Bi-Weekly', nextRun: '2025-02-07', amount: '$38,000.00', status: 'Paused' },
 ];
 
-const STATUS_COLORS = { Active: '#27ae60', Paused: '#f39c12' };
+const STATUS_COLORS = { Active: 'var(--color-success)', Paused: 'var(--color-warning)' };
 
 const columns = [
   { key: 'name', header: 'Name' },
@@ -38,7 +38,7 @@ export default function RecurringEntries() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Active Entries</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>3</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>3</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Next 7 Days</div>

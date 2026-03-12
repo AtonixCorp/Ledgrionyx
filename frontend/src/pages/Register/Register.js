@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { countries } from '../../utils/countries';
-import AtonixLogo from '../../components/Logo/AtonixLogo';
 
 const Register = () => {
   const [step, setStep] = useState(1); // 1: email → 2: details
@@ -79,7 +78,6 @@ const Register = () => {
         <div className="auth-container">
           <div className="auth-header">
             <Link to="/" className="auth-logo-link">
-              <AtonixLogo size="small" />
               <span>Atonix Capital</span>
             </Link>
           </div>
@@ -128,7 +126,6 @@ const Register = () => {
       <div className="auth-container">
         <div className="auth-header">
           <Link to="/" className="auth-logo-link">
-            <AtonixLogo size="small" />
             <span>Atonix Capital</span>
           </Link>
         </div>

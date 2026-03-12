@@ -33,9 +33,9 @@ const EnterpriseRiskExposure = () => {
   }, [currentOrganization?.id, fetchRiskExposureDashboard]);
 
   const getRiskColor = (score) => {
-    if (score < 20) return '#10b981'; // green
-    if (score < 30) return '#f59e0b'; // amber
-    return '#ef4444'; // red
+    if (score < 20) return 'var(--color-success)'; // green
+    if (score < 30) return 'var(--color-warning)'; // amber
+    return 'var(--color-error)'; // red
   };
 
   const formatCurrency = (amount) => {
@@ -109,15 +109,15 @@ const EnterpriseRiskExposure = () => {
             {/* Legend */}
             <div className="risk-legend">
               <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#10b981'}}></div>
+                <div className="legend-color" style={{backgroundColor: 'var(--color-success)'}}></div>
                 <span>Low Risk (&lt;20)</span>
               </div>
               <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#f59e0b'}}></div>
+                <div className="legend-color" style={{backgroundColor: 'var(--color-warning)'}}></div>
                 <span>Medium Risk (20-30)</span>
               </div>
               <div className="legend-item">
-                <div className="legend-color" style={{backgroundColor: '#ef4444'}}></div>
+                <div className="legend-color" style={{backgroundColor: 'var(--color-error)'}}></div>
                 <span>High Risk (&gt;30)</span>
               </div>
             </div>

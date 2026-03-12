@@ -128,7 +128,7 @@ const Analytics = () => {
     return null;
   }
 
-  const COLORS = ['#e74c3c', '#3498db', '#9b59b6', '#f39c12', '#2ecc71', '#1abc9c', '#e67e22'];
+  const COLORS = ['var(--color-error)', 'var(--color-cyan)', 'var(--color-cyan-dark)', 'var(--color-warning)', 'var(--color-success)', 'var(--color-cyan)', 'var(--color-warning)'];
 
   const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : 0;
 
@@ -205,7 +205,7 @@ const Analytics = () => {
               <XAxis dataKey="category" />
               <YAxis />
               <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-              <Bar dataKey="amount" fill="#e74c3c" />
+              <Bar dataKey="amount" fill="var(--color-error)" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -222,8 +222,8 @@ const Analytics = () => {
               <YAxis />
               <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
               <Legend />
-              <Line type="monotone" dataKey="income" stroke="#2ecc71" strokeWidth={2} name="Income" />
-              <Line type="monotone" dataKey="expenses" stroke="#e74c3c" strokeWidth={2} name="Expenses" />
+              <Line type="monotone" dataKey="income" stroke="var(--color-success)" strokeWidth={2} name="Income" />
+              <Line type="monotone" dataKey="expenses" stroke="var(--color-error)" strokeWidth={2} name="Expenses" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -261,7 +261,7 @@ const Analytics = () => {
                   <XAxis dataKey="type" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#3498db" />
+                  <Bar dataKey="count" fill="var(--color-cyan)" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

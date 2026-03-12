@@ -12,14 +12,14 @@ const columns = [
   { key: 'id', header: 'ID' },
   { key: 'name', header: 'Customer Name' },
   { key: 'email', header: 'Email', render: (row) => (
-    <a href={`mailto:${row.email}`} style={{ color: '#667eea' }}>{row.email}</a>
+    <a href={`mailto:${row.email}`} style={{ color: 'var(--color-cyan)' }}>{row.email}</a>
   )},
   { key: 'phone', header: 'Phone', render: (row) => (
     <span>{row.phone}</span>
   )},
   { key: 'balance', header: 'Balance' },
   { key: 'status', header: 'Status', render: (row) => (
-    <span className="status-badge" style={{ background: row.status === 'Active' ? '#27ae60' : '#95a5a6' }}>
+    <span className="status-badge" style={{ background: row.status === 'Active' ? 'var(--color-success)' : 'var(--color-silver-dark)' }}>
       {row.status}
     </span>
   )},

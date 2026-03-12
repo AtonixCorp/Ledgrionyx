@@ -47,9 +47,9 @@ const Budget = () => {
   };
 
   const getStatusColor = (percentage) => {
-    if (percentage >= 90) return '#e74c3c';
-    if (percentage >= 70) return '#f39c12';
-    return '#2ecc71';
+    if (percentage >= 90) return 'var(--color-error)';
+    if (percentage >= 70) return 'var(--color-warning)';
+    return 'var(--color-success)';
   };
 
   return (

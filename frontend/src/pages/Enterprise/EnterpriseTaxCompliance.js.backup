@@ -31,11 +31,11 @@ const EnterpriseTaxCompliance = () => {
   // Get status badge color
   const getStatusColor = (status) => {
     switch(status) {
-      case 'done': return '#10b981';
-      case 'upcoming': return '#3b82f6';
-      case 'due_soon': return '#f59e0b';
-      case 'overdue': return '#ef4444';
-      default: return '#6b7280';
+      case 'done': return 'var(--color-success)';
+      case 'upcoming': return 'var(--color-cyan)';
+      case 'due_soon': return 'var(--color-warning)';
+      case 'overdue': return 'var(--color-error)';
+      default: return 'var(--color-silver-dark)';
     }
   };
 

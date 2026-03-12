@@ -31,7 +31,7 @@ const JournalEntries = () => {
 
       <Card>
         {data.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#7a8fa6', padding: '32px 0' }}>No journal entries yet
+          <p style={{ textAlign: 'center', color: 'var(--color-silver-dark)', padding: '32px 0' }}>No journal entries yet
           </p>
         ) : (
           <Table columns={columns} data={data} />
@@ -51,7 +51,7 @@ const JournalEntries = () => {
         <div style={{ marginTop: '24px', marginBottom: '24px' }}>
           <h3>Line Items</h3>
           <Card>
-            <p style={{ color: '#7a8fa6' }}>Add accounts and amounts below</p>
+            <p style={{ color: 'var(--color-silver-dark)' }}>Add accounts and amounts below</p>
           </Card>
         </div>
 

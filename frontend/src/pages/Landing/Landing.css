@@ -1,0 +1,473 @@
+/* =============================================================================
+   ATC CAPITAL — LANDING PAGE
+   Hero Section + Three-Card Feature Row
+   Uses global design tokens from globals.css
+   Institutional banking standard — no shadows, no gradients, no rounded corners
+   ============================================================================= */
+
+/* ── Shared typography foundation ──────────────────────────────────────────── */
+.landing-page {
+  font-family: var(--font-family);
+  background: var(--color-white);
+  color: var(--color-midnight);
+}
+
+/* =============================================================================
+   HERO SECTION
+   Full-width, 520–580px height, white background
+   Left: headline + sub + CTAs  |  Right: institutional product card
+   ============================================================================= */
+.atc-hero {
+  width: 100%;
+  min-height: 520px;
+  max-height: 580px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--border-color-default);
+  display: flex;
+  align-items: stretch;
+}
+
+.atc-hero-inner {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 80px 40px;
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  gap: 80px;
+  align-items: center;
+}
+
+/* ── Hero text — left column ───────────────────────────────────────────────── */
+.atc-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.atc-hero-headline {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-midnight);
+  line-height: 1.15;
+  letter-spacing: -1px;
+  max-width: 620px;
+  margin: 0 0 24px 0;
+  font-family: var(--font-family);
+}
+
+.atc-hero-sub {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-silver-dark);
+  line-height: 1.5;
+  max-width: 540px;
+  margin: 0 0 40px 0;
+  font-family: var(--font-family);
+}
+
+.atc-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.atc-hero-btn-primary {
+  height: 48px;
+  padding: 0 32px;
+  background: var(--color-cyan);
+  color: var(--color-white);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  text-decoration: none;
+  border: none;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  transition: background 0.12s;
+}
+
+.atc-hero-btn-primary:hover {
+  background: var(--color-cyan-hover);
+  color: var(--color-white);
+}
+
+.atc-hero-btn-secondary {
+  height: 48px;
+  padding: 0 30px;
+  background: transparent;
+  color: var(--color-cyan);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  text-decoration: none;
+  border: 1.5px solid var(--color-cyan);
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  transition: background 0.12s;
+}
+
+.atc-hero-btn-secondary:hover {
+  background: var(--color-cyan-light);
+}
+
+/* ── Hero product card — right column ─────────────────────────────────────── */
+.atc-hero-card-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.atc-product-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-white);
+  border: 1px solid var(--border-color-default);
+  border-radius: 0;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Card header row */
+.atc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.atc-card-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-silver-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-family);
+}
+
+.atc-card-live {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-success);
+  font-family: var(--font-family);
+}
+
+.atc-live-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-success);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Balance display */
+.atc-card-balance {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-midnight);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  font-family: var(--font-family);
+}
+
+.atc-card-currency {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-silver-dark);
+  margin-bottom: 24px;
+  font-family: var(--font-family);
+}
+
+/* Divider */
+.atc-card-divider {
+  height: 1px;
+  background: var(--border-color-default);
+  margin: 0 0 20px 0;
+}
+
+/* Metrics row */
+.atc-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.atc-card-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.atc-metric-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-silver-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--font-family);
+}
+
+.atc-metric-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-midnight);
+  font-family: var(--font-family);
+}
+
+.atc-metric-up   { color: var(--color-success); }
+.atc-metric-down { color: var(--color-error); }
+
+/* Activity section */
+.atc-card-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.atc-activity-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-silver-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-family);
+}
+
+.atc-activity-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-silver-very-light);
+}
+
+.atc-activity-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.atc-activity-desc {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-midnight);
+  font-family: var(--font-family);
+}
+
+.atc-activity-time {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-silver-dark);
+  margin-top: 2px;
+  font-family: var(--font-family);
+}
+
+.atc-activity-amount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  font-family: var(--font-family);
+}
+
+/* =============================================================================
+   SECTION DIVIDER SYSTEM
+   ============================================================================= */
+.atc-section-divider {
+  height: 1px;
+  background: var(--border-color-default);
+  width: 100%;
+  margin: 48px 0;
+}
+
+/* =============================================================================
+   THREE-CARD FEATURE ROW
+   "Choose What's Right for You"
+   ============================================================================= */
+.atc-feature-section {
+  width: 100%;
+  background: var(--color-white);
+  padding: 80px 0;
+}
+
+.atc-feature-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.atc-feature-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-midnight);
+  letter-spacing: -0.5px;
+  margin: 0 0 48px 0;
+  font-family: var(--font-family);
+}
+
+.atc-feature-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+/* Individual feature card */
+.atc-feature-card {
+  background: var(--color-white);
+  border: 1px solid var(--border-color-default);
+  border-radius: 0;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: border-color 0.12s;
+}
+
+.atc-feature-card:hover {
+  border-color: var(--color-cyan);
+}
+
+/* Icon container */
+.atc-feature-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+/* Card title */
+.atc-feature-card-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-midnight);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.2px;
+  font-family: var(--font-family);
+}
+
+/* Card description */
+.atc-feature-card-desc {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-silver-dark);
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+  flex: 1;
+  font-family: var(--font-family);
+}
+
+/* CTA text link */
+.atc-feature-card-cta {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-cyan);
+  text-decoration: none;
+  font-family: var(--font-family);
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+  width: fit-content;
+  transition: border-color var(--transition-fast);
+  letter-spacing: 0.01em;
+}
+
+.atc-feature-card-cta:hover {
+  border-bottom-color: var(--color-cyan);
+}
+
+/* =============================================================================
+   RESPONSIVE
+   ============================================================================= */
+@media (max-width: 1100px) {
+  .atc-hero-inner {
+    grid-template-columns: 1fr 400px;
+    gap: 48px;
+    padding: 60px 32px;
+  }
+
+  .atc-hero-headline {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  .atc-hero {
+    max-height: none;
+    min-height: auto;
+  }
+
+  .atc-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding: 56px 24px;
+  }
+
+  .atc-hero-card-wrap {
+    justify-content: flex-start;
+  }
+
+  .atc-product-card {
+    max-width: 100%;
+  }
+
+  .atc-feature-cards {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .atc-feature-inner {
+    padding: 0 24px;
+  }
+
+  .atc-feature-section {
+    padding: 60px 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .atc-hero-headline {
+    font-size: 32px;
+    letter-spacing: -0.5px;
+  }
+
+  .atc-hero-sub {
+    font-size: 16px;
+  }
+
+  .atc-hero-inner {
+    padding: 40px 20px;
+  }
+
+  .atc-feature-inner {
+    padding: 0 20px;
+  }
+
+  .atc-card-metrics {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .atc-card-balance {
+    font-size: 28px;
+  }
+
+  .atc-section-divider {
+    margin: 32px 0;
+  }
+}

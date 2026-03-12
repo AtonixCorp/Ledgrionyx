@@ -84,7 +84,7 @@ const KPIWidget = ({ item, active, onSelect }) => {
       {typeof item.score === 'number' ? (
         <>
           <div className="health-score-bar">
-            <div className="health-score-fill" style={{ width: `${item.score}%`, background: '#4a5568' }} />
+            <div className="health-score-fill" style={{ width: `${item.score}%`, background: 'var(--color-midnight-light)' }} />
           </div>
           <div className="health-badges">
             {(item.badges || []).map((badge) => (
@@ -127,15 +127,15 @@ const CashFlowGraph = ({ period, onChangePeriod, series }) => (
   >
     <div className="cf-chart-area">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="cf-chart-svg">
-        <polyline fill="none" stroke="#4a5568" strokeWidth="2.2" points={formatPoints(series.inflow || [0])} />
-        <polyline fill="none" stroke="#a0aec0" strokeWidth="2.2" points={formatPoints(series.outflow || [0])} />
-        <polyline fill="none" stroke="#667eea" strokeWidth="2" strokeDasharray="3 2" points={formatPoints(series.forecast || [0])} />
+        <polyline fill="none" stroke="var(--color-midnight-light)" strokeWidth="2.2" points={formatPoints(series.inflow || [0])} />
+        <polyline fill="none" stroke="var(--color-silver-dark)" strokeWidth="2.2" points={formatPoints(series.outflow || [0])} />
+        <polyline fill="none" stroke="var(--color-cyan)" strokeWidth="2" strokeDasharray="3 2" points={formatPoints(series.forecast || [0])} />
       </svg>
     </div>
     <div className="cf-legend">
-      <div className="cf-legend-item"><span className="cf-legend-dot" style={{ background: '#4a5568' }} />Inflows</div>
-      <div className="cf-legend-item"><span className="cf-legend-dot" style={{ background: '#a0aec0' }} />Outflows</div>
-      <div className="cf-legend-item"><span className="cf-legend-dot" style={{ background: '#667eea' }} />Forecast</div>
+      <div className="cf-legend-item"><span className="cf-legend-dot" style={{ background: 'var(--color-midnight-light)' }} />Inflows</div>
+      <div className="cf-legend-item"><span className="cf-legend-dot" style={{ background: 'var(--color-silver-dark)' }} />Outflows</div>
+      <div className="cf-legend-item"><span className="cf-legend-dot" style={{ background: 'var(--color-cyan)' }} />Forecast</div>
     </div>
   </SectionCard>
 );

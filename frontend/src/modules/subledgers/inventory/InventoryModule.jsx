@@ -7,7 +7,7 @@ const mockInventory = [
   { sku: 'SKU-003', name: 'Consulting Hours Bundle', category: 'Services', qty: 0, unitCost: '$200.00', totalValue: '$0.00', reorderLevel: 5, status: 'Out of Stock' },
 ];
 
-const STATUS_COLORS = { 'In Stock': '#27ae60', 'Low Stock': '#f39c12', 'Out of Stock': '#e74c3c' };
+const STATUS_COLORS = { 'In Stock': 'var(--color-success)', 'Low Stock': 'var(--color-warning)', 'Out of Stock': 'var(--color-error)' };
 
 const columns = [
   { key: 'sku', header: 'SKU' },
@@ -50,7 +50,7 @@ export default function InventoryModule() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Low / Out of Stock</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>2</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>2</div>
         </Card>
       </div>
 

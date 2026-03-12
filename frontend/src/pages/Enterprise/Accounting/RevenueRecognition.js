@@ -10,7 +10,7 @@ const TABS = [
   { id: 'schedules', label: 'Recognition Schedules', },
 ];
 
-const STATUS_COLORS = { active: '#38a169', completed: '#667eea', cancelled: '#e53e3e', pending: '#ed8936', recognized: '#38a169' };
+const STATUS_COLORS = { active: 'var(--color-success)', completed: 'var(--color-cyan)', cancelled: 'var(--color-error)', pending: 'var(--color-warning)', recognized: 'var(--color-success)' };
 
 //  Deferred Revenue Tab
 const DeferredRevenueTab = ({ entityId }) => {
@@ -45,9 +45,9 @@ const DeferredRevenueTab = ({ entityId }) => {
     <div>
       <div className="acct-stat-cards">
         <div className="acct-stat-card"><div className="acct-stat-label">Total Contracts</div><div className="acct-stat-count">{items.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Still Deferred</div><div className="acct-stat-count" style={{ fontSize: '1.2rem', color: '#ed8936' }}>{fmt(totalDeferred)}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Total Recognized</div><div className="acct-stat-count" style={{ fontSize: '1.2rem', color: '#38a169' }}>{fmt(totalRecognized)}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Active Contracts</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{items.filter(i => i.status === 'active').length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Still Deferred</div><div className="acct-stat-count" style={{ fontSize: '1.2rem', color: 'var(--color-warning)' }}>{fmt(totalDeferred)}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Total Recognized</div><div className="acct-stat-count" style={{ fontSize: '1.2rem', color: 'var(--color-success)' }}>{fmt(totalRecognized)}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Active Contracts</div><div className="acct-stat-count" style={{ color: 'var(--color-success)' }}>{items.filter(i => i.status === 'active').length}</div></div>
       </div>
       <div className="tab-toolbar">
         <button className="btn-primary" onClick={() => setShowForm(true)}>New Contract</button>
@@ -61,11 +61,11 @@ const DeferredRevenueTab = ({ entityId }) => {
                 <td><strong>{item.contract_name}</strong></td>
                 <td>{item.customer_name || '—'}</td>
                 <td>{fmt(item.total_amount)}</td>
-                <td style={{ color: '#38a169', fontWeight: 600 }}>{fmt(item.recognized_amount)}</td>
-                <td style={{ color: '#ed8936', fontWeight: 600 }}>{fmt(item.deferred_amount)}</td>
-                <td style={{ fontSize: '0.8rem', color: '#718096' }}>{item.start_date} — {item.end_date}</td>
+                <td style={{ color: 'var(--color-success)', fontWeight: 600 }}>{fmt(item.recognized_amount)}</td>
+                <td style={{ color: 'var(--color-warning)', fontWeight: 600 }}>{fmt(item.deferred_amount)}</td>
+                <td style={{ fontSize: '0.8rem', color: 'var(--color-silver-dark)' }}>{item.start_date} — {item.end_date}</td>
                 <td><span className="tag tag-type">{item.recognition_method?.replace(/_/g,'')}</span></td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[item.status] || '#a0aec0', color: 'white' }}>{item.status}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[item.status] || 'var(--color-silver-dark)', color: 'white' }}>{item.status}</span></td>
               </tr>
             ))}
           </tbody>
@@ -127,8 +127,8 @@ const SchedulesTab = ({ entityId }) => {
     <div>
       <div className="acct-stat-cards">
         <div className="acct-stat-card"><div className="acct-stat-label">Total Entries</div><div className="acct-stat-count">{schedules.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Pending Recognition</div><div className="acct-stat-count" style={{ color: '#ed8936', fontSize: '1.2rem' }}>{fmt(pendingTotal)}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Recognized This Month</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{schedules.filter(s => s.status === 'recognized').length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Pending Recognition</div><div className="acct-stat-count" style={{ color: 'var(--color-warning)', fontSize: '1.2rem' }}>{fmt(pendingTotal)}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Recognized This Month</div><div className="acct-stat-count" style={{ color: 'var(--color-success)' }}>{schedules.filter(s => s.status === 'recognized').length}</div></div>
       </div>
       {loading ? <div className="acct-loading">Loading recognition schedules...</div> : (
         <table className="acct-table">
@@ -138,9 +138,9 @@ const SchedulesTab = ({ entityId }) => {
               <tr key={s.id}>
                 <td>{s.contract_name || `Contract ${s.deferred_revenue}`}</td>
                 <td>{s.recognition_date}</td>
-                <td style={{ fontWeight: 600, color: '#38a169' }}>{fmt(s.amount)}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[s.status] || '#a0aec0', color: 'white' }}>{s.status}</span></td>
-                <td style={{ color: '#718096', fontSize: '0.85rem' }}>{s.recognized_at ? new Date(s.recognized_at).toLocaleDateString() : '—'}</td>
+                <td style={{ fontWeight: 600, color: 'var(--color-success)' }}>{fmt(s.amount)}</td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[s.status] || 'var(--color-silver-dark)', color: 'white' }}>{s.status}</span></td>
+                <td style={{ color: 'var(--color-silver-dark)', fontSize: '0.85rem' }}>{s.recognized_at ? new Date(s.recognized_at).toLocaleDateString() : '—'}</td>
                 <td>
                   {s.status === 'pending' && (
                     <button className="btn-success btn-sm" onClick={() => handleRecognize(s.id)} disabled={recognizing === s.id}>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const STATUS_COLORS = { paid: '#27ae60', pending: '#f39c12', overdue: '#e74c3c', draft: '#95a5a6' };
+const STATUS_COLORS = { paid: 'var(--color-success)', pending: 'var(--color-warning)', overdue: 'var(--color-error)', draft: 'var(--color-silver-dark)' };
 
 const mockBills = [
   { id: 'BILL-0001', vendor: 'AWS Cloud', amount: '$3,200.00', due: '2025-02-10', status: 'pending', category: 'Technology' },

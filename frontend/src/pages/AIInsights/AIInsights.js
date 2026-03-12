@@ -245,13 +245,13 @@ const AIInsights = () => {
 
           <div className="fraud-score-circle">
             <svg viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" strokeWidth="8" />
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--color-silver-light)" strokeWidth="8" />
               <circle
                 cx="50"
                 cy="50"
                 r="45"
                 fill="none"
-                stroke={fraudDetection?.fraudScore > 60 ? '#e74c3c' : fraudDetection?.fraudScore > 30 ? '#f39c12' : '#27ae60'}
+                stroke={fraudDetection?.fraudScore > 60 ? 'var(--color-error)' : fraudDetection?.fraudScore > 30 ? 'var(--color-warning)' : 'var(--color-success)'}
                 strokeWidth="8"
                 strokeDasharray={`${(fraudDetection?.fraudScore / 100) * 283} 283`}
                 transform="rotate(-90 50 50)"

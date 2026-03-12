@@ -15,7 +15,7 @@ const columns = [
   { key: 'category', header: 'Category' },
   { key: 'balance', header: 'Outstanding' },
   { key: 'status', header: 'Status', render: (row) => (
-    <span className="status-badge" style={{ background: '#27ae60' }}>{row.status}</span>
+    <span className="status-badge" style={{ background: 'var(--color-success)' }}>{row.status}</span>
   )},
 ];
 

@@ -36,7 +36,7 @@ const GeneralLedger = () => {
   const totalDebits = filtered.reduce((s, e) => s + parseFloat(e.debit_amount || 0), 0);
   const totalCredits = filtered.reduce((s, e) => s + parseFloat(e.credit_amount || 0), 0);
   const fmt = (v) => parseFloat(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
-  const statusColor = { pending: '#ed8936', posted: '#48bb78', reversed: '#fc8181' };
+  const statusColor = { pending: 'var(--color-warning)', posted: 'var(--color-success)', reversed: 'var(--color-error)' };
 
   return (
     <div className="acct-page">
@@ -50,21 +50,21 @@ const GeneralLedger = () => {
 
       {/* Summary */}
       <div className="acct-stat-cards">
-        <div className="acct-stat-card" style={{ borderTop: '3px solid #4299e1' }}>
-          <div className="acct-stat-label" style={{ color: '#4299e1' }}>Total Entries</div>
+        <div className="acct-stat-card" style={{ borderTop: '3px solid var(--color-cyan)' }}>
+          <div className="acct-stat-label" style={{ color: 'var(--color-cyan)' }}>Total Entries</div>
           <div className="acct-stat-count">{filtered.length}</div>
         </div>
-        <div className="acct-stat-card" style={{ borderTop: '3px solid #48bb78' }}>
-          <div className="acct-stat-label" style={{ color: '#48bb78' }}>Total Debits</div>
+        <div className="acct-stat-card" style={{ borderTop: '3px solid var(--color-success)' }}>
+          <div className="acct-stat-label" style={{ color: 'var(--color-success)' }}>Total Debits</div>
           <div className="acct-stat-balance">${fmt(totalDebits)}</div>
         </div>
-        <div className="acct-stat-card" style={{ borderTop: '3px solid #fc8181' }}>
-          <div className="acct-stat-label" style={{ color: '#fc8181' }}>Total Credits</div>
+        <div className="acct-stat-card" style={{ borderTop: '3px solid var(--color-error)' }}>
+          <div className="acct-stat-label" style={{ color: 'var(--color-error)' }}>Total Credits</div>
           <div className="acct-stat-balance">${fmt(totalCredits)}</div>
         </div>
-        <div className="acct-stat-card" style={{ borderTop: `3px solid ${Math.abs(totalDebits - totalCredits) < 0.01 ? '#48bb78' : '#e53e3e'}` }}>
+        <div className="acct-stat-card" style={{ borderTop: `3px solid ${Math.abs(totalDebits - totalCredits) < 0.01 ? 'var(--color-success)' : 'var(--color-error)'}` }}>
           <div className="acct-stat-label">Balance Check</div>
-          <div className="acct-stat-balance" style={{ color: Math.abs(totalDebits - totalCredits) < 0.01 ? '#48bb78' : '#e53e3e' }}>
+          <div className="acct-stat-balance" style={{ color: Math.abs(totalDebits - totalCredits) < 0.01 ? 'var(--color-success)' : 'var(--color-error)' }}>
             {Math.abs(totalDebits - totalCredits) < 0.01 ? 'Balanced' : `Diff: $${fmt(totalDebits - totalCredits)}`}
           </div>
         </div>
@@ -114,7 +114,7 @@ const GeneralLedger = () => {
                   <td className="amount-debit">${fmt(e.debit_amount)}</td>
                   <td className="amount-credit">${fmt(e.credit_amount)}</td>
                   <td>
-                    <span className="status-badge" style={{ background: statusColor[e.posting_status] || '#e2e8f0', color: 'white' }}>
+                    <span className="status-badge" style={{ background: statusColor[e.posting_status] || 'var(--border-color-default)', color: 'white' }}>
                       {e.posting_status}
                     </span>
                   </td>

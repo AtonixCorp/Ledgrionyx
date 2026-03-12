@@ -42,7 +42,7 @@ export default function PeriodClose() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <Card title="Close Checklist — January 2025">
-          <div style={{ marginBottom: 12, color: '#7a8fa6', fontSize: 13 }}>
+          <div style={{ marginBottom: 12, color: 'var(--color-silver-dark)', fontSize: 13 }}>
             {completedCount}/{items.length} tasks completed
           </div>
           {items.map((item, idx) => (
@@ -54,12 +54,12 @@ export default function PeriodClose() {
                 alignItems: 'center',
                 gap: 10,
                 padding: '10px 0',
-                borderBottom: '1px solid #f0f2f5',
+                borderBottom: '1px solid var(--border-color-default)',
                 cursor: 'pointer',
               }}
             >
 
-              <span style={{ fontSize: 13, color: item.done ? '#7a8fa6' : '#2c3e50', textDecoration: item.done ? 'line-through' : 'none' }}>
+              <span style={{ fontSize: 13, color: item.done ? 'var(--color-silver-dark)' : 'var(--color-midnight)', textDecoration: item.done ? 'line-through' : 'none' }}>
                 {item.task}
               </span>
             </div>
@@ -73,15 +73,15 @@ export default function PeriodClose() {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: '12px 0',
-              borderBottom: '1px solid #f0f2f5',
+              borderBottom: '1px solid var(--border-color-default)',
             }}>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 14, color: '#2c3e50' }}>{p.period}</div>
+                <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--color-midnight)' }}>{p.period}</div>
                 {p.closedDate !== '—' && (
-                  <div style={{ fontSize: 12, color: '#7a8fa6' }}>Closed {p.closedDate} by {p.closedBy}</div>
+                  <div style={{ fontSize: 12, color: 'var(--color-silver-dark)' }}>Closed {p.closedDate} by {p.closedBy}</div>
                 )}
               </div>
-              <span className="status-badge" style={{ background: p.status === 'Closed' ? '#27ae60' : '#667eea' }}>
+              <span className="status-badge" style={{ background: p.status === 'Closed' ? 'var(--color-success)' : 'var(--color-cyan)' }}>
                 {p.status}
               </span>
             </div>

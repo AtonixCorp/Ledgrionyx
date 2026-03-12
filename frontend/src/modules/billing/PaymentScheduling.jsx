@@ -8,7 +8,7 @@ const mockSchedule = [
   { id: 'PAY-004', type: 'Invoice', ref: 'INV-0002', party: 'Globex Inc', amount: '$4,200.00', date: '2025-01-30', method: 'Wire', status: 'Overdue' },
 ];
 
-const STATUS_COLORS = { Scheduled: '#667eea', Approved: '#f39c12', Completed: '#27ae60', Overdue: '#e74c3c' };
+const STATUS_COLORS = { Scheduled: 'var(--color-cyan)', Approved: 'var(--color-warning)', Completed: 'var(--color-success)', Overdue: 'var(--color-error)' };
 
 const columns = [
   { key: 'id', header: 'Payment ID' },
@@ -41,7 +41,7 @@ export default function PaymentScheduling() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Pending Approval</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>$3,200.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>$3,200.00</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Overdue</div>

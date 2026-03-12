@@ -250,7 +250,7 @@ const EnterpriseDashboard = () => {
                   <div className="pbr-track">
                     <div
                       className="pbr-fill"
-                      style={{ width: `${pct}%`, background: branch.profit >= 0 ? '#10b981' : '#ef4444' }}
+                      style={{ width: `${pct}%`, background: branch.profit >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}
                     />
                   </div>
                   <div className="pbr-values">
@@ -306,7 +306,7 @@ const EnterpriseDashboard = () => {
                     <div
                       style={{
                         width: `${branch.revenue ? Math.max(0, (branch.profit / branch.revenue) * 100) : 0}%`,
-                        background: branch.profit >= 0 ? '#10b981' : '#ef4444',
+                        background: branch.profit >= 0 ? 'var(--color-success)' : 'var(--color-error)',
                       }}
                     />
                   </div>

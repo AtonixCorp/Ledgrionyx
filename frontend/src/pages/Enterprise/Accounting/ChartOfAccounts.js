@@ -4,11 +4,11 @@ import { useParams } from 'react-router-dom';
 import { chartOfAccountsAPI } from '../../../services/api';
 
 const ACCOUNT_TYPES = [
-  { value: 'asset', label: 'Asset', color: '#48bb78' },
-  { value: 'liability', label: 'Liability', color: '#fc8181' },
-  { value: 'equity', label: 'Equity', color: '#667eea' },
-  { value: 'revenue', label: 'Revenue', color: '#4299e1' },
-  { value: 'expense', label: 'Expense', color: '#ed8936' },
+  { value: 'asset', label: 'Asset', color: 'var(--color-success)' },
+  { value: 'liability', label: 'Liability', color: 'var(--color-error)' },
+  { value: 'equity', label: 'Equity', color: 'var(--color-cyan)' },
+  { value: 'revenue', label: 'Revenue', color: 'var(--color-cyan)' },
+  { value: 'expense', label: 'Expense', color: 'var(--color-warning)' },
 ];
 
 const ACCOUNT_STATUS = [

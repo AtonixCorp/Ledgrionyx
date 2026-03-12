@@ -156,7 +156,7 @@ const EnterpriseTeam = () => {
                 </div>
 
                 <div className="member-role">
-                  <div className="role-badge" style={{backgroundColor: member.status === 'pending' ? '#fef3c7' : '#dbeafe'}}>
+                  <div className="role-badge" style={{backgroundColor: member.status === 'pending' ? 'var(--color-warning-light)' : 'var(--color-cyan-light)'}}>
                     {getRoleObj(member.role)?.name}
                   </div>
                 </div>

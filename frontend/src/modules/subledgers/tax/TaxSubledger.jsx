@@ -8,7 +8,7 @@ const mockTax = [
   { period: 'Jan 2025', type: 'Sales Tax', jurisdiction: 'CA — State', liability: '$1,250.00', paid: '$0.00', balance: '$1,250.00', dueDate: '2025-02-28', status: 'Pending' },
 ];
 
-const STATUS_COLORS = { Filed: '#27ae60', Pending: '#f39c12', Overdue: '#e74c3c' };
+const STATUS_COLORS = { Filed: 'var(--color-success)', Pending: 'var(--color-warning)', Overdue: 'var(--color-error)' };
 
 const columns = [
   { key: 'period', header: 'Period' },
@@ -41,11 +41,11 @@ export default function TaxSubledger() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Paid</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>$51,800.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>$51,800.00</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Outstanding</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>$6,758.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>$6,758.00</div>
         </Card>
       </div>
 

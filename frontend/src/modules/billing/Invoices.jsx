@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
 const STATUS_COLORS = {
-  paid: '#27ae60',
-  pending: '#f39c12',
-  overdue: '#e74c3c',
-  draft: '#95a5a6',
+  paid: 'var(--color-success)',
+  pending: 'var(--color-warning)',
+  overdue: 'var(--color-error)',
+  draft: 'var(--color-silver-dark)',
 };
 
 const mockInvoices = [

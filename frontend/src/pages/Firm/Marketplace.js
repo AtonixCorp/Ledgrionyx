@@ -9,7 +9,7 @@ const CATALOG = [
   // Banking & Payments
   {
     id: 'stripe', name: 'Stripe Payments', category: 'Integration',
-    provider: 'Stripe Inc.', color: '#635bff',
+    provider: 'Stripe Inc.', color: 'var(--color-cyan-dark)',
     description: 'Accept payments, manage subscriptions, and process refunds directly within the platform.',
     tags: ['payments', 'billing', 'subscriptions'],
     rating: 4.9, reviews: 1240, featured: true,
@@ -17,7 +17,7 @@ const CATALOG = [
   },
   {
     id: 'plaid', name: 'Plaid Bank Connect', category: 'Integration',
-    provider: 'Plaid Technologies', color: '#008060',
+    provider: 'Plaid Technologies', color: 'var(--color-cyan-dark)',
     description: 'Connect and sync transactions from 11,000+ financial institutions automatically.',
     tags: ['banking', 'transactions', 'reconciliation'],
     rating: 4.8, reviews: 875, featured: true,
@@ -25,7 +25,7 @@ const CATALOG = [
   },
   {
     id: 'paypal', name: 'PayPal Business', category: 'Integration',
-    provider: 'PayPal Holdings', color: '#003087',
+    provider: 'PayPal Holdings', color: 'var(--color-cyan-dark)',
     description: 'Collect payments and manage PayPal transactions alongside your bookkeeping.',
     tags: ['payments', 'invoicing'],
     rating: 4.5, reviews: 640, featured: false,
@@ -34,7 +34,7 @@ const CATALOG = [
   // Tax & Compliance
   {
     id: 'avalara', name: 'Avalara Tax Automation', category: 'Integration',
-    provider: 'Avalara Inc.', color: '#e8500a',
+    provider: 'Avalara Inc.', color: 'var(--color-warning)',
     description: 'Real-time tax rates and automated compliance for 12,000+ tax jurisdictions worldwide.',
     tags: ['tax', 'compliance', 'automation'],
     rating: 4.7, reviews: 520, featured: true,
@@ -42,7 +42,7 @@ const CATALOG = [
   },
   {
     id: 'taxjar', name: 'TaxJar', category: 'Integration',
-    provider: 'TaxJar by Stripe', color: '#00b2e3',
+    provider: 'TaxJar by Stripe', color: 'var(--color-cyan)',
     description: 'Sales tax calculations, nexus tracking, and automated returns for eCommerce and SaaS.',
     tags: ['tax', 'sales-tax', 'ecommerce'],
     rating: 4.6, reviews: 380, featured: false,
@@ -51,7 +51,7 @@ const CATALOG = [
   // Payroll
   {
     id: 'gusto', name: 'Gusto Payroll', category: 'Integration',
-    provider: 'Gusto Inc.', color: '#f45d48',
+    provider: 'Gusto Inc.', color: 'var(--color-error)',
     description: 'Full-service payroll processing with automatic tax filings and benefits management.',
     tags: ['payroll', 'hr', 'benefits'],
     rating: 4.8, reviews: 920, featured: true,
@@ -59,7 +59,7 @@ const CATALOG = [
   },
   {
     id: 'adp', name: 'ADP Run', category: 'Integration',
-    provider: 'ADP LLC', color: '#d7282f',
+    provider: 'ADP LLC', color: 'var(--color-error)',
     description: 'Enterprise payroll processing, HR administration, and workforce management.',
     tags: ['payroll', 'enterprise', 'hr'],
     rating: 4.5, reviews: 750, featured: false,
@@ -68,7 +68,7 @@ const CATALOG = [
   // Add-ons
   {
     id: 'ai_advisor', name: 'AI Financial Advisor', category: 'Add-on',
-    provider: 'AtonixCorp AI', color: '#8b5cf6',
+    provider: 'AtonixCorp AI', color: 'var(--color-cyan-dark)',
     description: 'AI-powered financial insights, anomaly detection, and predictive cash flow forecasting.',
     tags: ['ai', 'analytics', 'forecasting'],
     rating: 4.9, reviews: 445, featured: true,
@@ -76,7 +76,7 @@ const CATALOG = [
   },
   {
     id: 'doc_automation', name: 'Document Automation', category: 'Add-on',
-    provider: 'AtonixCorp Labs', color: '#0ea5e9',
+    provider: 'AtonixCorp Labs', color: 'var(--color-cyan)',
     description: 'Auto-generate financial reports, proposals, and engagement letters from templates.',
     tags: ['documents', 'automation', 'reports'],
     rating: 4.7, reviews: 310, featured: false,
@@ -84,7 +84,7 @@ const CATALOG = [
   },
   {
     id: 'client_portal', name: 'Enhanced Client Portal', category: 'Add-on',
-    provider: 'AtonixCorp Labs', color: '#10b981',
+    provider: 'AtonixCorp Labs', color: 'var(--color-success)',
     description: 'Branded self-service portal for clients with real-time financial visibility.',
     tags: ['portal', 'clients', 'collaboration'],
     rating: 4.8, reviews: 280, featured: false,
@@ -92,7 +92,7 @@ const CATALOG = [
   },
   {
     id: 'security_vault', name: 'Security Vault Pro', category: 'Add-on',
-    provider: 'AtonixCorp Security', color: '#ef4444',
+    provider: 'AtonixCorp Security', color: 'var(--color-error)',
     description: 'Advanced encryption, multi-factor authentication, and audit trail capabilities.',
     tags: ['security', 'compliance', 'encryption'],
     rating: 4.9, reviews: 195, featured: false,
@@ -100,7 +100,7 @@ const CATALOG = [
   },
   {
     id: 'notifications_pro', name: 'Smart Alerts Pro', category: 'Add-on',
-    provider: 'AtonixCorp Labs', color: '#f59e0b',
+    provider: 'AtonixCorp Labs', color: 'var(--color-warning)',
     description: 'Multi-channel alerts (email, SMS, WhatsApp) with custom threshold triggers.',
     tags: ['notifications', 'alerts', 'sms'],
     rating: 4.6, reviews: 220, featured: false,
@@ -109,7 +109,7 @@ const CATALOG = [
   // Partner Services
   {
     id: 'kpmg_advisory', name: 'KPMG Advisory Connect', category: 'Partner Service',
-    provider: 'KPMG International', color: '#00338d',
+    provider: 'KPMG International', color: 'var(--color-cyan-dark)',
     description: 'Direct access to KPMG advisory services for tax planning, audits, and M&A support.',
     tags: ['advisory', 'audit', 'tax-planning'],
     rating: 4.9, reviews: 130, featured: true,
@@ -117,7 +117,7 @@ const CATALOG = [
   },
   {
     id: 'r2r', name: 'R2R Cloud Accounting', category: 'Partner Service',
-    provider: 'R2R Partners Group', color: '#1d4ed8',
+    provider: 'R2R Partners Group', color: 'var(--color-cyan-dark)',
     description: 'Outsourced CFO and controller services from certified accounting professionals.',
     tags: ['outsourcing', 'cfo', 'controller'],
     rating: 4.7, reviews: 88, featured: false,
@@ -125,7 +125,7 @@ const CATALOG = [
   },
   {
     id: 'inventory_link', name: 'InventoryLink', category: 'Partner Service',
-    provider: 'SupplyChain.io', color: '#059669',
+    provider: 'SupplyChain.io', color: 'var(--color-success)',
     description: 'Connect your inventory management system for automated COGS and stock tracking.',
     tags: ['inventory', 'cogs', 'supply-chain'],
     rating: 4.5, reviews: 160, featured: false,

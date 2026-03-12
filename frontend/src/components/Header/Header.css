@@ -1,0 +1,388 @@
+/* =============================================================================
+   ATC CAPITAL — INSTITUTIONAL HEADER
+   Two-Tier Global Banking Standard Header
+   Uses global design tokens from globals.css
+  Primary: #00B5E2 (Quantum Cyan)  |  Font: Inter / SF Pro  |  No shadows
+   ============================================================================= */
+
+/* ── Sticky container ──────────────────────────────────────────────────────── */
+.atc-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-fixed);
+  font-family: var(--font-family);
+  background: var(--color-white);
+}
+
+/* =============================================================================
+   TIER 1 — UTILITY BAR
+   ============================================================================= */
+.atc-utility-bar {
+  height: 38px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--border-color-default);
+}
+
+.atc-utility-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+}
+
+/* Brand text — left */
+.atc-utility-brand {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-midnight);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* Country selector — center */
+.atc-utility-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.atc-country-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-midnight);
+  font-family: var(--font-family);
+  padding: 0;
+  line-height: 1;
+}
+
+.atc-country-btn:focus-visible {
+  outline: 2px solid var(--atc-primary);
+  outline-offset: 2px;
+}
+
+.atc-country-flag {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.atc-country-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-white);
+  border: 1px solid var(--border-color-default);
+  min-width: 220px;
+  z-index: 200;
+}
+
+.atc-country-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-color-default);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  color: var(--color-midnight);
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.atc-country-option:last-child {
+  border-bottom: none;
+}
+
+.atc-country-option:hover {
+  background: #F9FAFB;
+}
+
+.atc-country-option[aria-selected='true'] {
+  color: var(--color-cyan);
+}
+
+/* Utility links — right */
+.atc-utility-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.atc-utility-links a {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-silver-dark);
+  text-decoration: none;
+  font-family: var(--font-family);
+  white-space: nowrap;
+  transition: color 0.12s;
+}
+
+.atc-utility-links a:hover {
+  color: var(--color-cyan);
+}
+
+/* Language select inside utility bar */
+.atc-lang-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.atc-lang-select {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-silver-dark);
+  font-family: var(--font-family);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.atc-lang-select:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 2px;
+}
+
+/* Sign In — distinct link */
+.atc-signin {
+  font-size: var(--font-size-sm) !important;
+  font-weight: var(--font-weight-bold) !important;
+  color: var(--color-cyan) !important;
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   TIER 2 — PRIMARY NAVIGATION BAR
+   ============================================================================= */
+.atc-primary-bar {
+  height: 72px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--border-color-default);
+}
+
+.atc-primary-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* Logo */
+.atc-logo {
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-right: 40px;
+}
+
+.atc-logo-text {
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-midnight);
+  letter-spacing: -0.5px;
+  font-family: var(--font-family);
+}
+
+/* Primary nav items */
+.atc-primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex: 1;
+}
+
+.atc-nav-link {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-midnight);
+  text-decoration: none;
+  font-family: var(--font-family);
+  white-space: nowrap;
+  padding-bottom: 3px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.12s, border-color 0.12s;
+  line-height: 1;
+}
+
+.atc-nav-link:hover,
+.atc-nav-link--active {
+  color: var(--color-cyan);
+  border-bottom-color: var(--color-cyan);
+}
+
+/* CTA buttons — right */
+.atc-primary-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.atc-cta-primary {
+  height: 42px;
+  padding: 0 24px;
+  background: var(--color-cyan);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  text-decoration: none;
+  border: none;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s;
+  letter-spacing: 0.01em;
+}
+
+.atc-cta-primary:hover {
+  background: var(--color-cyan-hover);
+  color: var(--color-white);
+}
+
+.atc-cta-secondary {
+  height: 42px;
+  padding: 0 22px;
+  background: transparent;
+  color: var(--color-cyan);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  text-decoration: none;
+  border: 1.5px solid var(--color-cyan);
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s;
+  letter-spacing: 0.01em;
+}
+
+.atc-cta-secondary:hover {
+  background: rgba(0, 126, 167, 0.05);
+}
+
+/* Hamburger */
+.atc-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+}
+
+.atc-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--atc-text);
+  border-radius: 0;
+}
+
+/* =============================================================================
+   MOBILE NAVIGATION MENU
+   ============================================================================= */
+.atc-mobile-nav {
+  background: var(--atc-white);
+  border-bottom: 1px solid var(--atc-divider);
+  padding: 0 24px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.atc-mobile-link {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-midnight);
+  text-decoration: none;
+  font-family: var(--font-family);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-color-default);
+  transition: color var(--transition-fast);
+}
+
+.atc-mobile-link:hover {
+  color: var(--color-cyan);
+}
+
+.atc-mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.atc-mobile-signin {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-cyan);
+  text-decoration: none;
+  font-family: var(--font-family);
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* =============================================================================
+   RESPONSIVE
+   ============================================================================= */
+@media (max-width: 1100px) {
+  .atc-primary-nav {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 960px) {
+  .atc-primary-nav {
+    display: none;
+  }
+
+  .atc-primary-actions {
+    display: none;
+  }
+
+  .atc-hamburger {
+    display: flex;
+  }
+
+  .atc-utility-center {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .atc-utility-bar {
+    display: none;
+  }
+
+  .atc-primary-inner {
+    padding: 0 20px;
+  }
+}

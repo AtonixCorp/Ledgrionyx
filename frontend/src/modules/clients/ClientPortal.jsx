@@ -25,7 +25,7 @@ export default function ClientPortal() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Pending Requests</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>2</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>2</div>
         </Card>
       </div>
 
@@ -33,17 +33,17 @@ export default function ClientPortal() {
         {mockPortalClients.map((c, i) => (
           <Card key={i} title={c.name}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#7a8fa6' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--color-silver-dark)' }}>
                 <span>Last Login</span>
-                <span style={{ color: '#2c3e50' }}>{c.lastLogin}</span>
+                <span style={{ color: 'var(--color-midnight)' }}>{c.lastLogin}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#7a8fa6' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--color-silver-dark)' }}>
                 <span>Documents Shared</span>
-                <span style={{ color: '#2c3e50', fontWeight: 600 }}>{c.documentsShared}</span>
+                <span style={{ color: 'var(--color-midnight)', fontWeight: 600 }}>{c.documentsShared}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#7a8fa6' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--color-silver-dark)' }}>
                 <span>Pending Document Requests</span>
-                <span style={{ color: c.requestsPending > 0 ? '#f39c12' : '#27ae60', fontWeight: 600 }}>
+                <span style={{ color: c.requestsPending > 0 ? 'var(--color-warning)' : 'var(--color-success)', fontWeight: 600 }}>
                   {c.requestsPending}
                 </span>
               </div>
@@ -61,11 +61,11 @@ export default function ClientPortal() {
       </div>
 
       <Card title="Portal Security" style={{ marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', fontSize: 13, color: '#2c3e50' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', fontSize: 13, color: 'var(--color-midnight)' }}>
 
           <div>
             <div style={{ fontWeight: 600 }}>Two-Factor Authentication Required</div>
-            <div style={{ color: '#7a8fa6' }}>All client portal access requires 2FA via email OTP</div>
+            <div style={{ color: 'var(--color-silver-dark)' }}>All client portal access requires 2FA via email OTP</div>
           </div>
         </div>
       </Card>

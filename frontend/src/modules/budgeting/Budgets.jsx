@@ -15,12 +15,12 @@ const columns = [
   { key: 'remaining', header: 'Remaining' },
   { key: 'pct', header: 'Utilization', render: (row) => (
     <div className="progress-bar-wrapper">
-      <div className="progress-bar" style={{ width: `${Math.min(row.pct, 100)}%`, background: row.pct > 100 ? '#e74c3c' : row.pct > 80 ? '#f39c12' : '#27ae60' }} />
+      <div className="progress-bar" style={{ width: `${Math.min(row.pct, 100)}%`, background: row.pct > 100 ? 'var(--color-error)' : row.pct > 80 ? 'var(--color-warning)' : 'var(--color-success)' }} />
       <span className="progress-label">{row.pct}%</span>
     </div>
   )},
   { key: 'status', header: 'Status', render: (row) => (
-    <span className="status-badge" style={{ background: row.status === 'Active' ? '#27ae60' : '#95a5a6' }}>{row.status}</span>
+    <span className="status-badge" style={{ background: row.status === 'Active' ? 'var(--color-success)' : 'var(--color-silver-dark)' }}>{row.status}</span>
   )},
 ];
 
@@ -52,7 +52,7 @@ export default function Budgets() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">YTD Spend</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>$346,000.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>$346,000.00</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Budget Utilization</div>

@@ -164,7 +164,7 @@ const EntityDashboard = () => {
     };
   });
 
-  const COLORS = ['#e74c3c', '#3498db', '#9b59b6', '#f39c12', '#2ecc71'];
+  const COLORS = ['var(--color-error)', 'var(--color-cyan)', 'var(--color-cyan-dark)', 'var(--color-warning)', 'var(--color-success)'];
 
   return (
     <div className="entity-dashboard">
@@ -276,67 +276,67 @@ const EntityDashboard = () => {
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/chart-of-accounts`)}>
-                <div className="card-icon" style={{ background: '#ebf4ff', color: '#3182ce' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan)' }}></div>
                 <h4>Chart of Accounts</h4>
                 <p>COA & account codes</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/general-ledger`)}>
-                <div className="card-icon" style={{ background: '#e9d8fd', color: '#6b46c1' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan-dark)' }}></div>
                 <h4>General Ledger</h4>
                 <p>All posted entries</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/journal-entries`)}>
-                <div className="card-icon" style={{ background: '#fefcbf', color: '#d69e2e' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}></div>
                 <h4>Journal Entries</h4>
                 <p>Debits & credits</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/accounts-receivable`)}>
-                <div className="card-icon" style={{ background: '#c6f6d5', color: '#276749' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}></div>
                 <h4>Accounts Receivable</h4>
                 <p>Customers & invoices</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/accounts-payable`)}>
-                <div className="card-icon" style={{ background: '#fed7d7', color: '#9b2c2c' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-error-light)', color: 'var(--color-error)' }}></div>
                 <h4>Accounts Payable</h4>
                 <p>Vendors & bills</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/inventory`)}>
-                <div className="card-icon" style={{ background: '#feebc8', color: '#c05621' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}></div>
                 <h4>Inventory</h4>
                 <p>Items, COGS & movements</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bank-reconciliation`)}>
-                <div className="card-icon" style={{ background: '#e6fffa', color: '#276749' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-cyan-very-light)', color: 'var(--color-success)' }}></div>
                 <h4>Bank Reconciliation</h4>
                 <p>Match bank statements</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/revenue-recognition`)}>
-                <div className="card-icon" style={{ background: '#e9d8fd', color: '#553c9a' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan-dark)' }}></div>
                 <h4>Revenue Recognition</h4>
                 <p>Deferred & scheduled</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/period-close`)}>
-                <div className="card-icon" style={{ background: '#fed7d7', color: '#c53030' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-error-light)', color: 'var(--color-error)' }}></div>
                 <h4>Period Close</h4>
                 <p>Close ledger periods</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/fx-accounting`)}>
-                <div className="card-icon" style={{ background: '#bee3f8', color: '#2b6cb0' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan-dark)' }}></div>
                 <h4>FX Accounting</h4>
                 <p>Exchange rates & FX P&L</p>
                 <span className="card-arrow">→</span>
               </div>
               <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/notifications`)}>
-                <div className="card-icon" style={{ background: '#fefcbf', color: '#d69e2e' }}></div>
+                <div className="card-icon" style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}></div>
                 <h4>Notifications</h4>
                 <p>Alerts & preferences</p>
                 <span className="card-arrow">→</span>
@@ -403,8 +403,8 @@ const EntityDashboard = () => {
                     <YAxis />
                     <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
                     <Legend />
-                    <Bar dataKey="budget" fill="#2ecc71" name="Budget" />
-                    <Bar dataKey="spent" fill="#e74c3c" name="Spent" />
+                    <Bar dataKey="budget" fill="var(--color-success)" name="Budget" />
+                    <Bar dataKey="spent" fill="var(--color-error)" name="Spent" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

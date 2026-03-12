@@ -9,8 +9,8 @@ const TABS = [
 ];
 
 const TYPE_COLORS = {
-  invoice_due: '#ed8936', payment_received: '#38a169', reconciliation_alert: '#4299e1',
-  period_close: '#667eea', fx_alert: '#e53e3e', system: '#a0aec0', info: '#4299e1', warning: '#ed8936', error: '#e53e3e'
+  invoice_due: 'var(--color-warning)', payment_received: 'var(--color-success)', reconciliation_alert: 'var(--color-cyan)',
+  period_close: 'var(--color-cyan)', fx_alert: 'var(--color-error)', system: 'var(--color-silver-dark)', info: 'var(--color-cyan)', warning: 'var(--color-warning)', error: 'var(--color-error)'
 };
 
 //  Inbox Tab
@@ -90,7 +90,7 @@ const InboxTab = ({ entityId }) => {
               {notif.is_read && <div style={{ width: 9 }} />}
               <div className="notif-body">
                 <div className="notif-title">
-                  <span style={{ color: TYPE_COLORS[notif.notification_type] || '#4299e1', fontSize: '0.7rem', background: (TYPE_COLORS[notif.notification_type] || '#4299e1') + '22', padding: '1px 7px', borderRadius: 10, marginRight: 8, fontWeight: 600, textTransform: 'capitalize' }}>
+                  <span style={{ color: TYPE_COLORS[notif.notification_type] || 'var(--color-cyan)', fontSize: '0.7rem', background: (TYPE_COLORS[notif.notification_type] || 'var(--color-cyan)') + '22', padding: '1px 7px', borderRadius: 10, marginRight: 8, fontWeight: 600, textTransform: 'capitalize' }}>
                     {notif.notification_type?.replace(/_/g, '') || 'notification'}
                   </span>
                   {notif.title}
@@ -150,19 +150,19 @@ const PreferencesTab = ({ entityId }) => {
   return (
     <div>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <p style={{ color: '#718096', margin: 0, fontSize: '0.875rem' }}>Configure which notifications you receive for this entity</p>
+        <p style={{ color: 'var(--color-silver-dark)', margin: 0, fontSize: '0.875rem' }}>Configure which notifications you receive for this entity</p>
         <button className="btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : saved ? <>Saved!</> : 'Save Preferences'}</button>
       </div>
       <div style={{ display: 'grid', gap: 12 }}>
         {PREF_LABELS.filter(({ key }) => key in prefs).map(({ key, label, desc }) => (
-          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: '#f7fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'var(--color-silver-white)', borderRadius: 8, border: '1px solid var(--border-color-default)' }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#2d3748' }}>{label}</div>
-              <div style={{ fontSize: '0.8rem', color: '#718096', marginTop: 2 }}>{desc}</div>
+              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--color-midnight)' }}>{label}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-silver-dark)', marginTop: 2 }}>{desc}</div>
             </div>
             <label style={{ position: 'relative', display: 'inline-block', width: 44, height: 24, cursor: 'pointer' }}>
               <input type="checkbox" checked={prefs[key] || false} onChange={() => handleToggle(key)} style={{ opacity: 0, width: 0, height: 0 }} />
-              <span style={{ position: 'absolute', inset: 0, borderRadius: 24, background: prefs[key] ? '#667eea' : '#cbd5e0', transition: '.2s' }}>
+              <span style={{ position: 'absolute', inset: 0, borderRadius: 24, background: prefs[key] ? 'var(--color-cyan)' : 'var(--color-silver-light)', transition: '.2s' }}>
                 <span style={{ position: 'absolute', left: prefs[key] ? 22 : 2, top: 2, width: 20, height: 20, borderRadius: '50%', background: 'white', transition: '.2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
               </span>
             </label>
@@ -191,7 +191,7 @@ const NotificationsCenter = () => {
         <div>
           <h1>
             Notifications
-            {unreadCount > 0 && <span style={{ background: '#e53e3e', color: 'white', borderRadius: '50%', fontSize: '0.7rem', padding: '2px 7px', marginLeft: 8, fontWeight: 700 }}>{unreadCount}</span>}
+            {unreadCount > 0 && <span style={{ background: 'var(--color-error)', color: 'white', borderRadius: '50%', fontSize: '0.7rem', padding: '2px 7px', marginLeft: 8, fontWeight: 700 }}>{unreadCount}</span>}
           </h1>
           <p>Stay on top of your accounting activity — alerts, reminders, and events</p>
         </div>

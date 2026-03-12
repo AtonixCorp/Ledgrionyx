@@ -17,13 +17,13 @@ const reports = [
 ];
 
 const CATEGORY_COLORS = {
-  Financials: '#667eea',
-  Subledger: '#27ae60',
-  'HR & Payroll': '#f39c12',
-  Budgeting: '#9b59b6',
-  Tax: '#e74c3c',
-  Accounting: '#2c3e50',
-  Inventory: '#16a085',
+  Financials: 'var(--color-cyan)',
+  Subledger: 'var(--color-success)',
+  'HR & Payroll': 'var(--color-warning)',
+  Budgeting: 'var(--color-cyan-dark)',
+  Tax: 'var(--color-error)',
+  Accounting: 'var(--color-midnight)',
+  Inventory: 'var(--color-cyan-dark)',
 };
 
 export default function Analytics() {
@@ -44,12 +44,12 @@ export default function Analytics() {
           <h3 style={{
             fontSize: 13,
             fontWeight: 700,
-            color: CATEGORY_COLORS[cat] || '#667eea',
+            color: CATEGORY_COLORS[cat] || 'var(--color-cyan)',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
             marginBottom: 12,
             paddingBottom: 8,
-            borderBottom: `2px solid ${CATEGORY_COLORS[cat] || '#667eea'}`,
+            borderBottom: `2px solid ${CATEGORY_COLORS[cat] || 'var(--color-cyan)'}`,
           }}>
             {cat}
           </h3>

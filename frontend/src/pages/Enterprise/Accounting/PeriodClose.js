@@ -8,7 +8,7 @@ const TABS = [
   { id: 'checklists', label: 'Close Checklists', },
 ];
 
-const STATUS_COLORS = { open: '#38a169', closed: '#e53e3e', pending: '#ed8936', in_progress: '#4299e1', completed: '#38a169' };
+const STATUS_COLORS = { open: 'var(--color-success)', closed: 'var(--color-error)', pending: 'var(--color-warning)', in_progress: 'var(--color-cyan)', completed: 'var(--color-success)' };
 
 //  Ledger Periods Tab
 const PeriodsTab = ({ entityId }) => {
@@ -48,8 +48,8 @@ const PeriodsTab = ({ entityId }) => {
     <div>
       <div className="acct-stat-cards">
         <div className="acct-stat-card"><div className="acct-stat-label">Total Periods</div><div className="acct-stat-count">{periods.length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Open</div><div className="acct-stat-count" style={{ color: '#38a169' }}>{periods.filter(p => p.status === 'open').length}</div></div>
-        <div className="acct-stat-card"><div className="acct-stat-label">Closed</div><div className="acct-stat-count" style={{ color: '#e53e3e' }}>{periods.filter(p => p.status === 'closed').length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Open</div><div className="acct-stat-count" style={{ color: 'var(--color-success)' }}>{periods.filter(p => p.status === 'open').length}</div></div>
+        <div className="acct-stat-card"><div className="acct-stat-label">Closed</div><div className="acct-stat-count" style={{ color: 'var(--color-error)' }}>{periods.filter(p => p.status === 'closed').length}</div></div>
       </div>
       <div className="tab-toolbar">
         <button className="btn-primary" onClick={() => setShowForm(true)}>New Period</button>
@@ -64,8 +64,8 @@ const PeriodsTab = ({ entityId }) => {
                 <td>{p.fiscal_year}</td>
                 <td>{p.start_date}</td>
                 <td>{p.end_date}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || '#a0aec0', color: 'white' }}>{p.status}</span></td>
-                <td style={{ color: '#718096', fontSize: '0.85rem' }}>{p.closed_at ? new Date(p.closed_at).toLocaleDateString() : '—'}</td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || 'var(--color-silver-dark)', color: 'white' }}>{p.status}</span></td>
+                <td style={{ color: 'var(--color-silver-dark)', fontSize: '0.85rem' }}>{p.closed_at ? new Date(p.closed_at).toLocaleDateString() : '—'}</td>
                 <td>
                   {p.status === 'open' && (
                     <button className="btn-danger btn-sm" onClick={() => handleClose(p.id)} disabled={closing === p.id}>
@@ -157,8 +157,8 @@ const ChecklistsTab = ({ entityId }) => {
               <div className="acct-group-header" onClick={() => toggleChecklist(cl.id)}>
                 <span style={{ fontSize: '0.9rem' }}>''</span>
                 <strong style={{ flex: 1 }}>{cl.checklist_name}</strong>
-                {cl.description && <span style={{ color: '#718096', fontSize: '0.82rem' }}>{cl.description}</span>}
-                <span className="status-badge" style={{ background: STATUS_COLORS[cl.status] || '#a0aec0', color: 'white' }}>{cl.status}</span>
+                {cl.description && <span style={{ color: 'var(--color-silver-dark)', fontSize: '0.82rem' }}>{cl.description}</span>}
+                <span className="status-badge" style={{ background: STATUS_COLORS[cl.status] || 'var(--color-silver-dark)', color: 'white' }}>{cl.status}</span>
               </div>
               {expanded === cl.id && (
                 <div style={{ padding: '0 16px 16px' }}>
@@ -167,11 +167,11 @@ const ChecklistsTab = ({ entityId }) => {
                       <input type="checkbox" checked={item.is_completed} readOnly />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{item.item_name}</div>
-                        {item.description && <div style={{ fontSize: '0.8rem', color: '#718096' }}>{item.description}</div>}
+                        {item.description && <div style={{ fontSize: '0.8rem', color: 'var(--color-silver-dark)' }}>{item.description}</div>}
                       </div>
-                      <span className="status-badge" style={{ background: STATUS_COLORS[item.status] || '#a0aec0', color: 'white', fontSize: '0.7rem' }}>{item.status}</span>
+                      <span className="status-badge" style={{ background: STATUS_COLORS[item.status] || 'var(--color-silver-dark)', color: 'white', fontSize: '0.7rem' }}>{item.status}</span>
                     </div>
-                  )) : <div style={{ color: '#a0aec0', textAlign: 'center', padding: 16 }}>Loading items...</div>}
+                  )) : <div style={{ color: 'var(--color-silver-dark)', textAlign: 'center', padding: 16 }}>Loading items...</div>}
                 </div>
               )}
             </div>
@@ -210,7 +210,7 @@ const PeriodClose = () => {
           <h1>Period Close</h1>
           <p>Manage accounting periods, close checklists, and period-end processes</p>
         </div>
-        <span style={{ color: '#718096', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ color: 'var(--color-silver-dark)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
           Closing a period prevents new journal entries
         </span>
       </div>

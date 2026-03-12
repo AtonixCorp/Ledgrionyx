@@ -11,17 +11,17 @@ const mockVariance = [
   { account: 'Net Income', budget: '$154,000', actual: '$152,000', variance: '-$2,000', pct: '-1.3%', type: 'Unfavorable', isBold: true },
 ];
 
-const VARIANCE_COLORS = { Favorable: '#27ae60', Unfavorable: '#e74c3c' };
+const VARIANCE_COLORS = { Favorable: 'var(--color-success)', Unfavorable: 'var(--color-error)' };
 
 const columns = [
   { key: 'account', header: 'Account' },
   { key: 'budget', header: 'Budget' },
   { key: 'actual', header: 'Actual' },
   { key: 'variance', header: 'Variance ($)', render: (row) => (
-    <span style={{ color: row.type === 'Favorable' ? '#27ae60' : '#e74c3c', fontWeight: 600 }}>{row.variance}</span>
+    <span style={{ color: row.type === 'Favorable' ? 'var(--color-success)' : 'var(--color-error)', fontWeight: 600 }}>{row.variance}</span>
   )},
   { key: 'pct', header: 'Variance (%)', render: (row) => (
-    <span style={{ color: row.type === 'Favorable' ? '#27ae60' : '#e74c3c', fontWeight: 600 }}>{row.pct}</span>
+    <span style={{ color: row.type === 'Favorable' ? 'var(--color-success)' : 'var(--color-error)', fontWeight: 600 }}>{row.pct}</span>
   )},
   { key: 'type', header: 'Type', render: (row) => (
     <span className="status-badge" style={{ background: VARIANCE_COLORS[row.type] }}>{row.type}</span>
@@ -54,7 +54,7 @@ export default function VarianceAnalysis() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Overall Performance</div>
-          <div className="stat-value" style={{ color: '#f39c12' }}>98.7%</div>
+          <div className="stat-value" style={{ color: 'var(--color-warning)' }}>98.7%</div>
         </Card>
       </div>
 

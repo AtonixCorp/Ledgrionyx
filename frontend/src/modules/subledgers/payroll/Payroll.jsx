@@ -7,7 +7,7 @@ const mockPayroll = [
   { id: 'EMP-003', name: 'Lisa Rodriguez', role: 'Operations Manager', department: 'Operations', gross: '$10,833.33', deductions: '$2,500.00', net: '$8,333.33', period: 'Jan 2025', status: 'Pending' },
 ];
 
-const STATUS_COLORS = { Processed: '#27ae60', Pending: '#f39c12', Rejected: '#e74c3c' };
+const STATUS_COLORS = { Processed: 'var(--color-success)', Pending: 'var(--color-warning)', Rejected: 'var(--color-error)' };
 
 const columns = [
   { key: 'id', header: 'ID' },
@@ -47,11 +47,11 @@ export default function Payroll() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Total Deductions</div>
-          <div className="stat-value" style={{ color: '#e74c3c' }}>$8,800.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>$8,800.00</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Total Net Pay</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>$29,533.33</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>$29,533.33</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Employees</div>

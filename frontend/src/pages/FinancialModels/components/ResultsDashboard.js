@@ -60,12 +60,12 @@ const ResultsDashboard = ({
    */
   const getMetricColor = (value, type = 'return') => {
     if (type === 'return') {
-      if (value > 30) return '#00b894'; // Green - Excellent
-      if (value > 15) return '#74b9ff'; // Blue - Good
-      if (value > 0) return '#fdcb6e'; // Yellow - Fair
-      return '#d63031'; // Red - Poor
+      if (value > 30) return 'var(--color-success)'; // Green - Excellent
+      if (value > 15) return 'var(--color-cyan)'; // Blue - Good
+      if (value > 0) return 'var(--color-warning)'; // Yellow - Fair
+      return 'var(--color-error)'; // Red - Poor
     }
-    return '#2d3436'; // Default
+    return 'var(--color-midnight)'; // Default
   };
 
   return (

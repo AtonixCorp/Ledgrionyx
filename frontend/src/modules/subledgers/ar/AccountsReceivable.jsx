@@ -7,7 +7,7 @@ const mockAR = [
   { invoice: 'INV-0004', customer: 'Umbrella Co', invoiceDate: '2024-12-20', dueDate: '2025-01-20', original: '$31,000.00', balance: '$0.00', aging: 'Paid', status: 'Paid' },
 ];
 
-const STATUS_COLORS = { Current: '#27ae60', Overdue: '#e74c3c', Paid: '#95a5a6' };
+const STATUS_COLORS = { Current: 'var(--color-success)', Overdue: 'var(--color-error)', Paid: 'var(--color-silver-dark)' };
 
 const columns = [
   { key: 'invoice', header: 'Invoice' },
@@ -54,7 +54,7 @@ export default function AccountsReceivable() {
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Collected (MTD)</div>
-          <div className="stat-value" style={{ color: '#27ae60' }}>$31,000.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>$31,000.00</div>
         </Card>
       </div>
 
