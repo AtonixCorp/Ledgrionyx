@@ -38,6 +38,30 @@ export const EnterpriseProvider = ({ children }) => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
 
+  // Silently refresh the access token using the stored refresh token.
+  // Returns the new access token string, or null on failure.
+  const refreshAccessToken = useCallback(async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return null;
+    try {
+      const res = await fetch(apiUrl('/api/token/refresh/'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.access) {
+        localStorage.setItem('token', data.access);
+        if (data.refresh) localStorage.setItem('refreshToken', data.refresh);
+        return data.access;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [apiUrl]);
+
   // Organization state
   const [organizations, setOrganizations] = useState([]);
   const [currentOrganization, setCurrentOrganization] = useState(null);
@@ -334,6 +358,16 @@ export const EnterpriseProvider = ({ children }) => {
       headers: buildAuthHeaders(),
     })
       .then(async (response) => {
+        // Auto-refresh token on 401 and retry once
+        if (response.status === 401) {
+          const newToken = await refreshAccessToken();
+          if (!newToken) throw new Error('Session expired. Please log in again.');
+          const retryResponse = await fetch(apiUrl(`/api/organizations/${orgId}/accounting_dashboard/`), {
+            headers: { Authorization: `Bearer ${newToken}` },
+          });
+          if (!retryResponse.ok) throw new Error('Failed to fetch organization accounting dashboard');
+          return retryResponse.json();
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch organization accounting dashboard');
         }

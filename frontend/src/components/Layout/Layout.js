@@ -50,8 +50,8 @@ const Layout = ({ children }) => {
   //  Navigation definitions
 
   const overviewNav = [
-    { to: '/app/overview/dashboard',         label: 'Dashboard' },
-    { to: '/app/firm/enterprise-branches',   label: 'Enterprise Overview' },
+    { to: '/app/overview/dashboard',         label: 'Accounting Dashboard' },
+    { to: '/app/firm/enterprise-branches',   label: 'Group Overview' },
     { to: '/app/overview/notifications',     label: 'Notifications' },
     { to: '/app/overview/tasks',             label: 'Tasks' },
   ];

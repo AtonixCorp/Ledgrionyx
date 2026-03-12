@@ -42,6 +42,8 @@ const EnterpriseOrgOverview = () => {
     <div className="org-overview-container">
       {/* Executive Summary */}
       <section className="executive-summary">
+        <h1 className="page-title" style={{ marginBottom: 4 }}>Group Overview</h1>
+        <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 24 }}>Consolidated position across all legal entities and jurisdictions</p>
         <h2 className="section-title">Executive Summary</h2>
 
         <div className="metrics-grid">

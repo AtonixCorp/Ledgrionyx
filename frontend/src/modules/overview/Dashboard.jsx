@@ -410,8 +410,8 @@ const OverviewDashboard = () => {
   return (
     <div className="dashboard">
       <PageHeader
-        title={dashboard.metadata?.organizationName || currentOrganization.name}
-        subtitle={`Financial health, activity and workflows`}
+        title="Accounting Dashboard"
+        subtitle={`Financials, activity and workflows — ${dashboard.metadata?.organizationName || currentOrganization.name}`}
         actions={
           <div className="dashboard-header-actions">
             <Button variant="primary" size="small">Open Close Workspace</Button>
