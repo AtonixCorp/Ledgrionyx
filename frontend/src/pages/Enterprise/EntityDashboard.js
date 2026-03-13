@@ -167,7 +167,7 @@ const EntityDashboard = () => {
   const COLORS = ['var(--color-error)', 'var(--color-cyan)', 'var(--color-cyan-dark)', 'var(--color-warning)', 'var(--color-success)'];
 
   return (
-    <div className="entity-dashboard" style={{ minHeight: '100vh', background: '#f4f6fa' }}>
+    <div style={{ minHeight: '100vh', background: '#f4f6fa' }}>
       {/* Standalone topbar */}
       <div style={{
         height: 60, background: '#003B73', display: 'flex', alignItems: 'center',
@@ -200,244 +200,155 @@ const EntityDashboard = () => {
         <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{entity.country} &bull; {entity.entity_type}</span>
       </div>
 
-      <div className="dashboard-header">
-        <div className="entity-info">
-          <h1>{entity.name}</h1>
-          <div className="entity-meta">
-            <span className="country"> {entity.country}</span>
-            <span className="type">{entity.entity_type}</span>
-            <span className={`status ${entity.status}`}>{entity.status}</span>
+      {/* Page header section */}
+      <div style={{ padding: '28px 32px', borderBottom: '1px solid #E5E7EB', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111827', margin: 0 }}>{entity.name}</h1>
+          <div style={{ display: 'flex', gap: 12, marginTop: 8, alignItems: 'center' }}>
+            <span style={{ fontSize: 13, color: '#6B7280' }}>📍 {entity.country}</span>
+            <span style={{ fontSize: 13, color: '#6B7280' }}>•</span>
+            <span style={{ fontSize: 13, color: '#6B7280', textTransform: 'capitalize' }}>{entity.entity_type}</span>
+            <span style={{
+              background: entity.status === 'active' ? '#D1FAE5' : '#F3F4F6',
+              color: entity.status === 'active' ? '#065F46' : '#374151',
+              borderRadius: 12, padding: '2px 10px', fontSize: 12, fontWeight: 600,
+            }}>{entity.status}</span>
           </div>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="tab-navigation">
-        <button
-          className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >Overview
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'expenses' ? 'active' : ''}`}
-          onClick={() => setActiveTab('expenses')}
-        >Expenses ({expenses.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'income' ? 'active' : ''}`}
-          onClick={() => setActiveTab('income')}
-        >Income ({income.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'budgets' ? 'active' : ''}`}
-          onClick={() => setActiveTab('budgets')}
-        >Budgets ({budgets.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
-          onClick={() => setActiveTab('staff')}
-        >Staff & HR ({staff.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'structure' ? 'active' : ''}`}
-          onClick={() => setActiveTab('structure')}
-        >Company Structure
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
-          onClick={() => setActiveTab('financial')}
-        >Financial Tracking
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'bookkeeping' ? 'active' : ''}`}
-          onClick={() => setActiveTab('bookkeeping')}
-        >Bookkeeping
-        </button>
+      <div style={{
+        display: 'flex', gap: 0, borderBottom: '1px solid #E5E7EB', background: '#fff',
+        padding: '0 32px', position: 'sticky', top: 60, zIndex: 50,
+      }}>
+        {[
+          { key: 'overview', label: 'Overview' },
+          { key: 'expenses', label: `Expenses (${expenses.length})` },
+          { key: 'income', label: `Income (${income.length})` },
+          { key: 'budgets', label: `Budgets (${budgets.length})` },
+          { key: 'staff', label: `Staff & HR (${staff.length})` },
+          { key: 'structure', label: 'Company Structure' },
+          { key: 'financial', label: 'Financial Tracking' },
+          { key: 'bookkeeping', label: 'Bookkeeping' },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            style={{
+              background: activeTab === tab.key ? '#003B73' : 'transparent',
+              color: activeTab === tab.key ? '#fff' : '#6B7280',
+              border: 'none', padding: '14px 18px', fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', borderBottom: activeTab === tab.key ? '2px solid #003B73' : 'none',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={e => { if (activeTab !== tab.key) e.currentTarget.style.background = '#F3F4F6'; }}
+            onMouseOut={e => { if (activeTab !== tab.key) e.currentTarget.style.background = 'transparent'; }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      {/* Tab Content Container */}
+      <div style={{ padding: '32px', maxWidth: 1400, margin: '0 auto' }}>
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <div className="tab-content">
-          {/* Quick Access Cards */}
-          <div className="quick-access-section">
-            <h3>Quick Access</h3>
-            <div className="quick-access-grid">
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/expenses`)}>
-                <div className="card-icon expenses"></div>
-                <h4>Expenses</h4>
-                <p>{expenses.length} transactions</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/income`)}>
-                <div className="card-icon income"></div>
-                <h4>Income</h4>
-                <p>{income.length} records</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/budgets`)}>
-                <div className="card-icon budgets"></div>
-                <h4>Budgets</h4>
-                <p>{budgets.length} budgets</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}>
-                <div className="card-icon bookkeeping"></div>
-                <h4>Bookkeeping</h4>
-                <p>Full accounting</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/cashflow-treasury`)}>
-                <div className="card-icon treasury"></div>
-                <h4>Cashflow & Treasury</h4>
-                <p>Real-time visibility</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => setActiveTab('staff')}>
-                <div className="card-icon staff"></div>
-                <h4>Staff & HR</h4>
-                <p>{staff.length} members</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => setActiveTab('structure')}>
-                <div className="card-icon structure"></div>
-                <h4>Structure</h4>
-                <p>Accounts & docs</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/chart-of-accounts`)}>
-                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan)' }}></div>
-                <h4>Chart of Accounts</h4>
-                <p>COA & account codes</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/general-ledger`)}>
-                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan-dark)' }}></div>
-                <h4>General Ledger</h4>
-                <p>All posted entries</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/journal-entries`)}>
-                <div className="card-icon" style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}></div>
-                <h4>Journal Entries</h4>
-                <p>Debits & credits</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/accounts-receivable`)}>
-                <div className="card-icon" style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}></div>
-                <h4>Accounts Receivable</h4>
-                <p>Customers & invoices</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/accounts-payable`)}>
-                <div className="card-icon" style={{ background: 'var(--color-error-light)', color: 'var(--color-error)' }}></div>
-                <h4>Accounts Payable</h4>
-                <p>Vendors & bills</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/inventory`)}>
-                <div className="card-icon" style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}></div>
-                <h4>Inventory</h4>
-                <p>Items, COGS & movements</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/bank-reconciliation`)}>
-                <div className="card-icon" style={{ background: 'var(--color-cyan-very-light)', color: 'var(--color-success)' }}></div>
-                <h4>Bank Reconciliation</h4>
-                <p>Match bank statements</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/revenue-recognition`)}>
-                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan-dark)' }}></div>
-                <h4>Revenue Recognition</h4>
-                <p>Deferred & scheduled</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/period-close`)}>
-                <div className="card-icon" style={{ background: 'var(--color-error-light)', color: 'var(--color-error)' }}></div>
-                <h4>Period Close</h4>
-                <p>Close ledger periods</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/fx-accounting`)}>
-                <div className="card-icon" style={{ background: 'var(--color-cyan-light)', color: 'var(--color-cyan-dark)' }}></div>
-                <h4>FX Accounting</h4>
-                <p>Exchange rates & FX P&L</p>
-                <span className="card-arrow">→</span>
-              </div>
-              <div className="quick-access-card" onClick={() => navigate(`/enterprise/entity/${entityId}/notifications`)}>
-                <div className="card-icon" style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}></div>
-                <h4>Notifications</h4>
-                <p>Alerts & preferences</p>
-                <span className="card-arrow">→</span>
-              </div>
-            </div>
-          </div>
-
+        <div>
           {/* Financial Summary Cards */}
-          <div className="summary-cards">
-            <div className="summary-card income">
-              <h3>Total Income</h3>
-              <p className="amount">${totalIncome.toFixed(2)}</p>
-              <p className="subtitle">{income.length} transactions</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18, marginBottom: 32 }}>
+            <div style={{
+              background: '#fff', borderRadius: 10, padding: '20px 24px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.08)', borderLeft: '4px solid #0284C7',
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', marginBottom: 10 }}>Total Income</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: '#111827', marginBottom: 4 }}>${totalIncome.toFixed(2)}</div>
+              <div style={{ fontSize: 12, color: '#9CA3AF' }}>{income.length} transactions</div>
             </div>
-            <div className="summary-card expenses">
-              <h3>Total Expenses</h3>
-              <p className="amount">${totalExpenses.toFixed(2)}</p>
-              <p className="subtitle">{expenses.length} transactions</p>
+            <div style={{
+              background: '#fff', borderRadius: 10, padding: '20px 24px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.08)', borderLeft: '4px solid #DC2626',
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', marginBottom: 10 }}>Total Expenses</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: '#111827', marginBottom: 4 }}>${totalExpenses.toFixed(2)}</div>
+              <div style={{ fontSize: 12, color: '#9CA3AF' }}>{expenses.length} transactions</div>
             </div>
-            <div className={`summary-card net ${netIncome >= 0 ? 'positive' : 'negative'}`}>
-              <h3>Net Income</h3>
-              <p className="amount">${netIncome.toFixed(2)}</p>
-              <p className="subtitle">{((netIncome / totalIncome) * 100).toFixed(1)}% margin</p>
+            <div style={{
+              background: '#fff', borderRadius: 10, padding: '20px 24px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.08)', borderLeft: `4px solid ${netIncome >= 0 ? '#10B981' : '#DC2626'}`,
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', marginBottom: 10 }}>Net Income</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: netIncome >= 0 ? '#10B981' : '#DC2626', marginBottom: 4 }}>${netIncome.toFixed(2)}</div>
+              <div style={{ fontSize: 12, color: '#9CA3AF' }}>{totalIncome > 0 ? ((netIncome / totalIncome) * 100).toFixed(1) : 0}% margin</div>
             </div>
           </div>
 
-          {/* Charts */}
-          <div className="charts-grid">
-            {/* Expense Categories */}
-            <div className="chart-card">
-              <h3>Expense Categories</h3>
+          {/* Quick Access Cards Grid */}
+          <div style={{ marginBottom: 28 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>Quick Access</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 14 }}>
+              {[
+                { label: 'Expenses', icon: '📊', count: expenses.length, action: () => navigate(`/enterprise/entity/${entityId}/expenses`) },
+                { label: 'Income', icon: '💰', count: income.length, action: () => navigate(`/enterprise/entity/${entityId}/income`) },
+                { label: 'Budgets', icon: '📈', count: budgets.length, action: () => navigate(`/enterprise/entity/${entityId}/budgets`) },
+                { label: 'Bookkeeping', icon: '📚', action: () => navigate(`/enterprise/entity/${entityId}/bookkeeping`) },
+                { label: 'Cashflow', icon: '💳', action: () => navigate(`/enterprise/entity/${entityId}/cashflow-treasury`) },
+                { label: 'Staff & HR', icon: '👥', count: staff.length, action: () => setActiveTab('staff') },
+                { label: 'Chart of Accounts', icon: '📋', action: () => navigate(`/enterprise/entity/${entityId}/chart-of-accounts`) },
+                { label: 'General Ledger', icon: '📑', action: () => navigate(`/enterprise/entity/${entityId}/general-ledger`) },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  onClick={item.action}
+                  style={{
+                    background: '#fff', borderRadius: 10, padding: '16px', cursor: 'pointer',
+                    border: '1px solid #E5E7EB', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+                    e.currentTarget.style.borderColor = '#003B73';
+                  }}
+                  onMouseOut={e => {
+                    e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+                    e.currentTarget.style.borderColor = '#E5E7EB';
+                  }}
+                >
+                  <div style={{ fontSize: 20, marginBottom: 8 }}>{item.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#111827' }}>{item.label}</div>
+                  {item.count !== undefined && <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>{item.count} {item.label.toLowerCase()}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Charts Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 18 }}>
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 16, margin: '0 0 16px' }}>Expense Categories</h3>
               {expenseCategories.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
-                    <Pie
-                      data={expenseCategories}
-                      dataKey="amount"
-                      nameKey="category"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {expenseCategories.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
+                    <Pie data={expenseCategories} dataKey="amount" nameKey="category" cx="50%" cy="50%" outerRadius={80} label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}>
+                      {expenseCategories.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                     </Pie>
                     <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="no-data">No expense data available</p>
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>No expense data available</div>
               )}
             </div>
 
-            {/* Budget vs Actual */}
-            <div className="chart-card">
-              <h3>Budget vs Actual</h3>
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 16, margin: '0 0 16px' }}>Budget vs Actual</h3>
               {budgetComparison.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={budgetComparison}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                    <Legend />
-                    <Bar dataKey="budget" fill="var(--color-success)" name="Budget" />
-                    <Bar dataKey="spent" fill="var(--color-error)" name="Spent" />
-                  </BarChart>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={budgetComparison}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="category" /><YAxis /><Tooltip formatter={(value) => `$${value.toFixed(2)}`} /><Legend /><Bar dataKey="budget" fill="#10B981" name="Budget" /><Bar dataKey="spent" fill="#DC2626" name="Spent" /></BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="no-data">No budget data available</p>
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>No budget data available</div>
               )}
             </div>
           </div>
@@ -446,310 +357,253 @@ const EntityDashboard = () => {
 
       {/* Expenses Tab */}
       {activeTab === 'expenses' && (
-        <div className="tab-content">
-          <div className="management-nav-section">
-            <div className="section-header">
-              <h3>Expense Management</h3>
-              <p>Track and manage all business expenses with detailed categorization</p>
+        <div>
+          <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', marginBottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>Expense Management</h3>
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '4px 0 0' }}>Track and manage all business expenses</p>
             </div>
-            <button
-              className="manage-btn"
-              onClick={() => navigate(`/enterprise/entity/${entityId}/expenses`)}
-            >Open Expense Manager
-            </button>
+            <button onClick={() => navigate(`/enterprise/entity/${entityId}/expenses`)} style={{ background: '#003B73', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Open Manager →</button>
           </div>
-
-          <div className="data-table">
-            <table>
+          <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Category</th>
-                  <th>Amount</th>
+                <tr style={{ borderBottom: '1px solid #E5E7EB', background: '#F9FAFB' }}>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Date</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Description</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Category</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#374151' }}>Amount</th>
                 </tr>
               </thead>
               <tbody>
-                {expenses.slice(0, 10).map(expense => (
-                  <tr key={expense.id}>
-                    <td>{new Date(expense.date).toLocaleDateString()}</td>
-                    <td>{expense.description}</td>
-                    <td>{expense.category}</td>
-                    <td className="amount negative">${parseFloat(expense.amount).toFixed(2)}</td>
+                {expenses.slice(0, 10).map((exp, i) => (
+                  <tr key={exp.id} style={{ borderBottom: '1px solid #F3F4F6', background: i % 2 === 1 ? '#FAFAFA' : '#fff' }}>
+                    <td style={{ padding: '11px 16px', color: '#6B7280', fontSize: 12 }}>{new Date(exp.date).toLocaleDateString()}</td>
+                    <td style={{ padding: '11px 16px', color: '#111827' }}>{exp.description}</td>
+                    <td style={{ padding: '11px 16px', color: '#6B7280' }}>{exp.category}</td>
+                    <td style={{ padding: '11px 16px', textAlign: 'right', fontWeight: 600, color: '#DC2626' }}>-${parseFloat(exp.amount).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {expenses.length === 0 && <p className="no-data">No expenses recorded for this entity</p>}
-            {expenses.length > 10 && (
-              <div className="table-footer">
-                <p>Showing 10 of {expenses.length} expenses.{''}
-                  <a
-                    href={`/enterprise/entity/${entityId}/expenses`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate(`/enterprise/entity/${entityId}/expenses`);
-                    }}
-                  >View all →
-                  </a>
-                </p>
-              </div>
-            )}
+            {expenses.length === 0 && <div style={{ padding: '40px 0', textAlign: 'center', color: '#9CA3AF' }}>No expenses recorded</div>}
           </div>
         </div>
       )}
 
       {/* Income Tab */}
       {activeTab === 'income' && (
-        <div className="tab-content">
-          <div className="management-nav-section">
-            <div className="section-header">
-              <h3>Income Management</h3>
-              <p>Track revenue streams and analyze income sources</p>
+        <div>
+          <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', marginBottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>Income Management</h3>
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '4px 0 0' }}>Track revenue streams and analyze income sources</p>
             </div>
-            <button
-              className="manage-btn"
-              onClick={() => navigate(`/enterprise/entity/${entityId}/income`)}
-            >Open Income Manager
-            </button>
+            <button onClick={() => navigate(`/enterprise/entity/${entityId}/income`)} style={{ background: '#003B73', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Open Manager →</button>
           </div>
-
-          <div className="data-table">
-            <table>
+          <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Source</th>
-                  <th>Type</th>
-                  <th>Amount</th>
+                <tr style={{ borderBottom: '1px solid #E5E7EB', background: '#F9FAFB' }}>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Date</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Source</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Type</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#374151' }}>Amount</th>
                 </tr>
               </thead>
               <tbody>
-                {income.slice(0, 10).map(inc => (
-                  <tr key={inc.id}>
-                    <td>{new Date(inc.date).toLocaleDateString()}</td>
-                    <td>{inc.source}</td>
-                    <td>{inc.income_type}</td>
-                    <td className="amount positive">${parseFloat(inc.amount).toFixed(2)}</td>
+                {income.slice(0, 10).map((inc, i) => (
+                  <tr key={inc.id} style={{ borderBottom: '1px solid #F3F4F6', background: i % 2 === 1 ? '#FAFAFA' : '#fff' }}>
+                    <td style={{ padding: '11px 16px', color: '#6B7280', fontSize: 12 }}>{new Date(inc.date).toLocaleDateString()}</td>
+                    <td style={{ padding: '11px 16px', color: '#111827' }}>{inc.source}</td>
+                    <td style={{ padding: '11px 16px', color: '#6B7280' }}>{inc.income_type}</td>
+                    <td style={{ padding: '11px 16px', textAlign: 'right', fontWeight: 600, color: '#10B981' }}>${parseFloat(inc.amount).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {income.length === 0 && <p className="no-data">No income recorded for this entity</p>}
-            {income.length > 10 && (
-              <div className="table-footer">
-                <p>Showing 10 of {income.length} income records.{''}
-                  <a
-                    href={`/enterprise/entity/${entityId}/income`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate(`/enterprise/entity/${entityId}/income`);
-                    }}
-                  >View all →
-                  </a>
-                </p>
-              </div>
-            )}
+            {income.length === 0 && <div style={{ padding: '40px 0', textAlign: 'center', color: '#9CA3AF' }}>No income recorded</div>}
           </div>
         </div>
       )}
 
       {/* Budgets Tab */}
       {activeTab === 'budgets' && (
-        <div className="tab-content">
-          <div className="management-nav-section">
-            <div className="section-header">
-              <h3>Budget Management</h3>
-              <p>Set spending limits and monitor budget utilization across categories</p>
+        <div>
+          <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', marginBottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>Budget Management</h3>
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '4px 0 0' }}>Set spending limits and monitor utilization</p>
             </div>
-            <button
-              className="manage-btn"
-              onClick={() => navigate(`/enterprise/entity/${entityId}/budgets`)}
-            >Open Budget Manager
-            </button>
+            <button onClick={() => navigate(`/enterprise/entity/${entityId}/budgets`)} style={{ background: '#003B73', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Open Manager →</button>
           </div>
-
-          <div className="data-table">
-            <table>
+          <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Budget Limit</th>
-                  <th>Spent</th>
-                  <th>Remaining</th>
-                  <th>Status</th>
+                <tr style={{ borderBottom: '1px solid #E5E7EB', background: '#F9FAFB' }}>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Category</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#374151' }}>Budget Limit</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#374151' }}>Spent</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#374151' }}>Remaining</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {budgets.map(budget => {
-                  const spent = expenses
-                    .filter(exp => exp.category === budget.category)
-                    .reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+                {budgets.map((budget, i) => {
+                  const spent = expenses.filter(exp => exp.category === budget.category).reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
                   const remaining = parseFloat(budget.limit) - spent;
-                  const status = remaining >= 0 ? 'under' : 'over';
-
                   return (
-                    <tr key={budget.id}>
-                      <td>{budget.category}</td>
-                      <td>${parseFloat(budget.limit).toFixed(2)}</td>
-                      <td>${spent.toFixed(2)}</td>
-                      <td className={remaining >= 0 ? 'positive' : 'negative'}>
-                        ${remaining.toFixed(2)}
-                      </td>
-                      <td>
-                        <span className={`status-badge ${status}`}>
-                          {status === 'under' ? 'Under' : 'Over'}
-                        </span>
+                    <tr key={budget.id} style={{ borderBottom: '1px solid #F3F4F6', background: i % 2 === 1 ? '#FAFAFA' : '#fff' }}>
+                      <td style={{ padding: '11px 16px', fontWeight: 600, color: '#111827' }}>{budget.category}</td>
+                      <td style={{ padding: '11px 16px', textAlign: 'right', color: '#6B7280' }}>${parseFloat(budget.limit).toFixed(2)}</td>
+                      <td style={{ padding: '11px 16px', textAlign: 'right', color: '#6B7280' }}>${spent.toFixed(2)}</td>
+                      <td style={{ padding: '11px 16px', textAlign: 'right', fontWeight: 600, color: remaining >= 0 ? '#10B981' : '#DC2626' }}>${remaining.toFixed(2)}</td>
+                      <td style={{ padding: '11px 16px', textAlign: 'center' }}>
+                        <span style={{
+                          background: remaining >= 0 ? '#D1FAE5' : '#FEE2E2',
+                          color: remaining >= 0 ? '#065F46' : '#DC2626',
+                          borderRadius: 20, padding: '2px 10px', fontSize: 11, fontWeight: 600,
+                        }}>{remaining >= 0 ? 'Under' : 'Over'}</span>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-            {budgets.length === 0 && <p className="no-data">No budgets set for this entity</p>}
+            {budgets.length === 0 && <div style={{ padding: '40px 0', textAlign: 'center', color: '#9CA3AF' }}>No budgets set</div>}
           </div>
         </div>
       )}
 
       {/* Staff & HR Tab */}
       {activeTab === 'staff' && (
-        <div className="tab-content">
-          <div className="staff-grid">
-            {/* Departments Section */}
-            <div className="staff-section">
-              <h3>Departments ({departments.length})</h3>
-              <div className="departments-list">
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>Staff & HR</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 18, marginBottom: 28 }}>
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>Departments ({departments.length})</h4>
+              <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                 {departments.map(dept => (
-                  <div key={dept.id} className="department-card">
-                    <h4>{dept.name}</h4>
-                    <p>{dept.description}</p>
-                    <div className="dept-stats">
-                      <span>{dept.staff_count} staff</span>
-                      {dept.budget && <span>Budget: ${dept.budget}</span>}
-                    </div>
+                  <div key={dept.id} style={{ padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{dept.name}</div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{dept.staff_count} staff</div>
                   </div>
                 ))}
-                {departments.length === 0 && <p className="no-data">No departments created</p>}
+                {departments.length === 0 && <div style={{ color: '#9CA3AF', fontSize: 13 }}>No departments</div>}
               </div>
             </div>
 
-            {/* Roles Section */}
-            <div className="staff-section">
-              <h3>Roles ({roles.length})</h3>
-              <div className="roles-list">
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>Roles ({roles.length})</h4>
+              <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                 {roles.map(role => (
-                  <div key={role.id} className="role-card">
-                    <h4>{role.name}</h4>
-                    <p>{role.description}</p>
-                    <div className="role-stats">
-                      <span>{role.staff_count} staff</span>
-                      {role.department_name && <span>{role.department_name}</span>}
-                    </div>
+                  <div key={role.id} style={{ padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{role.name}</div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{role.staff_count} staff</div>
                   </div>
                 ))}
-                {roles.length === 0 && <p className="no-data">No roles defined</p>}
+                {roles.length === 0 && <div style={{ color: '#9CA3AF', fontSize: 13 }}>No roles</div>}
               </div>
             </div>
 
-            {/* Staff Section */}
-            <div className="staff-section">
-              <h3>Staff Directory</h3>
-              <div className="data-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Role</th>
-                      <th>Department</th>
-                      <th>Status</th>
-                      <th>Hire Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {staff.map(member => (
-                      <tr key={member.id}>
-                        <td>{member.full_name}</td>
-                        <td>{member.role_name}</td>
-                        <td>{member.department_name}</td>
-                        <td>
-                          <span className={`status-badge ${member.status}`}>
-                            {member.status}
-                          </span>
-                        </td>
-                        <td>{new Date(member.hire_date).toLocaleDateString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {staff.length === 0 && <p className="no-data">No staff members added</p>}
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>Quick Stats</h4>
+              <div>
+                <div style={{ padding: '8px 0', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Total Staff</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>{staff.length}</span>
+                </div>
+                <div style={{ padding: '8px 0', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Active</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#10B981' }}>{staff.filter(s => s.status === 'active').length}</span>
+                </div>
+                <div style={{ padding: '8px 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Avg Salary</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>${(staff.filter(s => s.status === 'active').reduce((sum, s) => sum + (parseFloat(s.salary) || 0), 0) / Math.max(staff.filter(s => s.status === 'active').length, 1)).toFixed(0)}</span>
+                </div>
               </div>
             </div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.08)', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #E5E7EB', background: '#F9FAFB' }}>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Name</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Role</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Department</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {staff.slice(0, 10).map((member, i) => (
+                  <tr key={member.id} style={{ borderBottom: '1px solid #F3F4F6', background: i % 2 === 1 ? '#FAFAFA' : '#fff' }}>
+                    <td style={{ padding: '11px 16px', fontWeight: 500, color: '#111827' }}>{member.full_name}</td>
+                    <td style={{ padding: '11px 16px', color: '#6B7280' }}>{member.role_name}</td>
+                    <td style={{ padding: '11px 16px', color: '#6B7280' }}>{member.department_name}</td>
+                    <td style={{ padding: '11px 16px', textAlign: 'center' }}>
+                      <span style={{
+                        background: member.status === 'active' ? '#D1FAE5' : '#F3F4F6',
+                        color: member.status === 'active' ? '#065F46' : '#374151',
+                        borderRadius: 20, padding: '2px 10px', fontSize: 11, fontWeight: 600,
+                      }}>{member.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {staff.length === 0 && <div style={{ padding: '40px 0', textAlign: 'center', color: '#9CA3AF' }}>No staff added</div>}
           </div>
         </div>
       )}
 
-      {/* Company Structure Tab */}
+      {/* Structure Tab - simplified */}
       {activeTab === 'structure' && (
-        <div className="tab-content">
-          <div className="structure-grid">
-            {/* Bank Accounts Section */}
-            <div className="structure-section">
-              <h3>Bank Accounts ({bankAccounts.length})</h3>
-              <div className="accounts-list">
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>Company Structure</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18 }}>
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Bank Accounts ({bankAccounts.length})</h4>
+              <div style={{ maxHeight: 350, overflowY: 'auto' }}>
                 {bankAccounts.map(account => (
-                  <div key={account.id} className="account-card">
-                    <h4>{account.account_name}</h4>
-                    <p>{account.bank_name} - {account.account_type}</p>
-                    <div className="account-balance">
-                      <span className="balance">${account.balance.toFixed(2)}</span>
-                      <span className="currency">{account.currency}</span>
-                    </div>
+                  <div key={account.id} style={{ padding: '12px 0', borderBottom: '1px solid #F3F4F6' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{account.account_name}</div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{account.bank_name}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#003B73', marginTop: 4 }}>${account.balance.toFixed(2)}</div>
                   </div>
                 ))}
-                {bankAccounts.length === 0 && <p className="no-data">No bank accounts added</p>}
+                {bankAccounts.length === 0 && <div style={{ color: '#9CA3AF', fontSize: 13 }}>No bank accounts</div>}
               </div>
             </div>
 
-            {/* Wallets Section */}
-            <div className="structure-section">
-              <h3>Wallets ({wallets.length})</h3>
-              <div className="wallets-list">
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Wallets ({wallets.length})</h4>
+              <div style={{ maxHeight: 350, overflowY: 'auto' }}>
                 {wallets.map(wallet => (
-                  <div key={wallet.id} className="wallet-card">
-                    <h4>{wallet.name}</h4>
-                    <p>{wallet.get_wallet_type_display} - {wallet.provider || 'N/A'}</p>
-                    <div className="wallet-balance">
-                      <span className="balance">${wallet.balance.toFixed(2)}</span>
-                      <span className="currency">{wallet.currency}</span>
-                    </div>
+                  <div key={wallet.id} style={{ padding: '12px 0', borderBottom: '1px solid #F3F4F6' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{wallet.name}</div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{wallet.get_wallet_type_display}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#003B73', marginTop: 4 }}>${wallet.balance.toFixed(2)}</div>
                   </div>
                 ))}
-                {wallets.length === 0 && <p className="no-data">No wallets added</p>}
+                {wallets.length === 0 && <div style={{ color: '#9CA3AF', fontSize: 13 }}>No wallets</div>}
               </div>
             </div>
 
-            {/* Compliance Documents Section */}
-            <div className="structure-section">
-              <h3>Compliance Documents ({complianceDocuments.length})</h3>
-              <div className="documents-list">
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Compliance Docs ({complianceDocuments.length})</h4>
+              <div style={{ maxHeight: 350, overflowY: 'auto' }}>
                 {complianceDocuments.map(doc => (
-                  <div key={doc.id} className={`document-card ${doc.is_expiring_soon ? 'expiring' : ''}`}>
-                    <h4>{doc.title}</h4>
-                    <p>{doc.document_type} - {doc.issuing_authority}</p>
-                    <div className="document-dates">
-                      <span>Expires: {new Date(doc.expiry_date).toLocaleDateString()}</span>
-                      {doc.days_until_expiry !== null && (
-                        <span className={doc.days_until_expiry <= 30 ? 'urgent' : ''}>
-                          {doc.days_until_expiry} days left
-                        </span>
-                      )}
+                  <div key={doc.id} style={{ padding: '12px 0', borderBottom: '1px solid #F3F4F6', opacity: doc.is_expiring_soon ? 1 : 0.8 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{doc.title}</div>
+                    <div style={{ fontSize: 12, color: doc.days_until_expiry <= 30 ? '#DC2626' : '#6B7280', marginTop: 2 }}>
+                      Expires: {new Date(doc.expiry_date).toLocaleDateString()}
                     </div>
-                    <span className={`status-badge ${doc.status}`}>
-                      {doc.status}
-                    </span>
+                    {doc.days_until_expiry !== null && doc.days_until_expiry <= 30 && (
+                      <div style={{ fontSize: 11, color: '#DC2626', fontWeight: 600, marginTop: 4 }}>⚠️ {doc.days_until_expiry} days left</div>
+                    )}
                   </div>
                 ))}
-                {complianceDocuments.length === 0 && <p className="no-data">No compliance documents added</p>}
+                {complianceDocuments.length === 0 && <div style={{ color: '#9CA3AF', fontSize: 13 }}>No documents</div>}
               </div>
             </div>
           </div>
@@ -758,82 +612,37 @@ const EntityDashboard = () => {
 
       {/* Financial Tracking Tab */}
       {activeTab === 'financial' && (
-        <div className="tab-content">
-          <div className="financial-grid">
-            {/* Profit & Loss Summary */}
-            <div className="financial-section">
-              <h3>Profit & Loss Summary</h3>
-              <div className="pnl-cards">
-                <div className="pnl-card">
-                  <h4>Total Revenue</h4>
-                  <p className="amount positive">${totalIncome.toFixed(2)}</p>
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>Financial Tracking</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 18 }}>
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>P&L Summary</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Total Revenue</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#10B981' }}>${totalIncome.toFixed(2)}</span>
                 </div>
-                <div className="pnl-card">
-                  <h4>Total Expenses</h4>
-                  <p className="amount negative">${totalExpenses.toFixed(2)}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Total Expenses</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#DC2626' }}>-${totalExpenses.toFixed(2)}</span>
                 </div>
-                <div className={`pnl-card ${netIncome >= 0 ? 'profit' : 'loss'}`}>
-                  <h4>Net Profit/Loss</h4>
-                  <p className="amount">${netIncome.toFixed(2)}</p>
-                </div>
-                <div className="pnl-card">
-                  <h4>Profit Margin</h4>
-                  <p className="percentage">
-                    {totalIncome > 0 ? ((netIncome / totalIncome) * 100).toFixed(1) : 0}%
-                  </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Net Income</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: netIncome >= 0 ? '#10B981' : '#DC2626' }}>${netIncome.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
-            {/* Cash Position */}
-            <div className="financial-section">
-              <h3>Cash Position</h3>
-              <div className="cash-position">
-                <div className="cash-accounts">
-                  <h4>Bank Accounts</h4>
-                  {bankAccounts.map(account => (
-                    <div key={account.id} className="cash-item">
-                      <span>{account.account_name}</span>
-                      <span className="amount">${account.balance.toFixed(2)}</span>
-                    </div>
-                  ))}
+            <div style={{ background: '#fff', borderRadius: 10, padding: '20px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Cash Position</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Bank Accounts</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#003B73' }}>${bankAccounts.reduce((s, a) => s + parseFloat(a.balance), 0).toFixed(2)}</span>
                 </div>
-                <div className="cash-accounts">
-                  <h4>Wallets</h4>
-                  {wallets.map(wallet => (
-                    <div key={wallet.id} className="cash-item">
-                      <span>{wallet.name}</span>
-                      <span className="amount">${wallet.balance.toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="total-cash">
-                  <h4>Total Cash Position</h4>
-                  <p className="amount large">
-                    ${(bankAccounts.reduce((sum, acc) => sum + parseFloat(acc.balance), 0) +
-                       wallets.reduce((sum, w) => sum + parseFloat(w.balance), 0)).toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Monthly Summary */}
-            <div className="financial-section">
-              <h3>Monthly Summary</h3>
-              <div className="monthly-summary">
-                <div className="summary-item">
-                  <span>Average Monthly Income</span>
-                  <span className="amount">${(totalIncome / 12).toFixed(2)}</span>
-                </div>
-                <div className="summary-item">
-                  <span>Average Monthly Expenses</span>
-                  <span className="amount">${(totalExpenses / 12).toFixed(2)}</span>
-                </div>
-                <div className="summary-item">
-                  <span>Staff Payroll Total</span>
-                  <span className="amount">
-                    ${staff.filter(s => s.status === 'active').reduce((sum, s) => sum + (parseFloat(s.salary) || 0), 0).toFixed(2)}
-                  </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0' }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Wallets</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#003B73' }}>${wallets.reduce((s, w) => s + parseFloat(w.balance), 0).toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -843,71 +652,24 @@ const EntityDashboard = () => {
 
       {/* Bookkeeping Tab */}
       {activeTab === 'bookkeeping' && (
-        <div className="tab-content">
-          <div className="bookkeeping-section">
-            <div className="section-info">
-              <h3>Bookkeeping Module</h3>
-              <p>Track all financial transactions, manage accounts, categories, and generate reports.</p>
-              <button
-                className="setup-btn"
-                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}
-              >Open Bookkeeping Dashboard
-              </button>
+        <div>
+          <div style={{ background: '#fff', borderRadius: 10, padding: '24px 28px', marginBottom: 20 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>Bookkeeping Module</h3>
+            <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 16px' }}>Manage financial transactions, chart of accounts, and reporting.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 12 }}>
+              <button onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)} style={{ background: '#003B73', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Dashboard</button>
+              <button onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/transactions`)} style={{ background: '#f3f4f6', color: '#111827', border: 'none', borderRadius: 7, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Transactions</button>
+              <button onClick={() => navigate(`/enterprise/entity/${entityId}/chart-of-accounts`)} style={{ background: '#f3f4f6', color: '#111827', border: 'none', borderRadius: 7, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Chart of Accounts</button>
+              <button onClick={() => navigate(`/enterprise/entity/${entityId}/general-ledger`)} style={{ background: '#f3f4f6', color: '#111827', border: 'none', borderRadius: 7, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>General Ledger</button>
             </div>
-
-            <div className="features-grid">
-              <div
-                className="feature-card clickable"
-                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/transactions`)}
-              >
-                <div className="feature-icon"></div>
-                <h4>Transaction Management</h4>
-                <p>Record income and expenses with detailed categorization</p>
-                <div className="feature-action">
-                  <span>Manage Transactions</span>
-                  <span className="arrow">→</span>
-                </div>
-              </div>
-              <div
-                className="feature-card clickable"
-                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}
-              >
-                <div className="feature-icon"></div>
-                <h4>Financial Reports</h4>
-                <p>P&L statements, cashflow, and category breakdowns</p>
-                <div className="feature-action">
-                  <span>View Reports</span>
-                  <span className="arrow">→</span>
-                </div>
-              </div>
-              <div
-                className="feature-card clickable"
-                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/accounts`)}
-              >
-                <div className="feature-icon"></div>
-                <h4>Account Tracking</h4>
-                <p>Monitor bank accounts, wallets, and cash balances</p>
-                <div className="feature-action">
-                  <span>Manage Accounts</span>
-                  <span className="arrow">→</span>
-                </div>
-              </div>
-              <div
-                className="feature-card clickable"
-                onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/categories`)}
-              >
-                <div className="feature-icon"></div>
-                <h4>Categories & Audit</h4>
-                <p>Manage categories and view audit logs</p>
-                <div className="feature-action">
-                  <span>View Details</span>
-                  <span className="arrow">→</span>
-                </div>
-              </div>
-            </div>
+          </div>
+          <div style={{ background: '#FEF3C7', borderRadius: 10, padding: '16px 20px', color: '#78350F', fontSize: 13 }}>
+            <strong>Note:</strong> Click on any button above to access the full bookkeeping module with detailed transaction management and reporting tools.
           </div>
         </div>
       )}
+
+      </div>
     </div>
   );
 };
