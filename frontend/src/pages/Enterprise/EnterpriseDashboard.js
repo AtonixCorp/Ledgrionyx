@@ -119,7 +119,7 @@ const EnterpriseDashboard = () => {
           <Button
             variant="secondary"
             size="small"
-            onClick={() => navigate('/app/settings/entities')}
+            onClick={() => navigate('/app/enterprise/entities')}
           >Manage Entities
           </Button>
           <Button

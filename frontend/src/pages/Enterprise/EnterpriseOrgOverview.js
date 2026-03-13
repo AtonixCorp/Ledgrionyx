@@ -188,7 +188,7 @@ const EnterpriseOrgOverview = () => {
         <div className="actions-grid">
           <button
             className="action-button entities"
-            onClick={() => handleNavigate('/app/settings/entities')}
+            onClick={() => handleNavigate('/app/enterprise/entities')}
           >
             <div className="action-icon"></div>
             <div className="action-content">

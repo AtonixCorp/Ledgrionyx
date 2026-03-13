@@ -182,27 +182,6 @@ const TransactionList = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#f9fafb' }}>
-      {/* Topbar */}
-      <div style={{ height: 60, background: '#003B73', position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', paddingLeft: 24, paddingRight: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderBottom: '1px solid #E5E7EB' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-          ← Back
-        </button>
-        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.3)', margin: '0 16px' }}></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>ATC Capital</span>
-          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>/</span>
-          <span style={{ color: '#fff', fontSize: 13 }}>{entity?.name || 'Transactions'}</span>
-        </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ background: '#10B981', color: '#fff', padding: '4px 12px', borderRadius: 4, fontSize: 11, fontWeight: 600 }}>Active</span>
-          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{entity?.country} • {entity?.entity_type}</span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
     <div className="transaction-list-container">
       {/* Header */}
       <div className="page-header">
@@ -443,9 +422,6 @@ const TransactionList = () => {
           onSave={handleSaveTransaction}
         />
       )}
-        </div>
-      </div>
-    </div>
     </div>
   );
 };

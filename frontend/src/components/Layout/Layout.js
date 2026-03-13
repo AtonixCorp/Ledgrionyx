@@ -56,8 +56,13 @@ const Layout = ({ children }) => {
 
   const overviewNav = [
     { to: '/app/firm/enterprise-branches',   label: 'Group Overview' },
+    { to: '/app/enterprise/org-overview',    label: 'Org Overview' },
     { to: '/app/overview/notifications',     label: 'Notifications' },
     { to: '/app/overview/tasks',             label: 'Tasks' },
+  ];
+
+  const entitiesNav = [
+    { to: '/app/enterprise/entities', label: 'All Entities' },
   ];
 
   const accountingNav = [
@@ -130,7 +135,6 @@ const Layout = ({ children }) => {
 
   const settingsNav = [
     { to: '/app/settings/firm',           label: 'Firm Settings' },
-    { to: '/app/settings/entities',       label: 'Entity Management' },
     { to: '/app/settings/team',           label: 'Team & Permissions' },
     { to: '/app/settings/security',       label: 'Security' },
     { to: '/app/settings/branding',       label: 'Branding' },

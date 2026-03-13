@@ -168,44 +168,12 @@ const EntityDashboard = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f6fa' }}>
-      {/* Standalone topbar */}
-      <div style={{
-        height: 60, background: '#003B73', display: 'flex', alignItems: 'center',
-        padding: '0 24px', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-        position: 'sticky', top: 0, zIndex: 100,
-      }}>
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
-            borderRadius: 6, color: '#fff', cursor: 'pointer', display: 'flex',
-            alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 500,
-          }}
-          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.22)'}
-          onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
-        >
-          <span style={{ fontSize: 16, lineHeight: 1 }}>&#8592;</span> Back
-        </button>
-        <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.2)' }} />
-        <span style={{ color: '#fff', fontWeight: 700, fontSize: 16, letterSpacing: 0.3 }}>ATC Capital</span>
-        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>/</span>
-        <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 600 }}>{entity.name}</span>
-        <div style={{ flex: 1 }} />
-        <span style={{
-          background: entity.status === 'active' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.1)',
-          color: entity.status === 'active' ? '#6EE7B7' : 'rgba(255,255,255,0.6)',
-          border: `1px solid ${entity.status === 'active' ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.2)'}`,
-          borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 600,
-        }}>{entity.status}</span>
-        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{entity.country} &bull; {entity.entity_type}</span>
-      </div>
-
       {/* Page header section */}
       <div style={{ padding: '28px 32px', borderBottom: '1px solid #E5E7EB', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111827', margin: 0 }}>{entity.name}</h1>
           <div style={{ display: 'flex', gap: 12, marginTop: 8, alignItems: 'center' }}>
-            <span style={{ fontSize: 13, color: '#6B7280' }}>📍 {entity.country}</span>
+            <span style={{ fontSize: 13, color: '#6B7280' }}>{entity.country}</span>
             <span style={{ fontSize: 13, color: '#6B7280' }}>•</span>
             <span style={{ fontSize: 13, color: '#6B7280', textTransform: 'capitalize' }}>{entity.entity_type}</span>
             <span style={{

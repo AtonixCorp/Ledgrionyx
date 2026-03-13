@@ -8,6 +8,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout/Layout';
+import EntityLayout from './components/EntityLayout/EntityLayout';
 import Landing from './pages/Landing/Landing';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
@@ -91,7 +92,6 @@ import AppIntegrationsList from './modules/integrations/IntegrationsList';
 import AppFirmSettings from './modules/settings/FirmSettings';
 import AppTeamPermissions from './modules/settings/TeamPermissions';
 import AppSecurity from './modules/settings/Security';
-import AppEntityManagement from './modules/settings/EntityManagement';
 import AppBranding from './modules/settings/Branding';
 import AppSubscription from './modules/settings/Subscription';
 import AppHelpCenter from './modules/support/HelpCenter';
@@ -147,112 +147,112 @@ function App() {
               } />
               <Route path="/app/enterprise/entities/:entityId/dashboard" element={
                 <ProtectedRoute>
-                  <EntityDashboard />
+                  <EntityLayout><EntityDashboard /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping" element={
                 <ProtectedRoute>
-                  <BookkeepingDashboard />
+                  <EntityLayout><BookkeepingDashboard /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/transactions" element={
                 <ProtectedRoute>
-                  <TransactionList />
+                  <EntityLayout><TransactionList /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/categories" element={
                 <ProtectedRoute>
-                  <CategoryManager />
+                  <EntityLayout><CategoryManager /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/accounts" element={
                 <ProtectedRoute>
-                  <AccountManager />
+                  <EntityLayout><AccountManager /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/reports" element={
                 <ProtectedRoute>
-                  <BookkeepingReports />
+                  <EntityLayout><BookkeepingReports /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/staff-hr" element={
                 <ProtectedRoute>
-                  <StaffHR />
+                  <EntityLayout><StaffHR /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/cashflow-treasury" element={
                 <ProtectedRoute>
-                  <Layout><CashflowTreasuryDashboard /></Layout>
+                  <EntityLayout><CashflowTreasuryDashboard /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/expenses" element={
                 <ProtectedRoute>
-                  <Layout><ExpensesManager /></Layout>
+                  <EntityLayout><ExpensesManager /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/income" element={
                 <ProtectedRoute>
-                  <Layout><IncomeManager /></Layout>
+                  <EntityLayout><IncomeManager /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/budgets" element={
                 <ProtectedRoute>
-                  <Layout><BudgetsManager /></Layout>
+                  <EntityLayout><BudgetsManager /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/chart-of-accounts" element={
                 <ProtectedRoute>
-                  <Layout><ChartOfAccounts /></Layout>
+                  <EntityLayout><ChartOfAccounts /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/general-ledger" element={
                 <ProtectedRoute>
-                  <Layout><GeneralLedger /></Layout>
+                  <EntityLayout><GeneralLedger /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/journal-entries" element={
                 <ProtectedRoute>
-                  <Layout><JournalEntries /></Layout>
+                  <EntityLayout><JournalEntries /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/accounts-receivable" element={
                 <ProtectedRoute>
-                  <Layout><ARModule /></Layout>
+                  <EntityLayout><ARModule /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/accounts-payable" element={
                 <ProtectedRoute>
-                  <Layout><APModule /></Layout>
+                  <EntityLayout><APModule /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/inventory" element={
                 <ProtectedRoute>
-                  <Layout><Inventory /></Layout>
+                  <EntityLayout><Inventory /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bank-reconciliation" element={
                 <ProtectedRoute>
-                  <Layout><BankReconciliation /></Layout>
+                  <EntityLayout><BankReconciliation /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/revenue-recognition" element={
                 <ProtectedRoute>
-                  <Layout><RevenueRecognition /></Layout>
+                  <EntityLayout><RevenueRecognition /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/period-close" element={
                 <ProtectedRoute>
-                  <Layout><LegacyPeriodClose /></Layout>
+                  <EntityLayout><LegacyPeriodClose /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/fx-accounting" element={
                 <ProtectedRoute>
-                  <Layout><FXModule /></Layout>
+                  <EntityLayout><FXModule /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/notifications" element={
                 <ProtectedRoute>
-                  <Layout><NotificationsCenter /></Layout>
+                  <EntityLayout><NotificationsCenter /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/tax-compliance" element={
@@ -317,7 +317,7 @@ function App() {
 
               {/*  New Module Routes  */}
               {/* Overview */}
-              <Route path="/app/overview/dashboard" element={<ProtectedRoute><AppDashboard /></ProtectedRoute>} />
+              <Route path="/app/overview/dashboard" element={<ProtectedRoute><Layout><AppDashboard /></Layout></ProtectedRoute>} />
               <Route path="/app/overview/notifications" element={<ProtectedRoute><Layout><AppNotifications /></Layout></ProtectedRoute>} />
               <Route path="/app/overview/tasks" element={<ProtectedRoute><Layout><AppTasks /></Layout></ProtectedRoute>} />
 
@@ -381,7 +381,7 @@ function App() {
               <Route path="/app/settings/firm" element={<ProtectedRoute><Layout><AppFirmSettings /></Layout></ProtectedRoute>} />
               <Route path="/app/settings/team" element={<ProtectedRoute><Layout><AppTeamPermissions /></Layout></ProtectedRoute>} />
               <Route path="/app/settings/security" element={<ProtectedRoute><Layout><AppSecurity /></Layout></ProtectedRoute>} />
-              <Route path="/app/settings/entities" element={<ProtectedRoute><AppEntityManagement /></ProtectedRoute>} />
+              <Route path="/app/settings/entities" element={<Navigate to="/app/enterprise/entities" replace />} />
               <Route path="/app/settings/branding" element={<ProtectedRoute><Layout><AppBranding /></Layout></ProtectedRoute>} />
               <Route path="/app/settings/subscription" element={<ProtectedRoute><Layout><AppSubscription /></Layout></ProtectedRoute>} />
               {/* Support */}
