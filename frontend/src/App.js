@@ -152,32 +152,32 @@ function App() {
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping" element={
                 <ProtectedRoute>
-                  <Layout><BookkeepingDashboard /></Layout>
+                  <BookkeepingDashboard />
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/transactions" element={
                 <ProtectedRoute>
-                  <Layout><TransactionList /></Layout>
+                  <TransactionList />
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/categories" element={
                 <ProtectedRoute>
-                  <Layout><CategoryManager /></Layout>
+                  <CategoryManager />
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/accounts" element={
                 <ProtectedRoute>
-                  <Layout><AccountManager /></Layout>
+                  <AccountManager />
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/reports" element={
                 <ProtectedRoute>
-                  <Layout><BookkeepingReports /></Layout>
+                  <BookkeepingReports />
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/bookkeeping/staff-hr" element={
                 <ProtectedRoute>
-                  <Layout><StaffHR /></Layout>
+                  <StaffHR />
                 </ProtectedRoute>
               } />
               <Route path="/enterprise/entity/:entityId/cashflow-treasury" element={
