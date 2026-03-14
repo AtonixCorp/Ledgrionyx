@@ -1405,6 +1405,49 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-weight: var(--font-weight-semibold);
 }
 
+.dashboard-notification-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-color-default);
+  background: var(--color-white);
+  color: var(--color-midnight);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.dashboard-notification-btn:hover {
+  background: var(--color-silver-white);
+  border-color: var(--color-cyan);
+  transform: translateY(-1px);
+}
+
+.dashboard-notification-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.dashboard-notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-error);
+  color: var(--color-white);
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px var(--color-white);
+}
+
 .pill-btn.primary {
   background: var(--color-cyan);
   border-color: var(--color-cyan);

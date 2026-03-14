@@ -7,6 +7,7 @@ from .views import (
     KPICalculationViewSet, ReportViewSet, ConsolidationViewSet,
     ConsolidationEntityViewSet, TaxCalculationViewSet
 )
+from .platform_views import health_check, ingest_platform_event
 from .views import list_countries, get_country
 from .enterprise_views import (
     OrganizationViewSet, EntityViewSet, TeamMemberViewSet,
@@ -177,6 +178,8 @@ router.register(r'client-marketplace-integrations', ClientMarketplaceIntegration
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('health/', health_check, name='health-check'),
+    path('platform/events/', ingest_platform_event, name='platform-event-ingest'),
     path('tax/countries/', list_countries, name='tax_countries_list'),
     path('tax/countries/<str:code>/', get_country, name='tax_country_detail'),
 ]

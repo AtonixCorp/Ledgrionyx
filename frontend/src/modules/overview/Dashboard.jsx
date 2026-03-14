@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card, PageHeader } from '../../components/ui';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { useFilters } from '../../context/FilterContext';
+import { notificationsAPI } from '../../services/api';
 
 const emptyDashboard = {
   summary: {
@@ -348,6 +349,7 @@ const OverviewDashboard = () => {
   const [activityFilter, setActivityFilter] = useState('All');
   const [cashFlowPeriod, setCashFlowPeriod] = useState('weekly');
   const [drillDownItem, setDrillDownItem] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -386,6 +388,30 @@ const OverviewDashboard = () => {
       cancelled = true;
     };
   }, [currentOrganization?.id, fetchOrganizationAccountingDashboard]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadUnreadNotifications = async () => {
+      try {
+        const response = await notificationsAPI.getUnread();
+        if (cancelled) return;
+
+        const unreadItems = response.data?.results || response.data || [];
+        setUnreadCount(Array.isArray(unreadItems) ? unreadItems.length : 0);
+      } catch {
+        if (!cancelled) {
+          setUnreadCount(0);
+        }
+      }
+    };
+
+    loadUnreadNotifications();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentOrganization?.id]);
 
   const filteredFeedItems = useMemo(() => {
     if (activityFilter === 'All') {
@@ -428,6 +454,18 @@ const OverviewDashboard = () => {
         subtitle={`Financials, activity and workflows — ${dashboard.metadata?.organizationName || currentOrganization.name}`}
         actions={
           <div className="dashboard-header-actions">
+            <button
+              type="button"
+              className="dashboard-notification-btn"
+              onClick={() => navigate('/app/overview/notifications')}
+              aria-label={unreadCount > 0 ? `Open notifications, ${unreadCount} unread` : 'Open notifications'}
+              title="Notifications"
+            >
+              <span className="dashboard-notification-icon" aria-hidden="true">🔔</span>
+              {unreadCount > 0 ? (
+                <span className="dashboard-notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+              ) : null}
+            </button>
             <Button variant="primary" size="small">Open Close Workspace</Button>
           </div>
         }

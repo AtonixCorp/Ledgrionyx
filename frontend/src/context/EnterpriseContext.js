@@ -44,7 +44,7 @@ export const EnterpriseProvider = ({ children }) => {
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) return null;
     try {
-      const res = await fetch(apiUrl('/api/token/refresh/'), {
+      const res = await fetch(apiUrl('/api/auth/token/refresh/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh: refreshToken }),
@@ -147,22 +147,43 @@ export const EnterpriseProvider = ({ children }) => {
    */
   const fetchOrganizations = useCallback(async () => {
     if (!user) return;
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+    if (!token) {
+      setOrganizations([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      const response = await fetch(apiUrl('/api/organizations/my_organizations/'), {
+      let response = await fetch(apiUrl('/api/organizations/my_organizations/'), {
         headers: {
           ...buildAuthHeaders(),
           'Content-Type': 'application/json',
         }
       });
+
+      if (response.status === 401) {
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          response = await fetch(apiUrl('/api/organizations/my_organizations/'), {
+            headers: {
+              Authorization: `Bearer ${newToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+        }
+      }
+
       if (response.ok) {
         const data = await response.json();
+        setError(null);
         setOrganizations(data);
         if (data.length > 0 && !currentOrganization) {
           setCurrentOrganization(data[0]);
         }
       } else {
         setOrganizations([]);
+        setError(response.status === 401 ? 'Your session expired. Please log in again.' : 'Failed to fetch organizations');
       }
     } catch (err) {
       setError('Failed to fetch organizations');
@@ -171,7 +192,7 @@ export const EnterpriseProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user, currentOrganization, apiUrl, buildAuthHeaders]);
+  }, [user, currentOrganization, apiUrl, buildAuthHeaders, refreshAccessToken]);
 
   useEffect(() => {
     if (!user || user.account_type !== 'enterprise') return;

@@ -1,29 +1,223 @@
-image: python:3.10-slim
+image: atlassian/default-image:4
 
-pipelines:
-  default:
-    - step:
-        name: Backend tests
+definitions:
+  caches:
+    pip: ~/.cache/pip
+    node: ~/.npm
+  services:
+    docker:
+      memory: 3072
+  steps:
+    - step: &backend-quality
+        name: Backend validation
+        image: python:3.13-slim
         caches:
           - pip
         script:
           - cd backend
           - python -m venv .venv
-          - source .venv/bin/activate
+          - . .venv/bin/activate
           - pip install --upgrade pip
           - pip install -r requirements.txt
+          - export DJANGO_DEBUG=False
+          - export DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+          - export CORS_ALLOWED_ORIGINS=http://localhost:3000
+          - export CSRF_TRUSTED_ORIGINS=http://localhost:3000
+          - python manage.py check --deploy
           - python manage.py test
-    - step:
-        name: Frontend build
+
+    - step: &frontend-quality
+        name: Frontend validation
         image: node:20-alpine
         caches:
           - node
         script:
           - cd frontend
           - npm ci
+          - CI=true npm test -- --watch=false --passWithNoTests
           - npm run build
 
-definitions:
-  caches:
-    pip: ~/.cache/pip
-    node: ~/.npm
+    - step: &dependency-scan
+        name: Dependency and security scan
+        image: python:3.13-slim
+        caches:
+          - pip
+        script:
+          - pip install --upgrade pip pip-audit
+          - pip-audit -r backend/requirements.txt
+          - apt-get update && apt-get install -y --no-install-recommends nodejs npm && rm -rf /var/lib/apt/lists/*
+          - cd frontend
+          - npm ci
+          - npm audit --audit-level=high
+
+    - step: &build-images
+        name: Build and push images
+        services:
+          - docker
+        script:
+          - echo "$DOCKER_PASSWORD" | docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin
+          - docker build -f backend/Dockerfile.prod -t "$DOCKER_REGISTRY/atc-capital/backend:$BITBUCKET_COMMIT" backend
+          - docker build -f frontend/Dockerfile.prod -t "$DOCKER_REGISTRY/atc-capital/frontend:$BITBUCKET_COMMIT" frontend
+          - docker push "$DOCKER_REGISTRY/atc-capital/backend:$BITBUCKET_COMMIT"
+          - docker push "$DOCKER_REGISTRY/atc-capital/frontend:$BITBUCKET_COMMIT"
+
+    - step: &build-verify
+        name: Verify production image builds
+        services:
+          - docker
+        script:
+          - docker build -f backend/Dockerfile.prod -t atc-capital/backend:pr-check backend
+          - docker build -f frontend/Dockerfile.prod -t atc-capital/frontend:pr-check frontend
+
+    - step: &deploy-dev
+        name: Deploy to dev
+        image: amazon/aws-cli:2.17.18
+        deployment: test
+        script:
+          - curl -sSLo /usr/local/bin/kubectl https://dl.k8s.io/release/v1.30.2/bin/linux/amd64/kubectl
+          - chmod +x /usr/local/bin/kubectl
+          - export DEPLOY_ENV=dev
+          - export APP_HOST="$DEV_APP_HOST"
+          - export EKS_CLUSTER_NAME="$DEV_EKS_CLUSTER_NAME"
+          - aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_DEFAULT_REGION"
+          - sed -i "s|registry.example.com|$DOCKER_REGISTRY|g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
+          - sed -i "s/newTag: dev/newTag: $BITBUCKET_COMMIT/g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
+          - kubectl apply -k deploy/k8s/overlays/$DEPLOY_ENV
+          - kubectl rollout status deployment/backend -n atc-capital-dev --timeout=300s
+          - kubectl rollout status deployment/frontend -n atc-capital-dev --timeout=300s
+          - curl --fail --silent --show-error "https://$APP_HOST/api/health/"
+          - |
+            curl --fail --silent --show-error \
+              -X POST "$ATC_PLATFORM_EVENT_URL" \
+              -H "Authorization: Bearer $PLATFORM_EVENT_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"event_type":"deployment","source":"bitbucket","environment":"dev","status":"succeeded","service":"platform","version":"'"$BITBUCKET_COMMIT"'","metadata":{"commit":"'"$BITBUCKET_COMMIT"'","pipeline":"'"$BITBUCKET_BUILD_NUMBER"'"}}'
+
+    - step: &deploy-staging
+        name: Deploy to staging
+        image: amazon/aws-cli:2.17.18
+        deployment: staging
+        script:
+          - curl -sSLo /usr/local/bin/kubectl https://dl.k8s.io/release/v1.30.2/bin/linux/amd64/kubectl
+          - chmod +x /usr/local/bin/kubectl
+          - export DEPLOY_ENV=staging
+          - export APP_HOST="$STAGING_APP_HOST"
+          - export EKS_CLUSTER_NAME="$STAGING_EKS_CLUSTER_NAME"
+          - aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_DEFAULT_REGION"
+          - sed -i "s|registry.example.com|$DOCKER_REGISTRY|g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
+          - sed -i "s/newTag: staging/newTag: $BITBUCKET_COMMIT/g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
+          - kubectl apply -k deploy/k8s/overlays/$DEPLOY_ENV
+          - kubectl rollout status deployment/backend -n atc-capital-staging --timeout=300s
+          - kubectl rollout status deployment/frontend -n atc-capital-staging --timeout=300s
+          - curl --fail --silent --show-error "https://$APP_HOST/api/health/"
+          - |
+            curl --fail --silent --show-error \
+              -X POST "$ATC_PLATFORM_EVENT_URL" \
+              -H "Authorization: Bearer $PLATFORM_EVENT_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"event_type":"deployment","source":"bitbucket","environment":"staging","status":"succeeded","service":"platform","version":"'"$BITBUCKET_COMMIT"'","metadata":{"commit":"'"$BITBUCKET_COMMIT"'","pipeline":"'"$BITBUCKET_BUILD_NUMBER"'"}}'
+
+    - step: &deploy-prod
+        name: Deploy to production
+        image: amazon/aws-cli:2.17.18
+        deployment: production
+        trigger: manual
+        script:
+          - curl -sSLo /usr/local/bin/kubectl https://dl.k8s.io/release/v1.30.2/bin/linux/amd64/kubectl
+          - chmod +x /usr/local/bin/kubectl
+          - export DEPLOY_ENV=prod
+          - export APP_HOST="$PROD_APP_HOST"
+          - export EKS_CLUSTER_NAME="$PROD_EKS_CLUSTER_NAME"
+          - aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --region "$AWS_DEFAULT_REGION"
+          - sed -i "s|registry.example.com|$DOCKER_REGISTRY|g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
+          - sed -i "s/newTag: prod/newTag: $BITBUCKET_COMMIT/g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
+          - kubectl apply -k deploy/k8s/overlays/$DEPLOY_ENV
+          - kubectl rollout status deployment/backend -n atc-capital-prod --timeout=300s
+          - kubectl rollout status deployment/frontend -n atc-capital-prod --timeout=300s
+          - curl --fail --silent --show-error "https://$APP_HOST/api/health/"
+          - |
+            curl --fail --silent --show-error \
+              -X POST "$ATC_PLATFORM_EVENT_URL" \
+              -H "Authorization: Bearer $PLATFORM_EVENT_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"event_type":"deployment","source":"bitbucket","environment":"prod","status":"succeeded","service":"platform","version":"'"$BITBUCKET_COMMIT"'","metadata":{"commit":"'"$BITBUCKET_COMMIT"'","pipeline":"'"$BITBUCKET_BUILD_NUMBER"'"}}'
+
+    - step: &terraform-plan-dev
+        name: Terraform plan dev
+        image: hashicorp/terraform:1.9.8
+        oidc: true
+        script:
+          - sh tools/ci/run_terraform_pipeline.sh plan dev
+
+    - step: &terraform-apply-dev
+        name: Terraform apply dev
+        image: hashicorp/terraform:1.9.8
+        oidc: true
+        trigger: manual
+        script:
+          - sh tools/ci/run_terraform_pipeline.sh apply dev
+
+    - step: &terraform-plan-staging
+        name: Terraform plan staging
+        image: hashicorp/terraform:1.9.8
+        oidc: true
+        script:
+          - sh tools/ci/run_terraform_pipeline.sh plan staging
+
+    - step: &terraform-apply-staging
+        name: Terraform apply staging
+        image: hashicorp/terraform:1.9.8
+        oidc: true
+        trigger: manual
+        script:
+          - sh tools/ci/run_terraform_pipeline.sh apply staging
+
+    - step: &terraform-plan-prod
+        name: Terraform plan prod
+        image: hashicorp/terraform:1.9.8
+        oidc: true
+        script:
+          - sh tools/ci/run_terraform_pipeline.sh plan prod
+
+    - step: &terraform-apply-prod
+        name: Terraform apply prod
+        image: hashicorp/terraform:1.9.8
+        oidc: true
+        trigger: manual
+        script:
+          - sh tools/ci/run_terraform_pipeline.sh apply prod
+
+
+pipelines:
+  pull-requests:
+    '**':
+      - parallel:
+          - step: *backend-quality
+          - step: *frontend-quality
+          - step: *dependency-scan
+      - step: *build-verify
+
+  branches:
+    main:
+      - parallel:
+          - step: *backend-quality
+          - step: *frontend-quality
+          - step: *dependency-scan
+      - step: *build-images
+      - step: *deploy-dev
+      - step: *deploy-staging
+      - step: *deploy-prod
+
+  custom:
+    terraform-plan-dev:
+      - step: *terraform-plan-dev
+    terraform-apply-dev:
+      - step: *terraform-apply-dev
+    terraform-plan-staging:
+      - step: *terraform-plan-staging
+    terraform-apply-staging:
+      - step: *terraform-apply-staging
+    terraform-plan-prod:
+      - step: *terraform-plan-prod
+    terraform-apply-prod:
+      - step: *terraform-apply-prod

@@ -209,8 +209,18 @@ const EnterpriseEntities = () => {
       </section>
 
       {error && (
-        <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '12px 16px', borderRadius: 8, marginBottom: 20, fontSize: 13 }}>
-          {error}
+        <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '14px 18px', borderRadius: 8, marginBottom: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ flex: 1 }}>
+            {error.includes('organizations')
+              ? 'Could not load your organization. Please refresh the page or log in again.'
+              : error}
+          </span>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ background: '#991B1B', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontSize: 12, whiteSpace: 'nowrap' }}
+          >
+            Refresh
+          </button>
         </div>
       )}
 

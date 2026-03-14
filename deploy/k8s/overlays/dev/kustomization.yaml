@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: atc-capital-dev
+
+resources:
+  - ../../base
+  - namespace.yaml
+
+patchesStrategicMerge:
+  - patch-config.yaml
+  - patch-backend.yaml
+  - patch-frontend.yaml
+  - patch-ingress.yaml
+
+images:
+  - name: atc-capital/backend
+    newName: registry.example.com/atc-capital/backend
+    newTag: dev
+  - name: atc-capital/frontend
+    newName: registry.example.com/atc-capital/frontend
+    newTag: dev
