@@ -3,10 +3,15 @@
 echo "🚀 Starting Atonix Capital Application..."
 echo ""
 
+VENV_DIR=".venv"
+if [ -d "backend/venv" ] && [ ! -d "backend/.venv" ]; then
+	VENV_DIR="venv"
+fi
+
 # Start backend
 echo "📦 Starting Django backend..."
 cd backend
-source venv/bin/activate 2>/dev/null || python -m venv venv && source venv/bin/activate
+source "$VENV_DIR/bin/activate" 2>/dev/null || python -m venv "$VENV_DIR" && source "$VENV_DIR/bin/activate"
 pip install -r requirements.txt > /dev/null 2>&1
 python manage.py migrate > /dev/null 2>&1
 python manage.py runserver &

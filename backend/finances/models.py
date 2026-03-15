@@ -278,6 +278,13 @@ class EntityDepartment(models.Model):
 
 class BankAccount(models.Model):
     """Bank accounts for entities"""
+    VERIFICATION_STATUS_CHOICES = [
+        ('unverified', 'Unverified'),
+        ('pending', 'Pending'),
+        ('verified', 'Verified'),
+        ('failed', 'Failed'),
+    ]
+
     ACCOUNT_TYPE_CHOICES = [
         ('checking', 'Checking'),
         ('savings', 'Savings'),
@@ -286,11 +293,14 @@ class BankAccount(models.Model):
     ]
 
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='bank_accounts')
+    provider = models.CharField(max_length=50, blank=True)
+    provider_account_id = models.CharField(max_length=255, blank=True)
     account_name = models.CharField(max_length=255)
     account_number = models.CharField(max_length=100)  # Masked for security
     bank_name = models.CharField(max_length=255)
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, default='checking')
     currency = models.CharField(max_length=3, default='USD')
+    verification_status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default='unverified')
     iban = models.CharField(max_length=34, blank=True)
     swift_code = models.CharField(max_length=11, blank=True)
     routing_number = models.CharField(max_length=9, blank=True)
@@ -304,6 +314,7 @@ class BankAccount(models.Model):
 
     class Meta:
         ordering = ['bank_name', 'account_name']
+        unique_together = ('entity', 'provider', 'provider_account_id')
 
     def __str__(self):
         return f"{self.account_name} - {self.bank_name} ({self.entity.name})"
@@ -831,6 +842,9 @@ class AuditLog(models.Model):
         ('delete', 'Delete'),
         ('view', 'View'),
         ('export', 'Export'),
+        ('reconcile', 'Reconcile'),
+        ('bulk_import', 'Bulk Import'),
+        ('replay', 'Replay'),
     ]
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='audit_logs')
@@ -3081,6 +3095,7 @@ class BankingTransaction(models.Model):
     
     is_matched = models.BooleanField(default=False)
     matched_transaction = models.ForeignKey(Transaction, on_delete=models.SET_NULL, null=True, blank=True)
+    raw_data = models.JSONField(default=dict, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -3090,6 +3105,38 @@ class BankingTransaction(models.Model):
 
     def __str__(self):
         return f"{self.transaction_id}: {self.amount} {self.currency}"
+
+
+class ReconciliationMatch(models.Model):
+    """Links imported bank transactions to posted ledger activity"""
+    MATCH_TYPE_CHOICES = [
+        ('exact', 'Exact'),
+        ('manual', 'Manual'),
+        ('partial', 'Partial'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='reconciliation_matches')
+    bank_transaction = models.OneToOneField(
+        BankingTransaction, on_delete=models.CASCADE, related_name='reconciliation_match'
+    )
+    journal_entry = models.ForeignKey(
+        JournalEntry, on_delete=models.CASCADE, related_name='reconciliation_matches'
+    )
+    match_type = models.CharField(max_length=20, choices=MATCH_TYPE_CHOICES, default='manual')
+    matched_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    notes = models.TextField(blank=True)
+    matched_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='reconciliation_matches_created'
+    )
+    matched_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-matched_at']
+
+    def __str__(self):
+        return f"Reconciliation {self.bank_transaction.transaction_id} -> {self.journal_entry.reference_number}"
 
 
 class EmbeddedPayment(models.Model):
@@ -3244,3 +3291,243 @@ class ClientMarketplaceIntegration(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.client.name}"
+
+
+# ============================================================================
+# V1 PUBLIC API – OAUTH, API KEYS, IDEMPOTENCY, MIGRATION, WEBHOOKS
+# ============================================================================
+
+class OAuthApplication(models.Model):
+    """OAuth 2.0 application for client_credentials grant"""
+    ENVIRONMENT_CHOICES = [
+        ('sandbox', 'Sandbox'),
+        ('production', 'Production'),
+    ]
+
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='oauth_applications'
+    )
+    name = models.CharField(max_length=255)
+    client_id = models.CharField(max_length=100, unique=True)
+    # Stored as SHA-256 hex digest – never store plaintext
+    client_secret_hash = models.CharField(max_length=64)
+    scopes = models.JSONField(default=list, blank=True)
+    environment = models.CharField(max_length=20, choices=ENVIRONMENT_CHOICES, default='sandbox')
+    source_metadata = models.JSONField(default=dict, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='oauth_applications_created'
+    )
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='oauth_applications_updated'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.client_id})"
+
+
+class APIKey(models.Model):
+    """Access token issued via OAuth client_credentials grant"""
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='api_keys'
+    )
+    application = models.ForeignKey(
+        OAuthApplication, on_delete=models.CASCADE, related_name='api_keys'
+    )
+    # Stored as SHA-256 hex digest of the raw bearer token
+    token_hash = models.CharField(max_length=64, unique=True)
+    # First 8 chars of the raw token for display/lookup hints
+    token_prefix = models.CharField(max_length=8, db_index=True)
+    scopes = models.JSONField(default=list, blank=True)
+    environment = models.CharField(max_length=20, choices=OAuthApplication.ENVIRONMENT_CHOICES, default='sandbox')
+    source_metadata = models.JSONField(default=dict, blank=True)
+    expires_at = models.DateTimeField()
+    is_revoked = models.BooleanField(default=False)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='api_keys_created'
+    )
+    revoked_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='api_keys_revoked'
+    )
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def is_valid(self):
+        from django.utils import timezone
+        return not self.is_revoked and self.expires_at > timezone.now()
+
+    def __str__(self):
+        return f"APIKey {self.token_prefix}... (org: {self.organization.name})"
+
+
+class IdempotencyKey(models.Model):
+    """Deduplication record for financial POST operations"""
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='idempotency_keys'
+    )
+    key = models.CharField(max_length=255)
+    endpoint = models.CharField(max_length=255)
+    response_body = models.JSONField(default=dict)
+    response_status = models.IntegerField(default=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('organization', 'key', 'endpoint')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"IdempotencyKey {self.key} @ {self.endpoint}"
+
+
+class MigrationJob(models.Model):
+    """Bulk data migration / import job"""
+    JOB_TYPE_CHOICES = [
+        ('chart_of_accounts', 'Chart of Accounts'),
+        ('customers', 'Customers'),
+        ('vendors', 'Vendors'),
+        ('invoices', 'Invoices'),
+        ('bills', 'Bills'),
+        ('transactions', 'Transactions'),
+        ('opening_balances', 'Opening Balances'),
+        ('historical_financials', 'Historical Financials'),
+        ('bank_statements', 'Bank Statements'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+    SOURCE_SYSTEM_CHOICES = [
+        ('quickbooks_online', 'QuickBooks Online'),
+        ('xero', 'Xero'),
+        ('sage', 'Sage'),
+        ('freshbooks', 'FreshBooks'),
+        ('wave', 'Wave'),
+        ('manual', 'Manual/CSV'),
+        ('other', 'Other'),
+    ]
+
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='migration_jobs'
+    )
+    entity = models.ForeignKey(
+        Entity, on_delete=models.CASCADE, related_name='migration_jobs',
+        null=True, blank=True
+    )
+    type = models.CharField(max_length=50, choices=JOB_TYPE_CHOICES)
+    source_system = models.CharField(
+        max_length=50, choices=SOURCE_SYSTEM_CHOICES, blank=True, default='other'
+    )
+    file_url = models.URLField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    processed_records = models.IntegerField(default=0)
+    failed_records = models.IntegerField(default=0)
+    total_records = models.IntegerField(default=0)
+    error_report = models.JSONField(default=list, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='migration_jobs_created'
+    )
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='migration_jobs_updated'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"MigrationJob {self.id}: {self.type} ({self.status})"
+
+
+class SystemEvent(models.Model):
+    """Persisted financial system events available for delivery and replay"""
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='system_events'
+    )
+    event_id = models.CharField(max_length=100, unique=True)
+    event_type = models.CharField(max_length=100)
+    payload = models.JSONField(default=dict)
+    source_metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['organization', 'event_type']),
+            models.Index(fields=['created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.event_type} ({self.event_id})"
+
+
+class WebhookEndpoint(models.Model):
+    """Registered webhook endpoint for event delivery"""
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='webhook_endpoints'
+    )
+    url = models.URLField()
+    # JSON list of event type strings e.g. ["invoice.created", "invoice.paid"]
+    events = models.JSONField(default=list)
+    # HMAC-SHA256 signing secret – stored plaintext (short-lived, org-scoped)
+    secret = models.CharField(max_length=255, blank=True)
+    source_metadata = models.JSONField(default=dict, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='webhook_endpoints_created'
+    )
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='webhook_endpoints_updated'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Webhook {self.url} (org: {self.organization.name})"
+
+
+class WebhookDelivery(models.Model):
+    """Log of individual webhook delivery attempts"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('delivered', 'Delivered'),
+        ('failed', 'Failed'),
+    ]
+
+    endpoint = models.ForeignKey(
+        WebhookEndpoint, on_delete=models.CASCADE, related_name='deliveries'
+    )
+    event_type = models.CharField(max_length=100)
+    event_id = models.CharField(max_length=100)
+    payload = models.JSONField(default=dict)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    response_status = models.IntegerField(null=True, blank=True)
+    response_body = models.TextField(blank=True)
+    attempt_count = models.IntegerField(default=0)
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
+    next_retry_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Delivery {self.event_type} → {self.endpoint.url} ({self.status})"

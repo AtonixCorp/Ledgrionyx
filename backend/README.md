@@ -80,6 +80,14 @@ This is the Django REST API backend for the AI Financial Modeling Integration Sy
 
 ## API Endpoints
 
+### Core Financial API v1 Documentation
+- OpenAPI blueprint: `openapi/atc-capital-v1-openapi.yaml`
+- External developer guide: `../README/ATC_CORE_FINANCIAL_API_V1_DEVELOPER_GUIDE.md`
+- Redoc UI: `/v1/docs`
+- Swagger UI: `/v1/swagger`
+- CLI authentication guide: `../README/CLI_AUTHENTICATION_GUIDE.md`
+- CLI auth endpoints: `/auth/cli-login`, `/auth/refresh`, `/auth/me`
+
 ### Core APIs
 - `GET /` - Landing page with system overview
 - `GET /api/` - API root with available endpoints

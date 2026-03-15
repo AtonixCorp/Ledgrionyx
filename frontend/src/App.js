@@ -107,6 +107,7 @@ import Support from './pages/Support/Support';
 import HelpCenter from './pages/HelpCenter/HelpCenter';
 import Contact from './pages/Contact/Contact';
 import Privacy from './pages/Privacy/Privacy';
+import CLIDocs from './pages/CLIDocs/CLIDocs';
 import GlobalErrorCenter from './components/GlobalErrorCenter';
 
 function App() {
@@ -148,6 +149,7 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/global-tax" element={<GlobalTax />} />
+              <Route path="/v1/docs" element={<CLIDocs />} />
 
               {/* Redirect legacy personal routes to enterprise */}
               <Route path="/dashboard" element={<Navigate to="/app/overview/dashboard" replace />} />

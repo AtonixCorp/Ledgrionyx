@@ -1,0 +1,174 @@
+.cli-docs-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5fbfe 0%, #ffffff 42%, #eef6fb 100%);
+  color: #11212d;
+}
+
+.cli-docs-hero {
+  padding: 120px 0 56px;
+  background:
+    radial-gradient(circle at top right, rgba(0, 181, 226, 0.18), transparent 28%),
+    linear-gradient(135deg, #0b1f2a 0%, #14384b 100%);
+  color: #f7fbfd;
+}
+
+.cli-docs-kicker {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cli-docs-hero h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  line-height: 1.05;
+}
+
+.cli-docs-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(247, 251, 253, 0.84);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.cli-docs-hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.cli-docs-hero-links a {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f7fbfd;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.cli-docs-hero-links a:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.34);
+  transform: translateY(-1px);
+}
+
+.cli-docs-section {
+  padding: 42px 0;
+}
+
+.cli-docs-section-alt {
+  background: rgba(11, 31, 42, 0.03);
+}
+
+.cli-docs-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.cli-docs-card {
+  grid-column: span 4;
+  padding: 28px;
+  border: 1px solid rgba(17, 33, 45, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 16px 40px rgba(17, 33, 45, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.cli-docs-card-wide {
+  grid-column: span 8;
+}
+
+.cli-docs-card h2 {
+  margin: 0 0 14px;
+  font-size: 1.35rem;
+  color: #0e2d3d;
+}
+
+.cli-docs-card p {
+  margin: 0 0 14px;
+  line-height: 1.7;
+  color: #395161;
+}
+
+.cli-docs-card strong {
+  color: #0e2d3d;
+}
+
+.cli-docs-card pre {
+  overflow-x: auto;
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #0e2430;
+  color: #dff7ff;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.cli-command-list {
+  display: grid;
+  gap: 12px;
+}
+
+.cli-docs-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #395161;
+  line-height: 1.8;
+}
+
+.cli-endpoints-table {
+  display: grid;
+  gap: 10px;
+}
+
+.cli-endpoints-row {
+  display: grid;
+  grid-template-columns: 100px minmax(180px, 1.5fr) 2fr;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f5fbfe;
+  color: #284152;
+}
+
+.cli-endpoints-head {
+  background: #dff4fb;
+  color: #0d2a39;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .cli-docs-card,
+  .cli-docs-card-wide {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 640px) {
+  .cli-docs-hero {
+    padding: 108px 0 42px;
+  }
+
+  .cli-docs-card {
+    padding: 22px;
+  }
+
+  .cli-endpoints-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
