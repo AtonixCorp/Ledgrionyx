@@ -68,14 +68,62 @@ from .serializers import (
 from .permissions import PermissionChecker
 
 
+def _accessible_organizations_queryset(user):
+    if not user or not user.is_authenticated:
+        return Organization.objects.none()
+
+    return Organization.objects.filter(
+        Q(owner=user) | Q(team_members__user=user, team_members__is_active=True)
+    ).distinct()
+
+
+def _accessible_entities_queryset(user, organization=None):
+    if not user or not user.is_authenticated:
+        return Entity.objects.none()
+
+    base_qs = Entity.objects.all()
+    if organization is not None:
+                base_qs = base_qs.filter(organization=organization)
+
+    if organization is not None and organization.owner_id == user.id:
+        return base_qs
+
+    memberships = TeamMember.objects.filter(user=user, is_active=True)
+    if organization is not None:
+        memberships = memberships.filter(organization=organization)
+
+    unrestricted_org_ids = []
+    scoped_entity_ids = []
+    for membership in memberships.prefetch_related('scoped_entities'):
+        scoped_ids = list(membership.scoped_entities.values_list('id', flat=True))
+        if scoped_ids:
+            scoped_entity_ids.extend(scoped_ids)
+        else:
+            unrestricted_org_ids.append(membership.organization_id)
+
+    return base_qs.filter(
+        Q(organization__owner=user)
+        | Q(organization_id__in=unrestricted_org_ids)
+        | Q(id__in=scoped_entity_ids)
+    ).distinct()
+
+
+def _get_accessible_entity_or_404(user, entity_id, organization=None):
+    return get_object_or_404(_accessible_entities_queryset(user, organization), id=entity_id)
+
+
+def _filter_queryset_by_entity_scope(queryset, user, entity_relation='entity'):
+    return queryset.filter(**{f'{entity_relation}__in': _accessible_entities_queryset(user)}).distinct()
+
+
 class OrganizationViewSet(viewsets.ModelViewSet):
     """ViewSet for managing organizations"""
     serializer_class = OrganizationSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Return organizations owned by user"""
-        return Organization.objects.filter(owner=self.request.user)
+        """Return organizations the user can access"""
+        return _accessible_organizations_queryset(self.request.user)
 
     def perform_create(self, serializer):
         """Create organization with current user as owner"""
@@ -92,21 +140,22 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def overview(self, request, pk=None):
         """Get organization overview/dashboard data"""
         organization = self.get_object()
+        accessible_entities = _accessible_entities_queryset(request.user, organization)
+        entities = accessible_entities.filter(status='active')
         
         # Gather data
-        entities = organization.entities.filter(status='active')
         total_entities = entities.count()
         total_jurisdictions = entities.values('country').distinct().count()
 
         # Tax exposure
-        tax_exposures = TaxExposure.objects.filter(entity__organization=organization)
+        tax_exposures = TaxExposure.objects.filter(entity__in=accessible_entities)
         total_tax_exposure = tax_exposures.aggregate(
             total=Sum('estimated_amount')
         )['total'] or 0
 
         # Compliance
         pending_returns = ComplianceDeadline.objects.filter(
-            entity__organization=organization,
+            entity__in=accessible_entities,
             status__in=['upcoming', 'overdue']
         ).count()
         
@@ -145,6 +194,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         response.
         """
         organization = self.get_object()
+        accessible_entities = _accessible_entities_queryset(request.user, organization)
         today = timezone.now().date()
         month_start = today.replace(day=1)
         previous_month_start = (month_start - timedelta(days=1)).replace(day=1)
@@ -290,34 +340,32 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
             return {'inflow': inflow, 'outflow': outflow, 'forecast': forecast}
 
-        entities = list(
-            organization.entities.filter(status='active').values('id', 'name')
-        )
+        entities = list(accessible_entities.filter(status='active').values('id', 'name'))
         entity_name_by_id = {entity['id']: entity['name'] for entity in entities}
         entity_count = len(entities)
 
         bank_accounts = list(
-            BankAccount.objects.filter(entity__organization=organization, is_active=True).values(
+            BankAccount.objects.filter(entity__in=accessible_entities, is_active=True).values(
                 'id', 'entity_id', 'account_name', 'currency', 'balance'
             )
         )
         wallets = list(
-            Wallet.objects.filter(entity__organization=organization, is_active=True).values(
+            Wallet.objects.filter(entity__in=accessible_entities, is_active=True).values(
                 'id', 'entity_id', 'name', 'currency', 'balance'
             )
         )
         transactions = list(
-            Transaction.objects.filter(entity__organization=organization, date__gte=year_start).values(
+            Transaction.objects.filter(entity__in=accessible_entities, date__gte=year_start).values(
                 'id', 'entity_id', 'type', 'amount', 'currency', 'description', 'date', 'created_at'
             )
         )
         journals = list(
-            JournalEntry.objects.filter(entity__organization=organization).order_by('-created_at').values(
+            JournalEntry.objects.filter(entity__in=accessible_entities).order_by('-created_at').values(
                 'id', 'entity_id', 'reference_number', 'description', 'posting_date', 'status', 'created_at'
             )[:20]
         )
         invoices = []
-        for inv in Invoice.objects.filter(entity__organization=organization).select_related('customer').order_by('-invoice_date')[:50]:
+        for inv in Invoice.objects.filter(entity__in=accessible_entities).select_related('customer').order_by('-invoice_date')[:50]:
             invoices.append({
                 'id': inv.id,
                 'entity_id': inv.entity_id,
@@ -332,7 +380,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             })
         
         bills = []
-        for bill in Bill.objects.filter(entity__organization=organization).select_related('vendor').order_by('-bill_date')[:50]:
+        for bill in Bill.objects.filter(entity__in=accessible_entities).select_related('vendor').order_by('-bill_date')[:50]:
             bills.append({
                 'id': bill.id,
                 'entity_id': bill.entity_id,
@@ -346,7 +394,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
                 'status': bill.status,
             })
         reconciliations = list(
-            BankReconciliation.objects.filter(entity__organization=organization)
+            BankReconciliation.objects.filter(entity__in=accessible_entities)
             .select_related('bank_account')
             .order_by('bank_account_id', '-reconciliation_date')
             .values(
@@ -355,7 +403,9 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             )
         )
         task_requests = list(
-            TaskRequest.objects.filter(organization=organization).order_by('-created_at').values(
+            TaskRequest.objects.filter(
+                Q(organization=organization, entity__isnull=True) | Q(entity__in=accessible_entities)
+            ).order_by('-created_at').values(
                 'id', 'entity_id', 'task_type', 'status', 'priority', 'created_at'
             )[:20]
         )
@@ -365,19 +415,19 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             .values('id', 'notification_type', 'priority', 'title', 'message', 'sent_at')[:20]
         )
         documents = list(
-            ComplianceDocument.objects.filter(entity__organization=organization).order_by('expiry_date').values(
+            ComplianceDocument.objects.filter(entity__in=accessible_entities).order_by('expiry_date').values(
                 'id', 'entity_id', 'title', 'document_type', 'issuing_authority', 'status', 'file_path', 'expiry_date'
             )[:20]
         )
         close_checklists = list(
-            PeriodCloseChecklist.objects.filter(entity__organization=organization)
+            PeriodCloseChecklist.objects.filter(entity__in=accessible_entities)
             .select_related('period')
             .order_by('-created_at')
             .values('id', 'entity_id', 'period__period_name', 'status')[:20]
         )
         deadlines = list(
             ComplianceDeadline.objects.filter(
-                Q(organization=organization) | Q(entity__organization=organization),
+                Q(organization=organization, entity__isnull=True) | Q(entity__in=accessible_entities),
                 status__in=['upcoming', 'overdue']
             )
             .order_by('deadline_date')
@@ -831,6 +881,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def firm_dashboard(self, request, pk=None):
         """Comprehensive firm dashboard: clients, workload, staff performance"""
         organization = self.get_object()
+        accessible_entities = _accessible_entities_queryset(request.user, organization)
         now = timezone.now()
 
         # ── Clients ──────────────────────────────────────────────────────────
@@ -849,7 +900,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
                 c['created_at'] = c['created_at'].isoformat()
 
         # ── Workload ──────────────────────────────────────────────────────────
-        tasks_qs = TaskRequest.objects.filter(entity__organization=organization)
+        tasks_qs = TaskRequest.objects.filter(entity__in=accessible_entities)
         workload = {
             'total': tasks_qs.count(),
             'pending': tasks_qs.filter(status='pending').count(),
@@ -866,7 +917,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         )
 
         # ── Staff Performance ─────────────────────────────────────────────────
-        staff_qs = EntityStaff.objects.filter(entity__organization=organization)
+        staff_qs = EntityStaff.objects.filter(entity__in=accessible_entities)
         total_staff = staff_qs.count()
         # tasks assigned per staff member
         staff_performance = []
@@ -926,8 +977,9 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         Returns a stable shape with zero/empty defaults when no data exists.
         """
         organization = self.get_object()
+        accessible_entities = _accessible_entities_queryset(request.user, organization)
 
-        exposures_qs = TaxExposure.objects.filter(entity__organization=organization)
+        exposures_qs = TaxExposure.objects.filter(entity__in=accessible_entities)
         totals_by_country = list(
             exposures_qs.values('country')
             .annotate(total=Sum('estimated_amount'))
@@ -941,7 +993,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         # Compliance deadline counts (used for alerts + risk scores)
         deadline_counts = defaultdict(int)
         deadlines_qs = ComplianceDeadline.objects.filter(
-            entity__organization=organization,
+            entity__in=accessible_entities,
             status__in=['upcoming', 'due_soon', 'overdue'],
         )
         for row in (
@@ -1012,7 +1064,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         # Compliance alerts list (overdue + upcoming next 30 days)
         today = timezone.now().date()
         window_end = today + timedelta(days=30)
-        alerts_qs = ComplianceDeadline.objects.filter(entity__organization=organization).exclude(status='completed')
+        alerts_qs = ComplianceDeadline.objects.filter(entity__in=accessible_entities).exclude(status='completed')
         alerts_qs = alerts_qs.filter(Q(status='overdue') | Q(deadline_date__lte=window_end))
         alerts_qs = alerts_qs.filter(status__in=['upcoming', 'due_soon', 'overdue']).order_by('deadline_date')
 
@@ -1038,11 +1090,11 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
         # FX exposure from bank accounts + wallets (by currency)
         balances_by_currency = defaultdict(Decimal)
-        for acct in BankAccount.objects.filter(entity__organization=organization, is_active=True):
+        for acct in BankAccount.objects.filter(entity__in=accessible_entities, is_active=True):
             currency = acct.currency or 'USD'
             balances_by_currency[currency] += (acct.balance or Decimal('0'))
 
-        for wallet in Wallet.objects.filter(entity__organization=organization, is_active=True):
+        for wallet in Wallet.objects.filter(entity__in=accessible_entities, is_active=True):
             currency = wallet.currency or 'USD'
             balances_by_currency[currency] += (wallet.balance or Decimal('0'))
 
@@ -1085,8 +1137,8 @@ class EntityViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Return entities for organizations owned by the user."""
-        queryset = Entity.objects.filter(organization__owner=self.request.user)
+        """Return entities accessible to the user."""
+        queryset = _accessible_entities_queryset(self.request.user)
         org_id = self.request.query_params.get('organization_id')
         if org_id:
             queryset = queryset.filter(organization_id=org_id)
@@ -1140,8 +1192,14 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Return team members for user's organizations"""
-        return TeamMember.objects.filter(organization__owner=self.request.user)
+        """Return team members for organizations the user owns, or the user's own membership."""
+        queryset = TeamMember.objects.filter(
+            Q(organization__owner=self.request.user) | Q(user=self.request.user)
+        ).distinct()
+        org_id = self.request.query_params.get('organization_id')
+        if org_id:
+            queryset = queryset.filter(organization_id=org_id)
+        return queryset
 
     def perform_create(self, serializer):
         """Add team member"""
@@ -1157,7 +1215,7 @@ class TaxExposureViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return tax exposures for user's organizations"""
-        qs = TaxExposure.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(TaxExposure.objects.all(), self.request.user)
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
@@ -1170,7 +1228,7 @@ class TaxProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        qs = TaxProfile.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(TaxProfile.objects.all(), self.request.user)
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
@@ -1178,7 +1236,7 @@ class TaxProfileViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity') or self.request.data.get('entity_id')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
     @action(detail=False, methods=['get'])
@@ -1188,9 +1246,9 @@ class TaxProfileViewSet(viewsets.ModelViewSet):
         if not org_id:
             return Response({'error': 'organization_id required'}, status=400)
             
-        organization = get_object_or_404(Organization, id=org_id, owner=request.user)
+        organization = get_object_or_404(_accessible_organizations_queryset(request.user), id=org_id)
         
-        exposures = TaxExposure.objects.filter(entity__organization=organization)
+        exposures = TaxExposure.objects.filter(entity__in=_accessible_entities_queryset(request.user, organization))
         grouped = {}
         for exposure in exposures:
             country = exposure.country
@@ -1210,7 +1268,7 @@ class ComplianceDeadlineViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return compliance deadlines for user's organizations"""
-        qs = ComplianceDeadline.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(ComplianceDeadline.objects.all(), self.request.user)
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
@@ -1223,11 +1281,12 @@ class ComplianceDeadlineViewSet(viewsets.ModelViewSet):
         if not org_id:
             return Response({'error': 'organization_id required'}, status=400)
             
-        organization = get_object_or_404(Organization, id=org_id, owner=request.user)
+        organization = get_object_or_404(_accessible_organizations_queryset(request.user), id=org_id)
+        accessible_entities = _accessible_entities_queryset(request.user, organization)
         
         now = datetime.now().date()
         upcoming = ComplianceDeadline.objects.filter(
-            entity__organization=organization,
+            entity__in=accessible_entities,
             deadline_date__gte=now,
             deadline_date__lte=now + timedelta(days=30),
             status__in=['upcoming', 'overdue']
@@ -1243,11 +1302,12 @@ class ComplianceDeadlineViewSet(viewsets.ModelViewSet):
         if not org_id:
             return Response({'error': 'organization_id required'}, status=400)
             
-        organization = get_object_or_404(Organization, id=org_id, owner=request.user)
+        organization = get_object_or_404(_accessible_organizations_queryset(request.user), id=org_id)
+        accessible_entities = _accessible_entities_queryset(request.user, organization)
         
         now = datetime.now().date()
         overdue = ComplianceDeadline.objects.filter(
-            entity__organization=organization,
+            entity__in=accessible_entities,
             deadline_date__lt=now,
             status__in=['upcoming', 'overdue']
         ).order_by('deadline_date')
@@ -1263,7 +1323,7 @@ class CashflowForecastViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return cashflow forecasts for user's organizations"""
-        return CashflowForecast.objects.filter(entity__organization__owner=self.request.user)
+        return _filter_queryset_by_entity_scope(CashflowForecast.objects.all(), self.request.user)
 
     @action(detail=False, methods=['get'])
     def by_category(self, request):
@@ -1272,13 +1332,14 @@ class CashflowForecastViewSet(viewsets.ModelViewSet):
         if not org_id:
             return Response({'error': 'organization_id required'}, status=400)
             
-        organization = get_object_or_404(Organization, id=org_id, owner=request.user)
+        organization = get_object_or_404(_accessible_organizations_queryset(request.user), id=org_id)
+        accessible_entities = _accessible_entities_queryset(request.user, organization)
         
         now = datetime.now()
         current_month = now.replace(day=1)
 
         forecasts = CashflowForecast.objects.filter(
-            entity__organization=organization,
+            entity__in=accessible_entities,
             month=current_month
         )
         grouped = forecasts.values('category').annotate(
@@ -1310,7 +1371,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """Return audit logs for user's organizations"""
-        return AuditLog.objects.filter(organization__owner=self.request.user)
+        return AuditLog.objects.filter(organization__in=_accessible_organizations_queryset(self.request.user))
 
 
 # ============ Entity-Specific ViewSets ============
@@ -1322,12 +1383,12 @@ class EntityDepartmentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return departments for user's entities"""
-        return EntityDepartment.objects.filter(entity__organization__owner=self.request.user)
+        return _filter_queryset_by_entity_scope(EntityDepartment.objects.all(), self.request.user)
 
     def perform_create(self, serializer):
         """Create department for entity"""
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -1338,12 +1399,12 @@ class EntityRoleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return roles for user's entities"""
-        return EntityRole.objects.filter(entity__organization__owner=self.request.user)
+        return _filter_queryset_by_entity_scope(EntityRole.objects.all(), self.request.user)
 
     def perform_create(self, serializer):
         """Create role for entity"""
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -1354,14 +1415,14 @@ class EntityStaffViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return staff for user's entities"""
-        return EntityStaff.objects.filter(entity__organization__owner=self.request.user)
+        return _filter_queryset_by_entity_scope(EntityStaff.objects.all(), self.request.user)
 
     def perform_create(self, serializer):
         """Create staff member — resolves user by email if user PK not supplied"""
         from django.contrib.auth import get_user_model
         User = get_user_model()
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
 
         user_id = self.request.data.get('user')
         if not user_id:
@@ -1387,7 +1448,7 @@ class BankAccountViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return bank accounts for user's entities"""
-        qs = BankAccount.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(BankAccount.objects.all(), self.request.user)
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
@@ -1396,7 +1457,7 @@ class BankAccountViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create bank account for entity"""
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -1407,12 +1468,12 @@ class WalletViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return wallets for user's entities"""
-        return Wallet.objects.filter(entity__organization__owner=self.request.user)
+        return _filter_queryset_by_entity_scope(Wallet.objects.all(), self.request.user)
 
     def perform_create(self, serializer):
         """Create wallet for entity"""
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -1423,7 +1484,7 @@ class ComplianceDocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return compliance documents for user's entities"""
-        qs = ComplianceDocument.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(ComplianceDocument.objects.all(), self.request.user)
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
@@ -1432,7 +1493,7 @@ class ComplianceDocumentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create compliance document for entity"""
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
     @action(detail=False, methods=['get'])
@@ -1442,7 +1503,7 @@ class ComplianceDocumentViewSet(viewsets.ModelViewSet):
         if not entity_id:
             return Response({'error': 'entity_id required'}, status=400)
             
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=request.user)
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
         
         documents = ComplianceDocument.objects.filter(
             entity=entity,
@@ -1466,7 +1527,7 @@ class BookkeepingCategoryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return categories for specific entity"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = BookkeepingCategory.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(BookkeepingCategory.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
@@ -1475,7 +1536,7 @@ class BookkeepingCategoryViewSet(viewsets.ModelViewSet):
     def create_defaults(self, request):
         """Create default categories for an entity"""
         entity_id = request.data.get('entity_id')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=request.user)
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
         
         # Default income categories
         income_categories = [
@@ -1524,7 +1585,7 @@ class BookkeepingAccountViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return accounts for specific entity"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = BookkeepingAccount.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(BookkeepingAccount.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
@@ -1538,7 +1599,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return transactions for specific entity with filters"""
         entity_id = self.request.query_params.get('entity_id')
-        queryset = Transaction.objects.filter(entity__organization__owner=self.request.user)
+        queryset = _filter_queryset_by_entity_scope(Transaction.objects.all(), self.request.user)
         
         if entity_id:
             queryset = queryset.filter(entity_id=entity_id)
@@ -1633,6 +1694,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         entity_id = request.query_params.get('entity_id')
         if not entity_id:
             return Response({'error': 'entity_id required'}, status=400)
+        _get_accessible_entity_or_404(request.user, entity_id)
         
         # Date filters
         start_date = request.query_params.get('start_date')
@@ -1698,6 +1760,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         entity_id = request.query_params.get('entity_id')
         if not entity_id:
             return Response({'error': 'entity_id required'}, status=400)
+        _get_accessible_entity_or_404(request.user, entity_id)
 
         lookback_days = int(request.query_params.get('lookback_days', 180))
         z_threshold = float(request.query_params.get('z_threshold', 3.0))
@@ -1790,7 +1853,7 @@ class BookkeepingAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Return audit logs for specific entity"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = BookkeepingAuditLog.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(BookkeepingAuditLog.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
@@ -1817,7 +1880,7 @@ class FinancialStatementsViewSet(viewsets.ViewSet):
         else:
             as_of = datetime.now().date()
         
-        entity = get_object_or_404(Entity, pk=entity_id, organization__owner=request.user)
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
         
         # Get all transactions up to the as_of date
         transactions = Transaction.objects.filter(entity=entity, date__lte=as_of)
@@ -1892,7 +1955,7 @@ class FinancialStatementsViewSet(viewsets.ViewSet):
         else:
             start = end - timedelta(days=365)
         
-        entity = get_object_or_404(Entity, pk=entity_id, organization__owner=request.user)
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
         
         # Get all transactions in the period
         txns = Transaction.objects.filter(entity=entity, date__gte=start, date__lte=end)
@@ -1973,7 +2036,7 @@ class FinancialStatementsViewSet(viewsets.ViewSet):
         else:
             start = end - timedelta(days=365)
         
-        entity = get_object_or_404(Entity, pk=entity_id, organization__owner=request.user)
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
         
         # Get all transactions in the period
         from django.db.models import Sum
@@ -2025,7 +2088,7 @@ class CashflowTreasuryViewSet(viewsets.ViewSet):
         if not entity_id:
             return Response({'error': 'entity_id required'}, status=400)
 
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=request.user)
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
 
         from datetime import date
         from django.db.models import Sum
@@ -2097,7 +2160,7 @@ class CashflowTreasuryViewSet(viewsets.ViewSet):
             'bankAccounts': [
                 {
                     'id': a.id,
-                    'name': a.name,
+                    'name': a.account_name,
                     'bank': getattr(a, 'bank_name', None) or getattr(a, 'bank', None),
                     'balance': float(a.balance or 0),
                     'currency': getattr(a, 'currency', currency),
@@ -2113,18 +2176,195 @@ class CashflowTreasuryViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['post'])
     def transfer(self, request):
-        """Execute internal transfer between accounts"""
-        return Response({'detail': 'Not implemented.'}, status=501)
+        """Execute internal transfer between bank accounts of the same currency."""
+        from django.db import transaction as db_transaction
+
+        entity_id = request.data.get('entity_id')
+        from_account_id = request.data.get('from_account_id')
+        to_account_id = request.data.get('to_account_id')
+        raw_amount = request.data.get('amount')
+        description = request.data.get('description', 'Internal Transfer')
+
+        if not all([entity_id, from_account_id, to_account_id, raw_amount]):
+            return Response({'error': 'entity_id, from_account_id, to_account_id, and amount are required.'}, status=400)
+
+        try:
+            amount = Decimal(str(raw_amount))
+            if amount <= 0:
+                return Response({'error': 'Amount must be greater than zero.'}, status=400)
+        except Exception:
+            return Response({'error': 'Invalid amount.'}, status=400)
+
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
+
+        try:
+            from_acct = BankAccount.objects.get(id=from_account_id, entity=entity)
+            to_acct = BankAccount.objects.get(id=to_account_id, entity=entity)
+        except BankAccount.DoesNotExist:
+            return Response({'error': 'Account not found or not accessible.'}, status=404)
+
+        if from_acct.id == to_acct.id:
+            return Response({'error': 'Source and destination accounts must be different.'}, status=400)
+
+        if from_acct.currency != to_acct.currency:
+            return Response(
+                {'error': f'Accounts have different currencies ({from_acct.currency} vs {to_acct.currency}). Use FX Conversion instead.'},
+                status=400,
+            )
+
+        if Decimal(str(from_acct.available_balance)) < amount:
+            return Response({'error': 'Insufficient available balance.'}, status=400)
+
+        with db_transaction.atomic():
+            from_acct.balance = Decimal(str(from_acct.balance)) - amount
+            from_acct.available_balance = Decimal(str(from_acct.available_balance)) - amount
+            from_acct.save(update_fields=['balance', 'available_balance', 'updated_at'])
+
+            to_acct.balance = Decimal(str(to_acct.balance)) + amount
+            to_acct.available_balance = Decimal(str(to_acct.available_balance)) + amount
+            to_acct.save(update_fields=['balance', 'available_balance', 'updated_at'])
+
+        return Response({
+            'success': True,
+            'message': f'Transferred {amount} {from_acct.currency} from "{from_acct.account_name}" to "{to_acct.account_name}".',
+            'from_account': from_acct.account_name,
+            'to_account': to_acct.account_name,
+            'amount': str(amount),
+            'currency': from_acct.currency,
+            'from_balance': str(from_acct.balance),
+            'to_balance': str(to_acct.balance),
+        })
 
     @action(detail=False, methods=['post'])
     def fx_conversion(self, request):
-        """Execute FX conversion"""
-        return Response({'detail': 'Not implemented.'}, status=501)
+        """Execute FX conversion between accounts with different currencies."""
+        from django.db import transaction as db_transaction
+
+        entity_id = request.data.get('entity_id')
+        from_account_id = request.data.get('from_account_id')
+        to_account_id = request.data.get('to_account_id')
+        raw_amount = request.data.get('amount')
+        raw_rate = request.data.get('exchange_rate')
+        description = request.data.get('description', 'FX Conversion')
+
+        if not all([entity_id, from_account_id, to_account_id, raw_amount]):
+            return Response({'error': 'entity_id, from_account_id, to_account_id, and amount are required.'}, status=400)
+
+        try:
+            amount = Decimal(str(raw_amount))
+            if amount <= 0:
+                return Response({'error': 'Amount must be greater than zero.'}, status=400)
+        except Exception:
+            return Response({'error': 'Invalid amount.'}, status=400)
+
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
+
+        try:
+            from_acct = BankAccount.objects.get(id=from_account_id, entity=entity)
+            to_acct = BankAccount.objects.get(id=to_account_id, entity=entity)
+        except BankAccount.DoesNotExist:
+            return Response({'error': 'Account not found or not accessible.'}, status=404)
+
+        if from_acct.currency == to_acct.currency:
+            return Response({'error': 'Both accounts share the same currency. Use Internal Transfer instead.'}, status=400)
+
+        if raw_rate:
+            try:
+                rate = Decimal(str(raw_rate))
+                if rate <= 0:
+                    return Response({'error': 'Exchange rate must be greater than zero.'}, status=400)
+            except Exception:
+                return Response({'error': 'Invalid exchange rate.'}, status=400)
+        else:
+            er = ExchangeRate.objects.filter(
+                from_currency=from_acct.currency,
+                to_currency=to_acct.currency,
+            ).order_by('-rate_date').first()
+            if er:
+                rate = Decimal(str(er.rate))
+            else:
+                er_rev = ExchangeRate.objects.filter(
+                    from_currency=to_acct.currency,
+                    to_currency=from_acct.currency,
+                ).order_by('-rate_date').first()
+                if er_rev:
+                    rate = (Decimal('1') / Decimal(str(er_rev.rate))).quantize(Decimal('0.000001'))
+                else:
+                    return Response(
+                        {'error': f'No exchange rate found for {from_acct.currency}/{to_acct.currency}. Please enter the rate manually.'},
+                        status=400,
+                    )
+
+        converted_amount = (amount * rate).quantize(Decimal('0.01'))
+
+        if Decimal(str(from_acct.available_balance)) < amount:
+            return Response({'error': 'Insufficient available balance.'}, status=400)
+
+        with db_transaction.atomic():
+            from_acct.balance = Decimal(str(from_acct.balance)) - amount
+            from_acct.available_balance = Decimal(str(from_acct.available_balance)) - amount
+            from_acct.save(update_fields=['balance', 'available_balance', 'updated_at'])
+
+            to_acct.balance = Decimal(str(to_acct.balance)) + converted_amount
+            to_acct.available_balance = Decimal(str(to_acct.available_balance)) + converted_amount
+            to_acct.save(update_fields=['balance', 'available_balance', 'updated_at'])
+
+        return Response({
+            'success': True,
+            'message': f'Converted {amount} {from_acct.currency} → {converted_amount} {to_acct.currency} at rate {rate}.',
+            'from_amount': str(amount),
+            'from_currency': from_acct.currency,
+            'to_amount': str(converted_amount),
+            'to_currency': to_acct.currency,
+            'exchange_rate': str(rate),
+        })
 
     @action(detail=False, methods=['post'])
     def investment_allocation(self, request):
-        """Allocate funds to investment"""
-        return Response({'detail': 'Not implemented.'}, status=501)
+        """Deduct funds from a bank account and record an investment allocation."""
+        from django.db import transaction as db_transaction
+
+        entity_id = request.data.get('entity_id')
+        from_account_id = request.data.get('from_account_id')
+        raw_amount = request.data.get('amount')
+        instrument = request.data.get('instrument', '')
+        allocation_type = request.data.get('allocation_type', 'general')
+        description = request.data.get('description', '')
+
+        if not all([entity_id, from_account_id, raw_amount]):
+            return Response({'error': 'entity_id, from_account_id, and amount are required.'}, status=400)
+
+        try:
+            amount = Decimal(str(raw_amount))
+            if amount <= 0:
+                return Response({'error': 'Amount must be greater than zero.'}, status=400)
+        except Exception:
+            return Response({'error': 'Invalid amount.'}, status=400)
+
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
+
+        try:
+            from_acct = BankAccount.objects.get(id=from_account_id, entity=entity)
+        except BankAccount.DoesNotExist:
+            return Response({'error': 'Account not found or not accessible.'}, status=404)
+
+        if Decimal(str(from_acct.available_balance)) < amount:
+            return Response({'error': 'Insufficient available balance.'}, status=400)
+
+        with db_transaction.atomic():
+            from_acct.balance = Decimal(str(from_acct.balance)) - amount
+            from_acct.available_balance = Decimal(str(from_acct.available_balance)) - amount
+            from_acct.save(update_fields=['balance', 'available_balance', 'updated_at'])
+
+        label = instrument or allocation_type
+        return Response({
+            'success': True,
+            'message': f'Allocated {amount} {from_acct.currency} to "{label}".',
+            'instrument': label,
+            'amount': str(amount),
+            'currency': from_acct.currency,
+            'remaining_balance': str(from_acct.balance),
+        })
 
 
 # ============================================================================
@@ -2140,7 +2380,7 @@ class RecurringTransactionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         entity_id = self.request.query_params.get('entity_id')
-        qs = RecurringTransaction.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(RecurringTransaction.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
@@ -2148,7 +2388,7 @@ class RecurringTransactionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity') or self.request.data.get('entity_id')
         if entity_id:
-            entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+            entity = _get_accessible_entity_or_404(self.request.user, entity_id)
             serializer.save(created_by=self.request.user, entity=entity)
         else:
             serializer.save(created_by=self.request.user)
@@ -2168,7 +2408,7 @@ class RecurringTransactionViewSet(viewsets.ModelViewSet):
             as_of = date.today()
 
         created = []
-        for rt in RecurringTransaction.objects.filter(entity__organization__owner=request.user):
+        for rt in _filter_queryset_by_entity_scope(RecurringTransaction.objects.all(), request.user):
             if rt.is_due(as_of):
                 tx = rt.create_transaction(run_date=as_of)
                 if tx is not None:
@@ -2184,7 +2424,7 @@ class TaskRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        qs = TaskRequest.objects.filter(organization__owner=self.request.user)
+        qs = TaskRequest.objects.filter(organization__in=_accessible_organizations_queryset(self.request.user))
         org_id = self.request.query_params.get('organization_id')
         entity_id = self.request.query_params.get('entity_id')
         status_filter = self.request.query_params.get('status')
@@ -2205,11 +2445,11 @@ class TaskRequestViewSet(viewsets.ModelViewSet):
         entity = None
 
         if entity_id:
-            entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+            entity = _get_accessible_entity_or_404(self.request.user, entity_id)
             organization = entity.organization
 
         if org_id:
-            organization = get_object_or_404(Organization, id=org_id, owner=self.request.user)
+            organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=org_id)
 
         serializer.save(created_by=self.request.user, organization=organization, entity=entity)
 
@@ -2253,7 +2493,7 @@ class TaskRequestViewSet(viewsets.ModelViewSet):
         if not entity_id:
             return {'error': 'entity_id is required in payload to generate a statement.'}
 
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
 
         start_date = payload.get('start_date')
         end_date = payload.get('end_date')
@@ -2295,7 +2535,7 @@ class ChartOfAccountsViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Return COA for user's entities"""
-        qs = ChartOfAccounts.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(ChartOfAccounts.objects.all(), self.request.user)
         entity_id = (
             self.request.query_params.get('entity')
             or self.request.query_params.get('entity_id')
@@ -2306,7 +2546,7 @@ class ChartOfAccountsViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2318,7 +2558,7 @@ class GeneralLedgerViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Return GL entries for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = GeneralLedger.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(GeneralLedger.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
@@ -2332,14 +2572,14 @@ class JournalEntryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return journal entries for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = JournalEntry.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(JournalEntry.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity, created_by=self.request.user)
     
     @action(detail=True, methods=['post'])
@@ -2385,14 +2625,14 @@ class RecurringJournalTemplateViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return templates for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = RecurringJournalTemplate.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(RecurringJournalTemplate.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity, created_by=self.request.user)
 
 
@@ -2404,14 +2644,14 @@ class LedgerPeriodViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return periods for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = LedgerPeriod.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(LedgerPeriod.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
     
     @action(detail=True, methods=['post'])
@@ -2439,14 +2679,14 @@ class CustomerViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return customers for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = Customer.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(Customer.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2458,14 +2698,14 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return invoices for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = Invoice.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(Invoice.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         subtotal = Decimal(str(self.request.data.get('subtotal') or '0'))
         tax_amount = Decimal(str(self.request.data.get('tax_amount') or '0'))
         total_amount = Decimal(str(self.request.data.get('total_amount') or (subtotal + tax_amount)))
@@ -2518,14 +2758,14 @@ class CreditNoteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return credit notes for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = CreditNote.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(CreditNote.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity, created_by=self.request.user)
 
 
@@ -2537,14 +2777,14 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return payments for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = Payment.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(Payment.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         invoice = serializer.validated_data['invoice']
         customer = serializer.validated_data.get('customer') or invoice.customer
         instance = serializer.save(entity=entity, customer=customer)
@@ -2571,14 +2811,14 @@ class VendorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return vendors for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = Vendor.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(Vendor.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2590,14 +2830,14 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return purchase orders for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = PurchaseOrder.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(PurchaseOrder.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         subtotal = Decimal(str(self.request.data.get('subtotal') or '0'))
         tax_amount = Decimal(str(self.request.data.get('tax_amount') or '0'))
         total_amount = Decimal(str(self.request.data.get('total_amount') or (subtotal + tax_amount)))
@@ -2612,14 +2852,14 @@ class BillViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return bills for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = Bill.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(Bill.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         subtotal = Decimal(str(self.request.data.get('subtotal') or '0'))
         tax_amount = Decimal(str(self.request.data.get('tax_amount') or '0'))
         total_amount = Decimal(str(self.request.data.get('total_amount') or (subtotal + tax_amount)))
@@ -2663,14 +2903,14 @@ class BillPaymentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return bill payments for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = BillPayment.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(BillPayment.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         bill = serializer.validated_data['bill']
         vendor = serializer.validated_data.get('vendor') or bill.vendor
         instance = serializer.save(entity=entity, vendor=vendor)
@@ -2697,14 +2937,14 @@ class InventoryItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return inventory items for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = InventoryItem.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(InventoryItem.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2716,14 +2956,14 @@ class InventoryTransactionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return inventory transactions for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = InventoryTransaction.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(InventoryTransaction.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         item = serializer.validated_data['inventory_item']
         quantity_before = item.quantity_on_hand
         quantity = serializer.validated_data['quantity']
@@ -2752,14 +2992,14 @@ class InventoryCOGSViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return COGS for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = InventoryCostOfGoodsSold.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(InventoryCostOfGoodsSold.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2775,14 +3015,14 @@ class BankReconciliationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return bank reconciliations for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = BankReconciliation.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(BankReconciliation.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         bank_statement_balance = Decimal(str(self.request.data.get('bank_statement_balance') or '0'))
         book_balance = Decimal(str(self.request.data.get('book_balance') or '0'))
         variance = abs(bank_statement_balance - book_balance)
@@ -2820,14 +3060,14 @@ class DeferredRevenueViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return deferred revenues for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = DeferredRevenue.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(DeferredRevenue.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2838,8 +3078,10 @@ class RevenueRecognitionScheduleViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Return revenue recognition schedules"""
-        return RevenueRecognitionSchedule.objects.filter(
-            deferred_revenue__entity__organization__owner=self.request.user
+        return _filter_queryset_by_entity_scope(
+            RevenueRecognitionSchedule.objects.all(),
+            self.request.user,
+            entity_relation='deferred_revenue__entity'
         )
     
     @action(detail=True, methods=['post'])
@@ -2876,14 +3118,14 @@ class PeriodCloseChecklistViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return close checklists for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = PeriodCloseChecklist.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(PeriodCloseChecklist.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2894,8 +3136,10 @@ class PeriodCloseItemViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Return close items for user's entities"""
-        return PeriodCloseItem.objects.filter(
-            checklist__entity__organization__owner=self.request.user
+        return _filter_queryset_by_entity_scope(
+            PeriodCloseItem.objects.all(),
+            self.request.user,
+            entity_relation='checklist__entity'
         )
 
 
@@ -2921,14 +3165,14 @@ class FXGainLossViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return FX gains/losses for user's entities"""
         entity_id = self.request.query_params.get('entity_id')
-        qs = FXGainLoss.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(FXGainLoss.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
 
@@ -2997,10 +3241,11 @@ class ClientViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return Client.objects.filter(organization_id=org_id)
-        return Client.objects.all()
+            return Client.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return Client.objects.filter(organization__in=accessible_orgs)
 
 
 class ClientPortalViewSet(viewsets.ModelViewSet):
@@ -3027,10 +3272,11 @@ class ClientDocumentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return ClientDocument.objects.filter(organization_id=org_id)
-        return ClientDocument.objects.all()
+            return ClientDocument.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return ClientDocument.objects.filter(organization__in=accessible_orgs)
 
 
 class DocumentRequestViewSet(viewsets.ModelViewSet):
@@ -3039,10 +3285,11 @@ class DocumentRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return DocumentRequest.objects.filter(organization_id=org_id)
-        return DocumentRequest.objects.all()
+            return DocumentRequest.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return DocumentRequest.objects.filter(organization__in=accessible_orgs)
 
 
 class ApprovalRequestViewSet(viewsets.ModelViewSet):
@@ -3051,10 +3298,11 @@ class ApprovalRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return ApprovalRequest.objects.filter(organization_id=org_id)
-        return ApprovalRequest.objects.all()
+            return ApprovalRequest.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return ApprovalRequest.objects.filter(organization__in=accessible_orgs)
 
 
 # ============ DOCUMENT TEMPLATE VIEWSETS ============
@@ -3065,10 +3313,11 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return DocumentTemplate.objects.filter(organization_id=org_id)
-        return DocumentTemplate.objects.all()
+            return DocumentTemplate.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return DocumentTemplate.objects.filter(organization__in=accessible_orgs)
 
 
 # ============ LOAN MANAGEMENT VIEWSETS ============
@@ -3079,10 +3328,11 @@ class LoanViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return Loan.objects.filter(organization_id=org_id)
-        return Loan.objects.all()
+            return Loan.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return Loan.objects.filter(organization__in=accessible_orgs)
 
 
 class LoanPaymentViewSet(viewsets.ModelViewSet):
@@ -3091,10 +3341,11 @@ class LoanPaymentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         loan_id = self.request.query_params.get('loan')
         if loan_id:
-            return LoanPayment.objects.filter(loan_id=loan_id)
-        return LoanPayment.objects.all()
+            return LoanPayment.objects.filter(loan__organization__in=accessible_orgs, loan_id=loan_id)
+        return LoanPayment.objects.filter(loan__organization__in=accessible_orgs)
 
 
 # ============ COMPLIANCE & KYC/AML VIEWSETS ============
@@ -3105,10 +3356,11 @@ class KYCProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return KYCProfile.objects.filter(organization_id=org_id)
-        return KYCProfile.objects.all()
+            return KYCProfile.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return KYCProfile.objects.filter(organization__in=accessible_orgs)
 
 
 class AMLTransactionViewSet(viewsets.ModelViewSet):
@@ -3117,10 +3369,11 @@ class AMLTransactionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return AMLTransaction.objects.filter(organization_id=org_id)
-        return AMLTransaction.objects.all()
+            return AMLTransaction.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return AMLTransaction.objects.filter(organization__in=accessible_orgs)
 
 
 # ============ BILLING & FIRM MANAGEMENT VIEWSETS ============
@@ -3131,10 +3384,11 @@ class FirmServiceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return FirmService.objects.filter(organization_id=org_id)
-        return FirmService.objects.all()
+            return FirmService.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return FirmService.objects.filter(organization__in=accessible_orgs)
 
 
 class ClientInvoiceViewSet(viewsets.ModelViewSet):
@@ -3143,10 +3397,11 @@ class ClientInvoiceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return ClientInvoice.objects.filter(organization_id=org_id)
-        return ClientInvoice.objects.all()
+            return ClientInvoice.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return ClientInvoice.objects.filter(organization__in=accessible_orgs)
 
 
 class ClientInvoiceLineItemViewSet(viewsets.ModelViewSet):
@@ -3155,10 +3410,11 @@ class ClientInvoiceLineItemViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         invoice_id = self.request.query_params.get('invoice')
         if invoice_id:
-            return ClientInvoiceLineItem.objects.filter(invoice_id=invoice_id)
-        return ClientInvoiceLineItem.objects.all()
+            return ClientInvoiceLineItem.objects.filter(invoice__organization__in=accessible_orgs, invoice_id=invoice_id)
+        return ClientInvoiceLineItem.objects.filter(invoice__organization__in=accessible_orgs)
 
 
 class ClientSubscriptionViewSet(viewsets.ModelViewSet):
@@ -3167,10 +3423,11 @@ class ClientSubscriptionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return ClientSubscription.objects.filter(organization_id=org_id)
-        return ClientSubscription.objects.all()
+            return ClientSubscription.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return ClientSubscription.objects.filter(organization__in=accessible_orgs)
 
 
 # ============ WHITE-LABELING VIEWSETS ============
@@ -3181,7 +3438,7 @@ class WhiteLabelBrandingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return WhiteLabelBranding.objects.filter(organization__owner=self.request.user)
+        return WhiteLabelBranding.objects.filter(organization__in=_accessible_organizations_queryset(self.request.user))
 
 
 # ============ EMBEDDED BANKING & PAYMENTS VIEWSETS ============
@@ -3192,10 +3449,11 @@ class BankingIntegrationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return BankingIntegration.objects.filter(organization_id=org_id)
-        return BankingIntegration.objects.all()
+            return BankingIntegration.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return BankingIntegration.objects.filter(organization__in=accessible_orgs)
 
 
 class BankingTransactionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -3204,10 +3462,11 @@ class BankingTransactionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        qs = _filter_queryset_by_entity_scope(BankingTransaction.objects.all(), self.request.user)
         entity_id = self.request.query_params.get('entity')
         if entity_id:
-            return BankingTransaction.objects.filter(entity_id=entity_id)
-        return BankingTransaction.objects.all()
+            return qs.filter(entity_id=entity_id)
+        return qs
 
 
 class EmbeddedPaymentViewSet(viewsets.ModelViewSet):
@@ -3216,10 +3475,11 @@ class EmbeddedPaymentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return EmbeddedPayment.objects.filter(organization_id=org_id)
-        return EmbeddedPayment.objects.all()
+            return EmbeddedPayment.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return EmbeddedPayment.objects.filter(organization__in=accessible_orgs)
 
 
 # ============ WORKFLOW AUTOMATION VIEWSETS ============
@@ -3230,10 +3490,11 @@ class AutomationWorkflowViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return AutomationWorkflow.objects.filter(organization_id=org_id)
-        return AutomationWorkflow.objects.all()
+            return AutomationWorkflow.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return AutomationWorkflow.objects.filter(organization__in=accessible_orgs)
 
 
 class AutomationExecutionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -3242,10 +3503,11 @@ class AutomationExecutionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         workflow_id = self.request.query_params.get('workflow')
         if workflow_id:
-            return AutomationExecution.objects.filter(workflow_id=workflow_id)
-        return AutomationExecution.objects.all()
+            return AutomationExecution.objects.filter(workflow__organization__in=accessible_orgs, workflow_id=workflow_id)
+        return AutomationExecution.objects.filter(workflow__organization__in=accessible_orgs)
 
 
 # ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE VIEWSETS ============
@@ -3256,10 +3518,11 @@ class FirmMetricViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return FirmMetric.objects.filter(organization_id=org_id)
-        return FirmMetric.objects.all()
+            return FirmMetric.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return FirmMetric.objects.filter(organization__in=accessible_orgs)
 
 
 class ClientMarketplaceIntegrationViewSet(viewsets.ModelViewSet):
@@ -3268,7 +3531,8 @@ class ClientMarketplaceIntegrationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
         org_id = self.request.query_params.get('organization')
         if org_id:
-            return ClientMarketplaceIntegration.objects.filter(organization_id=org_id)
-        return ClientMarketplaceIntegration.objects.all()
+            return ClientMarketplaceIntegration.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
+        return ClientMarketplaceIntegration.objects.filter(organization__in=accessible_orgs)

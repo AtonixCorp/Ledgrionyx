@@ -46,6 +46,13 @@ const Layout = ({ children }) => {
     { to: '/app/overview/tasks',             label: 'Tasks' },
   ];
 
+  const workspaceNav = [
+    { to: '/app/enterprise/entities',        label: 'Entities' },
+    { to: '/app/enterprise/team',            label: 'Team & Permissions' },
+    { to: '/app/enterprise/reports',         label: 'Reports' },
+    { to: '/app/enterprise/tax-compliance',  label: 'Tax Compliance' },
+  ];
+
   const accountingNav = [
     { to: '/app/accounting/chart-of-accounts', label: 'Chart of Accounts' },
     { to: '/app/accounting/general-ledger', label: 'General Ledger' },
@@ -187,12 +194,12 @@ const Layout = ({ children }) => {
       );
     });
 
-  const renderSection = (label, navItems) => {
+  const renderSection = (label, navItems, extraLabelClass = '') => {
     const isCollapsed = collapsedSections[label] === true;
     return (
       <React.Fragment key={label}>
         {!sidebarMinimized && (
-          <li className="nav-section-label nav-section-toggle" onClick={() => toggleSection(label)}>
+          <li className={`nav-section-label nav-section-toggle${extraLabelClass ? ' ' + extraLabelClass : ''}`} onClick={() => toggleSection(label)}>
             <span>{label}</span>
             <span className={`section-chevron${isCollapsed ? ' collapsed' : ''}`}>▾</span>
           </li>
@@ -218,6 +225,9 @@ const Layout = ({ children }) => {
         {/* Navigation */}
         <ul className="nav-menu">
           {renderSection('Overview', overviewNav)}
+          <li className="nav-divider" role="separator" />
+
+          {renderSection('Workspace', workspaceNav, 'workspace-label')}
           <li className="nav-divider" role="separator" />
 
           {renderSection('Accounting', accountingNav)}

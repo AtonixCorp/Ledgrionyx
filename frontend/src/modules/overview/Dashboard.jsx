@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { Button, Card, PageHeader } from '../../components/ui';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { useFilters } from '../../context/FilterContext';
@@ -433,9 +433,19 @@ const OverviewDashboard = () => {
     );
   }
 
+  const workspaceLinks = [
+    { to: '/app/enterprise/org-overview',   label: 'Overview',           icon: '⊞' },
+    { to: '/app/enterprise/entities',       label: 'Entities',           icon: '🏢' },
+    { to: '/app/enterprise/team',           label: 'Team & Permissions', icon: '👥' },
+    { to: '/app/enterprise/reports',        label: 'Reports',            icon: '📊' },
+    { to: '/app/enterprise/tax-compliance', label: 'Tax Compliance',     icon: '📋' },
+    { to: '/app/overview/notifications',    label: 'Notifications',      icon: '🔔' },
+    { to: '/app/overview/tasks',            label: 'Tasks',              icon: '✅' },
+  ];
+
   return (
     <div className="dashboard-fullpage">
-      {/* Standalone navigation bar — no sidebar on this page */}
+      {/* Topbar */}
       <div className="dashboard-topbar">
         <div className="dashboard-topbar-left">
           <button className="dashboard-back-btn" onClick={() => navigate(-1)} title="Back">
@@ -447,6 +457,25 @@ const OverviewDashboard = () => {
           <span className="dashboard-topbar-org">{currentOrganization.name}</span>
         </div>
       </div>
+
+      <div className="dashboard-content-row">
+        {/* Workspace Sidebar */}
+        <nav className="overview-workspace-sidebar" aria-label="Workspace navigation">
+          <div className="ows-section-label">Workspace</div>
+          <ul className="ows-nav">
+            {workspaceLinks.map((link) => (
+              <li key={link.to}>
+                <NavLink
+                  to={link.to}
+                  className={({ isActive }) => `ows-nav-link${isActive ? ' active' : ''}`}
+                >
+                  <span className="ows-icon" aria-hidden="true">{link.icon}</span>
+                  <span className="ows-label">{link.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
       <div className="dashboard">
       <PageHeader
@@ -571,7 +600,8 @@ const OverviewDashboard = () => {
           onNavigate={() => navigate(rightPanel.route || '/app/subledgers/cash-bank')}
         />
       )}
-      </div>
+      </div>{/* end .dashboard */}
+      </div>{/* end .dashboard-content-row */}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { Button } from '../../components/ui';
+import '../../styles/EntityPages.css';
 import './EnterpriseOverviewShared.css';
 import './EnterpriseOverviewSections.css';
 import './EnterpriseOrgOverview.css';
@@ -83,7 +83,7 @@ const EnterpriseOrgOverview = () => {
   const [loading, setLoading] = useState(false);
   const [branchData, setBranchData] = useState([]);
   const [regionData, setRegionData] = useState({});
-  const [viewMode, setViewMode] = useState('branches');
+  const [activeTab, setActiveTab] = useState('overview');
   const [sortBy, setSortBy] = useState('revenue');
 
   const buildBranchData = useCallback((entitiesList) => {
@@ -185,141 +185,310 @@ const EnterpriseOrgOverview = () => {
   const totalProfit = totalRevenue - totalExpenses;
   const regionCount = Object.keys(regionData).length;
   const profitMargin = totalRevenue ? (totalProfit / totalRevenue) * 100 : 0;
+  const attentionCount = pending_tax_returns + missing_data_entities;
 
   return (
-    <div className="enterprise-overview enterprise-dashboard org-overview-container">
-      <section className="executive-summary">
-        <div className="overview-hero">
+    <div className="enterprise-overview enterprise-dashboard org-overview-container ed-page org-dashboard-page">
+      <div className="ed-header org-dashboard-header">
+        <div className="org-dashboard-title-block">
+          <h1 className="ed-entity-name">{currentOrganization.name}</h1>
+          <p className="org-dashboard-subtitle">ATC Capital dashboard with consolidated branch performance, compliance posture, and financial positions.</p>
+          <div className="ed-meta-row">
+            <span className="ed-meta-item">{active_entities} active entities</span>
+            <span className="ed-meta-sep">·</span>
+            <span className="ed-meta-item">{active_jurisdictions} jurisdictions</span>
+            <span className="ed-meta-sep">·</span>
+            <span className="ed-meta-item">{regionCount} regions</span>
+            <span className={`badge ${attentionCount > 0 ? 'dormant' : 'success'}`}>
+              {attentionCount > 0 ? `${attentionCount} items need review` : 'Portfolio healthy'}
+            </span>
+          </div>
+        </div>
+
+        <div className="org-dashboard-actions">
+          <button className="btn-secondary btn-sm" onClick={() => navigate('/app/enterprise/entities')}>Manage Entities</button>
+          <button className="btn-secondary btn-sm" onClick={() => navigate('/app/overview/dashboard')}>Accounting Dashboard</button>
+          <button
+            className="btn-primary btn-sm"
+            onClick={() => {
+              setLoading(true);
+              fetchOrgOverview(currentOrganization.id);
+              fetchEntities(currentOrganization.id);
+            }}
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div className="ed-tabs org-dashboard-tabs">
+        {[
+          { key: 'overview', label: 'Overview' },
+          { key: 'branches', label: `Branches (${branchData.length})` },
+          { key: 'regions', label: `Regions (${regionCount})` },
+          { key: 'actions', label: 'Quick Actions' },
+          { key: 'positions', label: 'Financial Positions' },
+          { key: 'attention', label: `Attention (${attentionCount})` },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`ed-tab-btn${activeTab === tab.key ? ' active' : ''}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="ed-content org-dashboard-content">
+        {activeTab === 'overview' && (
           <div>
-            <span className="overview-kicker">Enterprise Overview</span>
-            <h1 className="page-title">Overview</h1>
-            <p className="overview-subtitle">Balance sheet position, branch performance, and compliance posture for {currentOrganization.name}</p>
-            <div className="overview-hero-actions">
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => navigate('/app/enterprise/entities')}
-              >Manage Entities
-              </Button>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => navigate('/app/overview/dashboard')}
-              >Accounting Dashboard
-              </Button>
-              <Button
-                variant="primary"
-                size="small"
-                onClick={() => {
-                  setLoading(true);
-                  fetchOrgOverview(currentOrganization.id);
-                  fetchEntities(currentOrganization.id);
-                }}
-              >Refresh
-              </Button>
-            </div>
-          </div>
-          <div className="overview-chip">{currentOrganization.name}</div>
-        </div>
-
-        <div className="section-heading-row">
-          <h2 className="section-title">Executive Summary</h2>
-          <span className="section-caption">Organization-level health at a glance</span>
-        </div>
-
-        <div className="metrics-grid">
-          <div className="metric-card primary">
-            <div className="metric-header stacked">
-              <span className="metric-kicker">Balance Snapshot</span>
-              <h3>Net Position</h3>
-              <span className="metric-label">Total Assets vs Liabilities</span>
-            </div>
-            <div className="metric-value">{formatCurrency(net_position, { maximumFractionDigits: 2 })}</div>
-            <div className="metric-details">
-              <span className="asset">Assets: {formatCurrency(total_assets)}</span>
-              <span className="liability">Liabilities: {formatCurrency(total_liabilities)}</span>
-            </div>
-          </div>
-
-          <div className="metric-card warning">
-            <div className="metric-header stacked">
-              <span className="metric-kicker">Compliance Watch</span>
-              <h3>Total Tax Exposure</h3>
-              <span className="metric-label">Current Period</span>
-            </div>
-            <div className="metric-value">{formatCurrency(total_tax_exposure)}</div>
-            <div className="metric-badge">{pending_tax_returns} returns pending</div>
-          </div>
-
-          <div className="metric-card info">
-            <div className="metric-header stacked">
-              <span className="metric-kicker">Geographic Reach</span>
-              <h3>Coverage</h3>
-              <span className="metric-label">Jurisdictions and regional spread</span>
-            </div>
-            <div className="metric-value">{active_jurisdictions}</div>
-            <div className="metric-details">
-              <span className="asset">{regionCount} regions</span>
-              <span className="liability">{active_entities} entities</span>
-            </div>
-          </div>
-
-          <div className="metric-card success">
-            <div className="metric-header stacked">
-              <span className="metric-kicker">Profitability</span>
-              <h3>Net Profit</h3>
-              <span className="metric-label">Consolidated branch earnings after costs</span>
-            </div>
-            <div className="metric-value">{formatCompactCurrency(Math.abs(totalProfit))}</div>
-            <div className="metric-badge">{profitMargin.toFixed(1)}% margin</div>
-          </div>
-        </div>
-      </section>
-
-      <section className="quick-actions quick-actions--priority">
-        <div className="section-heading-row">
-          <h3 className="section-title">Quick Actions</h3>
-          <span className="section-caption">Jump directly into operational workflows</span>
-        </div>
-
-        <div className="actions-grid">
-          {quickActions.map((action) => (
-            <button key={action.key} className={`action-button ${action.accent}`} onClick={action.onClick}>
-              <div className="action-icon">{action.title.slice(0, 2).toUpperCase()}</div>
-              <div className="action-content">
-                <span className="action-eyebrow">{action.eyebrow}</span>
-                <h4>{action.title}</h4>
-                <p>{action.description}</p>
+            <div className="summary-cards org-summary-cards" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
+              <div className="summary-card profit">
+                <div className="card-label">Net Position</div>
+                <div className="card-value">{formatCurrency(net_position, { maximumFractionDigits: 2 })}</div>
+                <div className="card-count">Assets {formatCurrency(total_assets)} vs liabilities {formatCurrency(total_liabilities)}</div>
               </div>
-              <span className="action-arrow">Open</span>
-            </button>
-          ))}
-        </div>
-      </section>
+              <div className="summary-card expense">
+                <div className="card-label">Tax Exposure</div>
+                <div className="card-value">{formatCurrency(total_tax_exposure)}</div>
+                <div className="card-count">{pending_tax_returns} returns pending this period</div>
+              </div>
+              <div className="summary-card income">
+                <div className="card-label">Consolidated Revenue</div>
+                <div className="card-value">{formatCompactCurrency(totalRevenue)}</div>
+                <div className="card-count">{branchData.length} branches contributing</div>
+              </div>
+              <div className={`summary-card ${totalProfit >= 0 ? 'profit' : 'expense'}`}>
+                <div className="card-label">Net Profit</div>
+                <div className="card-value">{formatCompactCurrency(Math.abs(totalProfit))}</div>
+                <div className="card-count">{profitMargin.toFixed(1)}% consolidated margin</div>
+              </div>
+            </div>
 
-      <section className="overview-band">
-        <div className="section-heading-row">
-          <h2 className="section-title">Operating Lens</h2>
-          <span className="section-caption">Switch between branch execution and regional concentration</span>
-        </div>
+            <div className="ed-section">
+              <h2 className="ed-section-title">Workspace</h2>
+              <div className="ed-quick-access">
+                {quickActions.map((action) => (
+                  <button key={action.key} onClick={action.onClick} className={`ed-quick-card org-quick-card ${action.accent}`}>
+                    <div className="ed-quick-label">{action.title}</div>
+                    <div className="org-quick-meta">{action.eyebrow}</div>
+                    <div className="card-count">{action.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="overview-toolbar">
-          <div className="overview-view-toggle">
-            <button
-              className={`overview-view-button ${viewMode === 'branches' ? 'active' : ''}`}
-              onClick={() => setViewMode('branches')}
-            >
-              Branch View
-            </button>
-            <button
-              className={`overview-view-button ${viewMode === 'regions' ? 'active' : ''}`}
-              onClick={() => setViewMode('regions')}
-            >
-              Regional View
-            </button>
+            {loading && (
+              <div className="ed-loading">
+                <div className="spinner" />Loading enterprise data...
+              </div>
+            )}
+
+            {!loading && branchData.length === 0 && (
+              <div className="ed-onboarding org-dashboard-onboarding">
+                <div className="ed-onboarding-header">
+                  <div className="ed-onboarding-kpi-row">
+                    <div className="ed-ob-kpi">
+                      <div className="ed-ob-kpi-value">0</div>
+                      <div className="ed-ob-kpi-label">Active Entities</div>
+                    </div>
+                    <div className="ed-ob-kpi">
+                      <div className="ed-ob-kpi-value">$0</div>
+                      <div className="ed-ob-kpi-label">Consolidated Revenue</div>
+                    </div>
+                    <div className="ed-ob-kpi">
+                      <div className="ed-ob-kpi-value">$0</div>
+                      <div className="ed-ob-kpi-label">Total Tax Exposure</div>
+                    </div>
+                    <div className="ed-ob-kpi">
+                      <div className="ed-ob-kpi-value">0</div>
+                      <div className="ed-ob-kpi-label">Jurisdictions</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="ed-onboarding-body">
+                  <div className="ed-ob-left">
+                    <div className="ed-ob-step-label">Getting Started</div>
+                    <h2 className="ed-ob-title">Set up your Enterprise Structure</h2>
+                    <p className="ed-ob-desc">
+                      Add legal entities to unlock multi-branch financial consolidation, regional P&amp;L,
+                      tax exposure tracking, and cross-entity reporting.
+                    </p>
+                    <div className="ed-ob-steps">
+                      <div className="ed-ob-step">
+                        <div className="ed-ob-step-num">1</div>
+                        <div>
+                          <div className="ed-ob-step-title">Create an entity</div>
+                          <div className="ed-ob-step-sub">Add a subsidiary, branch, or holding company</div>
+                        </div>
+                      </div>
+                      <div className="ed-ob-step">
+                        <div className="ed-ob-step-num">2</div>
+                        <div>
+                          <div className="ed-ob-step-title">Assign jurisdiction &amp; currency</div>
+                          <div className="ed-ob-step-sub">Set the operating country and local currency</div>
+                        </div>
+                      </div>
+                      <div className="ed-ob-step">
+                        <div className="ed-ob-step-num">3</div>
+                        <div>
+                          <div className="ed-ob-step-title">Connect accounting</div>
+                          <div className="ed-ob-step-sub">Import or record transactions for consolidated reporting</div>
+                        </div>
+                      </div>
+                      <div className="ed-ob-step">
+                        <div className="ed-ob-step-num">4</div>
+                        <div>
+                          <div className="ed-ob-step-title">View consolidated dashboard</div>
+                          <div className="ed-ob-step-sub">Revenue, profit, and tax across all branches appear here</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="ed-ob-actions">
+                      <button className="btn-primary btn-sm" onClick={() => navigate('/app/enterprise/entities')}>
+                        Add First Entity
+                      </button>
+                      <button className="btn-secondary btn-sm" onClick={() => navigate('/app/overview/dashboard')}>
+                        Go to Accounting Dashboard
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="ed-ob-right">
+                    <div className="ed-ob-preview-label">Preview - With entities, you will see:</div>
+                    <div className="ed-ob-preview-cards">
+                      <div className="ed-ob-preview-card">
+                        <div className="ed-ob-preview-row">
+                          <span className="ed-ob-preview-dot cyan" />
+                          <span>Revenue by Branch</span>
+                        </div>
+                        <div className="ed-ob-preview-bar-track">
+                          <div className="ed-ob-preview-bar-fill" style={{ width: '80%', background: 'var(--color-cyan)' }} />
+                        </div>
+                        <div className="ed-ob-preview-bar-track" style={{ marginTop: 6 }}>
+                          <div className="ed-ob-preview-bar-fill" style={{ width: '55%', background: 'var(--color-cyan-dark)' }} />
+                        </div>
+                        <div className="ed-ob-preview-bar-track" style={{ marginTop: 6 }}>
+                          <div className="ed-ob-preview-bar-fill" style={{ width: '35%', background: 'var(--color-silver-dark)' }} />
+                        </div>
+                      </div>
+                      <div className="ed-ob-preview-card">
+                        <div className="ed-ob-preview-row">
+                          <span className="ed-ob-preview-dot green" />
+                          <span>Regional P&amp;L Breakdown</span>
+                        </div>
+                        <div className="ed-ob-preview-region-list">
+                          <div className="ed-ob-preview-region">
+                            <span>North America</span><span className="pos">+$1.2M</span>
+                          </div>
+                          <div className="ed-ob-preview-region">
+                            <span>Europe</span><span className="pos">+$840K</span>
+                          </div>
+                          <div className="ed-ob-preview-region">
+                            <span>Middle East</span><span className="pos">+$480K</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ed-ob-preview-card">
+                        <div className="ed-ob-preview-row">
+                          <span className="ed-ob-preview-dot orange" />
+                          <span>Tax Exposure by Jurisdiction</span>
+                        </div>
+                        <div className="ed-ob-preview-region-list">
+                          <div className="ed-ob-preview-region">
+                            <span>US Federal + State</span><span>$142K</span>
+                          </div>
+                          <div className="ed-ob-preview-region">
+                            <span>UK Corporation Tax</span><span>$88K</span>
+                          </div>
+                          <div className="ed-ob-preview-region">
+                            <span>UAE Corporate Tax</span><span>$34K</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!loading && branchData.length > 0 && (
+              <div className="chart-grid org-dashboard-panels">
+                <div className="chart-card org-dashboard-panel">
+                  <div className="org-panel-head">
+                    <h3>Top Branches</h3>
+                    <span>Ranked by revenue contribution</span>
+                  </div>
+                  <div className="org-performance-list">
+                    {sortedBranches.slice(0, 5).map((branch) => {
+                      const pct = totalRevenue ? (branch.revenue / totalRevenue) * 100 : 0;
+                      return (
+                        <button
+                          key={branch.id}
+                          className="perf-bar-row org-performance-row"
+                          onClick={() => navigate(`/app/enterprise/entities/${branch.id}/dashboard`)}
+                        >
+                          <div className="pbr-label">
+                            <span className="pbr-name">{branch.name}</span>
+                            <span className="pbr-country">{branch.country}</span>
+                          </div>
+                          <div className="pbr-track">
+                            <div
+                              className="pbr-fill"
+                              style={{ width: `${pct}%`, background: branch.profit >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}
+                            />
+                          </div>
+                          <div className="pbr-values">
+                            <span className="pbr-rev">{formatCompactCurrency(branch.revenue)}</span>
+                            <span className={`pbr-profit ${branch.profit >= 0 ? 'pos' : 'neg'}`}>
+                              {formatCompactCurrency(Math.abs(branch.profit))}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="chart-card org-dashboard-panel">
+                  <div className="org-panel-head">
+                    <h3>Regional Snapshot</h3>
+                    <span>Operating concentration by region</span>
+                  </div>
+                  <div className="org-region-snapshot-list">
+                    {Object.values(regionData)
+                      .sort((a, b) => b.revenue - a.revenue)
+                      .slice(0, 5)
+                      .map((region) => (
+                        <div className="org-region-snapshot-item" key={region.region}>
+                          <div>
+                            <strong>{region.region}</strong>
+                            <div className="table-row-muted">{region.entities} entities across {region.countries} countries</div>
+                          </div>
+                          <div className="org-region-snapshot-metrics">
+                            <span>{formatCompactCurrency(region.revenue)}</span>
+                            <span className={region.profit >= 0 ? 'pos' : 'neg'}>{formatCompactCurrency(Math.abs(region.profit))}</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'branches' && branchData.length > 0 && (
+          <section className="overview-band">
+          <div className="section-heading-row">
+            <h2 className="section-title">Branch Overview</h2>
+            <span className="section-caption">{branchData.length} entities ranked by {sortBy}</span>
           </div>
 
-          {viewMode === 'branches' && (
+          <div className="overview-toolbar org-tab-toolbar">
+            <div className="org-tab-summary">Compare branch contribution and jump straight into each entity dashboard.</div>
             <div className="overview-select">
               <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
                 <option value="revenue">Sort by Revenue</option>
@@ -327,158 +496,6 @@ const EnterpriseOrgOverview = () => {
                 <option value="name">Sort by Name</option>
               </select>
             </div>
-          )}
-        </div>
-      </section>
-
-      {loading && (
-        <div className="ed-loading">
-          <div className="spinner" />Loading enterprise data...
-        </div>
-      )}
-
-      {!loading && branchData.length === 0 && (
-        <div className="ed-onboarding">
-          <div className="ed-onboarding-header">
-            <div className="ed-onboarding-kpi-row">
-              <div className="ed-ob-kpi">
-                <div className="ed-ob-kpi-value">0</div>
-                <div className="ed-ob-kpi-label">Active Entities</div>
-              </div>
-              <div className="ed-ob-kpi">
-                <div className="ed-ob-kpi-value">$0</div>
-                <div className="ed-ob-kpi-label">Consolidated Revenue</div>
-              </div>
-              <div className="ed-ob-kpi">
-                <div className="ed-ob-kpi-value">$0</div>
-                <div className="ed-ob-kpi-label">Total Tax Exposure</div>
-              </div>
-              <div className="ed-ob-kpi">
-                <div className="ed-ob-kpi-value">0</div>
-                <div className="ed-ob-kpi-label">Jurisdictions</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="ed-onboarding-body">
-            <div className="ed-ob-left">
-              <div className="ed-ob-step-label">Getting Started</div>
-              <h2 className="ed-ob-title">Set up your Enterprise Structure</h2>
-              <p className="ed-ob-desc">
-                Add legal entities to unlock multi-branch financial consolidation, regional P&amp;L,
-                tax exposure tracking, and cross-entity reporting.
-              </p>
-              <div className="ed-ob-steps">
-                <div className="ed-ob-step">
-                  <div className="ed-ob-step-num">1</div>
-                  <div>
-                    <div className="ed-ob-step-title">Create an entity</div>
-                    <div className="ed-ob-step-sub">Add a subsidiary, branch, or holding company</div>
-                  </div>
-                </div>
-                <div className="ed-ob-step">
-                  <div className="ed-ob-step-num">2</div>
-                  <div>
-                    <div className="ed-ob-step-title">Assign jurisdiction &amp; currency</div>
-                    <div className="ed-ob-step-sub">Set the operating country and local currency</div>
-                  </div>
-                </div>
-                <div className="ed-ob-step">
-                  <div className="ed-ob-step-num">3</div>
-                  <div>
-                    <div className="ed-ob-step-title">Connect accounting</div>
-                    <div className="ed-ob-step-sub">Import or record transactions for consolidated reporting</div>
-                  </div>
-                </div>
-                <div className="ed-ob-step">
-                  <div className="ed-ob-step-num">4</div>
-                  <div>
-                    <div className="ed-ob-step-title">View consolidated dashboard</div>
-                    <div className="ed-ob-step-sub">Revenue, profit, and tax across all branches appear here</div>
-                  </div>
-                </div>
-              </div>
-              <div className="ed-ob-actions">
-                <Button
-                  variant="primary"
-                  size="small"
-                  onClick={() => navigate('/app/enterprise/entities')}
-                >
-                  Add First Entity
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={() => navigate('/app/overview/dashboard')}
-                >
-                  Go to Accounting Dashboard
-                </Button>
-              </div>
-            </div>
-
-            <div className="ed-ob-right">
-              <div className="ed-ob-preview-label">Preview - With entities, you will see:</div>
-              <div className="ed-ob-preview-cards">
-                <div className="ed-ob-preview-card">
-                  <div className="ed-ob-preview-row">
-                    <span className="ed-ob-preview-dot cyan" />
-                    <span>Revenue by Branch</span>
-                  </div>
-                  <div className="ed-ob-preview-bar-track">
-                    <div className="ed-ob-preview-bar-fill" style={{ width: '80%', background: 'var(--color-cyan)' }} />
-                  </div>
-                  <div className="ed-ob-preview-bar-track" style={{ marginTop: 6 }}>
-                    <div className="ed-ob-preview-bar-fill" style={{ width: '55%', background: 'var(--color-cyan-dark)' }} />
-                  </div>
-                  <div className="ed-ob-preview-bar-track" style={{ marginTop: 6 }}>
-                    <div className="ed-ob-preview-bar-fill" style={{ width: '35%', background: 'var(--color-silver-dark)' }} />
-                  </div>
-                </div>
-                <div className="ed-ob-preview-card">
-                  <div className="ed-ob-preview-row">
-                    <span className="ed-ob-preview-dot green" />
-                    <span>Regional P&amp;L Breakdown</span>
-                  </div>
-                  <div className="ed-ob-preview-region-list">
-                    <div className="ed-ob-preview-region">
-                      <span>North America</span><span className="pos">+$1.2M</span>
-                    </div>
-                    <div className="ed-ob-preview-region">
-                      <span>Europe</span><span className="pos">+$840K</span>
-                    </div>
-                    <div className="ed-ob-preview-region">
-                      <span>Middle East</span><span className="pos">+$480K</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="ed-ob-preview-card">
-                  <div className="ed-ob-preview-row">
-                    <span className="ed-ob-preview-dot orange" />
-                    <span>Tax Exposure by Jurisdiction</span>
-                  </div>
-                  <div className="ed-ob-preview-region-list">
-                    <div className="ed-ob-preview-region">
-                      <span>US Federal + State</span><span>$142K</span>
-                    </div>
-                    <div className="ed-ob-preview-region">
-                      <span>UK Corporation Tax</span><span>$88K</span>
-                    </div>
-                    <div className="ed-ob-preview-region">
-                      <span>UAE Corporate Tax</span><span>$34K</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!loading && viewMode === 'branches' && branchData.length > 0 && (
-        <section className="overview-band">
-          <div className="section-heading-row">
-            <h2 className="section-title">Branch Overview</h2>
-            <span className="section-caption">{branchData.length} entities ranked by {sortBy}</span>
           </div>
 
           <div className="ent-card">
@@ -564,10 +581,16 @@ const EnterpriseOrgOverview = () => {
             ))}
           </div>
         </section>
-      )}
+        )}
 
-      {!loading && viewMode === 'regions' && Object.keys(regionData).length > 0 && (
-        <section className="overview-band">
+        {activeTab === 'branches' && !loading && branchData.length === 0 && (
+          <div className="empty-state">
+            <p className="empty-state-text">No entities available yet. Add your first entity to unlock branch comparisons and direct dashboard access.</p>
+          </div>
+        )}
+
+        {activeTab === 'regions' && Object.keys(regionData).length > 0 && (
+          <section className="overview-band">
           <div className="section-heading-row">
             <h2 className="section-title">Regional Operations</h2>
             <span className="section-caption">{Object.keys(regionData).length} regions by contribution to total revenue</span>
@@ -631,10 +654,39 @@ const EnterpriseOrgOverview = () => {
               ))}
           </div>
         </section>
-      )}
+        )}
 
-      {(pending_tax_returns > 0 || missing_data_entities > 0) && (
-        <section className="overview-band">
+        {activeTab === 'regions' && !loading && Object.keys(regionData).length === 0 && (
+          <div className="empty-state">
+            <p className="empty-state-text">Regional insights will appear here once entity locations and financial activity are available.</p>
+          </div>
+        )}
+
+        {activeTab === 'actions' && (
+          <section className="overview-band">
+            <div className="section-heading-row">
+              <h2 className="section-title">Quick Actions</h2>
+              <span className="section-caption">Jump directly into operational workflows</span>
+            </div>
+
+            <div className="actions-grid">
+              {quickActions.map((action) => (
+                <button key={action.key} className={`action-button ${action.accent}`} onClick={action.onClick}>
+                  <div className="action-icon">{action.title.slice(0, 2).toUpperCase()}</div>
+                  <div className="action-content">
+                    <span className="action-eyebrow">{action.eyebrow}</span>
+                    <h4>{action.title}</h4>
+                    <p>{action.description}</p>
+                  </div>
+                  <span className="action-arrow">Open</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'attention' && (
+          <section className="overview-band">
           <div className="section-heading-row">
             <h2 className="section-title">Action Required</h2>
             <span className="section-caption">Exceptions that need attention before close and filing</span>
@@ -643,8 +695,9 @@ const EnterpriseOrgOverview = () => {
             <div className="ent-card-header">
               <h3 className="ent-card-title ent-card-title--with-icon">Action Required</h3>
             </div>
-            <div className="ed-alert-list">
-              {pending_tax_returns > 0 && (
+            {attentionCount > 0 ? (
+              <div className="ed-alert-list">
+                {pending_tax_returns > 0 && (
                 <div className="ed-alert-item warning">
                   <span>{pending_tax_returns} tax return(s) pending. Review compliance status.</span>
                   <button
@@ -653,8 +706,8 @@ const EnterpriseOrgOverview = () => {
                   >View
                   </button>
                 </div>
-              )}
-              {missing_data_entities > 0 && (
+                )}
+                {missing_data_entities > 0 && (
                 <div className="ed-alert-item info">
                   <span>{missing_data_entities} entity(ies) have incomplete data.</span>
                   <button
@@ -663,13 +716,19 @@ const EnterpriseOrgOverview = () => {
                   >Fix
                   </button>
                 </div>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <p className="empty-state-text">No critical action items right now. Compliance and entity data are in a healthy state.</p>
+              </div>
+            )}
           </div>
         </section>
-      )}
+        )}
 
-      <section className="active-positions">
+        {activeTab === 'positions' && (
+          <section className="active-positions">
         <div className="section-heading-row">
           <h3 className="section-title">Active Financial Positions</h3>
           <span className="section-caption">Current exposure by balance sheet bucket</span>
@@ -691,7 +750,8 @@ const EnterpriseOrgOverview = () => {
           ))}
         </div>
       </section>
-
+        )}
+      </div>
     </div>
   );
 };

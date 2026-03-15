@@ -12,6 +12,7 @@ const EnterpriseEntities = () => {
     entities,
     fetchEntities,
     createEntity,
+    deleteEntity,
     hasPermission,
     PERMISSIONS,
     loading,
@@ -20,6 +21,7 @@ const EnterpriseEntities = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingEntity, setEditingEntity] = useState(null);
+  const [deletingEntityId, setDeletingEntityId] = useState(null);
   const [availableBanks, setAvailableBanks] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -151,6 +153,29 @@ const EnterpriseEntities = () => {
     }
   };
 
+  const handleDeleteEntity = async (entity) => {
+    if (!currentOrganization || !entity?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${entity.name}? This will permanently remove the entity and its related records.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingEntityId(entity.id);
+      await deleteEntity(entity.id, currentOrganization.id);
+    } catch (err) {
+      alert(`Failed to delete entity: ${err.message}`);
+    } finally {
+      setDeletingEntityId(null);
+    }
+  };
+
   const statusColors = {
     active:    { bg: '#D1FAE5', color: '#065F46', dot: '#10B981' },
     dormant:   { bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' },
@@ -267,6 +292,15 @@ const EnterpriseEntities = () => {
                   {hasPermission(PERMISSIONS.EDIT_ENTITY) && (
                     <button className="btn-secondary btn-sm" onClick={() => handleOpenModal(entity)}>Edit</button>
                   )}
+                  {hasPermission(PERMISSIONS.DELETE_ENTITY) && (
+                    <button
+                      className="btn-danger btn-sm"
+                      disabled={deletingEntityId === entity.id}
+                      onClick={() => handleDeleteEntity(entity)}
+                    >
+                      {deletingEntityId === entity.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -319,7 +353,13 @@ const EnterpriseEntities = () => {
                             <button className="btn-secondary btn-sm" onClick={() => handleOpenModal(entity)}>Edit</button>
                           )}
                           {hasPermission(PERMISSIONS.DELETE_ENTITY) && (
-                            <button className="btn-danger btn-sm" onClick={() => { if (window.confirm('Delete this entity?')) {} }}>Delete</button>
+                            <button
+                              className="btn-danger btn-sm"
+                              disabled={deletingEntityId === entity.id}
+                              onClick={() => handleDeleteEntity(entity)}
+                            >
+                              {deletingEntityId === entity.id ? 'Deleting...' : 'Delete'}
+                            </button>
                           )}
                         </div>
                       </td>

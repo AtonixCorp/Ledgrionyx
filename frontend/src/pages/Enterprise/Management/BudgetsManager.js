@@ -22,6 +22,29 @@ const BudgetsManager = () => {
     'Transportation', 'Salaries', 'Benefits', 'Taxes', 'Other'
   ];
 
+  const normalizeCategoryKey = (value) => String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+  const categoryAliases = {
+    utility: 'Utilities',
+    utilities: 'Utilities',
+    travel: 'Travel',
+  };
+
+  const getCanonicalCategory = (value) => {
+    const normalized = normalizeCategoryKey(value);
+    if (!normalized) return '';
+
+    const directMatch = categories.find((category) => normalizeCategoryKey(category) === normalized);
+    if (directMatch) return directMatch;
+
+    return categoryAliases[normalized] || value;
+  };
+
   const [formData, setFormData] = useState({
     category: '',
     limit: '',
@@ -57,7 +80,7 @@ const BudgetsManager = () => {
   const handleEditBudget = (budget) => {
     setEditingBudget(budget);
     setFormData({
-      category: budget.category || '',
+      category: getCanonicalCategory(budget.category),
       limit: budget.limit || '',
       period: budget.period || 'monthly',
       start_date: budget.start_date || new Date().toISOString().split('T')[0],
@@ -90,7 +113,10 @@ const BudgetsManager = () => {
 
   // Calculate spending for each budget
   const getBudgetStatus = (budget) => {
-    const categoryExpenses = expenses.filter(exp => exp.category === budget.category);
+    const budgetCategory = normalizeCategoryKey(getCanonicalCategory(budget.category));
+    const categoryExpenses = expenses.filter(
+      (exp) => normalizeCategoryKey(getCanonicalCategory(exp.category)) === budgetCategory
+    );
     const spent = categoryExpenses.reduce((sum, exp) => sum + toAmount(exp.amount), 0);
     const limit = toAmount(budget.limit);
     const percentage = limit > 0 ? (spent / limit) * 100 : 0;

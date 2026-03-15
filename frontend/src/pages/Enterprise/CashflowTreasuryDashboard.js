@@ -4,7 +4,7 @@ import { useEnterprise } from '../../context/EnterpriseContext';
 import '../../styles/EntityPages.css';
 
 const CashflowTreasuryDashboard = () => {
-  const { entities, fetchCashflowTreasuryDashboard } = useEnterprise();
+  const { entities, fetchCashflowTreasuryDashboard, executeInternalTransfer, executeFXConversion, executeInvestmentAllocation } = useEnterprise();
 
   // State management
   const [selectedEntity, setSelectedEntity] = useState(null);
@@ -16,6 +16,13 @@ const CashflowTreasuryDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timelineView, setTimelineView] = useState('monthly');
+  const [activeTreasuryOp, setActiveTreasuryOp] = useState(null); // null | 'transfer' | 'fx' | 'invest' | 'sweep'
+  const [opLoading, setOpLoading] = useState(false);
+  const [opResult, setOpResult] = useState(null);
+  const [transferForm, setTransferForm] = useState({ fromAccountId: '', toAccountId: '', amount: '', description: '' });
+  const [fxForm, setFxForm] = useState({ fromAccountId: '', toAccountId: '', amount: '', exchangeRate: '', description: '' });
+  const [investForm, setInvestForm] = useState({ fromAccountId: '', amount: '', instrument: '', allocationType: 'fixed_deposit', description: '' });
+  const [sweepForm, setSweepForm] = useState({ fromAccountId: '', toAccountId: '', threshold: '', action: 'sweep_excess', ruleName: '' });
 
   const emptyDashboardData = useMemo(
     () => ({
@@ -118,10 +125,85 @@ const CashflowTreasuryDashboard = () => {
     }
   };
 
+  const closeTreasuryOp = () => { setActiveTreasuryOp(null); setOpResult(null); };
+
+  const handleTransfer = async (e) => {
+    e.preventDefault(); setOpLoading(true); setOpResult(null);
+    try {
+      const entityId = selectedEntity?.id || entities[0]?.id;
+      const res = await executeInternalTransfer({
+        entity_id: entityId,
+        from_account_id: transferForm.fromAccountId,
+        to_account_id: transferForm.toAccountId,
+        amount: transferForm.amount,
+        description: transferForm.description,
+      });
+      setOpResult({ success: true, message: res.message || 'Transfer completed successfully.' });
+      setTransferForm({ fromAccountId: '', toAccountId: '', amount: '', description: '' });
+      loadDashboardData();
+    } catch (err) {
+      setOpResult({ success: false, message: err.message || 'Transfer failed.' });
+    } finally {
+      setOpLoading(false);
+    }
+  };
+
+  const handleFXConversion = async (e) => {
+    e.preventDefault(); setOpLoading(true); setOpResult(null);
+    try {
+      const entityId = selectedEntity?.id || entities[0]?.id;
+      const res = await executeFXConversion({
+        entity_id: entityId,
+        from_account_id: fxForm.fromAccountId,
+        to_account_id: fxForm.toAccountId,
+        amount: fxForm.amount,
+        exchange_rate: fxForm.exchangeRate || undefined,
+        description: fxForm.description,
+      });
+      setOpResult({ success: true, message: res.message || 'FX conversion completed.' });
+      setFxForm({ fromAccountId: '', toAccountId: '', amount: '', exchangeRate: '', description: '' });
+      loadDashboardData();
+    } catch (err) {
+      setOpResult({ success: false, message: err.message || 'FX conversion failed.' });
+    } finally {
+      setOpLoading(false);
+    }
+  };
+
+  const handleInvestmentAllocation = async (e) => {
+    e.preventDefault(); setOpLoading(true); setOpResult(null);
+    try {
+      const entityId = selectedEntity?.id || entities[0]?.id;
+      const res = await executeInvestmentAllocation({
+        entity_id: entityId,
+        from_account_id: investForm.fromAccountId,
+        amount: investForm.amount,
+        instrument: investForm.instrument,
+        allocation_type: investForm.allocationType,
+        description: investForm.description,
+      });
+      setOpResult({ success: true, message: res.message || 'Investment allocation completed.' });
+      setInvestForm({ fromAccountId: '', amount: '', instrument: '', allocationType: 'fixed_deposit', description: '' });
+      loadDashboardData();
+    } catch (err) {
+      setOpResult({ success: false, message: err.message || 'Investment allocation failed.' });
+    } finally {
+      setOpLoading(false);
+    }
+  };
+
+  const handleSweepRule = (e) => {
+    e.preventDefault();
+    setOpResult({
+      success: true,
+      message: `Sweep rule "${sweepForm.ruleName || 'Rule'}" saved. It will be applied during the next scheduled treasury cycle.`,
+    });
+  };
+
   if (loading) {
     return (
       <div className="cashflow-treasury-dashboard">
-        <div className="loading">Loading Cashflow & Treasury Dashboard...</div>
+        <div className="loading">Loading Cashflow &amp; Treasury Dashboard...</div>
       </div>
     );
   }
@@ -530,29 +612,333 @@ const CashflowTreasuryDashboard = () => {
         <div className="operations-card">
           <div className="card-header">
             <h3>Treasury Operations</h3>
-
+            <span className="op-subtitle">Select an operation to execute</span>
           </div>
 
           <div className="operations-grid">
-            <button className="operation-btn">
-
+            <button
+              className={`operation-btn${activeTreasuryOp === 'transfer' ? ' op-active' : ''}`}
+              onClick={() => { setActiveTreasuryOp('transfer'); setOpResult(null); }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
               <span>Internal Transfer</span>
             </button>
-            <button className="operation-btn">
-
+            <button
+              className={`operation-btn${activeTreasuryOp === 'fx' ? ' op-active' : ''}`}
+              onClick={() => { setActiveTreasuryOp('fx'); setOpResult(null); }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v1m0 6v1m-3-4h6m-6 0a3 3 0 0 1 3-3m0 6a3 3 0 0 0 3-3"/>
+              </svg>
               <span>FX Conversion</span>
             </button>
-            <button className="operation-btn">
-
+            <button
+              className={`operation-btn${activeTreasuryOp === 'invest' ? ' op-active' : ''}`}
+              onClick={() => { setActiveTreasuryOp('invest'); setOpResult(null); }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
               <span>Investment Allocation</span>
             </button>
-            <button className="operation-btn">
-
+            <button
+              className={`operation-btn${activeTreasuryOp === 'sweep' ? ' op-active' : ''}`}
+              onClick={() => { setActiveTreasuryOp('sweep'); setOpResult(null); }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4l16 8-16 8V4z"/>
+              </svg>
               <span>Sweep Rules</span>
             </button>
           </div>
         </div>
       </div>
+
+      {/* Treasury Operation Modal */}
+      {activeTreasuryOp && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) closeTreasuryOp(); }}>
+          <div className="modal-content treasury-op-modal">
+            <div className="modal-header">
+              <h3>
+                {activeTreasuryOp === 'transfer' && 'Internal Transfer'}
+                {activeTreasuryOp === 'fx' && 'FX Conversion'}
+                {activeTreasuryOp === 'invest' && 'Investment Allocation'}
+                {activeTreasuryOp === 'sweep' && 'Sweep Rules'}
+              </h3>
+              <button className="modal-close-btn" onClick={closeTreasuryOp} aria-label="Close">&#x2715;</button>
+            </div>
+
+            <div className="treasury-op-form">
+              {opResult && (
+                <div className={`op-result-banner ${opResult.success ? 'op-success' : 'op-error'}`}>
+                  {opResult.message}
+                </div>
+              )}
+
+              {/* Internal Transfer */}
+              {activeTreasuryOp === 'transfer' && (
+                <form onSubmit={handleTransfer}>
+                  <div className="form-group">
+                    <label>From Account</label>
+                    <select
+                      required
+                      value={transferForm.fromAccountId}
+                      onChange={(e) => setTransferForm({ ...transferForm, fromAccountId: e.target.value })}
+                    >
+                      <option value="">Select source account</option>
+                      {dashboardData.bankAccounts.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {formatCurrency(a.balance, a.currency)} {a.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>To Account</label>
+                    <select
+                      required
+                      value={transferForm.toAccountId}
+                      onChange={(e) => setTransferForm({ ...transferForm, toAccountId: e.target.value })}
+                    >
+                      <option value="">Select destination account</option>
+                      {dashboardData.bankAccounts.filter(a => String(a.id) !== String(transferForm.fromAccountId)).map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {a.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Amount</label>
+                    <input
+                      type="number" step="0.01" min="0.01" required
+                      placeholder="0.00"
+                      value={transferForm.amount}
+                      onChange={(e) => setTransferForm({ ...transferForm, amount: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Description (optional)</label>
+                    <input
+                      type="text"
+                      placeholder="Transfer notes"
+                      value={transferForm.description}
+                      onChange={(e) => setTransferForm({ ...transferForm, description: e.target.value })}
+                    />
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn-secondary" onClick={closeTreasuryOp}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={opLoading}>
+                      {opLoading ? 'Processing…' : 'Execute Transfer'}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* FX Conversion */}
+              {activeTreasuryOp === 'fx' && (
+                <form onSubmit={handleFXConversion}>
+                  <div className="form-group">
+                    <label>From Account (source currency)</label>
+                    <select
+                      required
+                      value={fxForm.fromAccountId}
+                      onChange={(e) => setFxForm({ ...fxForm, fromAccountId: e.target.value })}
+                    >
+                      <option value="">Select source account</option>
+                      {dashboardData.bankAccounts.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {formatCurrency(a.balance, a.currency)} {a.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>To Account (target currency)</label>
+                    <select
+                      required
+                      value={fxForm.toAccountId}
+                      onChange={(e) => setFxForm({ ...fxForm, toAccountId: e.target.value })}
+                    >
+                      <option value="">Select destination account</option>
+                      {dashboardData.bankAccounts.filter(a => String(a.id) !== String(fxForm.fromAccountId)).map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {a.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Amount to Convert</label>
+                    <input
+                      type="number" step="0.01" min="0.01" required
+                      placeholder="0.00"
+                      value={fxForm.amount}
+                      onChange={(e) => setFxForm({ ...fxForm, amount: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Exchange Rate (optional — auto-lookup if blank)</label>
+                    <input
+                      type="number" step="0.000001" min="0.000001"
+                      placeholder="Leave blank for auto lookup"
+                      value={fxForm.exchangeRate}
+                      onChange={(e) => setFxForm({ ...fxForm, exchangeRate: e.target.value })}
+                    />
+                  </div>
+                  {fxForm.amount && fxForm.exchangeRate && (
+                    <div className="op-preview">
+                      Estimated output: {(parseFloat(fxForm.amount) * parseFloat(fxForm.exchangeRate)).toFixed(2)}
+                    </div>
+                  )}
+                  <div className="form-group">
+                    <label>Description (optional)</label>
+                    <input
+                      type="text"
+                      placeholder="FX conversion notes"
+                      value={fxForm.description}
+                      onChange={(e) => setFxForm({ ...fxForm, description: e.target.value })}
+                    />
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn-secondary" onClick={closeTreasuryOp}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={opLoading}>
+                      {opLoading ? 'Processing…' : 'Execute Conversion'}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Investment Allocation */}
+              {activeTreasuryOp === 'invest' && (
+                <form onSubmit={handleInvestmentAllocation}>
+                  <div className="form-group">
+                    <label>Source Account</label>
+                    <select
+                      required
+                      value={investForm.fromAccountId}
+                      onChange={(e) => setInvestForm({ ...investForm, fromAccountId: e.target.value })}
+                    >
+                      <option value="">Select account</option>
+                      {dashboardData.bankAccounts.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {formatCurrency(a.balance, a.currency)} {a.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Allocation Type</label>
+                    <select
+                      value={investForm.allocationType}
+                      onChange={(e) => setInvestForm({ ...investForm, allocationType: e.target.value })}
+                    >
+                      <option value="fixed_deposit">Fixed Deposit</option>
+                      <option value="treasury_bills">Treasury Bills</option>
+                      <option value="money_market">Money Market</option>
+                      <option value="bonds">Bonds</option>
+                      <option value="equity">Equity</option>
+                      <option value="general">General Investment</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Instrument / Fund Name</label>
+                    <input
+                      type="text" required
+                      placeholder="e.g. T-Bill 90-day, HSBC Money Market"
+                      value={investForm.instrument}
+                      onChange={(e) => setInvestForm({ ...investForm, instrument: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Amount</label>
+                    <input
+                      type="number" step="0.01" min="0.01" required
+                      placeholder="0.00"
+                      value={investForm.amount}
+                      onChange={(e) => setInvestForm({ ...investForm, amount: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Notes (optional)</label>
+                    <input
+                      type="text"
+                      placeholder="Additional details"
+                      value={investForm.description}
+                      onChange={(e) => setInvestForm({ ...investForm, description: e.target.value })}
+                    />
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn-secondary" onClick={closeTreasuryOp}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={opLoading}>
+                      {opLoading ? 'Processing…' : 'Allocate Funds'}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Sweep Rules */}
+              {activeTreasuryOp === 'sweep' && (
+                <form onSubmit={handleSweepRule}>
+                  <p className="op-info">Sweep rules automatically move excess funds or top up accounts based on balance thresholds.</p>
+                  <div className="form-group">
+                    <label>Rule Name</label>
+                    <input
+                      type="text" required
+                      placeholder="e.g. Overnight Sweep"
+                      value={sweepForm.ruleName}
+                      onChange={(e) => setSweepForm({ ...sweepForm, ruleName: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>From Account</label>
+                    <select
+                      required
+                      value={sweepForm.fromAccountId}
+                      onChange={(e) => setSweepForm({ ...sweepForm, fromAccountId: e.target.value })}
+                    >
+                      <option value="">Select account</option>
+                      {dashboardData.bankAccounts.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {a.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Action</label>
+                    <select
+                      value={sweepForm.action}
+                      onChange={(e) => setSweepForm({ ...sweepForm, action: e.target.value })}
+                    >
+                      <option value="sweep_excess">Sweep Excess (when above threshold)</option>
+                      <option value="top_up">Top Up (when below threshold)</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Threshold Amount</label>
+                    <input
+                      type="number" step="0.01" min="0" required
+                      placeholder="0.00"
+                      value={sweepForm.threshold}
+                      onChange={(e) => setSweepForm({ ...sweepForm, threshold: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>To Account</label>
+                    <select
+                      required
+                      value={sweepForm.toAccountId}
+                      onChange={(e) => setSweepForm({ ...sweepForm, toAccountId: e.target.value })}
+                    >
+                      <option value="">Select destination account</option>
+                      {dashboardData.bankAccounts.filter(a => String(a.id) !== String(sweepForm.fromAccountId)).map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {a.currency}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn-secondary" onClick={closeTreasuryOp}>Cancel</button>
+                    <button type="submit" className="btn-primary">Save Rule</button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

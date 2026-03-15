@@ -223,6 +223,16 @@
   list-style: none;
 }
 
+/* Workspace section gets a highlighted label */
+.nav-section-label.workspace-label {
+  color: var(--color-midnight, #0f1c2e);
+  font-weight: 700;
+  background: rgba(0, 59, 115, 0.06);
+  border-radius: 6px;
+  margin: 0 8px;
+  padding: 6px 10px 6px;
+}
+
 .nav-section-toggle {
   display: flex;
   align-items: center;

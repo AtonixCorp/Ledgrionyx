@@ -3,14 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import permission_classes
-from django.db.models import Sum
+from rest_framework.exceptions import ValidationError
+from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
 from .models import (
     Expense, Income, Budget, ModelTemplate, FinancialModel, Scenario,
     SensitivityAnalysis, AIInsight, CustomKPI, KPICalculation, Report,
-    Consolidation, ConsolidationEntity, TaxCalculation, Entity
+    Consolidation, ConsolidationEntity, TaxCalculation, Entity, Organization, TeamMember
 )
 from .serializers import (
     ExpenseSerializer, IncomeSerializer, BudgetSerializer,
@@ -39,6 +40,65 @@ def _load_countries():
         return []
 
 
+def _accessible_organizations_queryset(user):
+    return Organization.objects.filter(
+        Q(owner=user) | Q(team_members__user=user, team_members__is_active=True)
+    ).distinct()
+
+
+def _accessible_entities_queryset(user, organization=None):
+    base_qs = Entity.objects.filter(organization__in=_accessible_organizations_queryset(user)).distinct()
+    if organization is not None:
+        base_qs = base_qs.filter(organization=organization)
+
+    membership_qs = TeamMember.objects.filter(user=user, is_active=True)
+    if organization is not None:
+        membership_qs = membership_qs.filter(organization=organization)
+
+    scoped_entity_ids = list(
+        membership_qs.filter(scoped_entities__isnull=False).values_list('scoped_entities__id', flat=True).distinct()
+    )
+    owner_org_ids = set(Organization.objects.filter(owner=user).values_list('id', flat=True))
+
+    if not scoped_entity_ids:
+        return base_qs
+
+    return base_qs.filter(Q(organization_id__in=owner_org_ids) | Q(id__in=scoped_entity_ids)).distinct()
+
+
+def _get_accessible_entity_or_404(user, entity_id, organization=None):
+    return get_object_or_404(_accessible_entities_queryset(user, organization), id=entity_id)
+
+
+def _filter_queryset_by_entity_scope(queryset, user, entity_relation='entity'):
+    relation_prefix = f'{entity_relation}__'
+    filters = {f'{relation_prefix}in': _accessible_entities_queryset(user)}
+    return queryset.filter(**filters).distinct()
+
+
+def _accessible_financial_models_queryset(user):
+    return FinancialModel.objects.filter(
+        Q(user=user) | Q(organization__in=_accessible_organizations_queryset(user))
+    ).distinct()
+
+
+def _accessible_consolidations_queryset(user):
+    accessible_orgs = _accessible_organizations_queryset(user)
+    qs = Consolidation.objects.filter(organization__in=accessible_orgs).distinct()
+    memberships = TeamMember.objects.filter(user=user, is_active=True).prefetch_related('scoped_entities')
+    restricted_org_ids = [membership.organization_id for membership in memberships if membership.scoped_entities.exists()]
+
+    if not restricted_org_ids:
+        return qs
+
+    accessible_entity_ids = _accessible_entities_queryset(user).values_list('id', flat=True)
+    inaccessible_entities = Entity.objects.filter(organization_id__in=restricted_org_ids).exclude(id__in=accessible_entity_ids)
+
+    unrestricted_qs = qs.exclude(organization_id__in=restricted_org_ids)
+    restricted_qs = qs.filter(organization_id__in=restricted_org_ids).exclude(entities__entity__in=inaccessible_entities)
+    return (unrestricted_qs | restricted_qs).distinct()
+
+
 class ExpenseViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing expenses
@@ -50,7 +110,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         queryset = Expense.objects.all()
         entity_id = self.request.query_params.get('entity_id')
         if entity_id:
-            queryset = queryset.filter(entity_id=entity_id, entity__organization__owner=self.request.user)
+            queryset = _filter_queryset_by_entity_scope(queryset, self.request.user).filter(entity_id=entity_id)
         else:
             # If no entity specified, return user's personal expenses
             queryset = queryset.filter(user=self.request.user, entity__isnull=True)
@@ -61,7 +121,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         entity_id = self.request.data.get('entity_id')
         if entity_id:
             # Associate with entity
-            entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+            entity = _get_accessible_entity_or_404(self.request.user, entity_id)
             expense = serializer.save(entity=entity)
         else:
             # Associate with user (personal expense)
@@ -86,7 +146,14 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         """Update budget spent amount when deleting expense"""
         # Update budget if category matches
         try:
-            budget = Budget.objects.get(category=instance.category)
+            budget_filter = {'category': instance.category}
+            if instance.entity:
+                budget_filter['entity'] = instance.entity
+            else:
+                budget_filter['user'] = instance.user
+                budget_filter['entity__isnull'] = True
+
+            budget = Budget.objects.get(**budget_filter)
             budget.spent = max(0, budget.spent - instance.amount)
             budget.save()
         except Budget.DoesNotExist:
@@ -96,15 +163,14 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def total(self, request):
         """Get total expenses"""
-        total = self.queryset.aggregate(Sum('amount'))['amount__sum'] or 0
+        total = self.get_queryset().aggregate(Sum('amount'))['amount__sum'] or 0
         return Response({'total': total})
 
     @action(detail=False, methods=['get'])
     def by_category(self, request):
         """Get expenses grouped by category"""
-        from django.db.models import Sum
         expenses_by_category = (
-            self.queryset.values('category')
+            self.get_queryset().values('category')
             .annotate(total=Sum('amount'))
             .order_by('-total')
         )
@@ -122,7 +188,7 @@ class IncomeViewSet(viewsets.ModelViewSet):
         queryset = Income.objects.all()
         entity_id = self.request.query_params.get('entity_id')
         if entity_id:
-            queryset = queryset.filter(entity_id=entity_id, entity__organization__owner=self.request.user)
+            queryset = _filter_queryset_by_entity_scope(queryset, self.request.user).filter(entity_id=entity_id)
         else:
             # If no entity specified, return user's personal income
             queryset = queryset.filter(user=self.request.user, entity__isnull=True)
@@ -133,7 +199,7 @@ class IncomeViewSet(viewsets.ModelViewSet):
         entity_id = self.request.data.get('entity_id')
         if entity_id:
             # Associate with entity
-            entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+            entity = _get_accessible_entity_or_404(self.request.user, entity_id)
             serializer.save(entity=entity)
         else:
             # Associate with user (personal income)
@@ -151,7 +217,7 @@ class BudgetViewSet(viewsets.ModelViewSet):
         queryset = Budget.objects.all()
         entity_id = self.request.query_params.get('entity_id')
         if entity_id:
-            queryset = queryset.filter(entity_id=entity_id, entity__organization__owner=self.request.user)
+            queryset = _filter_queryset_by_entity_scope(queryset, self.request.user).filter(entity_id=entity_id)
         else:
             # If no entity specified, return user's personal budgets
             queryset = queryset.filter(user=self.request.user, entity__isnull=True)
@@ -162,7 +228,7 @@ class BudgetViewSet(viewsets.ModelViewSet):
         entity_id = self.request.data.get('entity_id')
         if entity_id:
             # Associate with entity
-            entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+            entity = _get_accessible_entity_or_404(self.request.user, entity_id)
             serializer.save(entity=entity)
         else:
             # Associate with user (personal budget)
@@ -171,7 +237,7 @@ class BudgetViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def summary(self, request):
         """Get budget summary"""
-        budgets = self.queryset.all()
+        budgets = self.get_queryset()
         total_limit = sum(b.limit for b in budgets)
         total_spent = sum(b.spent for b in budgets)
         return Response({
@@ -300,10 +366,20 @@ class FinancialModelViewSet(viewsets.ModelViewSet):
     queryset = FinancialModel.objects.all()
     serializer_class = FinancialModelSerializer
 
+    def get_queryset(self):
+        return _accessible_financial_models_queryset(self.request.user)
+
     def get_serializer_class(self):
         if self.action == 'create':
             return FinancialModelCreateSerializer
         return FinancialModelSerializer
+
+    def perform_create(self, serializer):
+        organization = None
+        organization_id = self.request.data.get('organization')
+        if organization_id:
+            organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=organization_id)
+        serializer.save(user=self.request.user, organization=organization)
 
     @action(detail=True, methods=['post'])
     def calculate(self, request, pk=None):
@@ -345,6 +421,13 @@ class ScenarioViewSet(viewsets.ModelViewSet):
     queryset = Scenario.objects.all()
     serializer_class = ScenarioSerializer
 
+    def get_queryset(self):
+        return Scenario.objects.filter(financial_model__in=_accessible_financial_models_queryset(self.request.user)).distinct()
+
+    def perform_create(self, serializer):
+        financial_model = get_object_or_404(_accessible_financial_models_queryset(self.request.user), id=self.request.data.get('financial_model'))
+        serializer.save(financial_model=financial_model)
+
     @action(detail=True, methods=['post'])
     def run_scenario(self, request, pk=None):
         """Run scenario analysis"""
@@ -362,6 +445,13 @@ class SensitivityAnalysisViewSet(viewsets.ModelViewSet):
     """
     queryset = SensitivityAnalysis.objects.all()
     serializer_class = SensitivityAnalysisSerializer
+
+    def get_queryset(self):
+        return SensitivityAnalysis.objects.filter(financial_model__in=_accessible_financial_models_queryset(self.request.user)).distinct()
+
+    def perform_create(self, serializer):
+        financial_model = get_object_or_404(_accessible_financial_models_queryset(self.request.user), id=self.request.data.get('financial_model'))
+        serializer.save(financial_model=financial_model)
 
     @action(detail=True, methods=['post'])
     def run_analysis(self, request, pk=None):
@@ -381,10 +471,17 @@ class AIInsightViewSet(viewsets.ModelViewSet):
     queryset = AIInsight.objects.all()
     serializer_class = AIInsightSerializer
 
+    def get_queryset(self):
+        return AIInsight.objects.filter(financial_model__in=_accessible_financial_models_queryset(self.request.user)).distinct()
+
+    def perform_create(self, serializer):
+        financial_model = get_object_or_404(_accessible_financial_models_queryset(self.request.user), id=self.request.data.get('financial_model'))
+        serializer.save(financial_model=financial_model)
+
     @action(detail=False, methods=['get'])
     def unread(self, request):
         """Get unread insights"""
-        insights = self.queryset.filter(is_read=False)
+        insights = self.get_queryset().filter(is_read=False)
         serializer = self.get_serializer(insights, many=True)
         return Response(serializer.data)
 
@@ -405,6 +502,13 @@ class CustomKPIViewSet(viewsets.ModelViewSet):
     queryset = CustomKPI.objects.all()
     serializer_class = CustomKPISerializer
 
+    def get_queryset(self):
+        return CustomKPI.objects.filter(organization__in=_accessible_organizations_queryset(self.request.user)).distinct()
+
+    def perform_create(self, serializer):
+        organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=self.request.data.get('organization'))
+        serializer.save(organization=organization)
+
     @action(detail=True, methods=['get'])
     def calculations(self, request, pk=None):
         """Get KPI calculations"""
@@ -421,6 +525,19 @@ class KPICalculationViewSet(viewsets.ModelViewSet):
     queryset = KPICalculation.objects.all()
     serializer_class = KPICalculationSerializer
 
+    def get_queryset(self):
+        accessible_models = _accessible_financial_models_queryset(self.request.user)
+        return KPICalculation.objects.filter(
+            financial_model__in=accessible_models,
+            kpi__organization__in=_accessible_organizations_queryset(self.request.user)
+        ).distinct()
+
+    def perform_create(self, serializer):
+        accessible_models = _accessible_financial_models_queryset(self.request.user)
+        financial_model = get_object_or_404(accessible_models, id=self.request.data.get('financial_model'))
+        kpi = get_object_or_404(CustomKPI.objects.filter(organization__in=_accessible_organizations_queryset(self.request.user)), id=self.request.data.get('kpi'))
+        serializer.save(financial_model=financial_model, kpi=kpi)
+
 
 class ReportViewSet(viewsets.ModelViewSet):
     """
@@ -428,6 +545,13 @@ class ReportViewSet(viewsets.ModelViewSet):
     """
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+
+    def get_queryset(self):
+        return Report.objects.filter(financial_model__in=_accessible_financial_models_queryset(self.request.user)).distinct()
+
+    def perform_create(self, serializer):
+        financial_model = get_object_or_404(_accessible_financial_models_queryset(self.request.user), id=self.request.data.get('financial_model'))
+        serializer.save(financial_model=financial_model, generated_by=self.request.user)
 
     @action(detail=True, methods=['post'])
     def generate(self, request, pk=None):
@@ -578,6 +702,13 @@ class ConsolidationViewSet(viewsets.ModelViewSet):
     queryset = Consolidation.objects.all()
     serializer_class = ConsolidationSerializer
 
+    def get_queryset(self):
+        return _accessible_consolidations_queryset(self.request.user)
+
+    def perform_create(self, serializer):
+        organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=self.request.data.get('organization'))
+        serializer.save(organization=organization)
+
     @action(detail=True, methods=['post'])
     def run_consolidation(self, request, pk=None):
         """Run consolidation process"""
@@ -601,6 +732,19 @@ class ConsolidationEntityViewSet(viewsets.ModelViewSet):
     queryset = ConsolidationEntity.objects.all()
     serializer_class = ConsolidationEntitySerializer
 
+    def get_queryset(self):
+        return ConsolidationEntity.objects.filter(
+            consolidation__in=_accessible_consolidations_queryset(self.request.user),
+            entity__in=_accessible_entities_queryset(self.request.user)
+        ).distinct()
+
+    def perform_create(self, serializer):
+        consolidation = get_object_or_404(_accessible_consolidations_queryset(self.request.user), id=self.request.data.get('consolidation'))
+        entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('entity'))
+        if consolidation.organization_id != entity.organization_id:
+            raise ValidationError({'entity': 'Consolidation and entity must belong to the same organization.'})
+        serializer.save(consolidation=consolidation, entity=entity)
+
 
 class TaxCalculationViewSet(viewsets.ModelViewSet):
     """
@@ -610,7 +754,7 @@ class TaxCalculationViewSet(viewsets.ModelViewSet):
     serializer_class = TaxCalculationSerializer
 
     def get_queryset(self):
-        qs = TaxCalculation.objects.filter(entity__organization__owner=self.request.user)
+        qs = _filter_queryset_by_entity_scope(TaxCalculation.objects.all(), self.request.user)
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
@@ -618,14 +762,14 @@ class TaxCalculationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity') or self.request.data.get('entity_id')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=self.request.user)
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         serializer.save(entity=entity)
 
     @action(detail=False, methods=['post'])
     def calculate(self, request):
         """Calculate tax for given parameters"""
         entity_id = request.data.get('entity') or request.data.get('entity_id')
-        entity = get_object_or_404(Entity, id=entity_id, organization__owner=request.user)
+        entity = _get_accessible_entity_or_404(request.user, entity_id)
 
         tax_year = int(request.data.get('tax_year'))
         calculation_type = request.data.get('calculation_type')

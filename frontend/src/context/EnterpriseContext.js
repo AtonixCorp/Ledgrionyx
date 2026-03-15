@@ -75,6 +75,7 @@ export const EnterpriseProvider = ({ children }) => {
   // Team
   const [teamMembers, setTeamMembers] = useState([]);
   const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [isRoleResolved, setIsRoleResolved] = useState(false);
 
   // Permissions
   const [permissions, setPermissions] = useState([]);
@@ -131,16 +132,67 @@ export const EnterpriseProvider = ({ children }) => {
     ASSIGN_ROLES: 'assign_roles',
   }), []);
 
+  const getRolePermissions = useCallback((roleCode) => {
+    const rolePermissionMap = {
+      ORG_OWNER: Object.values(PERMISSIONS),
+      CFO: Object.values(PERMISSIONS).filter(p => p !== PERMISSIONS.MANAGE_BILLING),
+      FINANCE_ANALYST: [
+        PERMISSIONS.VIEW_ORG_OVERVIEW,
+        PERMISSIONS.VIEW_ENTITIES,
+        PERMISSIONS.CREATE_ENTITY,
+        PERMISSIONS.EDIT_ENTITY,
+        PERMISSIONS.VIEW_TAX_COMPLIANCE,
+        PERMISSIONS.EDIT_TAX_COMPLIANCE,
+        PERMISSIONS.VIEW_CASHFLOW,
+        PERMISSIONS.EDIT_CASHFLOW,
+        PERMISSIONS.VIEW_RISK_EXPOSURE,
+        PERMISSIONS.VIEW_REPORTS,
+        PERMISSIONS.GENERATE_REPORTS,
+      ],
+      VIEWER: [
+        PERMISSIONS.VIEW_ORG_OVERVIEW,
+        PERMISSIONS.VIEW_ENTITIES,
+        PERMISSIONS.VIEW_TAX_COMPLIANCE,
+        PERMISSIONS.VIEW_CASHFLOW,
+        PERMISSIONS.VIEW_RISK_EXPOSURE,
+        PERMISSIONS.VIEW_REPORTS,
+      ],
+      EXTERNAL_ADVISOR: [
+        PERMISSIONS.VIEW_TAX_COMPLIANCE,
+        PERMISSIONS.VIEW_REPORTS,
+      ],
+    };
+
+    return rolePermissionMap[roleCode] || [];
+  }, [PERMISSIONS]);
+
   /**
    * Initialize enterprise data for user
    */
   useEffect(() => {
     if (user && user.account_type === 'enterprise') {
-      setCurrentUserRole(ROLES.ORG_OWNER);
       setRoles(Object.values(ROLES));
-      setPermissions(Object.values(PERMISSIONS));
+      setCurrentUserRole(null);
+      setPermissions([]);
+      setIsRoleResolved(false);
+      return;
     }
-  }, [user, ROLES, PERMISSIONS]);
+
+    setCurrentUserRole(null);
+    setPermissions([]);
+    setRoles([]);
+    setTeamMembers([]);
+    setIsRoleResolved(false);
+  }, [user, ROLES]);
+
+  useEffect(() => {
+    if (!currentUserRole) {
+      setPermissions([]);
+      return;
+    }
+
+    setPermissions(getRolePermissions(currentUserRole));
+  }, [currentUserRole, getRolePermissions]);
 
   /**
    * Fetch organizations for current user
@@ -246,29 +298,34 @@ export const EnterpriseProvider = ({ children }) => {
    */
   const fetchTeamMembers = useCallback(async (orgId) => {
     if (!orgId) return;
+    setIsRoleResolved(false);
     try {
       const response = await fetch(apiUrl(`/api/team-members/?organization_id=${orgId}`), {
         headers: buildAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
-        setTeamMembers(Array.isArray(data) ? data : data.results || []);
+        const members = Array.isArray(data) ? data : data.results || [];
+        setTeamMembers(members);
 
         // Find current user's role
-        const currentMember = (Array.isArray(data) ? data : data.results || []).find(
+        const currentMember = members.find(
           m => m.user_email === user?.email
         );
-        if (currentMember) {
-          setCurrentUserRole(currentMember.role_code);
-        }
+        setCurrentUserRole(currentMember?.role_code || ROLES.ORG_OWNER);
+        setIsRoleResolved(true);
       } else {
         setTeamMembers([]);
+        setCurrentUserRole(null);
+        setIsRoleResolved(true);
       }
     } catch (err) {
       console.error('Failed to fetch team members:', err);
       setTeamMembers([]);
+      setCurrentUserRole(null);
+      setIsRoleResolved(true);
     }
-  }, [apiUrl, buildAuthHeaders, user]);
+  }, [apiUrl, buildAuthHeaders, user, ROLES]);
 
   /**
    * Fetch tax compliance data
@@ -412,53 +469,28 @@ export const EnterpriseProvider = ({ children }) => {
    * Check if current user has permission
    */
   const hasPermission = useCallback((permissionCode) => {
-    // For now, use role-based simple check
-    // In production, you'd validate against the permissions array from API
-    const rolePermissionMap = {
-      ORG_OWNER: Object.values(PERMISSIONS),
-      CFO: Object.values(PERMISSIONS).filter(p => p !== PERMISSIONS.MANAGE_BILLING),
-      FINANCE_ANALYST: [
-        PERMISSIONS.VIEW_ORG_OVERVIEW,
-        PERMISSIONS.VIEW_ENTITIES,
-        PERMISSIONS.CREATE_ENTITY,
-        PERMISSIONS.EDIT_ENTITY,
-        PERMISSIONS.VIEW_TAX_COMPLIANCE,
-        PERMISSIONS.EDIT_TAX_COMPLIANCE,
-        PERMISSIONS.VIEW_CASHFLOW,
-        PERMISSIONS.EDIT_CASHFLOW,
-        PERMISSIONS.VIEW_RISK_EXPOSURE,
-        PERMISSIONS.VIEW_REPORTS,
-        PERMISSIONS.GENERATE_REPORTS,
-      ],
-      VIEWER: [
-        PERMISSIONS.VIEW_ORG_OVERVIEW,
-        PERMISSIONS.VIEW_ENTITIES,
-        PERMISSIONS.VIEW_TAX_COMPLIANCE,
-        PERMISSIONS.VIEW_CASHFLOW,
-        PERMISSIONS.VIEW_RISK_EXPOSURE,
-        PERMISSIONS.VIEW_REPORTS,
-      ],
-      EXTERNAL_ADVISOR: [
-        PERMISSIONS.VIEW_TAX_COMPLIANCE,
-        PERMISSIONS.VIEW_REPORTS,
-      ],
-    };
+    if (!isRoleResolved) {
+      return false;
+    }
 
-    const userPermissions = rolePermissionMap[currentUserRole] || [];
-    return userPermissions.includes(permissionCode);
-  }, [currentUserRole, PERMISSIONS]);
+    return permissions.includes(permissionCode);
+  }, [isRoleResolved, permissions]);
 
   /**
    * Check if user has specific role
    */
   const hasRole = useCallback((roleCode) => {
-    return currentUserRole === roleCode;
-  }, [currentUserRole]);
+    return isRoleResolved && currentUserRole === roleCode;
+  }, [currentUserRole, isRoleResolved]);
 
   /**
    * Switch to different organization
    */
   const switchOrganization = useCallback((org) => {
+    setCurrentUserRole(null);
+    setPermissions([]);
+    setTeamMembers([]);
+    setIsRoleResolved(false);
     setCurrentOrganization(org);
     const cacheKey = String(org.id);
     const now = Date.now();
@@ -478,6 +510,14 @@ export const EnterpriseProvider = ({ children }) => {
     fetchCashflowData(org.id);
     fetchOrganizationAccountingDashboard(org.id).catch(() => null);
   }, [fetchOrgOverview, fetchEntities, fetchTeamMembers, fetchTaxExposures, fetchComplianceDeadlines, fetchCashflowData, fetchOrganizationAccountingDashboard, ORG_PREFETCH_THROTTLE_MS]);
+
+  useEffect(() => {
+    if (!currentOrganization?.id || user?.account_type !== 'enterprise') {
+      return;
+    }
+
+    switchOrganization(currentOrganization);
+  }, [currentOrganization?.id, switchOrganization, user?.account_type]);
 
   /**
    * Create new organization
@@ -584,6 +624,45 @@ export const EnterpriseProvider = ({ children }) => {
       setError(err.message);
       console.error('Entity creation error:', err);
       throw err; // Re-throw so the component can handle it
+    }
+  }, [apiUrl, buildAuthHeaders, fetchEntities]);
+
+  /**
+   * Delete entity
+   */
+  const deleteEntity = useCallback(async (entityId, organizationId) => {
+    if (!entityId) {
+      throw new Error('Entity id is required');
+    }
+
+    try {
+      const response = await fetch(apiUrl(`/api/entities/${entityId}/`), {
+        method: 'DELETE',
+        headers: buildAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to delete entity';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorData.message || JSON.stringify(errorData);
+        } catch {
+          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (organizationId) {
+        await fetchEntities(organizationId);
+      } else {
+        setEntities((prev) => prev.filter((entity) => entity.id !== entityId));
+      }
+
+      return true;
+    } catch (err) {
+      setError(err.message);
+      console.error('Entity delete error:', err);
+      throw err;
     }
   }, [apiUrl, buildAuthHeaders, fetchEntities]);
 
@@ -1468,15 +1547,13 @@ export const EnterpriseProvider = ({ children }) => {
         body: JSON.stringify(transferData),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Failed to execute transfer');
+        return data;
       }
+      throw new Error(data?.error || 'Failed to execute transfer');
     } catch (err) {
-      setError(err.message);
-      console.error(err);
-      return null;
+      throw err;
     }
   }, [apiUrl, buildAuthHeaders]);
 
@@ -1494,15 +1571,13 @@ export const EnterpriseProvider = ({ children }) => {
         body: JSON.stringify(conversionData),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Failed to execute FX conversion');
+        return data;
       }
+      throw new Error(data?.error || 'Failed to execute FX conversion');
     } catch (err) {
-      setError(err.message);
-      console.error(err);
-      return null;
+      throw err;
     }
   }, [apiUrl, buildAuthHeaders]);
 
@@ -1520,15 +1595,13 @@ export const EnterpriseProvider = ({ children }) => {
         body: JSON.stringify(allocationData),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        return await response.json();
-      } else {
-        throw new Error('Failed to execute investment allocation');
+        return data;
       }
+      throw new Error(data?.error || 'Failed to execute investment allocation');
     } catch (err) {
-      setError(err.message);
-      console.error(err);
-      return null;
+      throw err;
     }
   }, [apiUrl, buildAuthHeaders]);
 
@@ -1561,6 +1634,7 @@ export const EnterpriseProvider = ({ children }) => {
     selectedEntities,
     teamMembers,
     currentUserRole,
+    isRoleResolved,
     permissions,
     roles,
     orgOverview,
@@ -1590,6 +1664,7 @@ export const EnterpriseProvider = ({ children }) => {
     createOrganization,
     updateOrganization,
     createEntity,
+    deleteEntity,
     addTeamMember,
 
     // Entity-specific financial methods
