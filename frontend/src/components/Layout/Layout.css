@@ -42,25 +42,13 @@
 .sidebar-header {
   padding: var(--space-xl) var(--space-lg) var(--space-base);
   border-bottom: 1px solid var(--border-color-default);
-  background: var(--color-midnight);
+  background: var(--atc-color-primary);
   flex-shrink: 0;
 }
 
 .sidebar-brand {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-white);
-  letter-spacing: -0.3px;
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-}
-
-.sidebar-brand-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--color-cyan);
-  flex-shrink: 0;
 }
 
 .sidebar-header-content {
@@ -323,7 +311,7 @@
 .topbar-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-midnight);
+  color: var(--atc-color-text-primary);
   margin: 0;
   letter-spacing: -0.2px;
 }

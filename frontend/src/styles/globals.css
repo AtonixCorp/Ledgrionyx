@@ -18,30 +18,54 @@
    ROOT DESIGN TOKENS
    ============================================================================= */
 :root {
+  --atc-color-primary: #0b1f3b;
+  --atc-color-primary-hover: #17345d;
+  --atc-color-primary-soft: #e8eef6;
+  --atc-color-accent: #1f7a78;
+  --atc-color-accent-soft: #e8f4f3;
+  --atc-color-bg: #f5f7fa;
+  --atc-color-surface: #ffffff;
+  --atc-color-text-primary: #111827;
+  --atc-color-text-muted: #5f6b7a;
+  --atc-color-border: #d2d8e1;
+  --atc-color-error: #b42318;
+  --atc-color-warning: #b54708;
+  --atc-color-success: #027a48;
+
+  --atc-font-family-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  --atc-font-size-hero: 2.5rem;
+  --atc-font-size-h1: 2rem;
+  --atc-font-size-h2: 1.5rem;
+  --atc-font-size-subheading: 1.125rem;
+  --atc-font-size-body: 1rem;
+  --atc-font-size-small: 0.8125rem;
+
+  --atc-radius-control: 6px;
+  --atc-radius-panel: 8px;
   /* === COLOR SYSTEM === */
-  --color-midnight: #0B0C10;     /* Primary institutional color */
+  --color-midnight: var(--atc-color-primary);     /* Primary institutional color */
   --color-midnight-light: #1a1b20;
   --color-midnight-lighter: #2d2f35;
   
   /* Primary brand palette — ATC Capital Navy Blue */
-  --primary-600: #003B73;         /* Primary actions, links, highlights */
-  --primary-500: #0052A2;         /* Hover states, accents */
-  --primary-100: #E6F0FA;         /* Light backgrounds, subtle emphasis */
+  --primary-600: var(--atc-color-primary);         /* Primary actions, links, highlights */
+  --primary-500: var(--atc-color-primary-hover);         /* Hover states, accents */
+  --primary-100: var(--atc-color-primary-soft);         /* Light backgrounds, subtle emphasis */
 
   /* Legacy tokens mapped to primary palette */
-  --color-cyan: #003B73;          /* → --primary-600 */
-  --color-cyan-hover: #0052A2;    /* → --primary-500 */
-  --color-cyan-dark: #003366;     /* Pressed / deep navy */
-  --color-cyan-text: #003B73;     /* WCAG AAA on white */
-  --color-cyan-light: #E6F0FA;    /* → --primary-100 */
+  --color-cyan: var(--atc-color-primary);          /* → --primary-600 */
+  --color-cyan-hover: var(--atc-color-primary-hover);    /* → --primary-500 */
+  --color-cyan-dark: #09172b;     /* Pressed / deep navy */
+  --color-cyan-text: var(--atc-color-primary);     /* WCAG AAA on white */
+  --color-cyan-light: var(--atc-color-primary-soft);    /* → --primary-100 */
   --color-cyan-very-light: #F0F6FF;
   
   /* Institutional Gray Palette */
-  --gray-900: #111827;            /* Titles, strong text */
+  --gray-900: var(--atc-color-text-primary);            /* Titles, strong text */
   --gray-700: #374151;            /* Labels, secondary text */
-  --gray-500: #6B7280;            /* Tertiary text */
-  --gray-300: #D1D5DB;            /* Borders */
-  --gray-100: #F3F4F6;            /* Backgrounds */
+  --gray-500: var(--atc-color-text-muted);            /* Tertiary text */
+  --gray-300: var(--atc-color-border);            /* Borders */
+  --gray-100: var(--atc-color-bg);            /* Backgrounds */
 
   --color-silver: #C5C6C7;        /* Secondary text and dividers */
   --color-silver-dark: #6B7280;   /* gray-500 — tertiary text */
@@ -57,24 +81,23 @@
   --warning-600: #D97706;          /* Pending, caution */
   --error-600: #DC2626;            /* Errors, failures */
 
-  --color-success: #059669;
+  --color-success: var(--atc-color-success);
   --color-success-light: #ECFDF5;
-  --color-warning: #D97706;
+  --color-warning: var(--atc-color-warning);
   --color-warning-light: #FEF3C7;
-  --color-error: #DC2626;
+  --color-error: var(--atc-color-error);
   --color-error-light: #FEE2E2;
   --color-info: #3B82F6;
   --color-info-light: #EFF6FF;
   
   /* === TYPOGRAPHY === */
-  --font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-                 'Roboto', 'Helvetica Neue', sans-serif;
+  --font-family: var(--atc-font-family-sans);
   --font-mono: 'IBM Plex Mono', 'Monaco', 'Courier New', monospace;
   
   /* Font sizes — strict scale */
   --font-size-xs: 12px;      /* 0.75rem — labels */
   --font-size-sm: 13px;      /* 0.8125rem — secondary text */
-  --font-size-base: 14px;    /* 0.875rem — body text */
+  --font-size-base: 16px;    /* 1rem — body text */
   --font-size-lg: 18px;      /* 1.125rem — large body text */
   --font-size-xl: 20px;      /* 1.25rem — section titles */
   --font-size-2xl: 24px;     /* 1.5rem — page titles */
@@ -105,8 +128,8 @@
   /* === BORDER RADIUS === */
   --radius-none: 0;                 /* Strict institutional standard */
   --radius-sm: 4px;                 /* Small soft elements only */
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-md: var(--atc-radius-control);
+  --radius-lg: var(--atc-radius-panel);
   
   /* === BORDERS === */
   --border-width-thin: 1px;
@@ -159,8 +182,8 @@ body {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
   line-height: 1.43;
-  color: #111827;
-  background: var(--color-white);
+  color: var(--atc-color-text-primary);
+  background: var(--atc-color-surface);
 }
 
 /* =============================================================================

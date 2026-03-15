@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
+import ATCLogo from '../branding/ATCLogo';
 import './Layout.css';
 
 const Layout = ({ children }) => {
@@ -220,8 +221,7 @@ const Layout = ({ children }) => {
         {/* Brand Header */}
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <span className="sidebar-brand-dot" />
-            {!sidebarMinimized && <span>ATC Capital</span>}
+            <ATCLogo variant="white" size="small" withText={!sidebarMinimized} text="ATC Capital Console" />
           </div>
         </div>
 
@@ -279,7 +279,7 @@ const Layout = ({ children }) => {
         {/* Top Bar */}
         <header className="topbar">
           <div className="topbar-left">
-            <h2 className="topbar-title">ATC Capital</h2>
+            <h2 className="topbar-title">ATC Capital Console</h2>
             {currentOrganization && (
               <span className="topbar-org-context">{currentOrganization.name}</span>
             )}

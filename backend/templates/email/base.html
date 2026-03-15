@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block email_title %}ATC Capital{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #edf2f8;
+            color: #0f172a;
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .email-shell {
+            width: 100%;
+            background-color: #edf2f8;
+            padding: 24px 12px;
+        }
+
+        .email-card {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #d7dee8;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            padding: 28px 32px 20px;
+            background: linear-gradient(135deg, #0b1f3a 0%, #12315b 100%);
+        }
+
+        .brand-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-copy {
+            color: #ffffff;
+        }
+
+        .brand-copy strong {
+            display: block;
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #c8a44d;
+        }
+
+        .brand-copy span {
+            display: block;
+            margin-top: 4px;
+            font-size: 20px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .email-body {
+            padding: 32px;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #314155;
+        }
+
+        .email-body h1,
+        .email-body h2,
+        .email-body h3 {
+            margin: 0 0 16px;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .email-body p {
+            margin: 0 0 16px;
+        }
+
+        .email-body a {
+            color: #0b1f3a;
+            font-weight: 700;
+        }
+
+        .email-panel {
+            margin: 24px 0;
+            padding: 18px 20px;
+            border-radius: 16px;
+            background-color: #f5f7fb;
+            border: 1px solid #d7dee8;
+        }
+
+        .email-footer {
+            padding: 0 32px 28px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #64748b;
+        }
+
+        .preheader {
+            display: none;
+            visibility: hidden;
+            opacity: 0;
+            color: transparent;
+            height: 0;
+            width: 0;
+            overflow: hidden;
+            mso-hide: all;
+        }
+
+        @media only screen and (max-width: 640px) {
+            .email-header,
+            .email-body,
+            .email-footer {
+                padding-left: 22px;
+                padding-right: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="preheader">{% block email_preheader %}ATC Capital platform update{% endblock %}</div>
+    <table role="presentation" width="100%" class="email-shell">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" class="email-card">
+                    <tr>
+                        <td class="email-header">
+                            <div class="brand-wrap">
+                                <svg width="52" height="52" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <circle cx="32" cy="32" r="30" fill="#0B1F3A"/>
+                                    <circle cx="32" cy="32" r="29" stroke="#C8A44D" stroke-width="2"/>
+                                    <path d="M45.5 18.5C49.8 22.6 52.5 28.4 52.5 34.8" stroke="#C8A44D" stroke-width="3" stroke-linecap="round"/>
+                                    <path d="M23.2 45L32.1 18L40.8 45" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M26.9 35H37.2" stroke="#C8A44D" stroke-width="3.5" stroke-linecap="round"/>
+                                </svg>
+                                <div class="brand-copy">
+                                    <strong>ATC Capital</strong>
+                                    <span>{% block email_brand_title %}Institutional Platform{% endblock %}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="email-body">
+                            {% block email_content %}{% endblock %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="email-footer">
+                            {% block email_footer %}
+                            ATC Capital developer communications are structured for operational clarity, predictable onboarding, and institutional-grade trust.
+                            {% endblock %}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

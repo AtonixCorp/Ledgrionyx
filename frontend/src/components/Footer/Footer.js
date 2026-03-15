@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ATCLogo from '../branding/ATCLogo';
 import './Footer.css';
 
 const Footer = () => {
@@ -9,11 +10,9 @@ const Footer = () => {
         <div className="footer-top">
           <div className="footer-section footer-brand">
             <div className="footer-logo">
-              <span>Atonix Capital</span>
+              <ATCLogo variant="white" withText size="medium" />
             </div>
-            <p className="footer-tagline">Atonix Capital envisions a world where financial power is no longer constrained by geography,
-              institutions, or legacy systems. We are building a platform that empowers individuals and
-              enterprises with sovereign financial intelligence.
+            <p className="footer-tagline">ATC Capital delivers institution-grade financial infrastructure for capital operations, risk control, and developer-ready integrations.
             </p>
             <div className="footer-social">
               <a href="https://twitter.com/atonixcapital" target="_blank" rel="noopener noreferrer" className="social-icon">
@@ -61,7 +60,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>&copy; 2025 Atonix Capital. All rights reserved.</p>
+          <p>&copy; 2026 ATC Capital. All rights reserved.</p>
           <div className="footer-bottom-links">
             <Link to="/privacy">Privacy</Link>
             <span className="separator">•</span>

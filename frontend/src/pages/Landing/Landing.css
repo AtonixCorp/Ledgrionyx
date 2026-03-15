@@ -8,7 +8,7 @@
 /* ── Shared typography foundation ──────────────────────────────────────────── */
 .landing-page {
   font-family: var(--font-family);
-  background: var(--color-white);
+  background: var(--atc-color-surface);
   color: var(--color-midnight);
 }
 
@@ -21,7 +21,7 @@
   width: 100%;
   min-height: 520px;
   max-height: 580px;
-  background: var(--color-white);
+  background: var(--atc-color-surface);
   border-bottom: 1px solid var(--border-color-default);
   display: flex;
   align-items: stretch;
@@ -76,14 +76,14 @@
 .atc-hero-btn-primary {
   height: 48px;
   padding: 0 32px;
-  background: var(--color-cyan);
+  background: var(--atc-color-primary);
   color: var(--color-white);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   text-decoration: none;
   border: none;
-  border-radius: 0;
+  border-radius: var(--atc-radius-control);
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
@@ -92,7 +92,7 @@
 }
 
 .atc-hero-btn-primary:hover {
-  background: var(--color-cyan-hover);
+  background: var(--atc-color-primary-hover);
   color: var(--color-white);
 }
 
@@ -100,13 +100,13 @@
   height: 48px;
   padding: 0 30px;
   background: transparent;
-  color: var(--color-cyan);
+  color: var(--atc-color-primary);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
   text-decoration: none;
-  border: 1.5px solid var(--color-cyan);
-  border-radius: 0;
+  border: 1.5px solid var(--atc-color-primary);
+  border-radius: var(--atc-radius-control);
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
@@ -115,7 +115,7 @@
 }
 
 .atc-hero-btn-secondary:hover {
-  background: var(--color-cyan-light);
+  background: var(--atc-color-primary-soft);
 }
 
 /* ── Hero product card — right column ─────────────────────────────────────── */
@@ -128,9 +128,9 @@
 .atc-product-card {
   width: 100%;
   max-width: 440px;
-  background: var(--color-white);
+  background: var(--atc-color-surface);
   border: 1px solid var(--border-color-default);
-  border-radius: 0;
+  border-radius: var(--atc-radius-panel);
   padding: 32px;
   display: flex;
   flex-direction: column;

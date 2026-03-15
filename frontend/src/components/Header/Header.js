@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useLanguage, LANGUAGE_LIST } from '../../context/LanguageContext';
+import ATCLogo from '../branding/ATCLogo';
 import './Header.css';
 
 const COUNTRIES = [
@@ -41,7 +42,7 @@ const Header = () => {
         <div className="atc-utility-inner">
 
           {/* Left — Brand identifier */}
-          <span className="atc-utility-brand">AtcCapital ™ Global Platform</span>
+          <span className="atc-utility-brand">ATC Capital Global Platform</span>
 
           {/* Center — Country selector */}
           <div className="atc-utility-center">
@@ -104,8 +105,8 @@ const Header = () => {
         <div className="atc-primary-inner">
 
           {/* Logo */}
-          <Link to="/" className="atc-logo" aria-label="AtcCapital Home">
-            <span className="atc-logo-text">AtcCapital</span>
+          <Link to="/" className="atc-logo-link" aria-label="ATC Capital Home">
+            <ATCLogo size="medium" withText />
           </Link>
 
           {/* Navigation */}
@@ -126,7 +127,7 @@ const Header = () => {
 
           {/* CTA buttons */}
           <div className="atc-primary-actions">
-            <Link to="/product" className="atc-cta-secondary">Get the App</Link>
+            <Link to="/v1/docs" className="atc-cta-secondary">API Portal</Link>
           </div>
 
           {/* Hamburger — mobile only */}

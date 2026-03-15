@@ -1,0 +1,97 @@
+.atc-logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--atc-color-primary);
+}
+
+.atc-logo-mark {
+  display: block;
+  flex-shrink: 0;
+}
+
+.atc-logo-mark__ring,
+.atc-logo-mark__orbit,
+.atc-logo-mark__beam,
+.atc-logo-mark__crossbar {
+  vector-effect: non-scaling-stroke;
+}
+
+.atc-logo-mark__ring {
+  stroke: currentColor;
+  stroke-width: 4;
+}
+
+.atc-logo-mark__orbit {
+  stroke: var(--atc-color-accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.atc-logo-mark__beam,
+.atc-logo-mark__crossbar {
+  stroke: currentColor;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.atc-logo-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+}
+
+.atc-logo-wordmark__primary {
+  font-family: var(--atc-font-family-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: currentColor;
+  letter-spacing: -0.02em;
+}
+
+.atc-logo-wordmark__secondary {
+  font-family: var(--atc-font-family-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--atc-color-text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.atc-logo--small {
+  gap: 10px;
+}
+
+.atc-logo--small .atc-logo-wordmark__primary {
+  font-size: 0.9375rem;
+}
+
+.atc-logo--large {
+  gap: 14px;
+}
+
+.atc-logo--large .atc-logo-wordmark__primary {
+  font-size: 1.125rem;
+}
+
+.atc-logo--white {
+  color: #ffffff;
+}
+
+.atc-logo--white .atc-logo-wordmark__secondary {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.atc-logo--white .atc-logo-mark__orbit {
+  stroke: rgba(255, 255, 255, 0.72);
+}
+
+.atc-logo--mono {
+  color: var(--atc-color-text-primary);
+}
+
+.atc-logo--mono .atc-logo-mark__orbit {
+  stroke: var(--atc-color-text-muted);
+}

@@ -20,7 +20,7 @@ const Landing = () => {
               Accounting Built for<br />Global Confidence
             </h1>
             <p className="atc-hero-sub">
-              AtcCapital delivers secure accounts, global transfers, and
+              ATC Capital delivers secure accounts, global transfers, and
               institution-grade financial tools designed for individuals
               and businesses worldwide.
             </p>
