@@ -15,6 +15,7 @@ from .models import (
     Budget,
     ChartOfAccounts,
     Customer,
+    DeveloperPortalKeyRequest,
     Entity,
     Expense,
     GeneralLedger,
@@ -24,6 +25,7 @@ from .models import (
     Organization,
     SystemEvent,
     TeamMember,
+    UserProfile,
     Vendor,
     WebhookDelivery,
 )
@@ -83,6 +85,7 @@ class PlatformIntegrationViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['error']['code'], 'UNAUTHORIZED')
 
     @override_settings(PLATFORM_EVENT_TOKEN='test-platform-token')
     def test_platform_event_accepts_valid_payload(self):
@@ -101,6 +104,114 @@ class PlatformIntegrationViewTests(TestCase):
 
         self.assertEqual(response.status_code, 202)
         self.assertTrue(response.data['accepted'])
+
+
+class DeveloperPortalViewTests(TestCase):
+    def setUp(self):
+        self.client = APIClient(HTTP_HOST='localhost')
+
+    def test_api_catalog_list_returns_seeded_results(self):
+        response = self.client.get('/developer/apis')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreaterEqual(len(response.data['results']), 1)
+        self.assertIn('available_filters', response.data)
+        self.assertTrue(any(item['slug'] == 'markets' for item in response.data['available_filters']['categories']))
+
+    def test_api_search_requires_query(self):
+        response = self.client.get('/developer/search')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['error']['code'], 'INVALID_REQUEST')
+        self.assertEqual(response.data['error']['details']['field'], 'q')
+
+    def test_api_search_returns_matching_seeded_entry(self):
+        response = self.client.get('/developer/search', {'q': 'market'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['query'], 'market')
+        self.assertTrue(any(item['slug'] == 'market-data-api' for item in response.data['results']))
+
+    def test_api_detail_returns_seeded_endpoints(self):
+        response = self.client.get('/developer/apis/market-data-api')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['slug'], 'market-data-api')
+        self.assertTrue(response.data['versions'])
+        self.assertTrue(response.data['endpoints'])
+
+    def test_api_detail_returns_standard_not_found_error(self):
+        response = self.client.get('/developer/apis/does-not-exist')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data['error']['code'], 'NOT_FOUND')
+
+    def test_docs_and_status_endpoints_are_public(self):
+        auth_response = self.client.get('/developer/docs/authentication')
+        errors_response = self.client.get('/developer/docs/errors')
+        status_response = self.client.get('/developer/status')
+
+        self.assertEqual(auth_response.status_code, 200)
+        self.assertEqual(auth_response.data['slug'], 'authentication')
+        self.assertEqual(errors_response.status_code, 200)
+        self.assertEqual(errors_response.data['slug'], 'errors')
+        self.assertEqual(status_response.status_code, 200)
+        self.assertEqual(status_response.data['service'], 'developer-portal')
+        self.assertTrue(any(component['name'] == 'database' for component in status_response.data['components']))
+
+    def test_key_request_requires_identity_fields(self):
+        response = self.client.post('/developer/keys/request', {'email': 'dev@example.com'}, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['error']['code'], 'INVALID_REQUEST')
+        self.assertIn('first_name', response.data['error']['details']['missing_fields'])
+        self.assertIn('last_name', response.data['error']['details']['missing_fields'])
+
+    def test_key_request_creates_user_profile_org_and_api_key(self):
+        response = self.client.post(
+            '/developer/keys/request',
+            {
+                'first_name': 'Ato',
+                'last_name': 'Developer',
+                'email': 'developer@atc-capital.test',
+                'organization': 'ATC Developer Lab',
+                'intended_use': 'Build a portfolio sync integration.',
+            },
+            format='json',
+            REMOTE_ADDR='127.0.0.1',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['developer']['email'], 'developer@atc-capital.test')
+        self.assertIn('.', response.data['api_key']['api_key'])
+        self.assertEqual(response.data['api_key']['environment'], 'sandbox')
+
+        user = User.objects.get(email='developer@atc-capital.test')
+        self.assertTrue(UserProfile.objects.filter(user=user).exists())
+
+        organization = Organization.objects.get(owner=user, name='ATC Developer Lab')
+        request_record = DeveloperPortalKeyRequest.objects.get(email='developer@atc-capital.test')
+        application = OAuthApplication.objects.get(pk=request_record.application_id)
+
+        self.assertEqual(request_record.status, 'generated')
+        self.assertEqual(request_record.organization, organization)
+        self.assertEqual(application.organization, organization)
+        self.assertEqual(application.environment, 'sandbox')
+        self.assertEqual(application.source_metadata['source'], 'developer_portal')
+        self.assertEqual(request_record.source_metadata['ip_address'], '127.0.0.1')
+
+    def test_jwt_token_endpoint_uses_standard_error_envelope(self):
+        response = self.client.post(
+            '/api/auth/token/',
+            {
+                'username': 'missing-user',
+                'password': 'wrong-password',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['error']['code'], 'UNAUTHORIZED')
 
 
 @override_settings(ATC_API_ENVIRONMENT='sandbox')

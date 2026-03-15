@@ -3,17 +3,17 @@ from django.utils.text import slugify
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.views import APIView
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .developer_portal_common import DeveloperFacingAPIView
 from .models import Organization, UserProfile, ACCOUNT_TYPE_ENTERPRISE, ACCOUNT_TYPE_PERSONAL
 
 
 User = get_user_model()
 
 
-class RegisterView(APIView):
+class RegisterView(DeveloperFacingAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -99,7 +99,7 @@ class RegisterView(APIView):
         )
 
 
-class MeView(APIView):
+class MeView(DeveloperFacingAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

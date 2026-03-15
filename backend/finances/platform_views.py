@@ -11,6 +11,8 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from .developer_portal_common import developer_standard_error_response
+
 
 def _database_health():
     try:
@@ -55,15 +57,22 @@ def ingest_platform_event(request):
     configured_token = settings.PLATFORM_EVENT_TOKEN
     provided_token = _extract_platform_token(request)
     if not configured_token or not secrets.compare_digest(provided_token, configured_token):
-        return Response({'detail': 'Unauthorized platform event publisher.'}, status=status.HTTP_401_UNAUTHORIZED)
+        return developer_standard_error_response(
+            code='UNAUTHORIZED',
+            message='Unauthorized platform event publisher.',
+            details={},
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
 
     payload = request.data if isinstance(request.data, dict) else {}
     required_fields = ['event_type', 'source', 'environment', 'status']
     missing_fields = [field for field in required_fields if not payload.get(field)]
     if missing_fields:
-        return Response(
-            {'detail': f'Missing required fields: {", ".join(missing_fields)}'},
-            status=status.HTTP_400_BAD_REQUEST,
+        return developer_standard_error_response(
+            code='INVALID_REQUEST',
+            message=f'Missing required fields: {", ".join(missing_fields)}',
+            details={'missing_fields': missing_fields},
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
 
     logger = logging.getLogger(settings.PLATFORM_EVENT_LOGGER)

@@ -3531,3 +3531,185 @@ class WebhookDelivery(models.Model):
 
     def __str__(self):
         return f"Delivery {self.event_type} → {self.endpoint.url} ({self.status})"
+
+
+# ============================================================================
+# DEVELOPER PORTAL – API CATALOG, SEARCH, AND KEY REQUESTS
+# ============================================================================
+
+class DeveloperAPICategory(models.Model):
+    """Top-level grouping for developer-facing APIs"""
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+        verbose_name = 'Developer API Category'
+        verbose_name_plural = 'Developer API Categories'
+
+    def __str__(self):
+        return self.name
+
+
+class DeveloperAPITag(models.Model):
+    """Searchable labels applied to developer-facing APIs"""
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Developer API Tag'
+        verbose_name_plural = 'Developer API Tags'
+
+    def __str__(self):
+        return self.name
+
+
+class DeveloperAPI(models.Model):
+    """Catalog record shown in the developer portal"""
+    STATUS_CHOICES = [
+        ('stable', 'Stable'),
+        ('beta', 'Beta'),
+        ('deprecated', 'Deprecated'),
+    ]
+    ACCESS_LEVEL_CHOICES = [
+        ('public', 'Public'),
+        ('partner', 'Partner'),
+        ('internal', 'Internal'),
+    ]
+    AUTH_TYPE_CHOICES = [
+        ('api_key', 'API Key'),
+        ('oauth2', 'OAuth 2.0'),
+        ('both', 'API Key and OAuth 2.0'),
+    ]
+
+    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=500)
+    overview = models.TextField()
+    use_cases = models.JSONField(default=list, blank=True)
+    data_domains = models.JSONField(default=list, blank=True)
+    data_types = models.JSONField(default=list, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='stable')
+    access_level = models.CharField(max_length=20, choices=ACCESS_LEVEL_CHOICES, default='public')
+    auth_type = models.CharField(max_length=20, choices=AUTH_TYPE_CHOICES, default='api_key')
+    compliance_notes = models.TextField(blank=True)
+    rate_limits = models.JSONField(default=dict, blank=True)
+    keywords = models.JSONField(default=list, blank=True)
+    is_featured = models.BooleanField(default=False)
+    featured_rank = models.PositiveIntegerField(default=0)
+    categories = models.ManyToManyField(DeveloperAPICategory, related_name='apis', blank=True)
+    tags = models.ManyToManyField(DeveloperAPITag, related_name='apis', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['featured_rank', 'name']
+        verbose_name = 'Developer API'
+        verbose_name_plural = 'Developer APIs'
+
+    def __str__(self):
+        return self.name
+
+
+class DeveloperAPIVersion(models.Model):
+    """Version-specific metadata for an API catalog entry"""
+    api = models.ForeignKey(DeveloperAPI, on_delete=models.CASCADE, related_name='versions')
+    version = models.CharField(max_length=20)
+    base_path = models.CharField(max_length=255)
+    summary = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=DeveloperAPI.STATUS_CHOICES, default='stable')
+    is_default = models.BooleanField(default=False)
+    release_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['api__name', 'version']
+        unique_together = ('api', 'version')
+        verbose_name = 'Developer API Version'
+        verbose_name_plural = 'Developer API Versions'
+
+    def __str__(self):
+        return f"{self.api.name} {self.version}"
+
+
+class DeveloperAPIEndpoint(models.Model):
+    """Endpoint documentation record for a versioned developer API"""
+    METHOD_CHOICES = [
+        ('GET', 'GET'),
+        ('POST', 'POST'),
+        ('PUT', 'PUT'),
+        ('PATCH', 'PATCH'),
+        ('DELETE', 'DELETE'),
+    ]
+
+    version = models.ForeignKey(DeveloperAPIVersion, on_delete=models.CASCADE, related_name='endpoints')
+    name = models.CharField(max_length=255)
+    method = models.CharField(max_length=10, choices=METHOD_CHOICES)
+    path = models.CharField(max_length=255)
+    summary = models.CharField(max_length=500)
+    description = models.TextField(blank=True)
+    path_params = models.JSONField(default=list, blank=True)
+    query_params = models.JSONField(default=list, blank=True)
+    headers = models.JSONField(default=list, blank=True)
+    scopes = models.JSONField(default=list, blank=True)
+    request_example = models.TextField(blank=True)
+    response_example = models.TextField(blank=True)
+    error_responses = models.JSONField(default=list, blank=True)
+    keywords = models.JSONField(default=list, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', 'method', 'path']
+        verbose_name = 'Developer API Endpoint'
+        verbose_name_plural = 'Developer API Endpoints'
+
+    def __str__(self):
+        return f"{self.method} {self.path}"
+
+
+class DeveloperPortalKeyRequest(models.Model):
+    """Tracks developer key requests initiated from the public portal"""
+    STATUS_CHOICES = [
+        ('submitted', 'Submitted'),
+        ('generated', 'Generated'),
+        ('revoked', 'Revoked'),
+    ]
+
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(db_index=True)
+    organization_name = models.CharField(max_length=255, blank=True)
+    intended_use = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='developer_portal_key_requests'
+    )
+    organization = models.ForeignKey(
+        Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='developer_portal_key_requests'
+    )
+    application = models.ForeignKey(
+        OAuthApplication, on_delete=models.SET_NULL, null=True, blank=True, related_name='developer_portal_key_requests'
+    )
+    source_metadata = models.JSONField(default=dict, blank=True)
+    generated_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Developer Portal Key Request'
+        verbose_name_plural = 'Developer Portal Key Requests'
+
+    def __str__(self):
+        return f"{self.email} ({self.status})"
