@@ -422,3 +422,329 @@
     padding: 24px;
   }
 }
+
+/* ── Workspace Pages — Shared Extras ─────────────────────── */
+
+/* Icon buttons (edit / delete / download) */
+.btn-icon {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--overview-line);
+  border-radius: 10px;
+  color: var(--overview-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 15px;
+  height: 34px;
+  justify-content: center;
+  transition: background 150ms, border-color 150ms, color 150ms;
+  width: 34px;
+}
+
+.btn-icon:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.btn-icon.delete:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Status badges */
+.status-badge {
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
+
+.status-badge.active   { background: #dcfce7; color: #15803d; }
+.status-badge.pending  { background: #fef9c3; color: #a16207; }
+.status-badge.warning  { background: #fff7ed; color: #c2410c; }
+.status-badge.inactive { background: #f1f5f9; color: #64748b; }
+
+/* Role badge */
+.role-badge {
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+}
+
+/* Error banner */
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
+  font-size: 13px;
+  padding: 12px 16px;
+}
+
+/* Empty state */
+.empty-state p {
+  color: var(--overview-muted);
+  font-size: 14px;
+}
+
+/* Member card internals */
+.member-info {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.member-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.member-name {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.member-role { display: flex; align-items: center; }
+
+.member-status {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.joined-date {
+  color: var(--overview-muted);
+  font-size: 11px;
+}
+
+.pending-actions,
+.member-actions {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+/* Permission matrix — has-permission cell */
+.team-container .matrix-row .col-role {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.team-container .matrix-row .col-role.has-permission {
+  color: #15803d;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.team-container .matrix-row .col-role.has-permission::before {
+  display: none;
+}
+
+.team-container .matrix-row .col-role:not(.has-permission)::before {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  content: '';
+  display: block;
+  height: 8px;
+  width: 8px;
+}
+
+/* Invite modal */
+.modal-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 40px 80px rgba(15, 23, 42, 0.18);
+  max-width: 480px;
+  padding: 28px 30px;
+  width: 100%;
+}
+
+.modal-card h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.role-description {
+  color: var(--overview-muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Report config */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  color: var(--overview-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.input-group input {
+  border: 1px solid var(--overview-line);
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  padding: 10px 14px;
+  transition: border-color 150ms;
+  width: 100%;
+}
+
+.input-group input:focus { border-color: #2563eb; }
+
+/* Format buttons */
+.reports-container .format-btn {
+  background: #f8fafc;
+  border: 1px solid var(--overview-line);
+  border-radius: 12px;
+  color: #334155;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px;
+  transition: background 150ms, border-color 150ms, color 150ms;
+}
+
+.reports-container .format-btn.selected,
+.reports-container .format-btn:hover {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+/* Preview items */
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preview-label {
+  color: var(--overview-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.preview-value {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Report sections chip list */
+.report-sections {
+  margin-top: 14px;
+}
+
+.report-sections h3 {
+  color: var(--overview-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.report-sections ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.report-sections li {
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+
+/* Recent report card internals */
+.report-name {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.report-meta {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.report-date {
+  color: var(--overview-muted);
+  font-size: 12px;
+}
+
+.report-format {
+  background: #eff6ff;
+  border-radius: 999px;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+}
+
+.report-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* Entity selector inside hero */
+.action-page-hero .entity-selector {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 280px;
+  outline: none;
+  padding: 8px 12px;
+}
+
+.action-page-hero .entity-selector option {
+  background: #0f172a;
+  color: #f8fafc;
+}

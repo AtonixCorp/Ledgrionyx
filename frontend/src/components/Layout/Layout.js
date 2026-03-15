@@ -47,10 +47,10 @@ const Layout = ({ children }) => {
   ];
 
   const workspaceNav = [
-    { to: '/app/enterprise/entities',        label: 'Entities' },
     { to: '/app/enterprise/team',            label: 'Team & Permissions' },
     { to: '/app/enterprise/reports',         label: 'Reports' },
     { to: '/app/enterprise/tax-compliance',  label: 'Tax Compliance' },
+    { to: '/app/settings/branding',          label: 'Branding' },
   ];
 
   const accountingNav = [
@@ -95,9 +95,12 @@ const Layout = ({ children }) => {
   ];
 
   const complianceNav = [
-    { to: '/app/compliance/tax-center',   label: 'Tax Center' },
-    { to: '/app/compliance/audit-trail',  label: 'Audit Trail' },
-    { to: '/app/compliance/period-close', label: 'Period Close' },
+    { to: '/app/compliance/tax-center',    label: 'Tax Center' },
+    { to: '/app/compliance/tax-calculator',label: 'Tax Calculator' },
+    { to: '/app/compliance/monitoring',    label: 'Monitoring' },
+    { to: '/app/compliance/audit-trail',   label: 'Audit Trail' },
+    { to: '/app/compliance/period-close',  label: 'Period Close' },
+    { to: '/app/compliance/filing',        label: 'Filing Assistant' },
   ];
 
   const documentsNav = [
@@ -114,6 +117,7 @@ const Layout = ({ children }) => {
     { to: '/app/automation/rules',        label: 'Automation Rules' },
     { to: '/app/automation/recurring',    label: 'Recurring Entries' },
     { to: '/app/automation/ai-insights',  label: 'AI Insights' },
+    { to: '/app/automation/ai-advisor',   label: 'AI Advisor' },
   ];
 
   const integrationsNav = [
@@ -125,7 +129,6 @@ const Layout = ({ children }) => {
     { to: '/app/settings/firm',           label: 'Firm Settings' },
     { to: '/app/settings/team',           label: 'Team & Permissions' },
     { to: '/app/settings/security',       label: 'Security' },
-    { to: '/app/settings/branding',       label: 'Branding' },
     { to: '/app/settings/subscription',   label: 'Subscription' },
   ];
 

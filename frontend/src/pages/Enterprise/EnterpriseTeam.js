@@ -94,7 +94,7 @@ const EnterpriseTeam = () => {
     <div className="team-container enterprise-action-page">
       <section className="action-page-hero">
         <div className="action-page-copy">
-          <span className="action-page-kicker">Quick Action Destination</span>
+          <span className="action-page-kicker">Workspace — Access Control</span>
           <h1 className="action-page-title">Team & Permissions</h1>
           <p className="action-page-subtitle">Control who can access the overview, who can act on entity data, and how responsibilities are distributed.</p>
           <div className="action-page-actions">
@@ -156,8 +156,11 @@ const EnterpriseTeam = () => {
             <div key={idx} className="matrix-row">
               <div className="col-permission">{perm.name}</div>
               {roles.map(role => (
-                <div key={role.code} className="col-role">
-
+                <div
+                  key={role.code}
+                  className={`col-role${perm.permissions.includes(role.code) ? ' has-permission' : ''}`}
+                >
+                  {perm.permissions.includes(role.code) ? '✓' : ''}
                 </div>
               ))}
             </div>
@@ -215,14 +218,14 @@ const EnterpriseTeam = () => {
                     title="Edit"
                     onClick={() => handleEditTeamMember(member)}
                   >
-
+                    ✎
                   </button>
                   <button
                     className="btn-icon delete"
                     title="Remove"
                     onClick={() => handleDeleteTeamMember(member.id)}
                   >
-
+                    ✕
                   </button>
                 </div>
               </div>

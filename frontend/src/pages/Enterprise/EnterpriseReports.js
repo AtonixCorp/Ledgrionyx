@@ -110,7 +110,7 @@ const EnterpriseReports = () => {
     <div className="reports-container enterprise-action-page">
       <section className="action-page-hero">
         <div className="action-page-copy">
-          <span className="action-page-kicker">Quick Action Destination</span>
+          <span className="action-page-kicker">Workspace — Report Generation</span>
           <h1 className="action-page-title">Reports & Exports</h1>
           <p className="action-page-subtitle">Generate leadership-ready outputs from the same consolidated data surfaced in the overview.</p>
           <div className="action-page-actions">
@@ -296,7 +296,7 @@ const EnterpriseReports = () => {
               </div>
               <div className="report-actions">
                 <button className="btn-icon" title="Download">
-
+                ↓
                 </button>
                 <button className="btn-icon" title="Share">
                   ↗

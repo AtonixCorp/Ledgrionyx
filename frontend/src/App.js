@@ -79,6 +79,9 @@ import AppVarianceAnalysis from './modules/budgeting/VarianceAnalysis';
 import AppTaxCenter from './modules/compliance/TaxCenter';
 import AppAuditTrail from './modules/compliance/AuditTrail';
 import AppPeriodClose from './modules/compliance/PeriodClose';
+import AppTaxCalculator from './modules/compliance/TaxCalculator';
+import AppTaxMonitoring from './modules/compliance/TaxMonitoring';
+import AppFilingAssistant from './modules/compliance/FilingAssistant';
 import AppDocumentVault from './modules/documents/DocumentVault';
 import AppReceipts from './modules/documents/Receipts';
 import AppClientDirectory from './modules/clients/ClientDirectory';
@@ -86,6 +89,7 @@ import AppClientPortal from './modules/clients/ClientPortal';
 import AppAutomationRules from './modules/automation/AutomationRules';
 import AppRecurringEntries from './modules/automation/RecurringEntries';
 import AppAIInsights from './modules/automation/AIInsights';
+import AppAIAdvisor from './modules/automation/AIAdvisor';
 import AppAPIKeys from './modules/integrations/APIKeys';
 import AppIntegrationsList from './modules/integrations/IntegrationsList';
 import AppFirmSettings from './modules/settings/FirmSettings';
@@ -369,6 +373,9 @@ function App() {
               {renderModuleCrudRoutes('/app/compliance/tax-center', AppTaxCenter)}
               {renderModuleCrudRoutes('/app/compliance/audit-trail', AppAuditTrail)}
               {renderModuleCrudRoutes('/app/compliance/period-close', AppPeriodClose)}
+              {renderModulePageRoutes('/app/compliance/tax-calculator', AppTaxCalculator)}
+              {renderModulePageRoutes('/app/compliance/monitoring', AppTaxMonitoring)}
+              {renderModulePageRoutes('/app/compliance/filing', AppFilingAssistant)}
 
               {/* Documents */}
               {renderModulePageRoutes('/app/documents/vault', AppDocumentVault)}
@@ -382,6 +389,7 @@ function App() {
               {renderModulePageRoutes('/app/automation/rules', AppAutomationRules)}
               {renderModulePageRoutes('/app/automation/recurring', AppRecurringEntries)}
               {renderModulePageRoutes('/app/automation/ai-insights', AppAIInsights)}
+              {renderModulePageRoutes('/app/automation/ai-advisor', AppAIAdvisor)}
 
               {/* Integrations */}
               {renderModulePageRoutes('/app/integrations/api-keys', AppAPIKeys)}
