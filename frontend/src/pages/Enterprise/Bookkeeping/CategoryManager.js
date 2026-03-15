@@ -84,8 +84,8 @@ const CategoryManager = () => {
       {/* Header */}
       <div className="page-header">
         <div className="header-left">
-          <h1>Categories</h1>
-          <p>{entity?.name} • {categories.length} categories</p>
+          <h1>Bookkeeping Categories</h1>
+          <p>Manage income and expense categories for {entity?.name}.</p>
         </div>
         <div className="header-right">
           {categories.length === 0 && (
@@ -104,7 +104,6 @@ const CategoryManager = () => {
         {/* Income Categories */}
         <div className="category-section">
           <div className="section-header income">
-
             <h3>Income Categories</h3>
             <span className="count">{incomeCategories.length}</span>
           </div>
@@ -152,7 +151,6 @@ const CategoryManager = () => {
         {/* Expense Categories */}
         <div className="category-section">
           <div className="section-header expense">
-
             <h3>Expense Categories</h3>
             <span className="count">{expenseCategories.length}</span>
           </div>

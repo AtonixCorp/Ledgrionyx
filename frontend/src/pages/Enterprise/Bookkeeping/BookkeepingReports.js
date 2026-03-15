@@ -126,7 +126,7 @@ const BookkeepingReports = () => {
       <div className="bookkeeping-header">
         <div className="header-left">
           <h1>Bookkeeping Reports</h1>
-          <p>{entity?.name} - Financial Reports & Exports</p>
+          <p className="bk-reports-subtitle">Financial Reports & Exports for {entity?.name}</p>
         </div>
         <div className="header-right">
           <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}>
@@ -153,7 +153,7 @@ const BookkeepingReports = () => {
             onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
           />
         </div>
-        <button className="btn-primary" onClick={loadReportData}>
+        <button className="btn-primary bk-report-apply" onClick={loadReportData}>
           Apply Filters
         </button>
       </div>
@@ -185,7 +185,10 @@ const BookkeepingReports = () => {
         {reportType === 'pnl' && (
           <div className="pnl-report">
             <div className="report-header">
-              <h2>Profit & Loss Statement</h2>
+              <div>
+                <h2>Profit & Loss Statement</h2>
+                <p className="bk-report-copy">A clear view of income, expenses, and net performance for the selected reporting period.</p>
+              </div>
               <button className="btn-primary" onClick={generatePNLReport}>
                 Export CSV
               </button>
@@ -251,7 +254,7 @@ const BookkeepingReports = () => {
                     </div>
                   ))
                 ) : (
-                  <p>No category data available</p>
+                  <p className="bk-report-empty">No category data available for this date range.</p>
                 )}
               </div>
             </div>
@@ -261,7 +264,10 @@ const BookkeepingReports = () => {
         {reportType === 'cashflow' && (
           <div className="cashflow-report">
             <div className="report-header">
-              <h2>Cash Flow Statement</h2>
+              <div>
+                <h2>Cash Flow Statement</h2>
+                <p className="bk-report-copy">Track operating cash movement and period-by-period flow changes across your bookkeeping activity.</p>
+              </div>
               <button className="btn-primary" onClick={generateCashflowReport}>
                 Export CSV
               </button>
@@ -315,7 +321,7 @@ const BookkeepingReports = () => {
                     ))}
                   </div>
                 ) : (
-                  <p>No trend data available</p>
+                  <p className="bk-report-empty">No trend data available for this reporting window.</p>
                 )}
               </div>
             </div>
@@ -325,7 +331,10 @@ const BookkeepingReports = () => {
         {reportType === 'summary' && (
           <div className="summary-report">
             <div className="report-header">
-              <h2>Financial Summary</h2>
+              <div>
+                <h2>Financial Summary</h2>
+                <p className="bk-report-copy">A compact overview of the most important bookkeeping totals and activity counts.</p>
+              </div>
               <button className="btn-primary" onClick={() => exportToCSV([
                 ['Financial Summary', entity?.name || 'Entity'],
                 ['Period', `${formatDate(dateRange.start)} - ${formatDate(dateRange.end)}`],

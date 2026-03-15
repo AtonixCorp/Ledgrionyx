@@ -261,21 +261,21 @@ const BookkeepingDashboard = () => {
           <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/transactions`)}>View All</button>
         </div>
 
-        <div className="transactions-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Category</th>
-                <th>Account</th>
-                <th>Type</th>
-                <th className="text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentTransactions.length > 0 ? (
-                recentTransactions.map((transaction) => (
+        {recentTransactions.length > 0 ? (
+          <div className="transactions-table bk-transactions-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Account</th>
+                  <th>Type</th>
+                  <th className="text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentTransactions.map((transaction) => (
                   <tr key={transaction.id}>
                     <td>{formatDate(transaction.date)}</td>
                     <td className="transaction-description">{transaction.description}</td>
@@ -293,15 +293,17 @@ const BookkeepingDashboard = () => {
                       {formatCurrency(transaction.amount, transaction.currency)}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="no-data">No transactions found</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="bk-empty-transactions">
+            <h4>No transactions found</h4>
+            <p>No recent bookkeeping activity matches the selected period.</p>
+            <button className="btn-primary" onClick={handleNewTransaction}>Add Transaction</button>
+          </div>
+        )}
       </div>
 
       {/* Transaction Form Modal */}

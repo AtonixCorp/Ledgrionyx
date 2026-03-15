@@ -64,6 +64,7 @@ const VendorsTab = ({ entityId }) => {
         <button className="btn-primary" onClick={handleNew}>New Vendor</button>
       </div>
       {loading ? <div className="acct-loading">Loading vendors...</div> : (
+        <div className="acct-table-wrap ap-table-wrap">
         <table className="acct-table">
           <thead><tr><th>Code</th><th>Name</th><th>Email</th><th>Country</th><th>Currency</th><th>Payment Terms</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
@@ -81,6 +82,7 @@ const VendorsTab = ({ entityId }) => {
             ))}
           </tbody>
         </table>
+        </div>
       )}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
@@ -151,7 +153,7 @@ const BillsTab = ({ entityId }) => {
   return (
     <div>
       <div className="tab-toolbar">
-        <div className="ar-summary-mini">
+        <div className="ar-summary-mini ap-toolbar-stats">
           <div className="mini-stat"><span>Total Bills</span><strong>{items.length}</strong></div>
           <div className="mini-stat"><span>Outstanding AP</span><strong style={{ color: 'var(--color-error)' }}>{fmt(totalOutstanding)}</strong></div>
           <div className="mini-stat"><span>Overdue</span><strong style={{ color: 'var(--color-error)' }}>{items.filter(i => i.status === 'overdue').length}</strong></div>
@@ -159,6 +161,7 @@ const BillsTab = ({ entityId }) => {
         <button className="btn-primary" onClick={() => setShowForm(true)}>New Bill</button>
       </div>
       {loading ? <div className="acct-loading">Loading bills...</div> : (
+        <div className="acct-table-wrap ap-table-wrap">
         <table className="acct-table">
           <thead><tr><th>Bill #</th><th>Vendor</th><th>Bill Date</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Status</th></tr></thead>
           <tbody>
@@ -176,6 +179,7 @@ const BillsTab = ({ entityId }) => {
             ))}
           </tbody>
         </table>
+        </div>
       )}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
@@ -242,11 +246,14 @@ const BillPaymentsTab = ({ entityId }) => {
   return (
     <div>
       <div className="tab-toolbar">
-        <div className="mini-stat"><span>Total Payments</span><strong>{items.length}</strong></div>
-        <div className="mini-stat"><span>Total Paid Out</span><strong style={{ color: 'var(--color-error)' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
+        <div className="ap-toolbar-stats">
+          <div className="mini-stat"><span>Total Payments</span><strong>{items.length}</strong></div>
+          <div className="mini-stat"><span>Total Paid Out</span><strong style={{ color: 'var(--color-error)' }}>{fmt(items.reduce((s, p) => s + parseFloat(p.amount || 0), 0))}</strong></div>
+        </div>
         <button className="btn-primary" onClick={() => setShowForm(true)}>Pay Bill</button>
       </div>
       {loading ? <div className="acct-loading">Loading payments...</div> : (
+        <div className="acct-table-wrap ap-table-wrap">
         <table className="acct-table">
           <thead><tr><th>Date</th><th>Vendor</th><th>Bill</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead>
           <tbody>
@@ -263,6 +270,7 @@ const BillPaymentsTab = ({ entityId }) => {
             ))}
           </tbody>
         </table>
+        </div>
       )}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
@@ -298,11 +306,15 @@ const APModule = () => {
   const [activeTab, setActiveTab] = useState('vendors');
 
   return (
-    <div className="acct-page">
+    <div className="acct-page ap-module-page">
       <div className="acct-header">
-        <div>
+        <div className="ap-header-copy">
           <h1>Accounts Payable</h1>
-          <p>Manage vendors, purchase orders, bills, and payments — track money you owe</p>
+          <p className="ap-subtitle">Manage vendors, purchase orders, bills, and payments — track money you owe.</p>
+          <div className="ap-meta-row">
+            <span className="ap-meta-pill">4 workflows</span>
+            <span className="ap-meta-pill">Vendor to payment lifecycle</span>
+          </div>
         </div>
         <button className="btn-secondary">Export</button>
       </div>
@@ -358,11 +370,14 @@ const PurchaseOrdersTab = ({ entityId }) => {
   return (
     <div>
       <div className="tab-toolbar">
-        <div className="mini-stat"><span>Total POs</span><strong>{items.length}</strong></div>
-        <div className="mini-stat"><span>Open</span><strong style={{ color: 'var(--color-cyan)' }}>{items.filter(p => !['received','cancelled'].includes(p.status)).length}</strong></div>
+        <div className="ap-toolbar-stats">
+          <div className="mini-stat"><span>Total POs</span><strong>{items.length}</strong></div>
+          <div className="mini-stat"><span>Open</span><strong style={{ color: 'var(--color-cyan)' }}>{items.filter(p => !['received','cancelled'].includes(p.status)).length}</strong></div>
+        </div>
         <button className="btn-primary" onClick={() => setShowForm(true)}>New PO</button>
       </div>
       {loading ? <div className="acct-loading">Loading purchase orders...</div> : (
+        <div className="acct-table-wrap ap-table-wrap">
         <table className="acct-table">
           <thead><tr><th>PO #</th><th>Vendor</th><th>Date</th><th>Expected Delivery</th><th>Total</th><th>Status</th></tr></thead>
           <tbody>
@@ -378,6 +393,7 @@ const PurchaseOrdersTab = ({ entityId }) => {
             ))}
           </tbody>
         </table>
+        </div>
       )}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>

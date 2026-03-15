@@ -32,6 +32,11 @@ const BudgetsManager = () => {
     notes: ''
   });
 
+  const toAmount = (value) => {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
   const loadBudgets = useCallback(async () => {
     setLoading(true);
     const data = await fetchEntityBudgets(entityId);
@@ -86,9 +91,9 @@ const BudgetsManager = () => {
   // Calculate spending for each budget
   const getBudgetStatus = (budget) => {
     const categoryExpenses = expenses.filter(exp => exp.category === budget.category);
-    const spent = categoryExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
-    const limit = parseFloat(budget.limit);
-    const percentage = (spent / limit) * 100;
+    const spent = categoryExpenses.reduce((sum, exp) => sum + toAmount(exp.amount), 0);
+    const limit = toAmount(budget.limit);
+    const percentage = limit > 0 ? (spent / limit) * 100 : 0;
     const remaining = limit - spent;
 
     let status = 'good';
@@ -105,12 +110,15 @@ const BudgetsManager = () => {
   };
 
   // Calculate overall budget summary
-  const totalBudgetLimit = budgets.reduce((sum, b) => sum + parseFloat(b.limit), 0);
+  const totalBudgetLimit = budgets.reduce((sum, b) => sum + toAmount(b.limit), 0);
   const totalSpent = budgets.reduce((sum, b) => {
     const status = getBudgetStatus(b);
     return sum + status.spent;
   }, 0);
   const totalRemaining = totalBudgetLimit - totalSpent;
+  const utilizationPercentage = totalBudgetLimit > 0
+    ? ((totalSpent / totalBudgetLimit) * 100).toFixed(1)
+    : '0.0';
 
   const exceededBudgets = budgets.filter(b => getBudgetStatus(b).status === 'exceeded').length;
   const warningBudgets = budgets.filter(b => getBudgetStatus(b).status === 'warning').length;
@@ -121,9 +129,13 @@ const BudgetsManager = () => {
     <div className="entity-management-container">
       {/* Header */}
       <div className="management-header">
-        <div>
+        <div className="budget-header-copy">
           <h2>Budget Management</h2>
-          <p className="subtitle">{entity?.name} - {budgets.length} budgets</p>
+          <p className="subtitle">Plan category budgets, monitor utilization, and catch overspend risk early for {entity?.name}.</p>
+          <div className="budget-header-meta">
+            <span className="budget-meta-pill">{budgets.length} budget{budgets.length === 1 ? '' : 's'}</span>
+            <span className="budget-meta-pill">{expenses.length} tracked expense entries</span>
+          </div>
         </div>
         <div className="header-actions">
           <button className="btn-primary" onClick={() => setShowForm(true)}>
@@ -150,7 +162,7 @@ const BudgetsManager = () => {
         </div>
         <div className="summary-card-mini">
           <h4>Utilization</h4>
-          <p className="percentage">{((totalSpent / totalBudgetLimit) * 100).toFixed(1)}%</p>
+          <p className="percentage">{utilizationPercentage}%</p>
         </div>
       </div>
 
@@ -159,13 +171,11 @@ const BudgetsManager = () => {
         <div className="alert-summary">
           {exceededBudgets > 0 && (
             <div className="alert-card danger">
-
               <span>{exceededBudgets} budget{exceededBudgets > 1 ? 's' : ''} exceeded</span>
             </div>
           )}
           {warningBudgets > 0 && (
             <div className="alert-card warning">
-
               <span>{warningBudgets} budget{warningBudgets > 1 ? 's' : ''} approaching limit</span>
             </div>
           )}
@@ -176,6 +186,7 @@ const BudgetsManager = () => {
       <div className="budgets-grid">
         {budgets.map(budget => {
           const status = getBudgetStatus(budget);
+          const budgetLimit = toAmount(budget.limit);
           return (
             <div key={budget.id} className={`budget-card ${status.status}`}>
               <div className="budget-header">
@@ -193,7 +204,7 @@ const BudgetsManager = () => {
               <div className="budget-amounts">
                 <div className="budget-amount-row">
                   <span>Budget:</span>
-                  <span className="amount">${parseFloat(budget.limit).toFixed(2)}</span>
+                  <span className="amount">${budgetLimit.toFixed(2)}</span>
                 </div>
                 <div className="budget-amount-row">
                   <span>Spent:</span>
@@ -240,8 +251,9 @@ const BudgetsManager = () => {
       </div>
 
       {budgets.length === 0 && (
-        <div className="empty-state">
-          <p>No budgets created yet. Create your first budget to start tracking spending.</p>
+        <div className="empty-state budget-empty-state">
+          <h3>No budgets created yet</h3>
+          <p>Create your first budget to start tracking category spending against clear limits.</p>
           <button className="btn-primary" onClick={() => setShowForm(true)}>
             Create First Budget
           </button>
