@@ -15,6 +15,8 @@ from .models import (
     Budget,
     ChartOfAccounts,
     Customer,
+    DeveloperAPI,
+    DeveloperAPIEndpoint,
     DeveloperPortalKeyRequest,
     Entity,
     Expense,
@@ -110,6 +112,15 @@ class DeveloperPortalViewTests(TestCase):
     def setUp(self):
         self.client = APIClient(HTTP_HOST='localhost')
 
+    def test_root_landing_page_renders_nasa_style_public_portal(self):
+        response = self.client.get('/')
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode('utf-8')
+        self.assertIn('ATC Capital APIs', content)
+        self.assertIn('Request API key', content)
+        self.assertIn('Search APIs', content)
+
     def test_api_catalog_list_returns_seeded_results(self):
         response = self.client.get('/developer/apis')
 
@@ -140,6 +151,32 @@ class DeveloperPortalViewTests(TestCase):
         self.assertTrue(response.data['versions'])
         self.assertTrue(response.data['endpoints'])
 
+    def test_public_api_aliases_return_catalog_detail_and_endpoint_data(self):
+        api_response = self.client.get('/apis')
+        detail_response = self.client.get('/apis/market-data-api')
+        endpoint_list_response = self.client.get('/apis/market-data-api/endpoints')
+
+        self.assertEqual(api_response.status_code, 200)
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertEqual(endpoint_list_response.status_code, 200)
+        self.assertEqual(detail_response.data['slug'], 'market-data-api')
+        self.assertTrue(endpoint_list_response.data['endpoints'])
+
+        endpoint_id = endpoint_list_response.data['endpoints'][0]['id']
+        endpoint_detail_response = self.client.get(f'/apis/market-data-api/endpoints/{endpoint_id}')
+        self.assertEqual(endpoint_detail_response.status_code, 200)
+        self.assertEqual(endpoint_detail_response.data['api']['slug'], 'market-data-api')
+        self.assertEqual(endpoint_detail_response.data['endpoint']['id'], endpoint_id)
+
+    def test_docs_aliases_return_catalog_documents(self):
+        list_response = self.client.get('/docs/apis')
+        detail_response = self.client.get('/docs/apis/market-data-api')
+
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertTrue(any(item['slug'] == 'market-data-api' for item in list_response.data['results']))
+        self.assertEqual(detail_response.data['slug'], 'market-data-api')
+
     def test_api_detail_returns_standard_not_found_error(self):
         response = self.client.get('/developer/apis/does-not-exist')
 
@@ -150,6 +187,7 @@ class DeveloperPortalViewTests(TestCase):
         auth_response = self.client.get('/developer/docs/authentication')
         errors_response = self.client.get('/developer/docs/errors')
         status_response = self.client.get('/developer/status')
+        public_status_response = self.client.get('/status')
 
         self.assertEqual(auth_response.status_code, 200)
         self.assertEqual(auth_response.data['slug'], 'authentication')
@@ -157,6 +195,9 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(errors_response.data['slug'], 'errors')
         self.assertEqual(status_response.status_code, 200)
         self.assertEqual(status_response.data['service'], 'developer-portal')
+        self.assertIn('uptime_seconds', status_response.data)
+        self.assertEqual(public_status_response.status_code, 200)
+        self.assertEqual(public_status_response.data['version'], status_response.data['version'])
         self.assertTrue(any(component['name'] == 'database' for component in status_response.data['components']))
 
     def test_key_request_requires_identity_fields(self):
@@ -199,6 +240,23 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(application.environment, 'sandbox')
         self.assertEqual(application.source_metadata['source'], 'developer_portal')
         self.assertEqual(request_record.source_metadata['ip_address'], '127.0.0.1')
+
+    def test_public_key_register_accepts_name_payload(self):
+        response = self.client.post(
+            '/keys/register',
+            {
+                'name': 'Jane Portal',
+                'email': 'jane.portal@example.com',
+                'organization': 'Portal Labs',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['developer']['first_name'], 'Jane')
+        self.assertEqual(response.data['developer']['last_name'], 'Portal')
+        self.assertEqual(response.data['api_key']['status'], 'ACTIVE')
+        self.assertTrue(DeveloperPortalKeyRequest.objects.filter(email='jane.portal@example.com').exists())
 
     def test_jwt_token_endpoint_uses_standard_error_envelope(self):
         response = self.client.post(

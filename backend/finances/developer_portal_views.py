@@ -1,9 +1,11 @@
 import hashlib
 import secrets
+import time
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch
 from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework.permissions import AllowAny
@@ -25,6 +27,7 @@ from .v1_auth import compose_cli_api_key
 
 
 User = get_user_model()
+DEVELOPER_PORTAL_START_TIME = time.monotonic()
 
 
 def _developer_source_metadata(request, extra=None):
@@ -105,6 +108,20 @@ def _developer_api_detail(api):
         'versions': [_developer_api_version(version) for version in versions],
         'default_version': _developer_api_version(default_version) if default_version else None,
         'endpoints': [_developer_endpoint_payload(endpoint) for endpoint in default_version.endpoints.all()] if default_version else [],
+    }
+
+
+def _developer_endpoint_detail(api, endpoint):
+    return {
+        'api': {
+            'slug': api.slug,
+            'name': api.name,
+            'version': next((version.version for version in api.versions.all() if version.is_default), None),
+        },
+        'endpoint': {
+            'id': endpoint.id,
+            **_developer_endpoint_payload(endpoint),
+        },
     }
 
 
@@ -261,6 +278,76 @@ class DeveloperAPIDetailView(DeveloperFacingAPIView):
         return Response(_developer_api_detail(api))
 
 
+class DeveloperAPIEndpointListView(DeveloperFacingAPIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, slug):
+        api = _developer_catalog_queryset().filter(slug=slug).first()
+        if api is None:
+            return developer_standard_error_response(
+                code='NOT_FOUND',
+                message='The requested API catalog entry was not found.',
+                details={'slug': slug},
+                status_code=404,
+            )
+
+        endpoints = []
+        for version in api.versions.all():
+            for endpoint in version.endpoints.all():
+                endpoints.append(
+                    {
+                        'id': endpoint.id,
+                        'version': version.version,
+                        **_developer_endpoint_payload(endpoint),
+                    }
+                )
+
+        return Response(
+            {
+                'api': {
+                    'slug': api.slug,
+                    'name': api.name,
+                    'status': api.status,
+                    'version': next((version.version for version in api.versions.all() if version.is_default), None),
+                },
+                'endpoints': endpoints,
+            }
+        )
+
+
+class DeveloperAPIEndpointDetailView(DeveloperFacingAPIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, slug, endpoint_id):
+        api = _developer_catalog_queryset().filter(slug=slug).first()
+        if api is None:
+            return developer_standard_error_response(
+                code='NOT_FOUND',
+                message='The requested API catalog entry was not found.',
+                details={'slug': slug},
+                status_code=404,
+            )
+
+        endpoint = next(
+            (
+                endpoint_item
+                for version in api.versions.all()
+                for endpoint_item in version.endpoints.all()
+                if endpoint_item.id == endpoint_id
+            ),
+            None,
+        )
+        if endpoint is None:
+            return developer_standard_error_response(
+                code='NOT_FOUND',
+                message='The requested API endpoint was not found.',
+                details={'slug': slug, 'endpoint_id': endpoint_id},
+                status_code=404,
+            )
+
+        return Response(_developer_endpoint_detail(api, endpoint))
+
+
 class DeveloperAuthenticationDocsView(DeveloperFacingAPIView):
     permission_classes = [AllowAny]
 
@@ -327,10 +414,13 @@ class DeveloperStatusView(DeveloperFacingAPIView):
     def get(self, request):
         database_status = _database_health()
         overall_status = 'operational' if database_status == 'ok' else 'degraded'
+        uptime_seconds = max(int(time.monotonic() - DEVELOPER_PORTAL_START_TIME), 0)
         return Response(
             {
                 'status': overall_status,
                 'service': 'developer-portal',
+                'version': settings.APP_VERSION,
+                'uptime_seconds': uptime_seconds,
                 'updated_at': timezone.now().isoformat(),
                 'components': [
                     {'name': 'catalog', 'status': 'operational'},
@@ -348,8 +438,13 @@ class DeveloperKeyRequestView(DeveloperFacingAPIView):
     @transaction.atomic
     def post(self, request):
         payload = request.data or {}
+        full_name = (payload.get('name') or '').strip()
         first_name = (payload.get('first_name') or '').strip()
         last_name = (payload.get('last_name') or '').strip()
+        if full_name and not first_name and not last_name:
+            name_parts = full_name.split()
+            first_name = name_parts[0]
+            last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else 'Developer'
         email = (payload.get('email') or '').strip().lower()
         organization_name = (payload.get('organization') or '').strip()
         intended_use = (payload.get('intended_use') or '').strip()
@@ -468,6 +563,7 @@ class DeveloperKeyRequestView(DeveloperFacingAPIView):
                     'id': f'key_{application.pk}',
                     'client_id': application.client_id,
                     'api_key': compose_cli_api_key(application.client_id, raw_secret),
+                    'status': 'ACTIVE',
                     'scopes': application.scopes,
                     'environment': application.environment,
                 },

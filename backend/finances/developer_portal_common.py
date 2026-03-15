@@ -13,7 +13,7 @@ def developer_error_code_from_status(status_code):
         404: 'NOT_FOUND',
         405: 'METHOD_NOT_ALLOWED',
         409: 'CONFLICT',
-        429: 'RATE_LIMITED',
+        429: 'RATE_LIMIT_EXCEEDED',
     }.get(status_code, 'INTERNAL_ERROR')
 
 
@@ -42,7 +42,7 @@ def normalize_developer_error_response_data(data, status_code):
         detail = data.get('detail')
         detail_code = getattr(detail, 'code', None)
         code = {
-            'throttled': 'RATE_LIMITED',
+            'throttled': 'RATE_LIMIT_EXCEEDED',
             'authentication_failed': 'UNAUTHORIZED',
             'not_authenticated': 'UNAUTHORIZED',
             'permission_denied': 'FORBIDDEN',

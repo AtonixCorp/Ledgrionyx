@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.exceptions import ValidationError
+from django.conf import settings
 from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
@@ -11,7 +12,7 @@ from django.utils import timezone
 from .models import (
     Expense, Income, Budget, ModelTemplate, FinancialModel, Scenario,
     SensitivityAnalysis, AIInsight, CustomKPI, KPICalculation, Report,
-    Consolidation, ConsolidationEntity, TaxCalculation, Entity, Organization, TeamMember
+    Consolidation, ConsolidationEntity, TaxCalculation, Entity, Organization, TeamMember, DeveloperAPI
 )
 from .serializers import (
     ExpenseSerializer, IncomeSerializer, BudgetSerializer,
@@ -269,70 +270,47 @@ def get_country(request, code):
 
 
 def landing_page(request):
-    """
-    Landing page for the AI Financial Modeling Integration System Backend
-    """
+    featured_apis = list(
+        DeveloperAPI.objects.filter(status='stable', is_featured=True)
+        .prefetch_related('categories', 'tags', 'versions')
+        .order_by('featured_rank', 'name')[:6]
+    )
     context = {
-        'title': 'AI Financial Modeling Integration System',
-        'subtitle': 'Enterprise-Grade Financial Analysis Platform',
-        'version': '1.0.0',
-        'description': 'Complete backend API for advanced financial modeling, AI-driven insights, and enterprise compliance.',
-        'features': [
+        'title': 'ATC Capital APIs',
+        'subtitle': 'Institutional-grade market, account, transaction, and risk data for engineering teams.',
+        'version': settings.APP_VERSION,
+        'description': 'A clear, authoritative API entry point for discovery, authentication, rate limits, and operational trust.',
+        'featured_apis': [
             {
-                'title': 'Financial Modeling Engine',
-                'description': 'DCF, comparable companies, and merger analysis with 40+ country tax libraries',
-                'icon': '💰',
-                'endpoints': ['/api/models/', '/api/tax/countries/']
-            },
-            {
-                'title': 'AI & Analytics',
-                'description': 'Pattern recognition, anomaly detection, and predictive analytics',
-                'icon': '🤖',
-                'endpoints': ['/api/ai/insights/', '/api/analytics/']
-            },
-            {
-                'title': 'Scenario Planning',
-                'description': 'Best/base/worst case analysis with sensitivity testing',
-                'icon': '🎯',
-                'endpoints': ['/api/scenarios/', '/api/sensitivity/']
-            },
-            {
-                'title': 'Enterprise Features',
-                'description': 'Multi-tenant architecture, audit trails, and compliance',
-                'icon': '🏢',
-                'endpoints': ['/api/organizations/', '/api/audit-logs/']
-            },
-            {
-                'title': 'Reporting & Export',
-                'description': 'Professional reports with PDF/HTML/JSON export capabilities',
-                'icon': '📊',
-                'endpoints': ['/api/reports/', '/api/export/']
-            },
-            {
-                'title': 'Tax & Compliance',
-                'description': 'Multi-country tax calculations and regulatory compliance',
-                'icon': '⚖️',
-                'endpoints': ['/api/tax/', '/api/compliance/']
+                'slug': api.slug,
+                'name': api.name,
+                'description': api.description,
+                'status': api.status.upper(),
+                'auth_type': api.auth_type.upper(),
+                'version': next((version.version for version in api.versions.all() if version.is_default), None) or 'v1',
+                'categories': [category.name for category in api.categories.all()],
+                'tags': [tag.name for tag in api.tags.all()],
             }
+            for api in featured_apis
         ],
         'api_stats': {
-            'total_endpoints': 25,
-            'supported_countries': 40,
-            'calculation_engines': 6,
-            'ai_models': 3
+            'api_count': DeveloperAPI.objects.count(),
+            'featured_count': len(featured_apis),
+            'stable_count': DeveloperAPI.objects.filter(status='stable').count(),
+            'public_count': DeveloperAPI.objects.filter(access_level='public').count(),
         },
         'quick_links': [
-            {'name': 'API Documentation', 'url': '/api/docs/', 'icon': '📚'},
-            {'name': 'Admin Panel', 'url': '/admin/', 'icon': '⚙️'},
-            {'name': 'Health Check', 'url': '/api/health/', 'icon': '❤️'},
-            {'name': 'Frontend App', 'url': 'http://localhost:3000', 'icon': '🌐'}
+            {'name': 'Get API Key', 'url': '/keys/register', 'description': 'Provision a developer key for sandbox access.'},
+            {'name': 'Authentication Docs', 'url': '/developer/docs/authentication', 'description': 'Review bearer, CLI, and org header conventions.'},
+            {'name': 'Platform Status', 'url': '/status', 'description': 'Inspect live health, version, and backend component state.'},
+            {'name': 'API Catalog', 'url': '/apis', 'description': 'Browse all published ATC Capital API surfaces.'},
         ],
         'system_info': {
             'backend': 'Django REST Framework',
-            'database': 'SQLite (Development)',
-            'frontend': 'React 18',
-            'deployment': 'Docker Ready'
-        }
+            'authentication': 'API keys and OAuth 2.0 client credentials',
+            'rate_limits': 'Per-key burst and endpoint throttles',
+            'audit': 'Request events and issuance metadata are retained server-side',
+        },
     }
 
     return render(request, 'landing_page.html', context)
