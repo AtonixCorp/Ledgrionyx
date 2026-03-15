@@ -1,3 +1,5 @@
+import time
+
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, PermissionDenied, Throttled, ValidationError
 from rest_framework.response import Response
@@ -32,6 +34,87 @@ def developer_standard_error_response(*, code, message, details=None, status_cod
         developer_standard_error_payload(code=code, message=message, details=details),
         status=status_code,
     )
+
+
+def _extract_client_ip(request):
+    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded_for:
+        return forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR')
+
+
+def _log_developer_portal_request(request, response):
+    resolver_match = getattr(request, 'resolver_match', None)
+    if resolver_match is None:
+        return
+
+    tracked_view_names = {
+        'developer-api-list',
+        'developer-api-detail',
+        'developer-api-endpoints',
+        'developer-api-endpoint-detail',
+        'developer-search',
+        'developer-docs-authentication',
+        'developer-docs-errors',
+        'developer-status',
+        'developer-key-request',
+        'public-api-list',
+        'public-api-detail',
+        'public-api-endpoints',
+        'public-api-endpoint-detail',
+        'public-api-search',
+        'public-api-docs',
+        'public-api-docs-detail',
+        'public-key-register',
+        'public-status',
+    }
+    if resolver_match.view_name not in tracked_view_names:
+        return
+
+    try:
+        from django.utils import timezone
+        from .models import DeveloperAPI, DeveloperAPIEndpoint, DeveloperPortalAPILog, DeveloperPortalKeyRequest, RateLimitProfile
+
+        slug = resolver_match.kwargs.get('slug')
+        endpoint_id = resolver_match.kwargs.get('endpoint_id')
+
+        api_service = DeveloperAPI.objects.filter(slug=slug).first() if slug else None
+        endpoint = DeveloperAPIEndpoint.objects.filter(id=endpoint_id).first() if endpoint_id else None
+
+        response_data = getattr(response, 'data', None)
+        request_record = None
+        if isinstance(response_data, dict) and response_data.get('request_id'):
+            request_record = DeveloperPortalKeyRequest.objects.filter(pk=response_data['request_id']).first()
+
+        rate_limit_profile = None
+        if request_record is not None and request_record.rate_limit_profile_id:
+            rate_limit_profile = request_record.rate_limit_profile
+        elif api_service is not None and api_service.rate_limit_profile_id:
+            rate_limit_profile = api_service.rate_limit_profile
+        else:
+            rate_limit_profile = RateLimitProfile.objects.filter(is_default=True).order_by('id').first()
+
+        started_at = getattr(request, '_developer_portal_started_at', None)
+        response_time_ms = max(int((time.monotonic() - started_at) * 1000), 0) if started_at is not None else 0
+        DeveloperPortalAPILog.objects.create(
+            api_service=api_service,
+            endpoint=endpoint,
+            key_request=request_record,
+            rate_limit_profile=rate_limit_profile,
+            method=request.method,
+            path=request.path,
+            status_code=getattr(response, 'status_code', 200),
+            request_timestamp=timezone.now(),
+            response_time_ms=response_time_ms,
+            client_ip=_extract_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', ''),
+            source_metadata={
+                'view_name': resolver_match.view_name,
+                'route_kwargs': resolver_match.kwargs,
+            },
+        )
+    except Exception:
+        return
 
 
 def normalize_developer_error_response_data(data, status_code):
@@ -76,6 +159,10 @@ def normalize_developer_error_response_data(data, status_code):
 
 
 class DeveloperFacingAPIView(APIView):
+    def initial(self, request, *args, **kwargs):
+        request._developer_portal_started_at = time.monotonic()
+        return super().initial(request, *args, **kwargs)
+
     def handle_exception(self, exc):
         if isinstance(exc, ValueError):
             return developer_standard_error_response(
@@ -96,6 +183,7 @@ class DeveloperFacingAPIView(APIView):
         if getattr(response, 'status_code', 200) >= 400 and hasattr(response, 'data'):
             response.data = normalize_developer_error_response_data(response.data, response.status_code)
             response._is_rendered = False
+        _log_developer_portal_request(request, response)
         return response
 
 

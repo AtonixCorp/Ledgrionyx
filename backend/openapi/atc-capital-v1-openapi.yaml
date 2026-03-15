@@ -14,6 +14,9 @@ servers:
 security:
   - OAuth2: []
 tags:
+  - name: Developer Portal
+  - name: Developer Docs
+  - name: Status
   - name: Authentication
   - name: Organizations
   - name: Migration
@@ -939,6 +942,278 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WebhookEvent'
+  /:
+    get:
+      tags: [Developer Portal]
+      summary: Render the public ATC Capital API landing page
+      operationId: renderDeveloperLandingPage
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      responses:
+        '200':
+          description: NASA-style landing page HTML
+          content:
+            text/html:
+              schema:
+                type: string
+  /apis:
+    get:
+      tags: [Developer Portal]
+      summary: List published APIs in the public catalog
+      operationId: listDeveloperCatalogApis
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [stable, beta, deprecated]
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: accessLevel
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [public, partner, internal]
+      responses:
+        '200':
+          description: API catalog page data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperAPIListResponse'
+  /apis/{slug}:
+    get:
+      tags: [Developer Portal]
+      summary: Get full metadata for a published API
+      operationId: getDeveloperCatalogApi
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: API detail document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperAPIDetail'
+        '404':
+          $ref: '#/components/responses/StandardNotFound'
+  /apis/{slug}/endpoints:
+    get:
+      tags: [Developer Portal]
+      summary: List endpoints for a published API
+      operationId: listDeveloperCatalogEndpoints
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Endpoint catalog for an API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperAPIEndpointListResponse'
+        '404':
+          $ref: '#/components/responses/StandardNotFound'
+  /apis/{slug}/endpoints/{endpoint_id}:
+    get:
+      tags: [Developer Portal]
+      summary: Get detail for one published API endpoint
+      operationId: getDeveloperCatalogEndpoint
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: endpoint_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Endpoint detail document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperAPIEndpointDetailResponse'
+        '404':
+          $ref: '#/components/responses/StandardNotFound'
+  /search:
+    get:
+      tags: [Developer Portal]
+      summary: Search across published APIs and endpoint metadata
+      operationId: searchDeveloperCatalog
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [stable, beta, deprecated]
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperSearchResponse'
+        '400':
+          $ref: '#/components/responses/StandardBadRequest'
+  /keys/register:
+    post:
+      tags: [Developer Portal]
+      summary: Register a developer and issue a composite API key
+      operationId: registerDeveloperApiKey
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeveloperKeyRegistrationRequest'
+      responses:
+        '201':
+          description: Developer key issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperKeyRegistrationResponse'
+        '400':
+          $ref: '#/components/responses/StandardBadRequest'
+  /docs/apis:
+    get:
+      tags: [Developer Docs]
+      summary: List API documentation documents for the public catalog
+      operationId: listDeveloperApiDocs
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      responses:
+        '200':
+          description: Documentation listing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperAPIListResponse'
+  /docs/apis/{slug}:
+    get:
+      tags: [Developer Docs]
+      summary: Get a documentation document for one published API
+      operationId: getDeveloperApiDoc
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: API documentation detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperAPIDetail'
+        '404':
+          $ref: '#/components/responses/StandardNotFound'
+  /status:
+    get:
+      tags: [Status]
+      summary: Return developer portal health and version information
+      operationId: getDeveloperPortalStatus
+      security: []
+      servers:
+        - url: https://api.atc-capital.com
+          description: Production root
+        - url: https://sandbox.api.atc-capital.com
+          description: Sandbox root
+      responses:
+        '200':
+          description: Developer portal status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeveloperStatus'
 components:
   securitySchemes:
     OAuth2:
@@ -1081,6 +1356,307 @@ components:
         updated_at:
           type: string
           format: date-time
+    RateLimitProfile:
+      type: object
+      properties:
+        name:
+          type: string
+        requests_per_minute:
+          type: integer
+        requests_per_day:
+          type: integer
+    DeveloperAPICategory:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+    DeveloperAPITag:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+    DeveloperAPIEndpoint:
+      type: object
+      properties:
+        id:
+          type: integer
+        version:
+          type: string
+        name:
+          type: string
+        method:
+          type: string
+        path:
+          type: string
+        summary:
+          type: string
+        description:
+          type: string
+        path_parameters:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        query_parameters:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        headers:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        scopes:
+          type: array
+          items:
+            type: string
+        request_example:
+          type: string
+        response_example:
+          type: string
+        error_responses:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    DeveloperAPIListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        access_level:
+          type: string
+        auth_type:
+          type: string
+        data_types:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeveloperAPICategory'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeveloperAPITag'
+        version:
+          type: string
+        is_featured:
+          type: boolean
+        rate_limit_profile:
+          $ref: '#/components/schemas/RateLimitProfile'
+    DeveloperAPIVersion:
+      type: object
+      properties:
+        version:
+          type: string
+        base_path:
+          type: string
+        summary:
+          type: string
+        status:
+          type: string
+        is_default:
+          type: boolean
+        release_notes:
+          type: string
+    DeveloperAPIDetail:
+      allOf:
+        - $ref: '#/components/schemas/DeveloperAPIListItem'
+        - type: object
+          properties:
+            overview:
+              type: string
+            use_cases:
+              type: array
+              items:
+                type: string
+            data_domains:
+              type: array
+              items:
+                type: string
+            rate_limits:
+              type: object
+              additionalProperties: true
+            compliance_notes:
+              type: string
+            keywords:
+              type: array
+              items:
+                type: string
+            versions:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeveloperAPIVersion'
+            default_version:
+              $ref: '#/components/schemas/DeveloperAPIVersion'
+            endpoints:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeveloperAPIEndpoint'
+    DeveloperPagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    DeveloperAPIListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeveloperAPIListItem'
+        pagination:
+          $ref: '#/components/schemas/DeveloperPagination'
+        available_filters:
+          type: object
+          additionalProperties: true
+    DeveloperSearchResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeveloperAPIListItem'
+        pagination:
+          $ref: '#/components/schemas/DeveloperPagination'
+    DeveloperAPIEndpointListResponse:
+      type: object
+      properties:
+        api:
+          type: object
+          properties:
+            slug:
+              type: string
+            name:
+              type: string
+            status:
+              type: string
+            version:
+              type: string
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeveloperAPIEndpoint'
+    DeveloperAPIEndpointDetailResponse:
+      type: object
+      properties:
+        api:
+          type: object
+          properties:
+            slug:
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+        endpoint:
+          $ref: '#/components/schemas/DeveloperAPIEndpoint'
+    DeveloperKeyRegistrationRequest:
+      type: object
+      required: [email]
+      properties:
+        name:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        organization:
+          type: string
+        intended_use:
+          type: string
+    DeveloperKeyRegistrationResponse:
+      type: object
+      properties:
+        request_id:
+          type: integer
+        message:
+          type: string
+        developer:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            first_name:
+              type: string
+            last_name:
+              type: string
+        organization:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        api_key:
+          type: object
+          properties:
+            id:
+              type: string
+            client_id:
+              type: string
+            api_key:
+              type: string
+            status:
+              type: string
+            scopes:
+              type: array
+              items:
+                type: string
+            environment:
+              type: string
+            rate_limit_profile:
+              $ref: '#/components/schemas/RateLimitProfile'
+    DeveloperStatus:
+      type: object
+      properties:
+        status:
+          type: string
+        service:
+          type: string
+        version:
+          type: string
+        uptime_seconds:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+        components:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              status:
+                type: string
     User:
       type: object
       properties:

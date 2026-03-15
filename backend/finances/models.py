@@ -3537,6 +3537,25 @@ class WebhookDelivery(models.Model):
 # DEVELOPER PORTAL – API CATALOG, SEARCH, AND KEY REQUESTS
 # ============================================================================
 
+class RateLimitProfile(models.Model):
+    """Named quota profile for developer portal APIs and issued credentials"""
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    requests_per_minute = models.PositiveIntegerField(default=60)
+    requests_per_day = models.PositiveIntegerField(default=10000)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Rate Limit Profile'
+        verbose_name_plural = 'Rate Limit Profiles'
+
+    def __str__(self):
+        return f"{self.name} ({self.requests_per_minute}/min, {self.requests_per_day}/day)"
+
 class DeveloperAPICategory(models.Model):
     """Top-level grouping for developer-facing APIs"""
     name = models.CharField(max_length=100, unique=True)
@@ -3605,6 +3624,9 @@ class DeveloperAPI(models.Model):
     keywords = models.JSONField(default=list, blank=True)
     is_featured = models.BooleanField(default=False)
     featured_rank = models.PositiveIntegerField(default=0)
+    rate_limit_profile = models.ForeignKey(
+        RateLimitProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='developer_apis'
+    )
     categories = models.ManyToManyField(DeveloperAPICategory, related_name='apis', blank=True)
     tags = models.ManyToManyField(DeveloperAPITag, related_name='apis', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -3701,6 +3723,9 @@ class DeveloperPortalKeyRequest(models.Model):
     application = models.ForeignKey(
         OAuthApplication, on_delete=models.SET_NULL, null=True, blank=True, related_name='developer_portal_key_requests'
     )
+    rate_limit_profile = models.ForeignKey(
+        RateLimitProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='developer_portal_key_requests'
+    )
     source_metadata = models.JSONField(default=dict, blank=True)
     generated_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -3713,3 +3738,41 @@ class DeveloperPortalKeyRequest(models.Model):
 
     def __str__(self):
         return f"{self.email} ({self.status})"
+
+
+class DeveloperPortalAPILog(models.Model):
+    """Audit trail for developer portal catalog, docs, search, status, and key-registration access"""
+    api_service = models.ForeignKey(
+        DeveloperAPI, on_delete=models.SET_NULL, null=True, blank=True, related_name='portal_logs'
+    )
+    endpoint = models.ForeignKey(
+        DeveloperAPIEndpoint, on_delete=models.SET_NULL, null=True, blank=True, related_name='portal_logs'
+    )
+    key_request = models.ForeignKey(
+        DeveloperPortalKeyRequest, on_delete=models.SET_NULL, null=True, blank=True, related_name='api_logs'
+    )
+    rate_limit_profile = models.ForeignKey(
+        RateLimitProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='portal_logs'
+    )
+    method = models.CharField(max_length=10)
+    path = models.CharField(max_length=255)
+    status_code = models.PositiveIntegerField()
+    request_timestamp = models.DateTimeField()
+    response_time_ms = models.PositiveIntegerField(default=0)
+    client_ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    source_metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-request_timestamp']
+        verbose_name = 'Developer Portal API Log'
+        verbose_name_plural = 'Developer Portal API Logs'
+        indexes = [
+            models.Index(fields=['path', 'method']),
+            models.Index(fields=['request_timestamp']),
+            models.Index(fields=['status_code']),
+        ]
+
+    def __str__(self):
+        return f"{self.method} {self.path} ({self.status_code})"

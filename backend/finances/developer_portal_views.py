@@ -20,6 +20,7 @@ from .models import (
     DeveloperPortalKeyRequest,
     OAuthApplication,
     Organization,
+    RateLimitProfile,
     UserProfile,
 )
 from .platform_views import _database_health
@@ -71,6 +72,11 @@ def _developer_api_summary(api):
         'tags': [{'name': tag.name, 'slug': tag.slug} for tag in api.tags.all()],
         'version': default_version.version if default_version else None,
         'is_featured': api.is_featured,
+        'rate_limit_profile': {
+            'name': api.rate_limit_profile.name,
+            'requests_per_minute': api.rate_limit_profile.requests_per_minute,
+            'requests_per_day': api.rate_limit_profile.requests_per_day,
+        } if api.rate_limit_profile_id else None,
     }
 
 
@@ -519,6 +525,7 @@ class DeveloperKeyRequestView(DeveloperFacingAPIView):
             status='submitted',
             user=user,
             organization=organization,
+            rate_limit_profile=RateLimitProfile.objects.filter(is_default=True).order_by('id').first(),
             source_metadata=_developer_source_metadata(request, {'created_user': created_user}),
         )
 
@@ -566,6 +573,11 @@ class DeveloperKeyRequestView(DeveloperFacingAPIView):
                     'status': 'ACTIVE',
                     'scopes': application.scopes,
                     'environment': application.environment,
+                    'rate_limit_profile': {
+                        'name': request_record.rate_limit_profile.name,
+                        'requests_per_minute': request_record.rate_limit_profile.requests_per_minute,
+                        'requests_per_day': request_record.rate_limit_profile.requests_per_day,
+                    } if request_record.rate_limit_profile_id else None,
                 },
             },
             status=201,

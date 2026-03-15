@@ -17,6 +17,7 @@ from .models import (
     Customer,
     DeveloperAPI,
     DeveloperAPIEndpoint,
+    DeveloperPortalAPILog,
     DeveloperPortalKeyRequest,
     Entity,
     Expense,
@@ -24,6 +25,7 @@ from .models import (
     Income,
     JournalEntry,
     OAuthApplication,
+    RateLimitProfile,
     Organization,
     SystemEvent,
     TeamMember,
@@ -128,6 +130,7 @@ class DeveloperPortalViewTests(TestCase):
         self.assertGreaterEqual(len(response.data['results']), 1)
         self.assertIn('available_filters', response.data)
         self.assertTrue(any(item['slug'] == 'markets' for item in response.data['available_filters']['categories']))
+        self.assertTrue(response.data['results'][0]['rate_limit_profile'])
 
     def test_api_search_requires_query(self):
         response = self.client.get('/developer/search')
@@ -167,6 +170,12 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(endpoint_detail_response.status_code, 200)
         self.assertEqual(endpoint_detail_response.data['api']['slug'], 'market-data-api')
         self.assertEqual(endpoint_detail_response.data['endpoint']['id'], endpoint_id)
+
+        self.assertGreaterEqual(DeveloperPortalAPILog.objects.filter(path='/apis').count(), 1)
+        self.assertGreaterEqual(DeveloperPortalAPILog.objects.filter(path='/apis/market-data-api').count(), 1)
+        endpoint_log = DeveloperPortalAPILog.objects.filter(path=f'/apis/market-data-api/endpoints/{endpoint_id}').first()
+        self.assertIsNotNone(endpoint_log)
+        self.assertEqual(endpoint_log.endpoint_id, endpoint_id)
 
     def test_docs_aliases_return_catalog_documents(self):
         list_response = self.client.get('/docs/apis')
@@ -226,6 +235,7 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(response.data['developer']['email'], 'developer@atc-capital.test')
         self.assertIn('.', response.data['api_key']['api_key'])
         self.assertEqual(response.data['api_key']['environment'], 'sandbox')
+        self.assertEqual(response.data['api_key']['rate_limit_profile']['name'], 'STANDARD')
 
         user = User.objects.get(email='developer@atc-capital.test')
         self.assertTrue(UserProfile.objects.filter(user=user).exists())
@@ -240,6 +250,11 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(application.environment, 'sandbox')
         self.assertEqual(application.source_metadata['source'], 'developer_portal')
         self.assertEqual(request_record.source_metadata['ip_address'], '127.0.0.1')
+        self.assertEqual(request_record.rate_limit_profile.name, 'STANDARD')
+
+        request_log = DeveloperPortalAPILog.objects.filter(path='/developer/keys/request', key_request=request_record).first()
+        self.assertIsNotNone(request_log)
+        self.assertEqual(request_log.rate_limit_profile.name, 'STANDARD')
 
     def test_public_key_register_accepts_name_payload(self):
         response = self.client.post(
@@ -257,6 +272,15 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(response.data['developer']['last_name'], 'Portal')
         self.assertEqual(response.data['api_key']['status'], 'ACTIVE')
         self.assertTrue(DeveloperPortalKeyRequest.objects.filter(email='jane.portal@example.com').exists())
+
+    def test_rate_limit_profiles_are_seeded(self):
+        standard = RateLimitProfile.objects.get(name='STANDARD')
+        partner = RateLimitProfile.objects.get(name='PARTNER')
+        market_api = DeveloperAPI.objects.get(slug='market-data-api')
+
+        self.assertEqual(standard.requests_per_minute, 60)
+        self.assertEqual(partner.requests_per_day, 100000)
+        self.assertEqual(market_api.rate_limit_profile, standard)
 
     def test_jwt_token_endpoint_uses_standard_error_envelope(self):
         response = self.client.post(
