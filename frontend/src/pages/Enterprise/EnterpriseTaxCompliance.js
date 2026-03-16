@@ -375,7 +375,7 @@ const EnterpriseTaxCompliance = () => {
       {/* Quick Stats */}
       <div className="overview-stats">
         <div className="stat-card stat-card-blue">
-          <div className="stat-icon stat-icon-globe">🌐</div>
+          <div className="stat-icon stat-icon-globe"></div>
           <div className="stat-content">
             <h3>{taxProfiles.filter(p => p.status === 'active').length}</h3>
             <p>Active Countries</p>
@@ -1095,7 +1095,7 @@ const EnterpriseTaxCompliance = () => {
                     <p>{doc.type}</p>
                   </div>
                   <div className="doc-security">
-                    <span className="security-badge">🔒 Encrypted</span>
+                    <span className="security-badge">Encrypted</span>
                   </div>
                 </div>
               ))

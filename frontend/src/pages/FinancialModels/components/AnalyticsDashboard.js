@@ -55,9 +55,9 @@ const AnalyticsDashboard = ({ analytics, results, isLoading }) => {
       case 'CRITICAL':
         return '';
       case 'WARNING':
-        return '🟡';
+        return '';
       case 'ON_TARGET':
-        return '🟢';
+        return '';
       case 'NORMAL':
         return '';
       default:

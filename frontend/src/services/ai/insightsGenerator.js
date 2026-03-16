@@ -512,7 +512,7 @@ export function formatInsightsForDisplay(insights) {
   }
 
   if (warnings.length > 0) {
-    output += '🟡 WARNINGS:\n';
+    output += 'WARNINGS:\n';
     for (const insight of warnings) {
       output += `• ${insight.title}: ${insight.description}\n`;
     }

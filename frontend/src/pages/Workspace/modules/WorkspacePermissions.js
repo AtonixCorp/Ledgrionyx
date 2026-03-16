@@ -20,7 +20,7 @@ const PERMISSIONS = [
   { action: 'Delete workspace',        owner: true,  admin: false, member: false, viewer: false },
 ];
 
-const Tick = () => <span className="wsm-perm-check">✓</span>;
+const Tick = () => <span className="wsm-perm-check">+</span>;
 const Cross = () => <span className="wsm-perm-cross">—</span>;
 
 const WorkspacePermissions = () => (

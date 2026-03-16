@@ -94,7 +94,7 @@ export default function ClientPortal() {
           { label: 'Session Expiry', desc: 'Portal sessions expire after 4 hours of inactivity', active: true },
         ].map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--border-color-default)', fontSize: 13 }}>
-            <span style={{ color: 'var(--color-success)', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
+            <span style={{ color: 'var(--color-success)', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>+</span>
             <div>
               <div style={{ fontWeight: 600, color: 'var(--color-midnight)' }}>{item.label}</div>
               <div style={{ color: 'var(--color-silver-dark)', marginTop: 2 }}>{item.desc}</div>

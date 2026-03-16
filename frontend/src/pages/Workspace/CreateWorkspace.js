@@ -588,7 +588,6 @@ const CreateWorkspace = () => {
           className="cw-fy-trigger"
           onClick={() => { setFyOpen(o => !o); setFyMonth(null); }}
         >
-          <span className="cw-fy-trigger-icon">📅</span>
           <span>{fyLabel}</span>
           <span className="cw-fy-trigger-arrow">{fyOpen ? '▲' : '▼'}</span>
         </button>
@@ -706,7 +705,7 @@ const CreateWorkspace = () => {
           {STEPS.map((s, idx) => (
             <React.Fragment key={s.id}>
               <div className={`cw-step-dot ${step === s.id ? 'cw-step-active' : step > s.id ? 'cw-step-done' : ''}`}>
-                <span>{step > s.id ? '✓' : s.id}</span>
+                <span>{step > s.id ? '+' : s.id}</span>
                 <span className="cw-step-label">{s.label}</span>
               </div>
               {idx < STEPS.length - 1 && <div className={`cw-step-line ${step > s.id ? 'cw-step-line-done' : ''}`} />}
@@ -758,28 +757,24 @@ const CreateWorkspace = () => {
         <h3>What happens next</h3>
         <ul className="cw-info-list">
           <li>
-            <span className="cw-info-icon">📊</span>
             <div>
               <strong>Chart of Accounts</strong>
               <p>A default chart of accounts based on your country and business type will be created automatically.</p>
             </div>
           </li>
           <li>
-            <span className="cw-info-icon">🧾</span>
             <div>
               <strong>Tax Profile</strong>
               <p>A default tax profile will be set up for the selected jurisdiction.</p>
             </div>
           </li>
           <li>
-            <span className="cw-info-icon">🔒</span>
             <div>
               <strong>You are the Owner</strong>
               <p>You will be assigned the Owner role. You can invite team members and configure permissions later.</p>
             </div>
           </li>
           <li>
-            <span className="cw-info-icon">🌐</span>
             <div>
               <strong>Scoped Environment</strong>
               <p>All financial data — ledger entries, invoices, budgets, tax filings — is scoped exclusively to this workspace.</p>

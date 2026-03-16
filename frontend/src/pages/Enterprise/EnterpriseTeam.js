@@ -160,7 +160,7 @@ const EnterpriseTeam = () => {
                   key={role.code}
                   className={`col-role${perm.permissions.includes(role.code) ? ' has-permission' : ''}`}
                 >
-                  {perm.permissions.includes(role.code) ? '✓' : ''}
+                  {perm.permissions.includes(role.code) ? '+' : ''}
                 </div>
               ))}
             </div>
@@ -218,14 +218,14 @@ const EnterpriseTeam = () => {
                     title="Edit"
                     onClick={() => handleEditTeamMember(member)}
                   >
-                    ✎
+                    Edit
                   </button>
                   <button
                     className="btn-icon delete"
                     title="Remove"
                     onClick={() => handleDeleteTeamMember(member.id)}
                   >
-                    ✕
+                    X
                   </button>
                 </div>
               </div>

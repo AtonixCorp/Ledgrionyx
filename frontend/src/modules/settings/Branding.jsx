@@ -33,7 +33,7 @@ export default function Branding() {
         subtitle="Customize the look and feel of your firm's workspace"
         actions={
           <Button variant="primary" onClick={handleSave}>
-            {saved ? '✓ Saved' : 'Save Changes'}
+            {saved ? 'Saved' : 'Save Changes'}
           </Button>
         }
       />

@@ -116,7 +116,7 @@ export default function Subscription() {
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px' }}>
                 {plan.features.map(f => (
                   <li key={f} style={{ fontSize: 13, color: 'var(--color-midnight)', padding: '4px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ color: 'var(--color-success)', fontWeight: 700 }}>✓</span> {f}
+                    <span style={{ color: 'var(--color-success)', fontWeight: 700 }}>+</span> {f}
                   </li>
                 ))}
               </ul>

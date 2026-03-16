@@ -2,14 +2,14 @@ import React, { useState, useRef } from 'react';
 import './WorkspaceModules.css';
 
 const ICON_MAP = {
-  pdf: '📄', doc: '📝', docx: '📝', xls: '📊', xlsx: '📊',
-  png: '🖼', jpg: '🖼', jpeg: '🖼', gif: '🖼', mp4: '🎬',
-  zip: '🗜', csv: '📊', txt: '📃',
+  pdf: 'PDF', doc: 'DOC', docx: 'DOC', xls: 'XLS', xlsx: 'XLS',
+  png: 'IMG', jpg: 'IMG', jpeg: 'IMG', gif: 'IMG', mp4: 'VID',
+  zip: 'ZIP', csv: 'CSV', txt: 'TXT',
 };
 
 const getIcon = (filename) => {
   const ext = filename.split('.').pop().toLowerCase();
-  return ICON_MAP[ext] || '📁';
+  return ICON_MAP[ext] || 'FILE';
 };
 
 const WorkspaceFiles = () => {

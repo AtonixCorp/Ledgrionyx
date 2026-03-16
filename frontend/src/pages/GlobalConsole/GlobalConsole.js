@@ -247,7 +247,7 @@ const GlobalConsole = () => {
           Invite User
         </button>
         <button className="gc-action-btn gc-action-secondary" onClick={() => navigate('/app/enterprise/entities')}>
-          <span className="gc-action-icon">⚙</span>
+          <span className="gc-action-icon">#</span>
           Manage Entities
         </button>
       </section>
@@ -289,7 +289,7 @@ const GlobalConsole = () => {
 
           {!loading && filtered.length === 0 && (
             <div className="gc-empty-state">
-              <div className="gc-empty-icon">🏢</div>
+              <div className="gc-empty-icon"></div>
               <h3>No workspaces yet</h3>
               <p>Create your first workspace to start managing a company's finances.</p>
               <button className="gc-action-btn gc-action-primary" onClick={() => navigate('/app/workspaces/create')}>
@@ -353,7 +353,7 @@ const GlobalConsole = () => {
             </div>
             {notifs.length === 0 ? (
               <div className="gc-notif-empty">
-                <span>✓ All compliance obligations are current</span>
+                <span>All compliance obligations are current</span>
               </div>
             ) : (
               <ul className="gc-notif-list">
@@ -385,7 +385,7 @@ const GlobalConsole = () => {
             </div>
             {tasks.length === 0 ? (
               <div className="gc-task-empty">
-                <span>✓ No pending tasks</span>
+                <span>No pending tasks</span>
               </div>
             ) : (
               <ul className="gc-task-list">

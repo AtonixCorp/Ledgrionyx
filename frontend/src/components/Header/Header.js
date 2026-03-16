@@ -5,16 +5,16 @@ import ATCLogo from '../branding/ATCLogo';
 import './Header.css';
 
 const COUNTRIES = [
-  { code: 'US', name: 'United States',         flag: '🇺🇸' },
-  { code: 'GB', name: 'United Kingdom',         flag: '🇬🇧' },
-  { code: 'AE', name: 'United Arab Emirates',   flag: '🇦🇪' },
-  { code: 'SG', name: 'Singapore',              flag: '🇸🇬' },
-  { code: 'AU', name: 'Australia',              flag: '🇦🇺' },
-  { code: 'CA', name: 'Canada',                 flag: '🇨🇦' },
-  { code: 'DE', name: 'Germany',                flag: '🇩🇪' },
-  { code: 'FR', name: 'France',                 flag: '🇫🇷' },
-  { code: 'JP', name: 'Japan',                  flag: '🇯🇵' },
-  { code: 'IN', name: 'India',                  flag: '🇮🇳' },
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'IN', name: 'India' },
 ];
 
 const NAV_ITEMS = [
@@ -52,7 +52,6 @@ const Header = () => {
               aria-haspopup="listbox"
               aria-expanded={countryOpen}
             >
-              <span className="atc-country-flag">{selectedCountry.flag}</span>
               <span>{selectedCountry.name}</span>
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
                 <path d="M1 1L5 5L9 1" stroke="#6B7280" strokeWidth="1.5"
@@ -70,7 +69,6 @@ const Header = () => {
                     className="atc-country-option"
                     onClick={() => { setSelectedCountry(c); setCountryOpen(false); }}
                   >
-                    <span>{c.flag}</span>
                     <span>{c.name}</span>
                   </button>
                 ))}

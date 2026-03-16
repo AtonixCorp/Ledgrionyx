@@ -3,8 +3,8 @@ import { Button, Card, PageHeader } from '../../components/ui';
 import { notificationsAPI } from '../../services/api';
 
 const TYPE_CONFIG = {
-  alert: { icon: '⚠', badge: '#ef4444', text: 'Alert' },
-  success: { icon: '✓', badge: '#10b981', text: 'Success' },
+  alert: { icon: '!', badge: '#ef4444', text: 'Alert' },
+  success: { icon: '+', badge: '#10b981', text: 'Success' },
   warning: { icon: '!', badge: '#f59e0b', text: 'Warning' },
   info: { icon: 'i', badge: '#3b82f6', text: 'Info' },
 };

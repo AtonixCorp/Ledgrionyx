@@ -49,7 +49,7 @@ export default function AIInsights() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
                 <span style={{ color: ins.color, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>
-                  {ins.type === 'anomaly' ? '⚠' : ins.type === 'forecast' ? '◈' : '✦'}
+                  {ins.type === 'anomaly' ? '!' : ins.type === 'forecast' ? '~' : '*'}
                 </span>
               </div>
               <div style={{ flex: 1 }}>

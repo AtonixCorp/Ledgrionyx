@@ -159,7 +159,7 @@ export default function AIAdvisor() {
             <div className="insights-grid">
               <div className="insight-card priority">
                 <div className="insight-header">
-                  <h4>✦ High-Impact Opportunity</h4>
+                  <h4>High-Impact Opportunity</h4>
                 </div>
                 <p>
                   Based on your Q4 income of $132,230, you qualify for the Qualified Business

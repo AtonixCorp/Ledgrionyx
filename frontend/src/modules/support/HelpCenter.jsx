@@ -116,15 +116,14 @@ export default function HelpCenter() {
       {!search && activeCategory === 'All' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {[
-            { emoji: '🚀', title: 'Quick Start Guide', desc: 'Set up your first entity and chart of accounts in under 10 minutes.' },
-            { emoji: '📚', title: 'API Documentation', desc: 'Full REST API reference with code examples in Python, JS, and cURL.' },
-            { emoji: '🔐', title: 'Security Whitepaper', desc: 'Learn about our encryption, SOC 2 compliance, and data residency.' },
-            { emoji: '📊', title: 'Reporting Guide', desc: 'Step-by-step guide to financial statements, trial balance, and exports.' },
-            { emoji: '🏦', title: 'Bank Integrations', desc: 'Supported banks, connection methods, and troubleshooting.' },
-            { emoji: '🎓', title: 'Video Tutorials', desc: 'Watch walkthroughs of every major feature in the platform.' },
+            { title: 'Quick Start Guide', desc: 'Set up your first entity and chart of accounts in under 10 minutes.' },
+            { title: 'API Documentation', desc: 'Full REST API reference with code examples in Python, JS, and cURL.' },
+            { title: 'Security Whitepaper', desc: 'Learn about our encryption, SOC 2 compliance, and data residency.' },
+            { title: 'Reporting Guide', desc: 'Step-by-step guide to financial statements, trial balance, and exports.' },
+            { title: 'Bank Integrations', desc: 'Supported banks, connection methods, and troubleshooting.' },
+            { title: 'Video Tutorials', desc: 'Watch walkthroughs of every major feature in the platform.' },
           ].map(link => (
             <Card key={link.title} style={{ cursor: 'pointer' }}>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>{link.emoji}</div>
               <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--color-midnight)', marginBottom: 4 }}>{link.title}</div>
               <div style={{ fontSize: 12, color: 'var(--color-silver-dark)' }}>{link.desc}</div>
             </Card>

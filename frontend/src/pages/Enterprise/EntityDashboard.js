@@ -490,7 +490,7 @@ const EntityDashboard = () => {
                         Expires: {new Date(doc.expiry_date).toLocaleDateString()}
                       </div>
                       {doc.days_until_expiry !== null && doc.days_until_expiry <= 30 && (
-                        <div className="ed-expiry-warning">⚠ {doc.days_until_expiry} days left</div>
+                        <div className="ed-expiry-warning">{doc.days_until_expiry} days left</div>
                       )}
                     </div>
                   ))}

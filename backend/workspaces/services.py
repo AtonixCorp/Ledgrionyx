@@ -1,0 +1,575 @@
+"""
+Workspace services — all business logic.
+Every service enforces membership + role before mutating data.
+Every write generates a WorkspaceLog entry via LogService.
+No cross-system dependencies.
+"""
+from django.db import transaction
+from django.contrib.auth.models import User
+from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError
+
+from .models import (
+    DEFAULT_MODULES,
+    MemberRole,
+    Workspace, WorkspaceStatus, WorkspaceTier,
+    WorkspaceCalendarEvent,
+    WorkspaceFile, WorkspaceFolder,
+    WorkspaceGroup, WorkspaceGroupMember,
+    WorkspaceLog,
+    WorkspaceMeeting, WorkspaceMeetingParticipant,
+    WorkspaceMember,
+    WorkspaceModule,
+    WorkspaceSetting,
+)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.7  PermissionService  (used by every other service)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class PermissionService:
+    """Role resolution and permission enforcement for workspace operations."""
+
+    # Actions permitted per role (cumulative upwards)
+    _ROLE_WEIGHT = {
+        MemberRole.VIEWER: 0,
+        MemberRole.MEMBER: 1,
+        MemberRole.ADMIN:  2,
+        MemberRole.OWNER:  3,
+    }
+
+    # Minimum role required for each action category
+    _ACTION_MIN_ROLE = {
+        'read':            MemberRole.VIEWER,
+        'write':           MemberRole.MEMBER,
+        'manage_members':  MemberRole.ADMIN,
+        'manage_groups':   MemberRole.ADMIN,
+        'manage_meetings': MemberRole.MEMBER,
+        'manage_files':    MemberRole.MEMBER,
+        'manage_settings': MemberRole.ADMIN,
+        'manage_modules':  MemberRole.ADMIN,
+        'delete_workspace':MemberRole.OWNER,
+        'change_tier':     MemberRole.OWNER,
+        'change_status':   MemberRole.OWNER,
+    }
+
+    @staticmethod
+    def get_role(workspace_id, user) -> str | None:
+        """Return the user's role in the workspace, or None if not a member."""
+        try:
+            membership = WorkspaceMember.objects.get(
+                workspace_id=workspace_id, user=user
+            )
+            return membership.role
+        except WorkspaceMember.DoesNotExist:
+            return None
+
+    @classmethod
+    def assert_member(cls, workspace_id, user):
+        """Raise PermissionDenied if user is not a member."""
+        role = cls.get_role(workspace_id, user)
+        if role is None:
+            raise PermissionDenied('You are not a member of this workspace.')
+        return role
+
+    @classmethod
+    def assert_permission(cls, workspace_id, user, action: str):
+        """
+        Assert that the user has sufficient role for `action`.
+        Raises PermissionDenied with a clear message on failure.
+        """
+        role = cls.assert_member(workspace_id, user)
+        min_role = cls._ACTION_MIN_ROLE.get(action, MemberRole.OWNER)
+        if cls._ROLE_WEIGHT.get(role, -1) < cls._ROLE_WEIGHT.get(min_role, 99):
+            raise PermissionDenied(
+                f'Action "{action}" requires role "{min_role}" or higher. '
+                f'Your role is "{role}".'
+            )
+        return role
+
+    @classmethod
+    def assert_owner_or_admin(cls, workspace_id, user):
+        cls.assert_permission(workspace_id, user, 'manage_members')
+
+    @classmethod
+    def assert_owner(cls, workspace_id, user):
+        cls.assert_permission(workspace_id, user, 'delete_workspace')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.9  LogService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class LogService:
+    @staticmethod
+    def log(workspace_id, actor, action: str, metadata: dict = None):
+        WorkspaceLog.objects.create(
+            workspace_id=workspace_id,
+            actor=actor,
+            action=action,
+            metadata=metadata or {},
+        )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.1  WorkspaceService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class WorkspaceService:
+
+    @staticmethod
+    @transaction.atomic
+    def create_workspace(user: User, payload: dict) -> Workspace:
+        """Create workspace, seed modules, insert owner member, log."""
+        name = payload.get('name', '').strip()
+        if not name:
+            raise ValidationError({'name': 'Workspace name is required.'})
+
+        ws = Workspace.objects.create(
+            owner=user,
+            name=name,
+            description=payload.get('description', ''),
+            tier=payload.get('tier', WorkspaceTier.FREE),
+        )
+
+        # Seed default modules
+        WorkspaceModule.objects.bulk_create([
+            WorkspaceModule(workspace=ws, module_key=key, enabled=True)
+            for key in DEFAULT_MODULES
+        ])
+
+        # Owner is automatically a member with role=owner
+        WorkspaceMember.objects.create(workspace=ws, user=user, role=MemberRole.OWNER)
+
+        LogService.log(ws.id, user, 'workspace.created', {'name': ws.name})
+        return ws
+
+    @staticmethod
+    def get_workspace(workspace_id, user: User) -> Workspace:
+        """Return workspace if user is a member."""
+        try:
+            ws = Workspace.objects.get(pk=workspace_id)
+        except Workspace.DoesNotExist:
+            raise NotFound('Workspace not found.')
+        PermissionService.assert_member(workspace_id, user)
+        return ws
+
+    @staticmethod
+    @transaction.atomic
+    def update_workspace(workspace_id, user: User, payload: dict) -> Workspace:
+        PermissionService.assert_owner_or_admin(workspace_id, user)
+        try:
+            ws = Workspace.objects.get(pk=workspace_id)
+        except Workspace.DoesNotExist:
+            raise NotFound('Workspace not found.')
+
+        allowed = ('name', 'description')
+        for field in allowed:
+            if field in payload:
+                setattr(ws, field, payload[field])
+        ws.save()
+        LogService.log(workspace_id, user, 'workspace.updated', payload)
+        return ws
+
+    @staticmethod
+    @transaction.atomic
+    def change_tier(workspace_id, user: User, tier: str) -> Workspace:
+        PermissionService.assert_owner(workspace_id, user)
+        if tier not in WorkspaceTier.values:
+            raise ValidationError({'tier': f'Invalid tier "{tier}".'})
+        ws = Workspace.objects.get(pk=workspace_id)
+        ws.tier = tier
+        ws.save()
+        LogService.log(workspace_id, user, 'workspace.tier_changed', {'tier': tier})
+        return ws
+
+    @staticmethod
+    @transaction.atomic
+    def change_status(workspace_id, user: User, status: str) -> Workspace:
+        PermissionService.assert_owner(workspace_id, user)
+        if status not in WorkspaceStatus.values:
+            raise ValidationError({'status': f'Invalid status "{status}".'})
+        ws = Workspace.objects.get(pk=workspace_id)
+        ws.status = status
+        ws.save()
+        LogService.log(workspace_id, user, 'workspace.status_changed', {'status': status})
+        return ws
+
+    @staticmethod
+    def list_user_workspaces(user: User):
+        """Return all workspaces where the user holds any membership."""
+        member_ws_ids = WorkspaceMember.objects.filter(user=user).values_list('workspace_id', flat=True)
+        return Workspace.objects.filter(pk__in=member_ws_ids).exclude(status=WorkspaceStatus.DELETED)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.2  MemberService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class MemberService:
+
+    @staticmethod
+    @transaction.atomic
+    def add_member(workspace_id, actor: User, user: User, role: str) -> WorkspaceMember:
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        if role not in MemberRole.values:
+            raise ValidationError({'role': f'Invalid role "{role}".'})
+        if role == MemberRole.OWNER:
+            raise PermissionDenied('Cannot assign owner role via this endpoint.')
+        member, created = WorkspaceMember.objects.get_or_create(
+            workspace_id=workspace_id, user=user,
+            defaults={'role': role}
+        )
+        if not created:
+            raise ValidationError({'user': 'User is already a member of this workspace.'})
+        LogService.log(workspace_id, actor, 'member.added', {'user_id': str(user.pk), 'role': role})
+        return member
+
+    @staticmethod
+    @transaction.atomic
+    def remove_member(workspace_id, actor: User, user: User):
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        try:
+            membership = WorkspaceMember.objects.get(workspace_id=workspace_id, user=user)
+        except WorkspaceMember.DoesNotExist:
+            raise NotFound('Member not found.')
+        if membership.role == MemberRole.OWNER:
+            raise PermissionDenied('Cannot remove the workspace owner.')
+        membership.delete()
+        # Remove from all groups in this workspace
+        WorkspaceGroupMember.objects.filter(
+            group__workspace_id=workspace_id, user=user
+        ).delete()
+        LogService.log(workspace_id, actor, 'member.removed', {'user_id': str(user.pk)})
+
+    @staticmethod
+    @transaction.atomic
+    def update_role(workspace_id, actor: User, user: User, role: str) -> WorkspaceMember:
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        if role not in MemberRole.values:
+            raise ValidationError({'role': f'Invalid role "{role}".'})
+        if role == MemberRole.OWNER:
+            raise PermissionDenied('Cannot assign owner role via this endpoint.')
+        try:
+            membership = WorkspaceMember.objects.get(workspace_id=workspace_id, user=user)
+        except WorkspaceMember.DoesNotExist:
+            raise NotFound('Member not found.')
+        if membership.role == MemberRole.OWNER:
+            raise PermissionDenied('Cannot change the role of the workspace owner.')
+        membership.role = role
+        membership.save()
+        LogService.log(workspace_id, actor, 'member.role_changed', {'user_id': str(user.pk), 'role': role})
+        return membership
+
+    @staticmethod
+    def list_members(workspace_id, actor: User):
+        PermissionService.assert_member(workspace_id, actor)
+        return WorkspaceMember.objects.filter(workspace_id=workspace_id).select_related('user')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.3  GroupService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class GroupService:
+
+    @staticmethod
+    @transaction.atomic
+    def create_group(workspace_id, actor: User, payload: dict) -> WorkspaceGroup:
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        name = payload.get('name', '').strip()
+        if not name:
+            raise ValidationError({'name': 'Group name is required.'})
+        if WorkspaceGroup.objects.filter(workspace_id=workspace_id, name=name).exists():
+            raise ValidationError({'name': 'A group with this name already exists.'})
+        group = WorkspaceGroup.objects.create(
+            workspace_id=workspace_id,
+            name=name,
+            description=payload.get('description', ''),
+        )
+        LogService.log(workspace_id, actor, 'group.created', {'group_id': str(group.pk), 'name': name})
+        return group
+
+    @staticmethod
+    @transaction.atomic
+    def add_member(workspace_id, actor: User, group_id, user: User) -> WorkspaceGroupMember:
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        try:
+            group = WorkspaceGroup.objects.get(pk=group_id, workspace_id=workspace_id)
+        except WorkspaceGroup.DoesNotExist:
+            raise NotFound('Group not found.')
+        # User must be a workspace member
+        if not WorkspaceMember.objects.filter(workspace_id=workspace_id, user=user).exists():
+            raise ValidationError({'user': 'User is not a member of this workspace.'})
+        gm, created = WorkspaceGroupMember.objects.get_or_create(group=group, user=user)
+        if not created:
+            raise ValidationError({'user': 'User is already in this group.'})
+        LogService.log(workspace_id, actor, 'group.member_added', {'group_id': str(group.pk), 'user_id': str(user.pk)})
+        return gm
+
+    @staticmethod
+    @transaction.atomic
+    def remove_member(workspace_id, actor: User, group_id, user: User):
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        deleted, _ = WorkspaceGroupMember.objects.filter(
+            group__pk=group_id, group__workspace_id=workspace_id, user=user
+        ).delete()
+        if not deleted:
+            raise NotFound('Group member not found.')
+        LogService.log(workspace_id, actor, 'group.member_removed', {'group_id': str(group_id), 'user_id': str(user.pk)})
+
+    @staticmethod
+    def list_groups(workspace_id, actor: User):
+        PermissionService.assert_member(workspace_id, actor)
+        return WorkspaceGroup.objects.filter(workspace_id=workspace_id).prefetch_related('group_members')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.4  MeetingService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class MeetingService:
+
+    @staticmethod
+    @transaction.atomic
+    def create_meeting(workspace_id, actor: User, payload: dict) -> WorkspaceMeeting:
+        PermissionService.assert_permission(workspace_id, actor, 'manage_meetings')
+        title = payload.get('title', '').strip()
+        if not title:
+            raise ValidationError({'title': 'Meeting title is required.'})
+        start_at = payload.get('start_at')
+        end_at   = payload.get('end_at')
+        if not start_at or not end_at:
+            raise ValidationError({'start_at': 'start_at and end_at are required.'})
+        meeting = WorkspaceMeeting.objects.create(
+            workspace_id=workspace_id,
+            title=title,
+            description=payload.get('description', ''),
+            start_at=start_at,
+            end_at=end_at,
+            created_by=actor,
+        )
+        # Creator is auto-accepted participant
+        WorkspaceMeetingParticipant.objects.create(meeting=meeting, user=actor, status='accepted')
+        LogService.log(workspace_id, actor, 'meeting.created', {'meeting_id': str(meeting.pk), 'title': title})
+        return meeting
+
+    @staticmethod
+    @transaction.atomic
+    def update_meeting(workspace_id, actor: User, meeting_id, payload: dict) -> WorkspaceMeeting:
+        PermissionService.assert_permission(workspace_id, actor, 'manage_meetings')
+        try:
+            meeting = WorkspaceMeeting.objects.get(pk=meeting_id, workspace_id=workspace_id)
+        except WorkspaceMeeting.DoesNotExist:
+            raise NotFound('Meeting not found.')
+        for field in ('title', 'description', 'start_at', 'end_at'):
+            if field in payload:
+                setattr(meeting, field, payload[field])
+        meeting.save()
+        LogService.log(workspace_id, actor, 'meeting.updated', {'meeting_id': str(meeting.pk)})
+        return meeting
+
+    @staticmethod
+    @transaction.atomic
+    def cancel_meeting(workspace_id, actor: User, meeting_id):
+        PermissionService.assert_permission(workspace_id, actor, 'manage_meetings')
+        try:
+            meeting = WorkspaceMeeting.objects.get(pk=meeting_id, workspace_id=workspace_id)
+        except WorkspaceMeeting.DoesNotExist:
+            raise NotFound('Meeting not found.')
+        meeting.delete()
+        LogService.log(workspace_id, actor, 'meeting.cancelled', {'meeting_id': str(meeting_id)})
+
+    @staticmethod
+    def list_meetings(workspace_id, actor: User):
+        PermissionService.assert_member(workspace_id, actor)
+        return WorkspaceMeeting.objects.filter(workspace_id=workspace_id).prefetch_related('participants')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.5  CalendarService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class CalendarService:
+
+    @staticmethod
+    @transaction.atomic
+    def create_event(workspace_id, actor: User, payload: dict) -> WorkspaceCalendarEvent:
+        PermissionService.assert_permission(workspace_id, actor, 'write')
+        title = payload.get('title', '').strip()
+        if not title:
+            raise ValidationError({'title': 'Event title is required.'})
+        event = WorkspaceCalendarEvent.objects.create(
+            workspace_id=workspace_id,
+            title=title,
+            description=payload.get('description', ''),
+            start_at=payload['start_at'],
+            end_at=payload['end_at'],
+            type=payload.get('type', 'custom'),
+            created_by=actor,
+        )
+        LogService.log(workspace_id, actor, 'calendar.event_created', {'event_id': str(event.pk)})
+        return event
+
+    @staticmethod
+    @transaction.atomic
+    def update_event(workspace_id, actor: User, event_id, payload: dict) -> WorkspaceCalendarEvent:
+        PermissionService.assert_permission(workspace_id, actor, 'write')
+        try:
+            event = WorkspaceCalendarEvent.objects.get(pk=event_id, workspace_id=workspace_id)
+        except WorkspaceCalendarEvent.DoesNotExist:
+            raise NotFound('Event not found.')
+        for field in ('title', 'description', 'start_at', 'end_at', 'type'):
+            if field in payload:
+                setattr(event, field, payload[field])
+        event.save()
+        LogService.log(workspace_id, actor, 'calendar.event_updated', {'event_id': str(event.pk)})
+        return event
+
+    @staticmethod
+    @transaction.atomic
+    def delete_event(workspace_id, actor: User, event_id):
+        PermissionService.assert_permission(workspace_id, actor, 'write')
+        try:
+            event = WorkspaceCalendarEvent.objects.get(pk=event_id, workspace_id=workspace_id)
+        except WorkspaceCalendarEvent.DoesNotExist:
+            raise NotFound('Event not found.')
+        event.delete()
+        LogService.log(workspace_id, actor, 'calendar.event_deleted', {'event_id': str(event_id)})
+
+    @staticmethod
+    def list_events(workspace_id, actor: User, start=None, end=None):
+        PermissionService.assert_member(workspace_id, actor)
+        qs = WorkspaceCalendarEvent.objects.filter(workspace_id=workspace_id)
+        if start:
+            qs = qs.filter(end_at__gte=start)
+        if end:
+            qs = qs.filter(start_at__lte=end)
+        return qs
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.6  FileService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class FileService:
+
+    @staticmethod
+    def _build_path(workspace_id, file_id) -> str:
+        return f'/workspace/{workspace_id}/files/{file_id}'
+
+    @staticmethod
+    @transaction.atomic
+    def create_folder(workspace_id, actor: User, parent_id, name: str) -> WorkspaceFolder:
+        PermissionService.assert_permission(workspace_id, actor, 'manage_files')
+        name = name.strip()
+        if not name:
+            raise ValidationError({'name': 'Folder name is required.'})
+        parent = None
+        if parent_id:
+            try:
+                parent = WorkspaceFolder.objects.get(pk=parent_id, workspace_id=workspace_id)
+            except WorkspaceFolder.DoesNotExist:
+                raise NotFound('Parent folder not found.')
+        if WorkspaceFolder.objects.filter(workspace_id=workspace_id, parent=parent, name=name).exists():
+            raise ValidationError({'name': 'A folder with this name already exists here.'})
+        folder = WorkspaceFolder.objects.create(workspace_id=workspace_id, parent=parent, name=name)
+        LogService.log(workspace_id, actor, 'file.folder_created', {'folder_id': str(folder.pk), 'name': name})
+        return folder
+
+    @staticmethod
+    @transaction.atomic
+    def upload_file(workspace_id, actor: User, folder_id, name: str, size: int, mime_type: str) -> WorkspaceFile:
+        """
+        Creates the metadata record. Actual binary upload to S3/Blob is
+        handled by the view layer (pre-signed URL or multipart).
+        """
+        PermissionService.assert_permission(workspace_id, actor, 'manage_files')
+        folder = None
+        if folder_id:
+            try:
+                folder = WorkspaceFolder.objects.get(pk=folder_id, workspace_id=workspace_id)
+            except WorkspaceFolder.DoesNotExist:
+                raise NotFound('Folder not found.')
+        # Reserve a UUID so the path can reference the id before save
+        file_id = __import__('uuid').uuid4()
+        path = FileService._build_path(workspace_id, file_id)
+        wf = WorkspaceFile.objects.create(
+            id=file_id,
+            workspace_id=workspace_id,
+            folder=folder,
+            name=name.strip(),
+            path=path,
+            size=size,
+            mime_type=mime_type,
+            uploaded_by=actor,
+        )
+        LogService.log(workspace_id, actor, 'file.uploaded', {'file_id': str(wf.pk), 'name': name})
+        return wf
+
+    @staticmethod
+    @transaction.atomic
+    def delete_file(workspace_id, actor: User, file_id):
+        PermissionService.assert_permission(workspace_id, actor, 'manage_files')
+        try:
+            wf = WorkspaceFile.objects.get(pk=file_id, workspace_id=workspace_id)
+        except WorkspaceFile.DoesNotExist:
+            raise NotFound('File not found.')
+        wf.delete()
+        LogService.log(workspace_id, actor, 'file.deleted', {'file_id': str(file_id)})
+
+    @staticmethod
+    def list_files(workspace_id, actor: User, folder_id=None):
+        PermissionService.assert_member(workspace_id, actor)
+        qs = WorkspaceFile.objects.filter(workspace_id=workspace_id)
+        if folder_id:
+            qs = qs.filter(folder_id=folder_id)
+        else:
+            qs = qs.filter(folder__isnull=True)
+        return qs.select_related('uploaded_by')
+
+    @staticmethod
+    def list_folders(workspace_id, actor: User, parent_id=None):
+        PermissionService.assert_member(workspace_id, actor)
+        return WorkspaceFolder.objects.filter(workspace_id=workspace_id, parent_id=parent_id)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.8  SettingsService
+# ─────────────────────────────────────────────────────────────────────────────
+
+class SettingsService:
+
+    @staticmethod
+    def get_settings(workspace_id, actor: User) -> dict:
+        PermissionService.assert_member(workspace_id, actor)
+        entries = WorkspaceSetting.objects.filter(workspace_id=workspace_id)
+        return {e.key: e.value for e in entries}
+
+    @staticmethod
+    @transaction.atomic
+    def update_settings(workspace_id, actor: User, payload: dict) -> dict:
+        PermissionService.assert_permission(workspace_id, actor, 'manage_settings')
+        for key, value in payload.items():
+            WorkspaceSetting.objects.update_or_create(
+                workspace_id=workspace_id, key=key,
+                defaults={'value': str(value)}
+            )
+        LogService.log(workspace_id, actor, 'settings.updated', {'keys': list(payload.keys())})
+        return SettingsService.get_settings(workspace_id, actor)
+
+    @staticmethod
+    @transaction.atomic
+    def update_modules(workspace_id, actor: User, payload: dict):
+        """payload = { module_key: True/False, ... }"""
+        PermissionService.assert_permission(workspace_id, actor, 'manage_modules')
+        updated = []
+        for module_key, enabled in payload.items():
+            mod, _ = WorkspaceModule.objects.get_or_create(
+                workspace_id=workspace_id, module_key=module_key
+            )
+            mod.enabled = bool(enabled)
+            mod.save()
+            updated.append({'module_key': module_key, 'enabled': mod.enabled})
+        LogService.log(workspace_id, actor, 'modules.updated', {'modules': updated})
+        return WorkspaceModule.objects.filter(workspace_id=workspace_id)

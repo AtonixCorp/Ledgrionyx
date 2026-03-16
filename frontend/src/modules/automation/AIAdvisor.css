@@ -191,7 +191,7 @@
 }
 
 .ai-advisor-page .message-avatar::after {
-  content: '✦';
+  content: 'AI';
 }
 
 .ai-advisor-page .message.user .message-avatar::after {
