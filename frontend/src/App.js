@@ -7,6 +7,7 @@ import { FilterProvider } from './context/FilterContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import WorkspaceRoute from './components/WorkspaceRoute';
 import Layout from './components/Layout/Layout';
 import EntityLayout from './components/EntityLayout/EntityLayout';
 import Landing from './pages/Landing/Landing';
@@ -109,19 +110,21 @@ import Contact from './pages/Contact/Contact';
 import Privacy from './pages/Privacy/Privacy';
 import CLIDocs from './pages/CLIDocs/CLIDocs';
 import GlobalErrorCenter from './components/GlobalErrorCenter';
+import GlobalConsole from './pages/GlobalConsole/GlobalConsole';
+import CreateWorkspace from './pages/Workspace/CreateWorkspace';
 
 function App() {
   const renderModuleCrudRoutes = (basePath, Component) => [
-    <Route key={`${basePath}-index`} path={basePath} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-list`} path={`${basePath}/list`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-create`} path={`${basePath}/create`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-edit`} path={`${basePath}/edit/:id`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-view`} path={`${basePath}/view/:id`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
+    <Route key={`${basePath}-index`} path={basePath} element={<WorkspaceRoute><Layout><Component /></Layout></WorkspaceRoute>} />,
+    <Route key={`${basePath}-list`} path={`${basePath}/list`} element={<WorkspaceRoute><Layout><Component /></Layout></WorkspaceRoute>} />,
+    <Route key={`${basePath}-create`} path={`${basePath}/create`} element={<WorkspaceRoute><Layout><Component /></Layout></WorkspaceRoute>} />,
+    <Route key={`${basePath}-edit`} path={`${basePath}/edit/:id`} element={<WorkspaceRoute><Layout><Component /></Layout></WorkspaceRoute>} />,
+    <Route key={`${basePath}-view`} path={`${basePath}/view/:id`} element={<WorkspaceRoute><Layout><Component /></Layout></WorkspaceRoute>} />,
   ];
 
   const renderModulePageRoutes = (basePath, Component) => [
-    <Route key={`${basePath}-index`} path={basePath} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-list`} path={`${basePath}/list`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
+    <Route key={`${basePath}-index`} path={basePath} element={<WorkspaceRoute><Layout><Component /></Layout></WorkspaceRoute>} />,
+    <Route key={`${basePath}-list`} path={`${basePath}/list`} element={<WorkspaceRoute><Layout><Component /></Layout></WorkspaceRoute>} />,
   ];
 
   return (
@@ -152,7 +155,11 @@ function App() {
               <Route path="/v1/docs" element={<CLIDocs />} />
 
               {/* Redirect legacy personal routes to enterprise */}
-              <Route path="/dashboard" element={<Navigate to="/app/overview/dashboard" replace />} />
+              <Route path="/dashboard" element={<Navigate to="/app/console" replace />} />
+
+              {/* Global Console — no sidebar */}
+              <Route path="/app/console" element={<ProtectedRoute><GlobalConsole /></ProtectedRoute>} />
+              <Route path="/app/workspaces/create" element={<ProtectedRoute><CreateWorkspace /></ProtectedRoute>} />
 
               {/* Enterprise Routes */}
               <Route path="/app/enterprise/org-overview" element={

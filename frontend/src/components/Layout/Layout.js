@@ -8,7 +8,7 @@ import './Layout.css';
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { currentOrganization } = useEnterprise();
+  const { currentOrganization, activeWorkspace } = useEnterprise();
 
   const [sidebarMinimized, setSidebarMinimized] = React.useState(false);
   const [expandedMenus, setExpandedMenus] = React.useState({});
@@ -223,6 +223,16 @@ const Layout = ({ children }) => {
           <div className="sidebar-brand">
             <ATCLogo variant="white" size="small" withText={!sidebarMinimized} text="ATC Capital Console" />
           </div>
+          {!sidebarMinimized && (
+            <NavLink to="/app/console" className="sidebar-console-link" title="All Workspaces">
+              ← All Workspaces
+            </NavLink>
+          )}
+          {activeWorkspace && !sidebarMinimized && (
+            <div className="sidebar-workspace-name" title={activeWorkspace.name}>
+              {activeWorkspace.name}
+            </div>
+          )}
         </div>
 
         {/* Navigation */}
@@ -282,6 +292,13 @@ const Layout = ({ children }) => {
             <h2 className="topbar-title">ATC Capital Console</h2>
             {currentOrganization && (
               <span className="topbar-org-context">{currentOrganization.name}</span>
+            )}
+            {activeWorkspace && (
+              <>
+                <span className="topbar-ws-sep">›</span>
+                <span className="topbar-ws-name">{activeWorkspace.name}</span>
+                <span className="topbar-env-badge">Production</span>
+              </>
             )}
           </div>
           <div className="topbar-right">

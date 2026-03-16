@@ -46,6 +46,34 @@
   flex-shrink: 0;
 }
 
+/* Console nav link and active workspace name in sidebar */
+.sidebar-console-link {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+  padding: 0 2px;
+}
+.sidebar-console-link:hover { color: rgba(255,255,255,0.9); }
+
+.sidebar-workspace-name {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 6px;
+}
+
 .sidebar-brand {
   display: flex;
   align-items: center;
@@ -490,6 +518,37 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Workspace context strip in topbar */
+.topbar-ws-sep {
+  color: var(--color-silver-dark);
+  font-size: 16px;
+  padding: 0 6px;
+  opacity: 0.5;
+}
+
+.topbar-ws-name {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: #1e3a5f;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-env-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #ecfdf5;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  padding: 2px 8px;
+  flex-shrink: 0;
 }
 
 /* Professional Footer */

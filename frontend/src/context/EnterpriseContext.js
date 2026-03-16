@@ -72,6 +72,20 @@ export const EnterpriseProvider = ({ children }) => {
   const [entities, setEntities] = useState([]);
   const [selectedEntities, setSelectedEntities] = useState([]);
 
+  // Active Workspace (the entity/company currently being worked on)
+  const [activeWorkspace, setActiveWorkspaceState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('atc_active_workspace');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Workspace-level notification/task state
+  const [globalNotifications, setGlobalNotifications] = useState([]);
+  const [globalTasks, setGlobalTasks] = useState([]);
+
   // Team
   const [teamMembers, setTeamMembers] = useState([]);
   const [currentUserRole, setCurrentUserRole] = useState(null);
@@ -579,6 +593,50 @@ export const EnterpriseProvider = ({ children }) => {
   }, [apiUrl, buildAuthHeaders]);
 
   /**
+   * Set the active workspace (entity) and persist to localStorage.
+   */
+  const setActiveWorkspace = useCallback((workspace) => {
+    setActiveWorkspaceState(workspace);
+    if (workspace) {
+      try {
+        localStorage.setItem('atc_active_workspace', JSON.stringify(workspace));
+      } catch { /* storage quota */ }
+    } else {
+      localStorage.removeItem('atc_active_workspace');
+    }
+  }, []);
+
+
+  /**
+   * Fetch global notifications — compile from compliance deadlines across all
+   * accessible entities so the Global Console can show them.
+   */
+  const fetchGlobalNotifications = useCallback(async () => {
+    if (!entities || entities.length === 0) return;
+    const now = new Date();
+    const notes = [];
+    entities.forEach((entity) => {
+      (complianceDeadlines || []).forEach((d) => {
+        const daysLeft = d.deadline_date
+          ? Math.ceil((new Date(d.deadline_date) - now) / (1000 * 60 * 60 * 24))
+          : null;
+        if (daysLeft !== null && daysLeft <= 30) {
+          notes.push({
+            id: `deadline-${d.id}`,
+            entityId: entity.id,
+            entityName: entity.name,
+            type: 'tax_deadline',
+            message: `${d.title} — due ${d.deadline_date}`,
+            severity: daysLeft <= 0 ? 'critical' : daysLeft <= 7 ? 'high' : 'medium',
+            daysLeft,
+          });
+        }
+      });
+    });
+    setGlobalNotifications(notes);
+  }, [entities, complianceDeadlines]);
+
+  /**
    * Create new entity
    */
   const createEntity = useCallback(async (entityData) => {
@@ -626,6 +684,27 @@ export const EnterpriseProvider = ({ children }) => {
       throw err; // Re-throw so the component can handle it
     }
   }, [apiUrl, buildAuthHeaders, fetchEntities]);
+
+  /**
+   * Create a new workspace (entity) and activate it.
+   * Also triggers default chart-of-accounts setup on the backend.
+   */
+  const createWorkspace = useCallback(async (workspaceData) => {
+    const payload = {
+      organization_id: workspaceData.organizationId,
+      name: workspaceData.name,
+      country: workspaceData.country,
+      entity_type: workspaceData.businessType || 'corporation',
+      local_currency: workspaceData.currency,
+      fiscal_year_end: workspaceData.fiscalYearEnd || '12-31',
+      status: 'active',
+    };
+    const newEntity = await createEntity(payload);
+    if (newEntity) {
+      setActiveWorkspace(newEntity);
+    }
+    return newEntity;
+  }, [createEntity, setActiveWorkspace]);
 
   /**
    * Delete entity
@@ -1712,6 +1791,15 @@ export const EnterpriseProvider = ({ children }) => {
     executeInternalTransfer,
     executeFXConversion,
     executeInvestmentAllocation,
+
+    // Workspace
+    activeWorkspace,
+    setActiveWorkspace,
+    createWorkspace,
+    globalNotifications,
+    globalTasks,
+    setGlobalTasks,
+    fetchGlobalNotifications,
 
     // Setters
     setCurrentOrganization,
