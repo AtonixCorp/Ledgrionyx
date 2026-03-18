@@ -52,6 +52,10 @@ const GlobalTax = () => {
   const selectedCountry = selected && filtered.some((country) => country.code === selected.code)
     ? selected
     : filtered[0] || selected;
+  const quickActionCount = [
+    Boolean(selectedCountry?.supported_tasks?.includes('open_tax_payment_portal') && selectedCountry?.tax_authority?.payment_portal),
+    Boolean(selectedCountry?.supported_tasks?.includes('basic_tax_estimator')),
+  ].filter(Boolean).length;
 
   return (
     <div className="global-tax-page">
@@ -225,17 +229,26 @@ const GlobalTax = () => {
                     {selectedCountry.supported_tasks && selectedCountry.supported_tasks.length > 0 && (
                       <div className="section-card actions-card">
                         <h4 className="section-title">Quick Actions</h4>
-                        <div className="actions-grid">
+                        {selectedCountry.supported_tasks?.includes('open_tax_payment_portal') && selectedCountry.tax_authority?.payment_portal && (
+                          <div className="actions-banner">Pay Tax Online</div>
+                        )}
+                        <div className={`actions-grid${quickActionCount === 1 ? ' actions-grid--single' : ''}`}>
                           {selectedCountry.supported_tasks?.includes('open_tax_payment_portal') && selectedCountry.tax_authority?.payment_portal && (
                             <a
                               href={selectedCountry.tax_authority.payment_portal}
-                              rel="noreferrer"
+                              target="_blank"
+                              rel="noreferrer noopener"
                               className="action-btn primary-btn"
-                            >Pay Tax Online
+                            >
+                              <span className="action-btn__title">Pay Tax Online</span>
                             </a>
                           )}
                           {selectedCountry.supported_tasks?.includes('basic_tax_estimator') && (
-                            <button className="action-btn secondary-btn" onClick={() => alert('Basic estimator coming soon for ' + selectedCountry.name)}>Estimate Tax
+                            <button
+                              className="action-btn secondary-btn"
+                              type="button"
+                            >
+                              <span className="action-btn__title">Estimate Tax</span>
                             </button>
                           )}
                         </div>
