@@ -1,0 +1,157 @@
+// =============================================================================
+// ATC Capital – Infrastructure Apply Pipeline
+// Trigger: Gerrit change-merged on infra/openstack-atc (main branch)
+//
+// Automatically applies to DEV. For TEST/STAGE/PROD use the promotion pipeline.
+// All resources are tagged with the Gerrit change ID and commit SHA for full
+// traceability.
+// =============================================================================
+
+@Library('atc-pipeline-library') _
+
+pipeline {
+    agent { label 'terraform' }
+
+    options {
+        timeout(time: 60, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '100'))
+        ansiColor('xterm')
+        lock(resource: 'terraform-atc-dev')  // Prevent concurrent applies
+    }
+
+    parameters {
+        string(name: 'GERRIT_CHANGE_ID',       defaultValue: '', description: 'Gerrit change ID (injected by trigger)')
+        string(name: 'GERRIT_CHANGE_COMMIT',   defaultValue: '', description: 'Merged commit SHA (injected by trigger)')
+        string(name: 'GERRIT_CHANGE_BRANCH',   defaultValue: 'main', description: 'Branch that was merged into')
+    }
+
+    environment {
+        TF_IN_AUTOMATION = "true"
+        TF_CLI_ARGS      = "-no-color"
+        ENV_NAME         = "dev"
+        CHANGE_ID        = "${params.GERRIT_CHANGE_ID}"
+        COMMIT_SHORT     = "${params.GERRIT_CHANGE_COMMIT.take(8)}"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Init') {
+            steps {
+                dir("infra/openstack/terraform/envs/${ENV_NAME}") {
+                    withCredentials([
+                        string(credentialsId: 'openstack-dev-appid',     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
+                        string(credentialsId: 'openstack-dev-appsecret', variable: 'OS_APPLICATION_CREDENTIAL_SECRET')
+                    ]) {
+                        sh '''
+                            set -e
+                            terraform init \
+                              -backend-config="application_credential_id=${OS_APPLICATION_CREDENTIAL_ID}" \
+                              -backend-config="application_credential_secret=${OS_APPLICATION_CREDENTIAL_SECRET}"
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Plan') {
+            steps {
+                dir("infra/openstack/terraform/envs/${ENV_NAME}") {
+                    withCredentials([
+                        string(credentialsId: 'openstack-dev-appid',     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
+                        string(credentialsId: 'openstack-dev-appsecret', variable: 'OS_APPLICATION_CREDENTIAL_SECRET'),
+                        string(credentialsId: "atc-${ENV_NAME}-ssh-pubkey", variable: 'TF_VAR_ssh_public_key')
+                    ]) {
+                        sh '''
+                            set -e
+                            terraform plan \
+                              -var="change_id=${CHANGE_ID}" \
+                              -var="commit=${COMMIT_SHORT}" \
+                              -var="os_application_credential_id=${OS_APPLICATION_CREDENTIAL_ID}" \
+                              -var="os_application_credential_secret=${OS_APPLICATION_CREDENTIAL_SECRET}" \
+                              -out=apply.tfplan 2>&1 | tee plan.txt
+                        '''
+                        script {
+                            // Store plan summary for audit log
+                            env.PLAN_SUMMARY = sh(
+                                script: "grep -E 'Plan:|No changes' infra/openstack/terraform/envs/${ENV_NAME}/plan.txt || true",
+                                returnStdout: true
+                            ).trim()
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: "infra/openstack/terraform/envs/${ENV_NAME}/plan.txt"
+                }
+            }
+        }
+
+        stage('Apply') {
+            steps {
+                dir("infra/openstack/terraform/envs/${ENV_NAME}") {
+                    withCredentials([
+                        string(credentialsId: 'openstack-dev-appid',     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
+                        string(credentialsId: 'openstack-dev-appsecret', variable: 'OS_APPLICATION_CREDENTIAL_SECRET')
+                    ]) {
+                        sh '''
+                            set -e
+                            terraform apply \
+                              -auto-approve \
+                              apply.tfplan 2>&1 | tee apply.txt
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: "infra/openstack/terraform/envs/${ENV_NAME}/apply.txt"
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            script {
+                gerrit.comment(
+                    changeId: env.CHANGE_ID,
+                    message: """✅ Infra applied to DEV (${env.ENV_NAME})
+
+Gerrit change : ${env.CHANGE_ID}
+Commit        : ${env.COMMIT_SHORT}
+Jenkins build : ${env.BUILD_URL}
+Plan summary  : ${env.PLAN_SUMMARY}
+
+Resources are tagged: system=atc-capital env=dev change_id=${env.CHANGE_ID} commit=${env.COMMIT_SHORT}
+"""
+                )
+            }
+        }
+        failure {
+            script {
+                gerrit.comment(
+                    changeId: env.CHANGE_ID,
+                    message: """❌ Infra APPLY FAILED on DEV
+
+Gerrit change : ${env.CHANGE_ID}
+Commit        : ${env.COMMIT_SHORT}
+Jenkins build : ${env.BUILD_URL}
+
+Immediate action required. Review apply.txt in build artifacts.
+"""
+                )
+            }
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

@@ -1,0 +1,148 @@
+// =============================================================================
+// ATC Capital – Infrastructure Validate Pipeline
+// Trigger: Gerrit patchset-created on infra/openstack-atc
+//
+// Runs lint, security checks, and terraform plan. Posts Verified vote
+// and a plan summary back to the Gerrit change.
+// =============================================================================
+
+@Library('atc-pipeline-library') _
+
+pipeline {
+    agent { label 'terraform' }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '50'))
+        ansiColor('xterm')
+    }
+
+    environment {
+        // Injected by Gerrit Trigger plugin
+        GERRIT_CHANGE_ID     = "${env.GERRIT_CHANGE_ID}"
+        GERRIT_PATCHSET_REV  = "${env.GERRIT_PATCHSET_REVISION}"
+        GERRIT_REFSPEC       = "${env.GERRIT_REFSPEC}"
+
+        // OpenStack credentials from Vault/Jenkins credentials store
+        OS_AUTH_URL = credentials('openstack-auth-url')
+        // Application credentials for plan-only sandbox project
+        OS_APPLICATION_CREDENTIAL_ID     = credentials('openstack-plan-appid')
+        OS_APPLICATION_CREDENTIAL_SECRET = credentials('openstack-plan-appsecret')
+
+        TF_IN_AUTOMATION = "true"
+        TF_CLI_ARGS      = "-no-color"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: env.GERRIT_PATCHSET_REV]],
+                    userRemoteConfigs: [[
+                        url: "${env.GERRIT_CHANGE_URL}",
+                        refspec: env.GERRIT_REFSPEC,
+                        credentialsId: 'gerrit-ssh-key'
+                    ]]
+                ])
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                dir('infra/openstack/terraform') {
+                    sh '''
+                        set -e
+                        echo "=== terraform fmt check ==="
+                        terraform fmt -check -recursive
+
+                        echo "=== tflint ==="
+                        find envs modules -name "*.tf" | head -1 | xargs dirname | \
+                          xargs -I{} sh -c 'cd {} && tflint --init && tflint'
+                    '''
+                }
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                dir('infra/openstack/terraform') {
+                    sh '''
+                        set -e
+                        echo "=== tfsec ==="
+                        tfsec . --no-color --exit-code 1
+                    '''
+                }
+            }
+        }
+
+        stage('Plan – DEV') {
+            steps {
+                dir('infra/openstack/terraform/envs/dev') {
+                    withCredentials([
+                        string(credentialsId: 'openstack-plan-appid',     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
+                        string(credentialsId: 'openstack-plan-appsecret', variable: 'OS_APPLICATION_CREDENTIAL_SECRET'),
+                        string(credentialsId: 'atc-dev-ssh-pubkey',       variable: 'TF_VAR_ssh_public_key')
+                    ]) {
+                        sh '''
+                            set -e
+                            terraform init -backend=false
+                            terraform validate
+                            terraform plan \
+                              -var="change_id=${GERRIT_CHANGE_ID}" \
+                              -var="commit=${GERRIT_PATCHSET_REV:0:8}" \
+                              -var="os_application_credential_id=${OS_APPLICATION_CREDENTIAL_ID}" \
+                              -var="os_application_credential_secret=${OS_APPLICATION_CREDENTIAL_SECRET}" \
+                              -out=dev.tfplan 2>&1 | tee dev-plan.txt
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'infra/openstack/terraform/envs/dev/dev-plan.txt', allowEmptyArchive: true
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            script {
+                def planSummary = readFile('infra/openstack/terraform/envs/dev/dev-plan.txt')
+                    .readLines()
+                    .findAll { it =~ /Plan:|No changes/ }
+                    .join('\n')
+
+                gerrit.vote(
+                    verified: '+1',
+                    message: """✅ Validation passed for change ${env.GERRIT_CHANGE_ID}
+
+Build: ${env.BUILD_URL}
+
+Plan summary (dev):
+${planSummary}
+"""
+                )
+            }
+        }
+        failure {
+            script {
+                gerrit.vote(
+                    verified: '-1',
+                    message: """❌ Validation FAILED for change ${env.GERRIT_CHANGE_ID}
+
+Build: ${env.BUILD_URL}
+
+Review the build log and fix issues before re-submitting.
+"""
+                )
+            }
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

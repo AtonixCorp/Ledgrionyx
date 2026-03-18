@@ -1,0 +1,170 @@
+// =============================================================================
+// ATC Capital – Application Build Pipeline
+// Trigger: Gerrit patchset-created on apps/atc-capital-core
+//
+// Stages: compile → unit test → security scan → container build → push registry
+// Artifacts are tagged with commit SHA, Gerrit change ID, and build number.
+// =============================================================================
+
+@Library('atc-pipeline-library') _
+
+pipeline {
+    agent { label 'docker-builder' }
+
+    options {
+        timeout(time: 40, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '100'))
+        ansiColor('xterm')
+    }
+
+    environment {
+        GERRIT_CHANGE_ID    = "${env.GERRIT_CHANGE_ID}"
+        GERRIT_PATCHSET_REV = "${env.GERRIT_PATCHSET_REVISION}"
+        GERRIT_REFSPEC      = "${env.GERRIT_REFSPEC}"
+
+        REGISTRY_URL        = credentials('container-registry-url')
+        IMAGE_NAME          = "atc-capital/api"
+        COMMIT_SHORT        = "${env.GERRIT_PATCHSET_REVISION?.take(8) ?: 'unknown'}"
+        IMAGE_TAG           = "${env.COMMIT_SHORT}-${env.BUILD_NUMBER}"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: env.GERRIT_PATCHSET_REV]],
+                    userRemoteConfigs: [[
+                        url: 'ssh://gerrit.atccapital.internal:29418/apps/atc-capital-core',
+                        refspec: env.GERRIT_REFSPEC,
+                        credentialsId: 'gerrit-ssh-key'
+                    ]]
+                ])
+            }
+        }
+
+        stage('Unit Tests') {
+            agent {
+                docker {
+                    image 'python:3.13-slim'
+                    reuseNode true
+                }
+            }
+            steps {
+                dir('api') {
+                    sh '''
+                        set -e
+                        pip install -r requirements.txt --quiet
+                        python manage.py test --verbosity=2 2>&1 | tee test-results.txt
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'api/test-results.txt', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Static Analysis & Security Scan') {
+            agent {
+                docker {
+                    image 'python:3.13-slim'
+                    reuseNode true
+                }
+            }
+            steps {
+                dir('api') {
+                    sh '''
+                        set -e
+                        pip install bandit flake8 --quiet
+                        echo "=== flake8 ==="
+                        flake8 . --max-line-length=120 --exclude=migrations
+
+                        echo "=== bandit security scan ==="
+                        bandit -r . -x ./migrations,./tests.py -ll 2>&1 | tee security-scan.txt
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'api/security-scan.txt', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Build Container Image') {
+            steps {
+                dir('api') {
+                    sh '''
+                        set -e
+                        docker build \
+                          --file Dockerfile.prod \
+                          --build-arg COMMIT=${COMMIT_SHORT} \
+                          --build-arg CHANGE_ID=${GERRIT_CHANGE_ID} \
+                          --build-arg BUILD_NUMBER=${BUILD_NUMBER} \
+                          --tag ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} \
+                          --tag ${REGISTRY_URL}/${IMAGE_NAME}:${GERRIT_CHANGE_ID} \
+                          .
+                    '''
+                }
+            }
+        }
+
+        stage('Push to Registry') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'container-registry-creds',
+                    usernameVariable: 'REGISTRY_USER',
+                    passwordVariable: 'REGISTRY_PASS'
+                )]) {
+                    sh '''
+                        set -e
+                        echo "${REGISTRY_PASS}" | docker login ${REGISTRY_URL} -u ${REGISTRY_USER} --password-stdin
+                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:${GERRIT_CHANGE_ID}
+                        # Explicit logout to remove stored credentials
+                        docker logout ${REGISTRY_URL}
+                    '''
+                }
+                // Record artifact tag for downstream deploy pipelines
+                writeFile file: 'image-tag.txt', text: env.IMAGE_TAG
+                archiveArtifacts artifacts: 'image-tag.txt'
+            }
+        }
+
+    }
+
+    post {
+        success {
+            script {
+                gerrit.vote(
+                    verified: '+1',
+                    message: """✅ Build passed for change ${env.GERRIT_CHANGE_ID}
+
+Image : ${env.REGISTRY_URL}/${env.IMAGE_NAME}:${env.IMAGE_TAG}
+Build : ${env.BUILD_URL}
+"""
+                )
+            }
+        }
+        failure {
+            script {
+                gerrit.vote(
+                    verified: '-1',
+                    message: """❌ Build FAILED for change ${env.GERRIT_CHANGE_ID}
+
+Build : ${env.BUILD_URL}
+
+Fix failures before re-submitting.
+"""
+                )
+            }
+        }
+        always {
+            sh 'docker image prune -f || true'
+            cleanWs()
+        }
+    }
+}

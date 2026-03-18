@@ -1,0 +1,52 @@
+---
+# roles/atc-db/tasks/main.yml
+# Provisions and configures the PostgreSQL container on db-group hosts.
+
+- name: Create Postgres data directory
+  ansible.builtin.file:
+    path: "{{ atc_db_data_dir }}"
+    state: directory
+    owner: "999"   # postgres container UID
+    group: "999"
+    mode: '0700'
+
+- name: Template Postgres env file from Vault secrets
+  ansible.builtin.template:
+    src: postgres.env.j2
+    dest: /opt/atc-capital/postgres.env
+    owner: "{{ atc_app_user }}"
+    group: "{{ atc_app_group }}"
+    mode: '0600'
+  no_log: true
+  notify: Restart postgres container
+
+- name: Ensure postgres container is running
+  community.docker.docker_container:
+    name: "atc-{{ env }}-postgres"
+    image: "{{ atc_db_image }}"
+    state: started
+    restart_policy: "{{ atc_db_container_restart_policy }}"
+    env_file: /opt/atc-capital/postgres.env
+    ports:
+      - "127.0.0.1:{{ atc_db_port }}:5432"   # Bind to loopback only; SG controls external access
+    volumes:
+      - "{{ atc_db_data_dir }}:/var/lib/postgresql/data:rw"
+    log_driver: journald
+    labels:
+      system: "atc-capital"
+      env: "{{ env }}"
+      service: "db"
+      change_id: "{{ gerrit_change_id | default('manual') }}"
+
+- name: Wait for Postgres to accept connections
+  community.postgresql.postgresql_ping:
+    db: postgres
+    login_host: 127.0.0.1
+    login_port: "{{ atc_db_port }}"
+    login_user: "{{ postgres_user | default('atc') }}"
+    login_password: "{{ postgres_password }}"
+  retries: 10
+  delay: 5
+  register: pg_ping
+  until: pg_ping.is_available
+  no_log: true

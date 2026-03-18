@@ -1,0 +1,13 @@
+---
+# roles/atc-api/defaults/main.yml
+
+atc_api_port: 8000
+atc_api_workers: 4
+atc_container_restart_policy: unless-stopped
+
+# Image is injected at deploy time via extra-vars; this default exists
+# only to allow site.yml re-runs without the image_tag var.
+atc_image: "{{ registry_url | default('registry.atccapital.internal') }}/atc-capital/api:{{ image_tag | default('latest') }}"
+
+atc_env_file: /opt/atc-capital/.env
+atc_data_dir: /opt/atc-capital/data

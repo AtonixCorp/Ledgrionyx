@@ -1,0 +1,8 @@
+---
+# roles/atc-api/handlers/main.yml
+
+- name: Restart atc-api container
+  community.docker.docker_container:
+    name: "atc-{{ env }}-{{ atc_service }}"
+    state: started
+    restart: true

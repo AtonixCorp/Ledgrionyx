@@ -1,0 +1,29 @@
+---
+# roles/atc-common/defaults/main.yml
+# Baseline defaults for all ATC Capital hosts.
+
+atc_timezone: UTC
+atc_ntp_servers:
+  - 0.pool.ntp.org
+  - 1.pool.ntp.org
+
+atc_log_dir: /var/log/atc-capital
+atc_app_user: atc
+atc_app_group: atc
+
+atc_security_packages:
+  - unattended-upgrades
+  - aide
+  - auditd
+  - fail2ban
+
+atc_required_packages:
+  - curl
+  - wget
+  - jq
+  - ca-certificates
+  - gnupg
+  - lsb-release
+  - python3-pip
+  - docker.io
+  - docker-compose-plugin

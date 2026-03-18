@@ -1,0 +1,8 @@
+---
+# roles/atc-db/handlers/main.yml
+
+- name: Restart postgres container
+  community.docker.docker_container:
+    name: "atc-{{ env }}-postgres"
+    state: started
+    restart: true

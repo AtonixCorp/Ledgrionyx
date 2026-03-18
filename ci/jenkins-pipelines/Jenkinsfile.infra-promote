@@ -1,0 +1,203 @@
+// =============================================================================
+// ATC Capital – Infrastructure Promotion Pipeline
+// Trigger: Manual dispatch (or Gerrit Ready-For-Test / Ready-For-Prod label)
+//
+// Promotes already-merged infrastructure from one environment to the next.
+// PROD applies require an explicit manual gate step in Jenkins.
+// Every promotion is logged with change ID, approver, and timestamp.
+// =============================================================================
+
+@Library('atc-pipeline-library') _
+
+pipeline {
+    agent { label 'terraform' }
+
+    parameters {
+        choice(
+            name: 'TARGET_ENV',
+            choices: ['test', 'stage', 'prod'],
+            description: 'Environment to promote infrastructure changes to.'
+        )
+        string(
+            name: 'SOURCE_COMMIT',
+            defaultValue: '',
+            description: 'Git commit SHA to promote. Must already be applied to DEV (and TEST for stage/prod).'
+        )
+        string(
+            name: 'GERRIT_CHANGE_ID',
+            defaultValue: '',
+            description: 'Gerrit change ID associated with this promotion.'
+        )
+    }
+
+    options {
+        timeout(time: 90, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '100'))
+        ansiColor('xterm')
+    }
+
+    environment {
+        TF_IN_AUTOMATION = "true"
+        TF_CLI_ARGS      = "-no-color"
+        COMMIT_SHORT     = "${params.SOURCE_COMMIT.take(8)}"
+    }
+
+    stages {
+
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!params.SOURCE_COMMIT?.trim()) {
+                        error "SOURCE_COMMIT must be specified."
+                    }
+                    if (!params.GERRIT_CHANGE_ID?.trim()) {
+                        error "GERRIT_CHANGE_ID must be specified."
+                    }
+                }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: params.SOURCE_COMMIT]],
+                    userRemoteConfigs: [[
+                        url: 'ssh://gerrit.atccapital.internal:29418/infra/openstack-atc',
+                        credentialsId: 'gerrit-ssh-key'
+                    ]]
+                ])
+            }
+        }
+
+        stage('Init') {
+            steps {
+                dir("infra/openstack/terraform/envs/${params.TARGET_ENV}") {
+                    withCredentials([
+                        string(credentialsId: "openstack-${params.TARGET_ENV}-appid",     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
+                        string(credentialsId: "openstack-${params.TARGET_ENV}-appsecret", variable: 'OS_APPLICATION_CREDENTIAL_SECRET')
+                    ]) {
+                        sh '''
+                            set -e
+                            terraform init \
+                              -backend-config="application_credential_id=${OS_APPLICATION_CREDENTIAL_ID}" \
+                              -backend-config="application_credential_secret=${OS_APPLICATION_CREDENTIAL_SECRET}"
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Plan') {
+            steps {
+                dir("infra/openstack/terraform/envs/${params.TARGET_ENV}") {
+                    withCredentials([
+                        string(credentialsId: "openstack-${params.TARGET_ENV}-appid",     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
+                        string(credentialsId: "openstack-${params.TARGET_ENV}-appsecret", variable: 'OS_APPLICATION_CREDENTIAL_SECRET'),
+                        string(credentialsId: "atc-${params.TARGET_ENV}-ssh-pubkey",      variable: 'TF_VAR_ssh_public_key')
+                    ]) {
+                        sh '''
+                            set -e
+                            terraform plan \
+                              -var="change_id=${GERRIT_CHANGE_ID}" \
+                              -var="commit=${COMMIT_SHORT}" \
+                              -var="os_application_credential_id=${OS_APPLICATION_CREDENTIAL_ID}" \
+                              -var="os_application_credential_secret=${OS_APPLICATION_CREDENTIAL_SECRET}" \
+                              -out=promote.tfplan 2>&1 | tee plan.txt
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: "infra/openstack/terraform/envs/${params.TARGET_ENV}/plan.txt"
+                }
+            }
+        }
+
+        // Hard gate: PROD requires explicit human approval before apply.
+        stage('Approval Gate (PROD only)') {
+            when {
+                expression { params.TARGET_ENV == 'prod' }
+            }
+            steps {
+                script {
+                    def plan = readFile("infra/openstack/terraform/envs/${params.TARGET_ENV}/plan.txt")
+                    def approver = input(
+                        id: 'prod-apply-approval',
+                        message: """PROD infrastructure apply requested.
+
+Gerrit change : ${params.GERRIT_CHANGE_ID}
+Commit        : ${env.COMMIT_SHORT}
+
+Plan summary:
+${plan.readLines().findAll { it =~ /Plan:|No changes/ }.join('\n')}
+
+Approve to proceed. This action is logged and irreversible without a rollback change.""",
+                        submitter: 'ATC Capital Owners,Infra Leads',
+                        parameters: [
+                            string(name: 'JUSTIFICATION', description: 'Brief justification for this production apply.')
+                        ]
+                    )
+                    env.APPROVER_NOTE = approver?.JUSTIFICATION ?: 'No justification provided'
+                }
+            }
+        }
+
+        stage('Apply') {
+            steps {
+                dir("infra/openstack/terraform/envs/${params.TARGET_ENV}") {
+                    withCredentials([
+                        string(credentialsId: "openstack-${params.TARGET_ENV}-appid",     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
+                        string(credentialsId: "openstack-${params.TARGET_ENV}-appsecret", variable: 'OS_APPLICATION_CREDENTIAL_SECRET')
+                    ]) {
+                        sh '''
+                            set -e
+                            terraform apply -auto-approve promote.tfplan 2>&1 | tee apply.txt
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: "infra/openstack/terraform/envs/${params.TARGET_ENV}/apply.txt"
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            script {
+                def approverNote = env.APPROVER_NOTE ? " | Justification: ${env.APPROVER_NOTE}" : ''
+                gerrit.comment(
+                    changeId: params.GERRIT_CHANGE_ID,
+                    message: """✅ Infra promoted to ${params.TARGET_ENV.toUpperCase()}
+
+Commit    : ${env.COMMIT_SHORT}
+Build     : ${env.BUILD_URL}
+Approver  : ${currentBuild.getBuildCauses()[0]?.userId ?: 'automated'}${approverNote}
+Timestamp : ${new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone('UTC'))}
+"""
+                )
+            }
+        }
+        failure {
+            script {
+                gerrit.comment(
+                    changeId: params.GERRIT_CHANGE_ID,
+                    message: """❌ Infra promotion to ${params.TARGET_ENV.toUpperCase()} FAILED
+
+Build : ${env.BUILD_URL}
+
+Immediate review required.
+"""
+                )
+            }
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

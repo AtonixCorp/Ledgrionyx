@@ -1,0 +1,24 @@
+---
+# site.yml – Apply baseline configuration to ALL ATC Capital OpenStack hosts.
+# Run this after first provisioning or when base configuration drifts.
+#
+# Usage:
+#   ansible-playbook playbooks/site.yml --inventory inventories/<env>/hosts.yml
+
+- name: Apply ATC Capital common baseline to all hosts
+  hosts: all
+  gather_facts: true
+  roles:
+    - atc-common
+
+- name: Configure API service hosts (ledger, accounts, risk, reporting)
+  hosts: api
+  gather_facts: true
+  roles:
+    - atc-api
+
+- name: Configure database hosts
+  hosts: database
+  gather_facts: true
+  roles:
+    - atc-db

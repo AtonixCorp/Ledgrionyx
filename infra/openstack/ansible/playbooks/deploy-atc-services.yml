@@ -1,0 +1,69 @@
+---
+# deploy-atc-services.yml
+# Deploys the ATC Capital container image to API hosts in the target environment.
+# Called by Jenkins Jenkinsfile.app-deploy.
+#
+# Required extra-vars (injected by Jenkins):
+#   env              – target environment (dev|test|stage|prod)
+#   image_tag        – versioned container tag from the build pipeline
+#   registry_url     – private container registry base URL
+#   gerrit_change_id – Gerrit change ID for audit tagging
+#   vault_token      – HashiCorp Vault token for secret retrieval
+
+- name: Deploy ATC Capital API services
+  hosts: api
+  gather_facts: true
+  serial: "50%"   # Rolling deploy – never take all hosts down simultaneously
+  max_fail_percentage: 0
+
+  vars:
+    atc_image: "{{ registry_url }}/atc-capital/api:{{ image_tag }}"
+    atc_deploy_label_change_id: "{{ gerrit_change_id }}"
+    atc_deploy_label_image_tag: "{{ image_tag }}"
+
+  pre_tasks:
+    - name: Verify image tag is set
+      ansible.builtin.assert:
+        that:
+          - image_tag is defined
+          - image_tag | length > 0
+        fail_msg: "image_tag must be set before deploying."
+
+    - name: Pull container image
+      community.docker.docker_image:
+        name: "{{ atc_image }}"
+        source: pull
+        force_source: true
+      register: image_pull
+
+    - name: Confirm image pull succeeded
+      ansible.builtin.assert:
+        that: image_pull is succeeded
+        fail_msg: "Failed to pull {{ atc_image }}. Check registry connectivity."
+
+  roles:
+    - atc-api
+
+  post_tasks:
+    - name: Health-check the deployed service
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host }}:8000/health/"
+        method: GET
+        status_code: 200
+        timeout: 10
+      register: health_check
+      retries: 5
+      delay: 5
+      until: health_check.status == 200
+      delegate_to: localhost
+
+    - name: Record deployment audit entry
+      ansible.builtin.copy:
+        content: |
+          timestamp={{ ansible_date_time.iso8601 }}
+          env={{ env }}
+          host={{ inventory_hostname }}
+          image={{ atc_image }}
+          change_id={{ gerrit_change_id }}
+        dest: "/var/log/atc-capital/deploy-audit.log"
+        mode: '0640'
