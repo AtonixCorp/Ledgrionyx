@@ -99,6 +99,7 @@ import AppSubscription from './modules/settings/Subscription';
 import AppHelpCenter from './modules/support/HelpCenter';
 import AppSupportTickets from './modules/support/SupportTickets';
 import Product from './pages/Product/Product';
+import Deployment from './pages/Deployment/Deployment';
 import Features from './pages/Features/Features';
 import Pricing from './pages/Pricing/Pricing';
 import About from './pages/About/About';
@@ -124,6 +125,8 @@ import WorkspaceEmail        from './pages/Workspace/modules/WorkspaceEmail';
 import WorkspaceMarketing    from './pages/Workspace/modules/WorkspaceMarketing';
 
 function App() {
+  const routerBasename = process.env.PUBLIC_URL || '/';
+
   // Console module routes — open inside the ATC Capital Console (Layout with sidebar).
   // WorkspaceRoute / WorkspaceLayout is reserved for workspace-scoped routes only.
   const renderModuleCrudRoutes = (basePath, Component) => [
@@ -146,7 +149,7 @@ function App() {
           <FinanceProvider>
             <EnterpriseProvider>
               <FilterProvider>
-              <Router>
+              <Router basename={routerBasename}>
             <GlobalErrorCenter />
             <Routes>
               {/* Public Routes */}
@@ -156,6 +159,7 @@ function App() {
 
               {/* Website Pages */}
               <Route path="/product" element={<Product />} />
+              <Route path="/deployment" element={<Deployment />} />
               <Route path="/features" element={<Features />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/about" element={<About />} />

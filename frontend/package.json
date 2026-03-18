@@ -1,6 +1,7 @@
 {
   "name": "atc-capital",
   "version": "1.0.0",
+  "homepage": "https://atccapital.github.io/atccapital",
   "private": true,
   "proxy": "http://localhost:8000",
   "engines": {

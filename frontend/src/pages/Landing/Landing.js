@@ -113,6 +113,28 @@ const Landing = () => {
         </div>
       </section>
 
+      <section className="landing-deployment-promo" aria-label="Deployment Overview">
+        <div className="landing-deployment-promo__inner">
+          <div className="landing-deployment-promo__copy">
+            <p className="landing-deployment-promo__eyebrow">Platform Delivery</p>
+            <h2 className="landing-deployment-promo__title">Deployment is now part of the frontend experience.</h2>
+            <p className="landing-deployment-promo__text">
+              Review how ATC Capital moves from GitHub validation to Docker images, Kubernetes promotion,
+              health verification, and infrastructure controls through a public deployment page built directly
+              into the frontend.
+            </p>
+          </div>
+          <div className="landing-deployment-promo__actions">
+            <Link to="/deployment" className="landing-deployment-promo__primary">
+              View Deployment Page
+            </Link>
+            <Link to="/v1/docs" className="landing-deployment-promo__secondary">
+              Open API Portal
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/*  IDENTITY / PILLARS  */}
       <section className="pillars-section">
         <div className="pillars-container">

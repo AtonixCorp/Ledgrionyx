@@ -521,6 +521,92 @@
 }
 
 /* =============================================================================
+   DEPLOYMENT PROMO
+   ============================================================================= */
+.landing-deployment-promo {
+  padding: 32px 0 0;
+  background: var(--color-background);
+}
+
+.landing-deployment-promo__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.9fr);
+  gap: 18px;
+}
+
+.landing-deployment-promo__copy,
+.landing-deployment-promo__actions {
+  border: 1px solid var(--border-color-default);
+  padding: 24px;
+  background:
+    linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.08), rgba(var(--color-primary-rgb), 0.02)),
+    var(--color-background);
+}
+
+.landing-deployment-promo__eyebrow {
+  margin: 0 0 8px;
+  color: rgba(var(--color-text-rgb), 0.58);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.landing-deployment-promo__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.landing-deployment-promo__text {
+  margin: 14px 0 0;
+  color: rgba(var(--color-text-rgb), 0.72);
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+  max-width: 72ch;
+}
+
+.landing-deployment-promo__actions {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.landing-deployment-promo__primary,
+.landing-deployment-promo__secondary {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  transition: transform var(--transition-base), border-color var(--transition-base), background-color var(--transition-base);
+}
+
+.landing-deployment-promo__primary {
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: var(--color-background);
+}
+
+.landing-deployment-promo__secondary {
+  background: transparent;
+  border: 1px solid rgba(var(--color-text-rgb), 0.16);
+  color: var(--color-text);
+}
+
+.landing-deployment-promo__primary:hover,
+.landing-deployment-promo__secondary:hover {
+  transform: translateY(-1px);
+}
+
+/* =============================================================================
    SHARED SECTION FRAME
    ============================================================================= */
 .pillars-section,
@@ -845,6 +931,12 @@
 }
 
 @media (max-width: 900px) {
+  .landing-deployment-promo__inner {
+    grid-template-columns: 1fr;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
   .problem-strip-inner,
   .pillars-container,
   .blueprint-container,
@@ -867,6 +959,15 @@
 }
 
 @media (max-width: 640px) {
+  .landing-deployment-promo__inner {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .landing-deployment-promo__actions {
+    grid-template-columns: 1fr;
+  }
+
   .pillars-grid,
   .blueprint-grid,
   .roadmap-grid,

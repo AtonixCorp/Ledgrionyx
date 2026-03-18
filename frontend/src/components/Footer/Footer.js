@@ -42,8 +42,9 @@ const Footer = () => {
           <div className="footer-section">
             <h4>Resources</h4>
             <div className="footer-links">
+              <Link to="/deployment">Deployment</Link>
               <Link to="/help-center">Help Center</Link>
-              <a href="/v1/docs" target="_blank" rel="noreferrer">API Docs</a>
+              <Link to="/v1/docs">API Docs</Link>
               <Link to="/support">Support</Link>
               <Link to="/about">About Us</Link>
             </div>

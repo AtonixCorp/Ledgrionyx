@@ -21,6 +21,20 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script>
+      (function (location) {
+        if (location.search[1] === '/') {
+          var decoded = location.search
+            .slice(1)
+            .split('&')
+            .map(function (segment) {
+              return segment.replace(/~and~/g, '&');
+            })
+            .join('?');
+          window.history.replaceState(null, null, location.pathname.slice(0, -1) + decoded + location.hash);
+        }
+      })(window.location);
+    </script>
+    <script>
       // Suppress benign ResizeObserver errors from Recharts
       window.addEventListener('error', (e) => {
         if (e.message === 'ResizeObserver loop completed with undelivered notifications.' || 

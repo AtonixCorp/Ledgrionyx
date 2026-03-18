@@ -20,6 +20,7 @@ const COUNTRIES = [
 const NAV_ITEMS = [
   { label: 'Home',       to: '/' },
   { label: 'Services',   to: '/product' },
+  { label: 'Deployment', to: '/deployment' },
   { label: 'Features',   to: '/features' },
   { label: 'Global Tax', to: '/global-tax' },
   { label: 'Pricing',    to: '/pricing' },
