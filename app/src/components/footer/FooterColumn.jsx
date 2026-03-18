@@ -4,8 +4,39 @@ import { Link } from 'react-router-dom';
 function FooterColumn({ columnKey, title, links, isOpen, onToggle }) {
   const contentId = `footer-column-${columnKey}`;
 
-  const handleInternalClick = () => {
+  const resolveInternalPath = (href) => {
+    if (!href) {
+      return null;
+    }
+
+    if (href.startsWith('/')) {
+      return href;
+    }
+
+    try {
+      const parsed = new URL(href);
+      if (typeof window !== 'undefined' && parsed.origin === window.location.origin) {
+        return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  };
+
+  const handleInternalClick = (href) => {
     window.setTimeout(() => {
+      if (href && href.includes('#')) {
+        const hash = href.split('#')[1];
+        const target = hash ? document.getElementById(hash) : null;
+
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+      }
+
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, 0);
   };
@@ -29,19 +60,24 @@ function FooterColumn({ columnKey, title, links, isOpen, onToggle }) {
 
       <div id={contentId} className="footer-column__content">
         <ul className="footer-column__list">
-          {links.map((item) => (
-            <li key={item.label} className="footer-column__item">
-              {item.external ? (
-                <a className="footer-link" href={item.to} target="_blank" rel="noreferrer noopener">
-                  {item.label}
-                </a>
-              ) : (
-                <Link className="footer-link" to={item.to.split('#')[0] || item.to} onClick={handleInternalClick}>
-                  {item.label}
-                </Link>
-              )}
-            </li>
-          ))}
+          {links.map((item) => {
+            const internalPath = resolveInternalPath(item.to);
+            const shouldUseRouterLink = Boolean(internalPath) && !item.external;
+
+            return (
+              <li key={item.label} className="footer-column__item">
+                {shouldUseRouterLink ? (
+                  <Link className="footer-link" to={internalPath} onClick={() => handleInternalClick(internalPath)}>
+                    {item.label}
+                  </Link>
+                ) : (
+                  <a className="footer-link" href={item.to} rel="noreferrer noopener">
+                    {item.label}
+                  </a>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>

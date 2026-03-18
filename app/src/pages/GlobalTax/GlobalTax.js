@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import Header from '../../components/Header/Header';
+import Footer from '../../components/Footer/Footer';
 import { taxAPI } from '../../services/api';
 import localCountries from '../../data/tax/countries.json';
 import { normalizeTaxDirectory } from '../../utils/taxDirectory';
@@ -53,195 +55,201 @@ const GlobalTax = () => {
 
   return (
     <div className="global-tax-page">
-      {/* Hero Section */}
-      <div className="tax-hero">
-        <div className="tax-hero-content">
-          <h1 className="tax-hero-title">Global Tax Directory</h1>
-          <p className="tax-hero-subtitle">Comprehensive tax guidance for 200+ jurisdictions worldwide</p>
-          <p className="tax-hero-description">Access verified tax authority information, payment portals, and expert summaries from PwC, Deloitte, and EY.
-            No login required.
-          </p>
-          <div className="tax-overview-grid">
-            <div className="tax-overview-card">
-              <span className="overview-label">Jurisdictions</span>
-              <strong>{countries.length}</strong>
-            </div>
-            <div className="tax-overview-card">
-              <span className="overview-label">Regions</span>
-              <strong>{totalRegions}</strong>
-            </div>
-            <div className="tax-overview-card">
-              <span className="overview-label">Sources</span>
-              <strong>PwC, Deloitte, EY</strong>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Header />
 
-      {/* Search & Filter Section */}
-      <div className="tax-search-section">
-        <div className="tax-search-container">
-          <div className="search-input-wrapper">
-
-            <input
-              className="tax-search-input"
-              placeholder="Search by country name or code (e.g., United States, US)"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
-          <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)} className="tax-region-select">
-            <option value="">All Regions</option>
-            {regions.map(r => (
-              <option key={r} value={r}>{r}</option>
-            ))}
-          </select>
-          <span className="results-count">{filtered.length} jurisdictions</span>
-        </div>
-        {isUsingFallback && (
-          <div className="tax-status-banner">
-            Showing the bundled jurisdiction directory while the live tax endpoint is unavailable.
-          </div>
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="tax-content-wrapper">
-        {loading && countries.length === 0 ? (
-          <div className="tax-loading">
-            <div className="spinner"></div>
-            <p>Loading tax data...</p>
-          </div>
-        ) : (
-          <div className="tax-grid">
-            {/* Countries List */}
-            <div className="tax-list-wrapper">
-              <div className="tax-list-header">
-                <h3>Jurisdictions</h3>
-                <span className="list-count">{filtered.length}</span>
+      <main>
+        {/* Hero Section */}
+        <div className="tax-hero">
+          <div className="tax-hero-content">
+            <h1 className="tax-hero-title">Global Tax Directory</h1>
+            <p className="tax-hero-subtitle">Comprehensive tax guidance for 200+ jurisdictions worldwide</p>
+            <p className="tax-hero-description">Access verified tax authority information, payment portals, and expert summaries from PwC, Deloitte, and EY.
+              No login required.
+            </p>
+            <div className="tax-overview-grid">
+              <div className="tax-overview-card">
+                <span className="overview-label">Jurisdictions</span>
+                <strong>{countries.length}</strong>
               </div>
-              <div className="tax-list">
-                {filtered.map(c => (
-                  <div
-                    key={c.code}
-                    className={`tax-list-item ${selectedCountry?.code === c.code ? 'active' : ''}`}
-                    onClick={() => setSelected(c)}
-                  >
-                    <div className="item-content">
-                      <div className="country-name">{c.name}</div>
-                      <div className="country-region">{c.region}</div>
+              <div className="tax-overview-card">
+                <span className="overview-label">Regions</span>
+                <strong>{totalRegions}</strong>
+              </div>
+              <div className="tax-overview-card">
+                <span className="overview-label">Sources</span>
+                <strong>PwC, Deloitte, EY</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Filter Section */}
+        <div className="tax-search-section">
+          <div className="tax-search-container">
+            <div className="search-input-wrapper">
+
+              <input
+                className="tax-search-input"
+                placeholder="Search by country name or code (e.g., United States, US)"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+            <select value={regionFilter} onChange={e => setRegionFilter(e.target.value)} className="tax-region-select">
+              <option value="">All Regions</option>
+              {regions.map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+            <span className="results-count">{filtered.length} jurisdictions</span>
+          </div>
+          {isUsingFallback && (
+            <div className="tax-status-banner">
+              Showing the bundled jurisdiction directory while the live tax endpoint is unavailable.
+            </div>
+          )}
+        </div>
+
+        {/* Main Content */}
+        <div className="tax-content-wrapper">
+          {loading && countries.length === 0 ? (
+            <div className="tax-loading">
+              <div className="spinner"></div>
+              <p>Loading tax data...</p>
+            </div>
+          ) : (
+            <div className="tax-grid">
+              {/* Countries List */}
+              <div className="tax-list-wrapper">
+                <div className="tax-list-header">
+                  <h3>Jurisdictions</h3>
+                  <span className="list-count">{filtered.length}</span>
+                </div>
+                <div className="tax-list">
+                  {filtered.map(c => (
+                    <div
+                      key={c.code}
+                      className={`tax-list-item ${selectedCountry?.code === c.code ? 'active' : ''}`}
+                      onClick={() => setSelected(c)}
+                    >
+                      <div className="item-content">
+                        <div className="country-name">{c.name}</div>
+                        <div className="country-region">{c.region}</div>
+                      </div>
+                      <div className="country-code">{c.code}</div>
                     </div>
-                    <div className="country-code">{c.code}</div>
+                  ))}
+                  {filtered.length === 0 && (
+                    <div className="empty-list">No jurisdictions match your search</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Details Panel */}
+              <div className="tax-details-wrapper">
+                {!selectedCountry ? (
+                  <div className="empty-panel">
+                    <div className="empty-icon"></div>
+                    <h3>Select a Jurisdiction</h3>
+                    <p>Choose a country from the list to view comprehensive tax information</p>
                   </div>
-                ))}
-                {filtered.length === 0 && (
-                  <div className="empty-list">No jurisdictions match your search</div>
+                ) : (
+                  <div className="country-details">
+                    {/* Header */}
+                    <div className="details-header">
+                      <div className="header-title">
+                        <h2>{selectedCountry.name}</h2>
+                        <span className="country-code-badge">{selectedCountry.code}</span>
+                      </div>
+                      <span className="region-badge">{selectedCountry.region}</span>
+                    </div>
+
+                    {/* Tax Authority */}
+                    <div className="section-card authority-card">
+                      <h4 className="section-title">Tax Authority</h4>
+                      <div className="authority-info">
+                        <div className="info-row">
+                          <span className="label">Official Name:</span>
+                          <span className="value">{selectedCountry.tax_authority?.name || '—'}</span>
+                        </div>
+                        {selectedCountry.tax_authority?.website && (
+                          <a href={selectedCountry.tax_authority.website} rel="noreferrer" className="primary-link">Visit Tax Authority Website →
+                          </a>
+                        )}
+                        {selectedCountry.tax_authority?.payment_portal && (
+                          <a href={selectedCountry.tax_authority.payment_portal} rel="noreferrer" className="secondary-link">Payment Portal →
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tax Summaries */}
+                    <div className="section-card summaries-card">
+                      <h4 className="section-title">Tax Summaries</h4>
+                      <div className="summaries-grid">
+                        {selectedCountry.links?.corporate_tax_summary && (
+                          <a href={selectedCountry.links.corporate_tax_summary} rel="noreferrer" className="summary-link">
+                            <span className="icon"></span>
+                            <span>Corporate Tax</span>
+                          </a>
+                        )}
+                        {selectedCountry.links?.personal_income_tax_summary && (
+                          <a href={selectedCountry.links.personal_income_tax_summary} rel="noreferrer" className="summary-link">
+                            <span className="icon"></span>
+                            <span>Personal Tax</span>
+                          </a>
+                        )}
+                        {selectedCountry.links?.vat_or_indirect_tax_summary && (
+                          <a href={selectedCountry.links.vat_or_indirect_tax_summary} rel="noreferrer" className="summary-link">
+                            <span className="icon"></span>
+                            <span>VAT / GST</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Global References */}
+                    <div className="section-card references-card">
+                      <h4 className="section-title">Expert References</h4>
+                      <div className="references-list">
+                        {selectedCountry.links?.global_references?.map((r, i) => (
+                          <a key={i} href={r.url} rel="noreferrer" className="reference-link">
+                            <span className="ref-icon"></span>
+                            <span>{r.label}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    {selectedCountry.supported_tasks && selectedCountry.supported_tasks.length > 0 && (
+                      <div className="section-card actions-card">
+                        <h4 className="section-title">Quick Actions</h4>
+                        <div className="actions-grid">
+                          {selectedCountry.supported_tasks?.includes('open_tax_payment_portal') && selectedCountry.tax_authority?.payment_portal && (
+                            <a
+                              href={selectedCountry.tax_authority.payment_portal}
+                              rel="noreferrer"
+                              className="action-btn primary-btn"
+                            >Pay Tax Online
+                            </a>
+                          )}
+                          {selectedCountry.supported_tasks?.includes('basic_tax_estimator') && (
+                            <button className="action-btn secondary-btn" onClick={() => alert('Basic estimator coming soon for ' + selectedCountry.name)}>Estimate Tax
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
+          )}
+        </div>
+      </main>
 
-            {/* Details Panel */}
-            <div className="tax-details-wrapper">
-              {!selectedCountry ? (
-                <div className="empty-panel">
-                  <div className="empty-icon"></div>
-                  <h3>Select a Jurisdiction</h3>
-                  <p>Choose a country from the list to view comprehensive tax information</p>
-                </div>
-              ) : (
-                <div className="country-details">
-                  {/* Header */}
-                  <div className="details-header">
-                    <div className="header-title">
-                      <h2>{selectedCountry.name}</h2>
-                      <span className="country-code-badge">{selectedCountry.code}</span>
-                    </div>
-                    <span className="region-badge">{selectedCountry.region}</span>
-                  </div>
-
-                  {/* Tax Authority */}
-                  <div className="section-card authority-card">
-                    <h4 className="section-title">Tax Authority</h4>
-                    <div className="authority-info">
-                      <div className="info-row">
-                        <span className="label">Official Name:</span>
-                        <span className="value">{selectedCountry.tax_authority?.name || '—'}</span>
-                      </div>
-                      {selectedCountry.tax_authority?.website && (
-                        <a href={selectedCountry.tax_authority.website} rel="noreferrer" className="primary-link">Visit Tax Authority Website →
-                        </a>
-                      )}
-                      {selectedCountry.tax_authority?.payment_portal && (
-                        <a href={selectedCountry.tax_authority.payment_portal} rel="noreferrer" className="secondary-link">Payment Portal →
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Tax Summaries */}
-                  <div className="section-card summaries-card">
-                    <h4 className="section-title">Tax Summaries</h4>
-                    <div className="summaries-grid">
-                      {selectedCountry.links?.corporate_tax_summary && (
-                        <a href={selectedCountry.links.corporate_tax_summary} rel="noreferrer" className="summary-link">
-                          <span className="icon"></span>
-                          <span>Corporate Tax</span>
-                        </a>
-                      )}
-                      {selectedCountry.links?.personal_income_tax_summary && (
-                        <a href={selectedCountry.links.personal_income_tax_summary} rel="noreferrer" className="summary-link">
-                          <span className="icon"></span>
-                          <span>Personal Tax</span>
-                        </a>
-                      )}
-                      {selectedCountry.links?.vat_or_indirect_tax_summary && (
-                        <a href={selectedCountry.links.vat_or_indirect_tax_summary} rel="noreferrer" className="summary-link">
-                          <span className="icon"></span>
-                          <span>VAT / GST</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Global References */}
-                  <div className="section-card references-card">
-                    <h4 className="section-title">Expert References</h4>
-                    <div className="references-list">
-                      {selectedCountry.links?.global_references?.map((r, i) => (
-                        <a key={i} href={r.url} rel="noreferrer" className="reference-link">
-                          <span className="ref-icon"></span>
-                          <span>{r.label}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  {selectedCountry.supported_tasks && selectedCountry.supported_tasks.length > 0 && (
-                    <div className="section-card actions-card">
-                      <h4 className="section-title">Quick Actions</h4>
-                      <div className="actions-grid">
-                        {selectedCountry.supported_tasks?.includes('open_tax_payment_portal') && selectedCountry.tax_authority?.payment_portal && (
-                          <a
-                            href={selectedCountry.tax_authority.payment_portal}
-                            rel="noreferrer"
-                            className="action-btn primary-btn"
-                          >Pay Tax Online
-                          </a>
-                        )}
-                        {selectedCountry.supported_tasks?.includes('basic_tax_estimator') && (
-                          <button className="action-btn secondary-btn" onClick={() => alert('Basic estimator coming soon for ' + selectedCountry.name)}>Estimate Tax
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      <Footer />
     </div>
   );
 };

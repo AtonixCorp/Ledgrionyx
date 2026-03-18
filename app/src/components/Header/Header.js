@@ -25,7 +25,6 @@ const NAV_ITEMS = [
   { label: 'Global Tax', to: '/global-tax' },
   { label: 'Pricing',    to: '/pricing' },
   { label: 'Resources',  to: '/help-center' },
-  { label: 'Contact',    to: '/contact' },
   { label: 'About',      to: '/about' },
 ];
 
