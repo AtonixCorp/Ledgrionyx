@@ -65,7 +65,7 @@ const CLIDocs = () => {
             <p>Bootstrap the backend environment and install the CLI into the backend virtual environment.</p>
             <pre>{`./setup.sh`}</pre>
             <p>Or install the package directly in editable mode:</p>
-            <pre>{`cd tools/atc_cli\n/home/atonixdev/atccapital/backend/.venv/bin/python -m pip install -e .`}</pre>
+            <pre>{`cd tools/atc_cli\n/home/atonixdev/atccapital/api/.venv/bin/python -m pip install -e .`}</pre>
           </article>
 
           <article className="cli-docs-card">
@@ -153,7 +153,7 @@ const CLIDocs = () => {
 
           <article className="cli-docs-card">
             <h2>Safer Secret Input</h2>
-            <pre>{`/home/atonixdev/atccapital/backend/.venv/bin/python - <<'PY' | atc login --api-key-stdin --org org_123 --profile prod\nimport getpass\nimport sys\n\nsys.stdout.write(getpass.getpass('ATC API key: '))\nPY`}</pre>
+            <pre>{`/home/atonixdev/atccapital/api/.venv/bin/python - <<'PY' | atc login --api-key-stdin --org org_123 --profile prod\nimport getpass\nimport sys\n\nsys.stdout.write(getpass.getpass('ATC API key: '))\nPY`}</pre>
           </article>
 
           <article className="cli-docs-card">

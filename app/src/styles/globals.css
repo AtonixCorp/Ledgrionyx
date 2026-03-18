@@ -49,6 +49,7 @@
   --atc-color-accent-soft: rgba(var(--color-primary-rgb), 0.12);
   --atc-color-bg: var(--color-background);
   --atc-color-surface: var(--color-background);
+  --atc-color-header-utility: #293241;
   --atc-color-text-primary: var(--color-text);
   --atc-color-text-muted: rgba(var(--color-text-rgb), 0.64);
   --atc-color-border: rgba(var(--color-text-rgb), 0.12);

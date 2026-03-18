@@ -8,11 +8,11 @@ Install with repo bootstrap:
 ./setup.sh
 ```
 
-Or install locally without the full frontend bootstrap:
+Or install locally without the full app bootstrap:
 
 ```bash
 cd tools/atc_cli
-/home/atonixdev/atccapital/backend/.venv/bin/python -m pip install -e .
+/home/atonixdev/atccapital/api/.venv/bin/python -m pip install -e .
 ```
 
 Core commands:

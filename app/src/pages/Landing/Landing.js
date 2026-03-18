@@ -117,11 +117,11 @@ const Landing = () => {
         <div className="landing-deployment-promo__inner">
           <div className="landing-deployment-promo__copy">
             <p className="landing-deployment-promo__eyebrow">Platform Delivery</p>
-            <h2 className="landing-deployment-promo__title">Deployment is now part of the frontend experience.</h2>
+            <h2 className="landing-deployment-promo__title">Deployment is now part of the app experience.</h2>
             <p className="landing-deployment-promo__text">
               Review how ATC Capital moves from GitHub validation to Docker images, Kubernetes promotion,
               health verification, and infrastructure controls through a public deployment page built directly
-              into the frontend.
+              into the app.
             </p>
           </div>
           <div className="landing-deployment-promo__actions">

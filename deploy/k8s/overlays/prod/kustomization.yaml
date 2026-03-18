@@ -10,13 +10,13 @@ resources:
 patchesStrategicMerge:
   - patch-config.yaml
   - patch-backend.yaml
-  - patch-frontend.yaml
+  - patch-app.yaml
   - patch-ingress.yaml
 
 images:
   - name: atc-capital/backend
     newName: registry.example.com/atc-capital/backend
     newTag: prod
-  - name: atc-capital/frontend
-    newName: registry.example.com/atc-capital/frontend
+  - name: atc-capital/app
+    newName: registry.example.com/atc-capital/app
     newTag: prod

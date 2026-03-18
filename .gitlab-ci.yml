@@ -9,13 +9,13 @@ variables:
 cache:
   paths:
     - .cache/pip
-    - frontend/node_modules/
+    - app/node_modules/
 
-backend-test:
+api-test:
   stage: test
   image: python:3.10-slim
   before_script:
-    - cd backend
+    - cd api
     - python -m venv .venv
     - source .venv/bin/activate
     - pip install --upgrade pip
@@ -23,11 +23,11 @@ backend-test:
   script:
     - python manage.py test
 
-frontend-build:
+app-build:
   stage: build
   image: node:20-alpine
   before_script:
-    - cd frontend
+    - cd app
     - npm ci
   script:
     - npm run build

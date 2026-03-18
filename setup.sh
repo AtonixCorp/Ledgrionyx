@@ -3,14 +3,15 @@
 echo "🔧 Setting up Atonix Capital..."
 echo ""
 
+API_DIR="api"
 VENV_DIR=".venv"
-if [ -d "backend/venv" ] && [ ! -d "backend/.venv" ]; then
+if [ -d "$API_DIR/venv" ] && [ ! -d "$API_DIR/.venv" ]; then
     VENV_DIR="venv"
 fi
 
-# Setup backend
-echo "📦 Setting up Django backend..."
-cd backend
+# Setup API
+echo "📦 Setting up Django API..."
+cd "$API_DIR"
 
 if [ ! -f ".env" ] && [ -f ".env.example" ]; then
     echo "Creating backend .env file..."
@@ -29,8 +30,15 @@ if [ ! -d "$VENV_DIR" ]; then
     python3 -m venv "$VENV_DIR"
 fi
 
-# Activate virtual environment
-source "$VENV_DIR/bin/activate"
+# Use the virtual environment without relying on activation scripts.
+VENV_PYTHON="$PWD/$VENV_DIR/bin/python"
+
+if [ ! -x "$VENV_PYTHON" ]; then
+    echo "Virtual environment is missing a Python executable. Recreating..."
+    rm -rf "$VENV_DIR"
+    python3 -m venv "$VENV_DIR"
+    VENV_PYTHON="$PWD/$VENV_DIR/bin/python"
+fi
 
 if [ -f ".env" ]; then
     set -a
@@ -40,29 +48,29 @@ fi
 
 # Install dependencies
 echo "Installing Python dependencies..."
-pip install -r requirements.txt
+"$VENV_PYTHON" -m pip install -r requirements.txt
 echo "Installing ATC CLI..."
-python -m pip install -e ../tools/atc_cli
+"$VENV_PYTHON" -m pip install -e ../tools/atc_cli
 
 # Run migrations
 echo "Running database migrations..."
-python manage.py makemigrations
-python manage.py migrate
+"$VENV_PYTHON" manage.py makemigrations
+"$VENV_PYTHON" manage.py migrate
 
 # Create superuser prompt
 echo ""
 read -p "Do you want to create a superuser for admin panel? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    python manage.py createsuperuser
+    "$VENV_PYTHON" manage.py createsuperuser
 fi
 
 cd ..
 
-# Setup frontend
+# Setup app
 echo ""
-echo "⚛️  Setting up React frontend..."
-cd frontend
+echo "⚛️  Setting up React app..."
+cd app
 
 # Install dependencies
 echo "Installing Node dependencies..."
@@ -83,13 +91,13 @@ echo "To start the application, run:"
 echo "  ./start.sh"
 echo ""
 echo "Banking integration setup:"
-echo "  1. Edit backend/.env with your Plaid, Yodlee, or Finicity credentials"
+echo "  1. Edit api/.env with your Plaid, Yodlee, or Finicity credentials"
 echo "  2. Point provider webhooks to /api/banking-integrations/webhooks/<provider_code>/"
 echo "  3. Nightly fallback sync runs automatically via start.sh or docker-compose banking-sync"
 echo ""
 echo "To use the CLI after setup, run:"
-echo "  backend/$VENV_DIR/bin/atc profiles"
+echo "  $API_DIR/$VENV_DIR/bin/atc profiles"
 echo ""
 echo "Or start manually:"
-echo "  Backend:  cd backend && source $VENV_DIR/bin/activate && python manage.py runserver"
-echo "  Frontend: cd frontend && npm start"
+echo "  API:      cd $API_DIR && $VENV_DIR/bin/python manage.py runserver"
+echo "  App:      cd app && npm start"

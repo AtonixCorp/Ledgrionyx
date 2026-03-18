@@ -1,9 +1,9 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: frontend
+  name: app
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: frontend
+      app.kubernetes.io/name: app

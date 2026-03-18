@@ -8,13 +8,13 @@ definitions:
     docker:
       memory: 3072
   steps:
-    - step: &backend-quality
-        name: Backend validation
+    - step: &api-quality
+        name: API validation
         image: python:3.13-slim
         caches:
           - pip
         script:
-          - cd backend
+          - cd api
           - python -m venv .venv
           - . .venv/bin/activate
           - pip install --upgrade pip
@@ -26,13 +26,13 @@ definitions:
           - python manage.py check --deploy
           - python manage.py test
 
-    - step: &frontend-quality
-        name: Frontend validation
+    - step: &app-quality
+        name: App validation
         image: node:20-alpine
         caches:
           - node
         script:
-          - cd frontend
+          - cd app
           - npm ci
           - CI=true npm test -- --watch=false --passWithNoTests
           - npm run build
@@ -44,9 +44,9 @@ definitions:
           - pip
         script:
           - pip install --upgrade pip pip-audit
-          - pip-audit -r backend/requirements.txt
+          - pip-audit -r api/requirements.txt
           - apt-get update && apt-get install -y --no-install-recommends nodejs npm && rm -rf /var/lib/apt/lists/*
-          - cd frontend
+          - cd app
           - npm ci
           - npm audit --audit-level=high
 
@@ -56,18 +56,18 @@ definitions:
           - docker
         script:
           - echo "$DOCKER_PASSWORD" | docker login "$DOCKER_REGISTRY" -u "$DOCKER_USERNAME" --password-stdin
-          - docker build -f backend/Dockerfile.prod -t "$DOCKER_REGISTRY/atc-capital/backend:$BITBUCKET_COMMIT" backend
-          - docker build -f frontend/Dockerfile.prod -t "$DOCKER_REGISTRY/atc-capital/frontend:$BITBUCKET_COMMIT" frontend
+          - docker build -f api/Dockerfile.prod -t "$DOCKER_REGISTRY/atc-capital/backend:$BITBUCKET_COMMIT" api
+          - docker build -f app/Dockerfile.prod -t "$DOCKER_REGISTRY/atc-capital/app:$BITBUCKET_COMMIT" app
           - docker push "$DOCKER_REGISTRY/atc-capital/backend:$BITBUCKET_COMMIT"
-          - docker push "$DOCKER_REGISTRY/atc-capital/frontend:$BITBUCKET_COMMIT"
+          - docker push "$DOCKER_REGISTRY/atc-capital/app:$BITBUCKET_COMMIT"
 
     - step: &build-verify
         name: Verify production image builds
         services:
           - docker
         script:
-          - docker build -f backend/Dockerfile.prod -t atc-capital/backend:pr-check backend
-          - docker build -f frontend/Dockerfile.prod -t atc-capital/frontend:pr-check frontend
+          - docker build -f api/Dockerfile.prod -t atc-capital/backend:pr-check api
+          - docker build -f app/Dockerfile.prod -t atc-capital/app:pr-check app
 
     - step: &deploy-dev
         name: Deploy to dev
@@ -84,7 +84,7 @@ definitions:
           - sed -i "s/newTag: dev/newTag: $BITBUCKET_COMMIT/g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
           - kubectl apply -k deploy/k8s/overlays/$DEPLOY_ENV
           - kubectl rollout status deployment/backend -n atc-capital-dev --timeout=300s
-          - kubectl rollout status deployment/frontend -n atc-capital-dev --timeout=300s
+          - kubectl rollout status deployment/app -n atc-capital-dev --timeout=300s
           - curl --fail --silent --show-error "https://$APP_HOST/api/health/"
           - |
             curl --fail --silent --show-error \
@@ -108,7 +108,7 @@ definitions:
           - sed -i "s/newTag: staging/newTag: $BITBUCKET_COMMIT/g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
           - kubectl apply -k deploy/k8s/overlays/$DEPLOY_ENV
           - kubectl rollout status deployment/backend -n atc-capital-staging --timeout=300s
-          - kubectl rollout status deployment/frontend -n atc-capital-staging --timeout=300s
+          - kubectl rollout status deployment/app -n atc-capital-staging --timeout=300s
           - curl --fail --silent --show-error "https://$APP_HOST/api/health/"
           - |
             curl --fail --silent --show-error \
@@ -133,7 +133,7 @@ definitions:
           - sed -i "s/newTag: prod/newTag: $BITBUCKET_COMMIT/g" deploy/k8s/overlays/$DEPLOY_ENV/kustomization.yaml
           - kubectl apply -k deploy/k8s/overlays/$DEPLOY_ENV
           - kubectl rollout status deployment/backend -n atc-capital-prod --timeout=300s
-          - kubectl rollout status deployment/frontend -n atc-capital-prod --timeout=300s
+          - kubectl rollout status deployment/app -n atc-capital-prod --timeout=300s
           - curl --fail --silent --show-error "https://$APP_HOST/api/health/"
           - |
             curl --fail --silent --show-error \
@@ -192,16 +192,16 @@ pipelines:
   pull-requests:
     '**':
       - parallel:
-          - step: *backend-quality
-          - step: *frontend-quality
+          - step: *api-quality
+          - step: *app-quality
           - step: *dependency-scan
       - step: *build-verify
 
   branches:
     main:
       - parallel:
-          - step: *backend-quality
-          - step: *frontend-quality
+          - step: *api-quality
+          - step: *app-quality
           - step: *dependency-scan
       - step: *build-images
       - step: *deploy-dev

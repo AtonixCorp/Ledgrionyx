@@ -1,4 +1,4 @@
-# Atonix Capital Frontend
+# Atonix Capital App
 
 A modern React-based personal finance management application with expense tracking, budgeting, income management, and analytics.
 
@@ -79,7 +79,7 @@ Uses React Context API with the following operations:
 - Add/Delete/Update Budgets
 - Automatic calculations for totals and balances
 
-## Future Enhancements (Django Backend Integration)
+## Future Enhancements (Django API Integration)
 
 The app is designed to easily integrate with a Django REST API backend:
 - User authentication

@@ -1,4 +1,4 @@
-name: Deploy Frontend To GitHub Pages
+name: Deploy App To GitHub Pages
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: app
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -32,12 +32,12 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: app/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build frontend
+      - name: Build app
         env:
           CI: false
         run: npm run build
@@ -45,7 +45,7 @@ jobs:
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/build
+          path: app/build
 
   deploy:
     runs-on: ubuntu-latest

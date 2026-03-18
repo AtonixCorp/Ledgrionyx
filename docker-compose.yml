@@ -1,18 +1,18 @@
 
 
 services:
-  backend:
+  api:
     build:
-      context: ./backend
+      context: ./api
       dockerfile: Dockerfile
-    container_name: atonix-backend
+    container_name: atonix-api
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./api:/app
     env_file:
-      - ./backend/.env
+      - ./api/.env
     environment:
       - DJANGO_SETTINGS_MODULE=finance_api.settings
       - PYTHONUNBUFFERED=1
@@ -30,7 +30,7 @@ services:
 
   banking-sync:
     build:
-      context: ./backend
+      context: ./api
       dockerfile: Dockerfile
     container_name: atonix-banking-sync
     command: >
@@ -39,32 +39,32 @@ services:
       sleep ${BANKING_SYNC_INTERVAL_SECONDS:-86400};
       done"
     volumes:
-      - ./backend:/app
+      - ./api:/app
     env_file:
-      - ./backend/.env
+      - ./api/.env
     environment:
       - DJANGO_SETTINGS_MODULE=finance_api.settings
       - PYTHONUNBUFFERED=1
       - BANKING_SYNC_INTERVAL_SECONDS=${BANKING_SYNC_INTERVAL_SECONDS:-86400}
     depends_on:
-      - backend
+      - api
 
-  frontend:
+  app:
     build:
-      context: ./frontend
+      context: ./app
       dockerfile: Dockerfile
-    container_name: atonix-frontend
+    container_name: atonix-app
     command: npm start
     ports:
       - "3000:3000"
     stdin_open: true
     tty: true
     volumes:
-      - ./frontend:/app
+      - ./app:/app
     environment:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
-      - backend
+      - api
 
   db:
     image: dhi.io/postgres:14-alpine3.22

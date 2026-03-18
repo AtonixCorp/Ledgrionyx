@@ -8,11 +8,11 @@ import './Deployment.css';
 const releaseStages = [
   {
     name: 'Validate',
-    detail: 'GitHub Actions runs backend tests, frontend build validation, and release checks before publication.'
+    detail: 'GitHub Actions runs API tests, app build validation, and release checks before publication.'
   },
   {
     name: 'Package',
-    detail: 'Production Docker images are built from the frontend and backend production Dockerfiles and tagged with the commit SHA.'
+    detail: 'Production Docker images are built from the app and API production Dockerfiles and tagged with the commit SHA.'
   },
   {
     name: 'Promote',
@@ -25,12 +25,12 @@ const releaseStages = [
 ];
 
 const stackRows = [
-  ['Frontend', 'React 18 build served by NGINX'],
-  ['Backend', 'Django + Django REST Framework on Gunicorn'],
-  ['Local stack', 'Docker Compose for frontend, backend, database, and banking sync'],
+  ['App', 'React 18 build served by NGINX'],
+  ['API', 'Django + Django REST Framework on Gunicorn'],
+  ['Local stack', 'Docker Compose for app, API, database, and banking sync'],
   ['Runtime orchestration', 'Kubernetes base manifests with dev, staging, and prod overlays'],
   ['Infrastructure', 'Terraform environment stacks and shared modules'],
-  ['Delivery model', 'GitHub Actions validation with a GitHub Pages frontend publish surface'],
+  ['Delivery model', 'GitHub Actions validation with a GitHub Pages app publish surface'],
 ];
 
 const envCards = [
@@ -62,10 +62,10 @@ const Deployment = () => {
         <div className="deployment-shell deployment-hero__grid">
           <div className="deployment-hero__copy">
             <p className="deployment-eyebrow">Deployment Architecture</p>
-            <h1>ATC Capital deployment is now visible through the frontend.</h1>
+            <h1>ATC Capital deployment is now visible through the app.</h1>
             <p className="deployment-hero__lede">
               This page translates the repository deployment model into a user-facing product surface. It explains
-              how the React frontend, Django backend, Docker images, Kubernetes overlays, and Terraform stacks work
+              how the React app, Django API, Docker images, Kubernetes overlays, and Terraform stacks work
               together when ATC Capital is published from GitHub.
             </p>
             <div className="deployment-hero__actions">
@@ -82,18 +82,18 @@ const Deployment = () => {
             <div className="deployment-status-card">
               <div className="deployment-status-card__header">
                 <span>Release Surface</span>
-                <span className="deployment-status-card__live">Frontend Published</span>
+                <span className="deployment-status-card__live">App Published</span>
               </div>
               <div className="deployment-status-card__metric">3 Environments</div>
               <p className="deployment-status-card__subtext">One codebase, immutable image tags, and overlay-based promotion.</p>
               <div className="deployment-status-card__list">
                 <div>
                   <span>Public surface</span>
-                  <strong>React frontend</strong>
+                  <strong>React app</strong>
                 </div>
                 <div>
                   <span>API runtime</span>
-                  <strong>Django backend</strong>
+                  <strong>Django API</strong>
                 </div>
                 <div>
                   <span>Health endpoint</span>
@@ -123,11 +123,11 @@ const Deployment = () => {
       <section className="deployment-section deployment-section--light">
         <div className="deployment-shell">
           <div className="deployment-section__header">
-            <p className="deployment-eyebrow">Frontend Surface</p>
+            <p className="deployment-eyebrow">App Surface</p>
             <h2>The deployment story lives in the product, not only in Markdown.</h2>
             <p>
               Users visiting the public site can now understand how ATC Capital is delivered, what environments exist,
-              and what release contracts protect platform stability without leaving the frontend experience.
+              and what release contracts protect platform stability without leaving the app experience.
             </p>
           </div>
 
@@ -135,14 +135,14 @@ const Deployment = () => {
             <article className="deployment-surface-card deployment-surface-card--primary">
               <h3>Public deployment page</h3>
               <p>
-                The GitHub Pages site can present deployment architecture directly through the React application rather
+                The GitHub Pages site can present deployment architecture directly through the React app rather
                 than forcing users to read repository files first.
               </p>
             </article>
             <article className="deployment-surface-card">
               <h3>Consistent UI system</h3>
               <p>
-                Deployment content uses the same ATC Capital frontend design language, navigation, and footer structure
+                Deployment content uses the same ATC Capital app design language, navigation, and footer structure
                 as the rest of the public product site.
               </p>
             </article>
@@ -176,9 +176,9 @@ const Deployment = () => {
 
           <aside className="deployment-callout">
             <p className="deployment-callout__eyebrow">Release Position</p>
-            <h3>Frontend publishing is ready for GitHub Pages visibility.</h3>
+            <h3>App publishing is ready for GitHub Pages visibility.</h3>
             <p>
-              The frontend is now wired to support the repository base path used by GitHub Pages, making
+              The app is now wired to support the repository base path used by GitHub Pages, making
               atonixcorp.github.io/atccapital/ the correct public surface for this repository deployment.
             </p>
           </aside>
@@ -230,11 +230,11 @@ const Deployment = () => {
             <p className="deployment-health-card__eyebrow">Health Contract</p>
             <div className="deployment-health-card__path">GET /api/health/</div>
             <p>
-              A release should not be treated as complete until the backend, frontend, and health contract all succeed.
+              A release should not be treated as complete until the API, app, and health contract all succeed.
             </p>
             <ul>
-              <li>Backend rollout succeeds</li>
-              <li>Frontend rollout succeeds</li>
+              <li>API rollout succeeds</li>
+              <li>App rollout succeeds</li>
               <li>Health endpoint responds successfully</li>
               <li>Deployment event logging remains intact</li>
             </ul>
@@ -246,7 +246,7 @@ const Deployment = () => {
         <div className="deployment-shell deployment-cta">
           <div>
             <p className="deployment-eyebrow deployment-eyebrow--inverse">GitHub Pages Target</p>
-            <h2>This frontend page is designed to be visible at atonixcorp.github.io/atccapital/.</h2>
+            <h2>This app page is designed to be visible at atonixcorp.github.io/atccapital/.</h2>
             <p>
               It gives users a clean public view of how ATC Capital is shipped, promoted, and verified without exposing
               them directly to internal deployment files first.

@@ -7,9 +7,9 @@ resources:
   - backend-service.yaml
   - backend-hpa.yaml
   - backend-pdb.yaml
-  - frontend-deployment.yaml
-  - frontend-service.yaml
-  - frontend-pdb.yaml
+  - app-deployment.yaml
+  - app-service.yaml
+  - app-pdb.yaml
   - ingress.yaml
   - networkpolicy.yaml
 

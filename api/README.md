@@ -1,8 +1,8 @@
-# AI Financial Modeling Integration System - Backend
+# AI Financial Modeling Integration System - API
 
 ## Overview
 
-This is the Django REST API backend for the AI Financial Modeling Integration System. It provides enterprise-grade financial analysis capabilities with AI-driven insights, multi-tenant architecture, and comprehensive compliance features.
+This is the Django REST API for the AI Financial Modeling Integration System. It provides enterprise-grade financial analysis capabilities with AI-driven insights, multi-tenant architecture, and comprehensive compliance features.
 
 ## Features
 
@@ -47,9 +47,9 @@ This is the Django REST API backend for the AI Financial Modeling Integration Sy
 
 ### Installation
 
-1. **Clone and navigate to backend directory:**
+1. **Clone and navigate to the API directory:**
    ```bash
-   cd backend/
+   cd api/
    ```
 
 2. **Create virtual environment:**
@@ -153,7 +153,7 @@ This is the Django REST API backend for the AI Financial Modeling Integration Sy
 
 ### Project Structure
 ```
-backend/
+api/
 ├── finance_api/          # Main Django project
 │   ├── settings.py      # Django settings
 │   ├── urls.py         # URL configuration
@@ -202,9 +202,9 @@ CMD ["gunicorn", "finance_api.wsgi:application", "--bind", "0.0.0.0:8000"]
 ```
 
 ### Banking Integration Environment
-- Copy `backend/.env.example` to `backend/.env` and set a strong `BANKING_TOKEN_ENCRYPTION_KEY`.
+- Copy `api/.env.example` to `api/.env` and set a strong `BANKING_TOKEN_ENCRYPTION_KEY`.
 - Configure the provider variables for the aggregator you are using: `PLAID_*`, `YODLEE_*`, or `FINICITY_*`.
-- Frontend consent callbacks can return to the integrations page after the provider completes the OAuth flow.
+- App consent callbacks can return to the integrations page after the provider completes the OAuth flow.
 - Provider webhooks should target `https://<your-domain>/api/banking-integrations/webhooks/<provider_code>/`.
 - Nightly fallback syncs run through `python manage.py sync_banking_integrations`; `docker-compose.yml` now includes a `banking-sync` service that executes this every 24 hours by default.
 - Run `python manage.py seed_source_filter_demo --reset` to recreate the mixed manual-plus-imported verification dataset used for source-filter QA.

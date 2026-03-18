@@ -3,30 +3,35 @@
 echo "🚀 Starting Atonix Capital Application..."
 echo ""
 
+API_DIR="api"
 VENV_DIR=".venv"
-if [ -d "backend/venv" ] && [ ! -d "backend/.venv" ]; then
+if [ -d "$API_DIR/venv" ] && [ ! -d "$API_DIR/.venv" ]; then
 	VENV_DIR="venv"
 fi
 
-# Start backend
-echo "📦 Starting Django backend..."
-cd backend
+# Start API
+echo "📦 Starting Django API..."
+cd "$API_DIR"
 if [ -f ".env" ]; then
 	set -a
 	source .env
 	set +a
 fi
-source "$VENV_DIR/bin/activate" 2>/dev/null || python -m venv "$VENV_DIR" && source "$VENV_DIR/bin/activate"
-pip install -r requirements.txt > /dev/null 2>&1
-python manage.py migrate > /dev/null 2>&1
-python manage.py runserver &
-BACKEND_PID=$!
-echo "✅ Backend running on http://localhost:8000"
+VENV_PYTHON="$PWD/$VENV_DIR/bin/python"
+if [ ! -x "$VENV_PYTHON" ]; then
+	python3 -m venv "$VENV_DIR"
+	VENV_PYTHON="$PWD/$VENV_DIR/bin/python"
+fi
+"$VENV_PYTHON" -m pip install -r requirements.txt > /dev/null 2>&1
+"$VENV_PYTHON" manage.py migrate > /dev/null 2>&1
+"$VENV_PYTHON" manage.py runserver &
+API_PID=$!
+echo "✅ API running on http://localhost:8000"
 
 if [ "${ENABLE_BANKING_SYNC_SCHEDULER:-1}" = "1" ]; then
 	(
 		while true; do
-			python manage.py sync_banking_integrations > /dev/null 2>&1
+			"$VENV_PYTHON" manage.py sync_banking_integrations > /dev/null 2>&1
 			sleep "${BANKING_SYNC_INTERVAL_SECONDS:-86400}"
 		done
 	) &
@@ -38,24 +43,24 @@ cd ..
 # Wait a moment
 sleep 2
 
-# Start frontend
-echo "⚛️  Starting React frontend..."
-cd frontend
+# Start app
+echo "⚛️  Starting React app..."
+cd app
 npm install > /dev/null 2>&1
 npm start &
-FRONTEND_PID=$!
-echo "✅ Frontend running on http://localhost:3000"
+APP_PID=$!
+echo "✅ App running on http://localhost:3000"
 cd ..
 
 echo ""
 echo "🎉 Application is ready!"
-echo "📊 Frontend: http://localhost:3000"
-echo "🔌 Backend API: http://localhost:8000/api"
+echo "📊 App: http://localhost:3000"
+echo "🔌 API: http://localhost:8000/api"
 echo "🛠️  Admin Panel: http://localhost:8000/admin"
 echo "🏦 Banking webhook base: http://localhost:8000/api/banking-integrations/webhooks/<provider_code>/"
 echo ""
 echo "Press Ctrl+C to stop all servers"
 
 # Wait for Ctrl+C
-trap "kill $BACKEND_PID $FRONTEND_PID ${BANKING_SYNC_PID:-} 2>/dev/null; exit" INT
+trap "kill $API_PID $APP_PID ${BANKING_SYNC_PID:-} 2>/dev/null; exit" INT
 wait
