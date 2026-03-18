@@ -1,7 +1,7 @@
 {
   "name": "atc-capital",
   "version": "1.0.0",
-  "homepage": "https://atonixcorp.github.io/atonixcapital",
+  "homepage": "https://atonixcorp.github.io/atccapital",
   "private": true,
   "proxy": "http://localhost:8000",
   "engines": {
