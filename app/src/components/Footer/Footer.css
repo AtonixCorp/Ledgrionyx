@@ -157,7 +157,7 @@
   width: 22px;
   height: 22px;
   color: #ffffff;
-  opacity: 0.6;
+  opacity: 1;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
