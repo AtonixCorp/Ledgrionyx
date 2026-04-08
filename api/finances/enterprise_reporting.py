@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 from io import BytesIO
 import json
+from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -10,6 +11,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Sum
 from django.utils import timezone
 
+from dateutil.relativedelta import relativedelta
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from reportlab.lib import colors
@@ -41,6 +43,8 @@ from .models import (
 
 
 DECIMAL_ZERO = Decimal('0.00')
+DEFAULT_SCHEDULE_TIMEZONE = 'UTC'
+DEFAULT_ARTIFACT_RETENTION_DAYS = 90
 SUPPORTED_REPORT_ACTIONS = {
     'enterprise_reporting_pack',
     'enterprise_report_pack',
@@ -699,6 +703,38 @@ def _parse_datetime(value):
         return None
 
 
+def _resolve_schedule_timezone_name(trigger_config):
+    timezone_name = (trigger_config or {}).get('schedule_timezone') or DEFAULT_SCHEDULE_TIMEZONE
+    try:
+        ZoneInfo(timezone_name)
+        return timezone_name
+    except Exception:
+        return DEFAULT_SCHEDULE_TIMEZONE
+
+
+def _resolve_schedule_timezone(trigger_config):
+    return ZoneInfo(_resolve_schedule_timezone_name(trigger_config))
+
+
+def _resolve_retention_days(trigger_config):
+    try:
+        retention_days = int((trigger_config or {}).get('retention_days') or DEFAULT_ARTIFACT_RETENTION_DAYS)
+    except (TypeError, ValueError):
+        retention_days = DEFAULT_ARTIFACT_RETENTION_DAYS
+    return max(1, retention_days)
+
+
+def normalize_schedule_trigger_config(trigger_config, *, now=None):
+    now = now or timezone.now()
+    normalized = dict(trigger_config or {})
+    if normalized.get('frequency') not in {'daily', 'weekly', 'monthly', 'quarterly'}:
+        normalized['frequency'] = 'monthly'
+    normalized['schedule_timezone'] = _resolve_schedule_timezone_name(normalized)
+    normalized['retention_days'] = _resolve_retention_days(normalized)
+    normalized['next_run_at'] = (_parse_datetime(normalized.get('next_run_at')) or now).isoformat()
+    return normalized
+
+
 def _resolve_report_period(action, now):
     end = _parse_datetime(action.get('end_date'))
     end_date = end.date() if end else now.date()
@@ -715,13 +751,19 @@ def _next_run_at(trigger_config, *, now=None):
     now = now or timezone.now()
     frequency = (trigger_config or {}).get('frequency', 'monthly')
     current = _parse_datetime((trigger_config or {}).get('next_run_at')) or now
+    local_timezone = _resolve_schedule_timezone(trigger_config)
+    local_current = current.astimezone(local_timezone)
+
     if frequency == 'daily':
-        return current + timedelta(days=1)
-    if frequency == 'weekly':
-        return current + timedelta(days=7)
-    if frequency == 'quarterly':
-        return current + timedelta(days=91)
-    return current + timedelta(days=30)
+        local_next = local_current + relativedelta(days=1)
+    elif frequency == 'weekly':
+        local_next = local_current + relativedelta(weeks=1)
+    elif frequency == 'quarterly':
+        local_next = local_current + relativedelta(months=3)
+    else:
+        local_next = local_current + relativedelta(months=1)
+
+    return local_next.astimezone(timezone.utc)
 
 
 def _due_for_execution(workflow, *, now=None):
@@ -803,6 +845,8 @@ def execute_automation_workflow(workflow, *, initiated_by=None, trigger_type='ma
         if workflow.trigger_type == 'schedule':
             trigger_config['last_trigger_type'] = trigger_type
             trigger_config['last_run_at'] = now.isoformat()
+            trigger_config['schedule_timezone'] = _resolve_schedule_timezone_name(trigger_config)
+            trigger_config['retention_days'] = _resolve_retention_days(trigger_config)
             trigger_config['next_run_at'] = _next_run_at(trigger_config, now=now).isoformat()
             workflow.trigger_config = trigger_config
             workflow.save(update_fields=['trigger_config', 'updated_at'])
@@ -838,8 +882,136 @@ def run_due_automation_workflows(*, now=None):
             completed += 1
         except Exception:
             failed += 1
+    cleanup = cleanup_automation_artifacts(now=now)
     return {
         'completed': completed,
         'failed': failed,
         'skipped': skipped,
+        'artifacts_deleted': cleanup['deleted'],
+        'bytes_reclaimed': cleanup['bytes_reclaimed'],
+    }
+
+
+def cleanup_automation_artifacts(*, now=None):
+    now = now or timezone.now()
+    deleted = 0
+    bytes_reclaimed = 0
+
+    queryset = AutomationArtifact.objects.select_related('workflow')
+    for artifact in queryset.iterator():
+        retention_days = _resolve_retention_days(getattr(artifact.workflow, 'trigger_config', {}) or {})
+        cutoff = now - timedelta(days=retention_days)
+        if artifact.created_at >= cutoff:
+            continue
+
+        storage = artifact.file_path.storage
+        file_name = artifact.file_path.name
+        if file_name and storage.exists(file_name):
+            try:
+                bytes_reclaimed += storage.size(file_name)
+            except Exception:
+                pass
+            storage.delete(file_name)
+        artifact.delete()
+        deleted += 1
+
+    return {
+        'deleted': deleted,
+        'bytes_reclaimed': bytes_reclaimed,
+    }
+
+
+def _get_artifact_size_bytes(artifact):
+    file_name = getattr(artifact.file_path, 'name', '')
+    if not file_name:
+        return 0
+    try:
+        return artifact.file_path.storage.size(file_name)
+    except Exception:
+        return 0
+
+
+def build_automation_cleanup_impact_report(*, workflows, now=None, days_ahead=30):
+    now = now or timezone.now()
+    try:
+        days_ahead = int(days_ahead)
+    except (TypeError, ValueError):
+        days_ahead = 30
+    days_ahead = max(1, days_ahead)
+    horizon = now + timedelta(days=days_ahead)
+
+    workflows = list(workflows)
+    artifacts_by_workflow = defaultdict(list)
+    for artifact in AutomationArtifact.objects.filter(workflow__in=workflows).select_related('workflow').iterator():
+        artifacts_by_workflow[artifact.workflow_id].append(artifact)
+
+    workflow_rows = []
+    totals = {
+        'workflow_count': len(workflows),
+        'artifacts_total': 0,
+        'artifacts_expiring': 0,
+        'artifacts_expired': 0,
+        'bytes_total': 0,
+        'bytes_expiring': 0,
+    }
+
+    for workflow in workflows:
+        retention_days = _resolve_retention_days(workflow.trigger_config)
+        timezone_name = _resolve_schedule_timezone_name(workflow.trigger_config)
+        workflow_artifacts = artifacts_by_workflow.get(workflow.id, [])
+
+        total_artifacts = 0
+        total_bytes = 0
+        expiring_artifacts = 0
+        expired_artifacts = 0
+        expiring_bytes = 0
+        next_expiration_at = None
+
+        for artifact in workflow_artifacts:
+            total_artifacts += 1
+            size_bytes = _get_artifact_size_bytes(artifact)
+            total_bytes += size_bytes
+            expires_at = artifact.created_at + timedelta(days=retention_days)
+            if next_expiration_at is None or expires_at < next_expiration_at:
+                next_expiration_at = expires_at
+            if expires_at <= horizon:
+                expiring_artifacts += 1
+                expiring_bytes += size_bytes
+                if expires_at <= now:
+                    expired_artifacts += 1
+
+        totals['artifacts_total'] += total_artifacts
+        totals['artifacts_expiring'] += expiring_artifacts
+        totals['artifacts_expired'] += expired_artifacts
+        totals['bytes_total'] += total_bytes
+        totals['bytes_expiring'] += expiring_bytes
+
+        workflow_rows.append({
+            'workflow_id': workflow.id,
+            'workflow_name': workflow.name,
+            'entity_name': workflow.entity.name if workflow.entity_id else 'All organization entities',
+            'retention_days': retention_days,
+            'schedule_timezone': timezone_name,
+            'total_artifacts': total_artifacts,
+            'total_bytes': total_bytes,
+            'artifacts_expiring_within_window': expiring_artifacts,
+            'artifacts_already_expired': expired_artifacts,
+            'bytes_expiring_within_window': expiring_bytes,
+            'next_expiration_at': next_expiration_at.isoformat() if next_expiration_at else None,
+        })
+
+    workflow_rows.sort(
+        key=lambda row: (
+            -row['artifacts_already_expired'],
+            -row['artifacts_expiring_within_window'],
+            row['next_expiration_at'] or '9999-12-31T00:00:00+00:00',
+            row['workflow_name'].lower(),
+        )
+    )
+
+    return {
+        'generated_at': now.isoformat(),
+        'days_ahead': days_ahead,
+        'summary': totals,
+        'workflows': workflow_rows,
     }

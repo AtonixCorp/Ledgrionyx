@@ -126,9 +126,11 @@ from .permissions import PermissionChecker
 from equity.models import EquityReport, WorkspaceEquityProfile
 from equity.scenario_services import get_scenario_overview
 from .enterprise_reporting import (
+    build_automation_cleanup_impact_report,
     build_enterprise_reporting_dashboard,
     execute_automation_workflow,
     export_enterprise_reporting_payload,
+    normalize_schedule_trigger_config,
     run_due_automation_workflows,
 )
 
@@ -4760,7 +4762,10 @@ class AutomationWorkflowViewSet(viewsets.ModelViewSet):
         entity = None
         if entity_id:
             entity = get_object_or_404(_accessible_entities_queryset(self.request.user, organization=organization), id=entity_id)
-        serializer.save(organization=organization, entity=entity, created_by=self.request.user)
+        trigger_config = serializer.validated_data.get('trigger_config')
+        if serializer.validated_data.get('trigger_type') == 'schedule':
+            trigger_config = normalize_schedule_trigger_config(trigger_config)
+        serializer.save(organization=organization, entity=entity, created_by=self.request.user, trigger_config=trigger_config)
 
     def perform_update(self, serializer):
         organization = get_object_or_404(
@@ -4771,7 +4776,11 @@ class AutomationWorkflowViewSet(viewsets.ModelViewSet):
         entity = None
         if entity_id:
             entity = get_object_or_404(_accessible_entities_queryset(self.request.user, organization=organization), id=entity_id)
-        serializer.save(organization=organization, entity=entity)
+        trigger_type = serializer.validated_data.get('trigger_type', serializer.instance.trigger_type)
+        trigger_config = serializer.validated_data.get('trigger_config', serializer.instance.trigger_config)
+        if trigger_type == 'schedule':
+            trigger_config = normalize_schedule_trigger_config(trigger_config)
+        serializer.save(organization=organization, entity=entity, trigger_config=trigger_config)
 
     @action(detail=True, methods=['post'])
     def execute(self, request, pk=None):
@@ -4783,6 +4792,14 @@ class AutomationWorkflowViewSet(viewsets.ModelViewSet):
     def run_due(self, request):
         results = run_due_automation_workflows()
         return Response(results)
+
+    @action(detail=False, methods=['get'])
+    def cleanup_impact(self, request):
+        report = build_automation_cleanup_impact_report(
+            workflows=self.get_queryset().select_related('entity'),
+            days_ahead=request.query_params.get('days_ahead', 30),
+        )
+        return Response(report)
 
 
 class AutomationExecutionViewSet(viewsets.ReadOnlyModelViewSet):

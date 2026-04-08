@@ -807,6 +807,7 @@ export const automationWorkflowsAPI = {
   delete: (id) => api.delete(`/automation-workflows/${id}/`),
   execute: (id) => api.post(`/automation-workflows/${id}/execute/`),
   runDue: () => api.post('/automation-workflows/run_due/'),
+  cleanupImpact: (params) => api.get('/automation-workflows/cleanup_impact/', { params }),
 };
 
 // Automation Executions API

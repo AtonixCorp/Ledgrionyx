@@ -11,6 +11,7 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 'Completed scheduled automation workflows. '
-                f"completed={results['completed']} failed={results['failed']} skipped={results['skipped']}"
+                f"completed={results['completed']} failed={results['failed']} skipped={results['skipped']} "
+                f"artifacts_deleted={results['artifacts_deleted']} bytes_reclaimed={results['bytes_reclaimed']}"
             )
         )

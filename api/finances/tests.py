@@ -1,18 +1,23 @@
 import hashlib
+import os
+import tempfile
 from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core import mail
+from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.test import TestCase
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 from decimal import Decimal
+from .enterprise_reporting import _next_run_at
 from .models import (
     APIKey,
     AuditLog,
+    AutomationArtifact,
     BankAccount,
     BankingConsentLog,
     BankingIntegration,
@@ -1915,6 +1920,8 @@ class EnterpriseReportingDashboardAPITests(TestCase):
             trigger_config={
                 'frequency': 'monthly',
                 'next_run_at': (timezone.now() - timedelta(minutes=5)).isoformat(),
+                'schedule_timezone': 'America/New_York',
+                'retention_days': 45,
             },
             actions=[
                 {
@@ -1935,11 +1942,174 @@ class EnterpriseReportingDashboardAPITests(TestCase):
         execution = workflow.executions.first()
         self.assertIsNotNone(execution)
         self.assertEqual(execution.status, 'completed')
+        self.assertEqual(execution.artifacts.count(), 1)
+        artifact = execution.artifacts.first()
+        self.assertTrue(artifact.file_name.endswith('.pdf'))
+        self.assertEqual(artifact.export_format, 'pdf')
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, ['cfo@example.com'])
         self.assertTrue(mail.outbox[0].attachments)
         self.assertTrue(mail.outbox[0].attachments[0][0].endswith('.pdf'))
         self.assertIn('next_run_at', workflow.trigger_config)
+        self.assertEqual(workflow.trigger_config['schedule_timezone'], 'America/New_York')
+        self.assertEqual(workflow.trigger_config['retention_days'], 45)
+
+        artifact_response = self.client.get(f'/api/automation-artifacts/{artifact.id}/download/')
+        self.assertEqual(artifact_response.status_code, 200)
+        self.assertGreater(len(b''.join(artifact_response.streaming_content)), 500)
+
+    def test_next_run_at_preserves_local_wall_clock_for_workflow_timezone(self):
+        next_run = _next_run_at(
+            {
+                'frequency': 'weekly',
+                'next_run_at': '2026-03-01T14:00:00+00:00',
+                'schedule_timezone': 'America/New_York',
+            }
+        )
+
+        self.assertEqual(next_run.isoformat(), '2026-03-08T13:00:00+00:00')
+
+    def test_cleanup_command_removes_expired_automation_artifacts(self):
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                workflow = AutomationWorkflow.objects.create(
+                    organization=self.organization,
+                    entity=self.entity,
+                    name='Retention Policy Workflow',
+                    description='Keep generated board packs briefly for test coverage.',
+                    trigger_type='schedule',
+                    trigger_config={
+                        'frequency': 'monthly',
+                        'next_run_at': timezone.now().isoformat(),
+                        'schedule_timezone': 'UTC',
+                        'retention_days': 1,
+                    },
+                    actions=[
+                        {
+                            'type': 'enterprise_reporting_pack',
+                            'format': 'pdf',
+                            'months_back': 12,
+                            'recipients': ['cfo@example.com'],
+                        }
+                    ],
+                    is_active=True,
+                    created_by=self.owner,
+                )
+                execution = workflow.executions.create(status='completed', started_at=timezone.now(), completed_at=timezone.now())
+
+                expired_artifact = AutomationArtifact(
+                    workflow=workflow,
+                    execution=execution,
+                    organization=self.organization,
+                    entity=self.entity,
+                    artifact_type='enterprise_board_pack',
+                    export_format='pdf',
+                    file_name='expired-pack.pdf',
+                    generated_by=self.owner,
+                )
+                expired_artifact.file_path.save('expired-pack.pdf', ContentFile(b'expired artifact bytes'), save=False)
+                expired_artifact.save()
+                AutomationArtifact.objects.filter(id=expired_artifact.id).update(created_at=timezone.now() - timedelta(days=5))
+                expired_artifact.refresh_from_db()
+                expired_path = expired_artifact.file_path.path
+
+                retained_artifact = AutomationArtifact(
+                    workflow=workflow,
+                    execution=execution,
+                    organization=self.organization,
+                    entity=self.entity,
+                    artifact_type='enterprise_board_pack',
+                    export_format='pdf',
+                    file_name='retained-pack.pdf',
+                    generated_by=self.owner,
+                )
+                retained_artifact.file_path.save('retained-pack.pdf', ContentFile(b'retained artifact bytes'), save=False)
+                retained_artifact.save()
+                retained_path = retained_artifact.file_path.path
+
+                call_command('cleanup_automation_artifacts')
+
+                self.assertFalse(AutomationArtifact.objects.filter(id=expired_artifact.id).exists())
+                self.assertFalse(os.path.exists(expired_path))
+                self.assertTrue(AutomationArtifact.objects.filter(id=retained_artifact.id).exists())
+                self.assertTrue(os.path.exists(retained_path))
+
+    def test_cleanup_impact_endpoint_reports_upcoming_retention_exposure_by_workflow(self):
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                workflow = AutomationWorkflow.objects.create(
+                    organization=self.organization,
+                    entity=self.entity,
+                    name='Exposure Workflow',
+                    description='Forecast cleanup impact for finance ops.',
+                    trigger_type='schedule',
+                    trigger_config={
+                        'frequency': 'monthly',
+                        'next_run_at': timezone.now().isoformat(),
+                        'schedule_timezone': 'Europe/London',
+                        'retention_days': 10,
+                    },
+                    actions=[
+                        {
+                            'type': 'enterprise_reporting_pack',
+                            'format': 'pdf',
+                            'months_back': 12,
+                            'recipients': ['cfo@example.com'],
+                        }
+                    ],
+                    is_active=True,
+                    created_by=self.owner,
+                )
+                execution = workflow.executions.create(status='completed', started_at=timezone.now(), completed_at=timezone.now())
+
+                expiring_artifact = AutomationArtifact(
+                    workflow=workflow,
+                    execution=execution,
+                    organization=self.organization,
+                    entity=self.entity,
+                    artifact_type='enterprise_board_pack',
+                    export_format='pdf',
+                    file_name='expiring-pack.pdf',
+                    generated_by=self.owner,
+                )
+                expiring_artifact.file_path.save('expiring-pack.pdf', ContentFile(b'expiring artifact bytes'), save=False)
+                expiring_artifact.save()
+                AutomationArtifact.objects.filter(id=expiring_artifact.id).update(created_at=timezone.now() - timedelta(days=9))
+
+                expired_artifact = AutomationArtifact(
+                    workflow=workflow,
+                    execution=execution,
+                    organization=self.organization,
+                    entity=self.entity,
+                    artifact_type='enterprise_board_pack',
+                    export_format='pdf',
+                    file_name='expired-pack.pdf',
+                    generated_by=self.owner,
+                )
+                expired_artifact.file_path.save('expired-pack.pdf', ContentFile(b'expired artifact bytes'), save=False)
+                expired_artifact.save()
+                AutomationArtifact.objects.filter(id=expired_artifact.id).update(created_at=timezone.now() - timedelta(days=15))
+
+                response = self.client.get(
+                    '/api/automation-workflows/cleanup_impact/',
+                    {'organization': self.organization.id, 'days_ahead': 7},
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.data['days_ahead'], 7)
+                self.assertEqual(response.data['summary']['workflow_count'], 1)
+                self.assertEqual(response.data['summary']['artifacts_expiring'], 2)
+                self.assertEqual(response.data['summary']['artifacts_expired'], 1)
+                self.assertGreater(response.data['summary']['bytes_expiring'], 0)
+                self.assertEqual(len(response.data['workflows']), 1)
+                workflow_row = response.data['workflows'][0]
+                self.assertEqual(workflow_row['workflow_id'], workflow.id)
+                self.assertEqual(workflow_row['schedule_timezone'], 'Europe/London')
+                self.assertEqual(workflow_row['retention_days'], 10)
+                self.assertEqual(workflow_row['total_artifacts'], 2)
+                self.assertEqual(workflow_row['artifacts_expiring_within_window'], 2)
+                self.assertEqual(workflow_row['artifacts_already_expired'], 1)
+                self.assertIsNotNone(workflow_row['next_expiration_at'])
 
 
 class PayrollEngineAPITests(TestCase):
