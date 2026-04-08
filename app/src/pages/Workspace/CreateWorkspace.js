@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import { useAuth } from '../../context/AuthContext';
 import ATCLogo from '../../components/branding/ATCLogo';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
+import {
+  ACCOUNTING_MODULE_KEYS,
+  EQUITY_MODULE_KEYS,
+  WORKSPACE_PACKAGE_OPTIONS,
+} from '../../utils/workspaceModules';
 import './CreateWorkspace.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -222,6 +226,7 @@ const STEPS = [
   { id: 1, label: 'Company Identity' },
   { id: 2, label: 'Jurisdiction & Currency' },
   { id: 3, label: 'Fiscal & Structure' },
+  { id: 4, label: 'Modules & Launch' },
 ];
 
 const EMPTY_FORM = {
@@ -233,12 +238,36 @@ const EMPTY_FORM = {
   currency: 'USD',
   fiscalYearEnd: '12-31',
   taxRegime: '',
+  workspaceMode: '',
+  enabledModules: [],
 };
+
+const ACCOUNTING_MODULE_OPTIONS = [
+  { key: 'overview', label: 'Workspace Overview', detail: 'Home dashboard and entity launchpad.' },
+  { key: 'members', label: 'Members', detail: 'Team invitations and membership visibility.' },
+  { key: 'groups', label: 'Groups', detail: 'Internal team structure and access grouping.' },
+  { key: 'meetings', label: 'Meetings', detail: 'Meeting scheduling, records, and follow-ups.' },
+  { key: 'calendar', label: 'Calendar', detail: 'Operational timeline and key dates.' },
+  { key: 'files', label: 'Files', detail: 'Document storage and workspace file access.' },
+  { key: 'permissions', label: 'Permissions', detail: 'Workspace access and approval controls.' },
+  { key: 'settings', label: 'Settings', detail: 'Workspace-level configuration and policies.' },
+  { key: 'email', label: 'Email', detail: 'Messaging and communication workflows.' },
+  { key: 'marketing', label: 'Marketing', detail: 'Growth and outbound workspace tools.' },
+];
+
+const EQUITY_MODULE_OPTIONS = [
+  { key: 'equity_registry', label: 'Ownership Registry', detail: 'Registered holders and beneficial owner records.' },
+  { key: 'equity_cap_table', label: 'Cap Table', detail: 'Share classes, issuances, and dilution structure.' },
+  { key: 'equity_vesting', label: 'Vesting & Grants', detail: 'Grant schedules, cliffs, accelerations, and forfeiture logic.' },
+  { key: 'equity_exercises', label: 'Exercise Center', detail: 'Exercise requests, certificates, approvals, and payroll tax sync.' },
+  { key: 'equity_valuation', label: 'Valuation', detail: 'Pricing history and board-approved value points.' },
+  { key: 'equity_transactions', label: 'Equity Transactions', detail: 'Issuances, transfers, conversions, and approvals.' },
+  { key: 'equity_governance', label: 'Governance & Reporting', detail: 'Board packs, reports, and regulatory artifacts.' },
+];
 
 const CreateWorkspace = () => {
   const navigate = useNavigate();
   const { createWorkspace, createEntity, currentOrganization, setActiveWorkspace } = useEnterprise();
-  const { user, logout } = useAuth();
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -271,9 +300,31 @@ const CreateWorkspace = () => {
   const MONTH_FULL  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const daysInMonth = (m) => new Date(2000, m, 0).getDate(); // m is 1-based
 
+  const toggleModule = (moduleKey) => {
+    setForm((prev) => {
+      const next = new Set(prev.enabledModules);
+      if (next.has(moduleKey)) {
+        next.delete(moduleKey);
+      } else {
+        next.add(moduleKey);
+      }
+      return { ...prev, enabledModules: Array.from(next) };
+    });
+  };
+
+  const selectPackage = (mode) => {
+    const selected = WORKSPACE_PACKAGE_OPTIONS.find((option) => option.id === mode);
+    setForm((prev) => ({
+      ...prev,
+      workspaceMode: mode,
+      enabledModules: selected ? [...selected.modules] : prev.enabledModules,
+    }));
+  };
+
   const canGoNext = () => {
     if (step === 1) return form.name.trim().length >= 2;
     if (step === 2) return !!form.country && !!form.currency;
+    if (step === 4) return !!form.workspaceMode && (form.enabledModules.length > 0 || form.workspaceMode === 'standalone');
     return true;
   };
 
@@ -281,6 +332,8 @@ const CreateWorkspace = () => {
     e.preventDefault();
     if (!form.name.trim()) { setError('Company name is required'); return; }
     if (!form.country)     { setError('Country is required'); return; }
+    if (!form.workspaceMode) { setError('Select a workspace package before launch.'); return; }
+    if (!currentOrganization?.id) { setError('No active organization is selected for this account.'); return; }
 
     setSubmitting(true);
     setError(null);
@@ -295,6 +348,8 @@ const CreateWorkspace = () => {
         status: 'active',
         organization_id: currentOrganization?.id,
         registration_number: form.registrationNumber || undefined,
+        workspace_mode: form.workspaceMode,
+        enabled_modules: form.enabledModules,
       };
 
       // Use createWorkspace if available (wraps createEntity + activates), otherwise fall back
@@ -305,6 +360,8 @@ const CreateWorkspace = () => {
           ...form,
           fiscalYearEnd: toFiscalYearEndDate(form.fiscalYearEnd),
           fiscal_year_end: toFiscalYearEndDate(form.fiscalYearEnd),
+          workspace_mode: form.workspaceMode,
+          enabled_modules: form.enabledModules,
         });
       } else {
         newWorkspace = await createEntity(payload);
@@ -315,7 +372,10 @@ const CreateWorkspace = () => {
 
       if (newWorkspace) {
         const wsId = newWorkspace.id;
-        navigate(`/app/workspace/${wsId}/overview`);
+        const launchEquity = ['equity', 'standalone'].includes(form.workspaceMode)
+          && form.enabledModules.some((moduleKey) => moduleKey.startsWith('equity_'))
+          && !form.enabledModules.some((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey));
+        navigate(launchEquity ? `/app/equity/${wsId}/registry` : `/app/workspace/${wsId}/overview`);
       }
     } catch (err) {
       setError(err?.message || 'Failed to create workspace. Please try again.');
@@ -478,6 +538,123 @@ const CreateWorkspace = () => {
     </div>
   );
 
+  const renderStep4 = () => {
+    const selectedPackage = WORKSPACE_PACKAGE_OPTIONS.find((option) => option.id === form.workspaceMode) || null;
+    const packageTitle = selectedPackage?.title || 'Choose a workspace package';
+    const packageSelected = Boolean(form.workspaceMode);
+    const accountingCount = form.enabledModules.filter((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey)).length;
+    const equityCount = form.enabledModules.filter((moduleKey) => EQUITY_MODULE_KEYS.includes(moduleKey)).length;
+    const launchDestination = ['equity', 'standalone'].includes(form.workspaceMode)
+      && equityCount > 0
+      && accountingCount === 0
+      ? 'ATC Equity Management'
+      : 'Standard Workspace Overview';
+
+    return (
+      <div className="cw-launch-layout">
+        <div className="cw-launch-main">
+          <div className="cw-field cw-field-wide">
+            <label className="cw-label">Workspace Package</label>
+            <span className="cw-hint">Choose the operating model first. Module customization opens after you select a package.</span>
+            <div className="cw-package-grid">
+              {WORKSPACE_PACKAGE_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`cw-package-card${form.workspaceMode === option.id ? ' selected' : ''}`}
+                  onClick={() => selectPackage(option.id)}
+                  aria-pressed={form.workspaceMode === option.id}
+                >
+                  <span className="cw-package-title">{option.title}</span>
+                  <span className="cw-package-desc">{option.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="cw-launch-modules">
+            <section className="cw-module-section">
+              <div className="cw-module-section-head">
+                <div>
+                  <h4>Accounting Workspace Modules</h4>
+                  <p>Core collaboration and finance workspace capabilities.</p>
+                </div>
+                <span className="cw-module-count">{accountingCount} selected</span>
+              </div>
+              <div className="cw-module-grid">
+                {ACCOUNTING_MODULE_OPTIONS.map((module) => (
+                  <label
+                    key={module.key}
+                    className={`cw-module-toggle${form.enabledModules.includes(module.key) ? ' selected' : ''}${!packageSelected ? ' disabled' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.enabledModules.includes(module.key)}
+                      onChange={() => toggleModule(module.key)}
+                      disabled={!packageSelected}
+                    />
+                    <span className="cw-module-copy">
+                      <strong>{module.label}</strong>
+                      <small>{module.detail}</small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <section className="cw-module-section cw-module-section-equity">
+              <div className="cw-module-section-head">
+                <div>
+                  <h4>Equity Management Modules</h4>
+                  <p>Dedicated ATC Equity navigation and ownership workflows.</p>
+                </div>
+                <span className="cw-module-count">{equityCount} selected</span>
+              </div>
+              <div className="cw-module-grid cw-module-grid-equity">
+                {EQUITY_MODULE_OPTIONS.map((module) => (
+                  <label
+                    key={module.key}
+                    className={`cw-module-toggle${form.enabledModules.includes(module.key) ? ' selected' : ''}${!packageSelected ? ' disabled' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.enabledModules.includes(module.key)}
+                      onChange={() => toggleModule(module.key)}
+                      disabled={!packageSelected}
+                    />
+                    <span className="cw-module-copy">
+                      <strong>{module.label}</strong>
+                      <small>{module.detail}</small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {!packageSelected && <span className="cw-hint">Select a workspace package to unlock module customization.</span>}
+          <span className="cw-hint">Equity modules launch inside a dedicated Equity Management sidebar while keeping the standard workspace intact.</span>
+        </div>
+
+        <div className="cw-launch-sidebar">
+          <div className="cw-review-card cw-review-card-accent cw-launch-summary">
+            <h4 className="cw-review-title">Launch Configuration</h4>
+            <div className="cw-review-rows">
+              <div className="cw-review-row"><span>Workspace package</span><strong>{packageTitle}</strong></div>
+              <div className="cw-review-row"><span>Organization</span><strong>{currentOrganization?.name || 'No organization selected'}</strong></div>
+              <div className="cw-review-row"><span>Accounting modules</span><strong>{accountingCount}</strong></div>
+              <div className="cw-review-row"><span>Equity modules</span><strong>{equityCount}</strong></div>
+              <div className="cw-review-row"><span>Launch target</span><strong>{launchDestination}</strong></div>
+            </div>
+            <div className="cw-review-note">
+              {selectedPackage?.description || 'Pick a package to preview how this workspace will launch.'}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="cw-page">
       {/* Top Navbar */}
@@ -502,7 +679,7 @@ const CreateWorkspace = () => {
           <span className="cw-kicker">New Workspace</span>
           <h1 className="cw-title">Create a Workspace</h1>
           <p className="cw-subtitle">
-            A workspace represents one company or entity. All financial data — ledger entries, invoices, tax filings — is scoped to this workspace.
+            A workspace represents one company or entity. You can launch it as accounting, equity management, a combined operating system, or a standalone shell.
           </p>
         </div>
 
@@ -527,6 +704,7 @@ const CreateWorkspace = () => {
           {step === 1 && renderStep1()}
           {step === 2 && renderStep2()}
           {step === 3 && renderStep3()}
+          {step === 4 && renderStep4()}
 
           {/* Navigation */}
           <div className="cw-nav">
@@ -549,9 +727,9 @@ const CreateWorkspace = () => {
               <button
                 type="submit"
                 className="cw-btn cw-btn-create"
-                disabled={submitting || !form.name || !form.country}
+                disabled={submitting || !form.name || !form.country || !form.workspaceMode || !currentOrganization?.id}
               >
-                {submitting ? 'Creating Workspace…' : 'Create Workspace'}
+                {submitting ? 'Creating Workspace…' : 'Launch Workspace'}
               </button>
             )}
           </div>
@@ -584,6 +762,12 @@ const CreateWorkspace = () => {
             <div>
               <strong>Scoped Environment</strong>
               <p>All financial data — ledger entries, invoices, budgets, tax filings — is scoped exclusively to this workspace.</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Dedicated Equity Sidebar</strong>
+              <p>If you enable equity management, the workspace gets a separate ATC Equity Management navigation with registry, cap table, valuation, transactions, and governance flows.</p>
             </div>
           </li>
         </ul>

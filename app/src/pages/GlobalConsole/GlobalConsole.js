@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import ATCLogo from '../../components/branding/ATCLogo';
+import { getWorkspaceLandingPath, WORKSPACE_MODE_LABELS } from '../../utils/workspaceModules';
 import './GlobalConsole.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -50,6 +51,8 @@ function buildWorkspaceCards(entities) {
     role: 'Member',
     registrationNumber: e.registration_number || null,
     fiscalYearEnd: e.fiscal_year_end || null,
+    workspaceMode: e.workspace_mode || 'accounting',
+    workspaceModeLabel: WORKSPACE_MODE_LABELS[e.workspace_mode || 'accounting'] || 'Accounting',
   }));
 }
 
@@ -128,14 +131,14 @@ const GlobalConsole = () => {
     const entity = entities.find((e) => e.id === workspace.id);
     if (entity) {
       setActiveWorkspace(entity);
-      navigate(`/app/workspace/${entity.id}/overview`);
+      navigate(getWorkspaceLandingPath(entity));
     }
   };
 
   const handleOpenLastWorkspace = () => {
     // Only open if a workspace has been explicitly selected — never auto-pick.
     if (activeWorkspace) {
-      navigate(`/app/workspace/${activeWorkspace.id}/overview`);
+      navigate(getWorkspaceLandingPath(activeWorkspace));
     }
     // No workspace selected → stay on console. The button is disabled in this case anyway.
   };
@@ -318,6 +321,7 @@ const GlobalConsole = () => {
                     {ws.industry && ws.industry !== '—' && (
                       <span className="gc-ws-tag">{ws.industry}</span>
                     )}
+                    <span className="gc-ws-tag">{ws.workspaceModeLabel}</span>
                     <span className="gc-ws-tag gc-ws-tag-role">{ws.role}</span>
                     <span className="gc-ws-tag">{ws.entityType.replace('_', ' ')}</span>
                   </div>

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { EnterpriseProvider } from './context/EnterpriseContext';
+import { EquityProvider } from './context/EquityContext';
 import { FilterProvider } from './context/FilterContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
@@ -123,6 +124,14 @@ import WorkspacePermissions  from './pages/Workspace/modules/WorkspacePermission
 import WorkspaceSettings     from './pages/Workspace/modules/WorkspaceSettings';
 import WorkspaceEmail        from './pages/Workspace/modules/WorkspaceEmail';
 import WorkspaceMarketing    from './pages/Workspace/modules/WorkspaceMarketing';
+import EquityLayout from './components/EquityLayout/EquityLayout';
+import OwnershipRegistry from './pages/Equity/modules/OwnershipRegistry';
+import CapTable from './pages/Equity/modules/CapTable';
+import VestingGrants from './pages/Equity/modules/VestingGrants';
+import ExerciseCenter from './pages/Equity/modules/ExerciseCenter';
+import Valuation from './pages/Equity/modules/Valuation';
+import EquityTransactions from './pages/Equity/modules/EquityTransactions';
+import GovernanceReporting from './pages/Equity/modules/GovernanceReporting';
 
 function App() {
   const routerBasename = process.env.PUBLIC_URL || '/';
@@ -148,7 +157,8 @@ function App() {
         <AuthProvider>
           <FinanceProvider>
             <EnterpriseProvider>
-              <FilterProvider>
+              <EquityProvider>
+                <FilterProvider>
               <Router basename={routerBasename}>
             <GlobalErrorCenter />
             <Routes>
@@ -453,12 +463,29 @@ function App() {
                 element={<WorkspaceRoute><WorkspaceLayout><WorkspaceEmail /></WorkspaceLayout></WorkspaceRoute>} />
               <Route path="/app/workspace/:workspaceId/marketing"
                 element={<WorkspaceRoute><WorkspaceLayout><WorkspaceMarketing /></WorkspaceLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/registry"
+                element={<WorkspaceRoute><EquityLayout><OwnershipRegistry /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/cap-table"
+                element={<WorkspaceRoute><EquityLayout><CapTable /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/grants"
+                element={<WorkspaceRoute><EquityLayout><VestingGrants /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/exercises"
+                element={<WorkspaceRoute><EquityLayout><ExerciseCenter /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/valuation"
+                element={<WorkspaceRoute><EquityLayout><Valuation /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/transactions"
+                element={<WorkspaceRoute><EquityLayout><EquityTransactions /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/governance"
+                element={<WorkspaceRoute><EquityLayout><GovernanceReporting /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId"
+                element={<Navigate to="registry" replace />} />
               {/* Redirect bare workspace path → overview */}
               <Route path="/app/workspace/:workspaceId"
                 element={<Navigate to="overview" replace />} />
             </Routes>
               </Router>
               </FilterProvider>
+              </EquityProvider>
           </EnterpriseProvider>
         </FinanceProvider>
       </AuthProvider>

@@ -1164,16 +1164,22 @@ class EntityViewSet(viewsets.ModelViewSet):
         """Create entity for organization"""
         from django.db import IntegrityError
         from rest_framework.exceptions import ValidationError
+        from equity.models import WorkspaceEquityProfile
         
         org_id = self.request.data.get('organization_id')
         if not org_id:
             raise ValidationError({'organization_id': 'This field is required.'})
+
+        enabled_modules = self.request.data.get('enabled_modules') or [
+            'overview', 'members', 'groups', 'meetings', 'calendar',
+            'files', 'permissions', 'settings', 'email', 'marketing',
+        ]
         
         # Get the organization owned by the current user
         organization = get_object_or_404(Organization, id=org_id, owner=self.request.user)
         
         try:
-            entity = serializer.save(organization=organization)
+            entity = serializer.save(organization=organization, enabled_modules=enabled_modules)
             # Create default structure for the new entity
             entity.create_default_structure()
 
@@ -1187,6 +1193,19 @@ class EntityViewSet(viewsets.ModelViewSet):
                     'tax_rules': {},
                     'auto_update': True,
                     'residency_status': 'detected',
+                },
+            )
+
+            WorkspaceEquityProfile.objects.get_or_create(
+                workspace=entity,
+                defaults={
+                    'workspace_type': entity.workspace_mode,
+                    'equity_enabled': any(str(module).startswith('equity_') for module in enabled_modules),
+                    'ownership_registry_enabled': 'equity_registry' in enabled_modules,
+                    'cap_table_enabled': 'equity_cap_table' in enabled_modules,
+                    'valuation_enabled': 'equity_valuation' in enabled_modules,
+                    'equity_transactions_enabled': 'equity_transactions' in enabled_modules,
+                    'governance_reporting_enabled': 'equity_governance' in enabled_modules,
                 },
             )
         except IntegrityError as e:

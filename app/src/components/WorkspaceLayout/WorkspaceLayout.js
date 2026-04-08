@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import ATCLogo from '../branding/ATCLogo';
+import { hasEquityModule } from '../../utils/workspaceModules';
 import './WorkspaceLayout.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -51,6 +52,7 @@ const WorkspaceLayout = ({ children }) => {
   const wsId   = workspaceId || resolvedWs?.id;
   const wsName = resolvedWs?.name || 'Workspace';
   const wsStatus = resolvedWs?.status || 'active';
+  const equityEnabled = hasEquityModule(resolvedWs);
 
   const [sidebarMinimized, setSidebarMinimized] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -91,6 +93,10 @@ const WorkspaceLayout = ({ children }) => {
   const optionalModules = [
     { to: `${base}/email`,        label: 'Email' },
     { to: `${base}/marketing`,    label: 'Marketing' },
+  ];
+
+  const equityModules = [
+    { to: `/app/equity/${wsId}/registry`, label: 'ATC Equity Management' },
   ];
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
@@ -165,6 +171,8 @@ const WorkspaceLayout = ({ children }) => {
           <li className="ws-nav-divider" />
           {renderSection('Management', managementModules)}
           <li className="ws-nav-divider" />
+          {equityEnabled && renderSection('Equity', equityModules)}
+          {equityEnabled && <li className="ws-nav-divider" />}
           {renderSection('Optional', optionalModules)}
         </ul>
       </nav>
@@ -176,7 +184,7 @@ const WorkspaceLayout = ({ children }) => {
         <header className="ws-topbar">
           <div className="ws-topbar-left">
             <h2 className="ws-topbar-title">{wsName}</h2>
-            <span className="ws-env-badge">Active</span>
+            <span className="ws-env-badge">{equityEnabled ? 'Finance + Equity Ready' : 'Active'}</span>
           </div>
 
           <div className="ws-topbar-right" ref={profileRef}>

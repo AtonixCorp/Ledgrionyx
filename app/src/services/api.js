@@ -827,4 +827,41 @@ export const taxProfilesAPI = {
   delete: (id) => api.delete(`/tax-profiles/${id}/`),
 };
 
+const equityScopedResource = (resource) => ({
+  list: (entityId) => api.get(`/entities/${entityId}/equity/${resource}`),
+  getById: (entityId, id) => api.get(`/entities/${entityId}/equity/${resource}/${id}`),
+  create: (entityId, data) => api.post(`/entities/${entityId}/equity/${resource}`, data),
+  update: (entityId, id, data) => api.put(`/entities/${entityId}/equity/${resource}/${id}`, data),
+  delete: (entityId, id) => api.delete(`/entities/${entityId}/equity/${resource}/${id}`),
+});
+
+export const equityAPI = {
+  profile: equityScopedResource('profile'),
+  shareholders: equityScopedResource('shareholders'),
+  shareClasses: equityScopedResource('share-classes'),
+  holdings: equityScopedResource('holdings'),
+  fundingRounds: equityScopedResource('funding-rounds'),
+  valuations: equityScopedResource('valuations'),
+  transactions: equityScopedResource('transactions'),
+  reports: equityScopedResource('reports'),
+  grants: {
+    ...equityScopedResource('grants'),
+    summary: (entityId, id) => api.get(`/entities/${entityId}/equity/grants/${id}/summary`),
+    rebuildSchedule: (entityId, id) => api.post(`/entities/${entityId}/equity/grants/${id}/rebuild_schedule`, {}),
+    terminate: (entityId, id, data) => api.post(`/entities/${entityId}/equity/grants/${id}/terminate`, data),
+    triggerSingle: (entityId, id, data) => api.post(`/entities/${entityId}/equity/grants/${id}/trigger_single`, data),
+    triggerDouble: (entityId, id, data) => api.post(`/entities/${entityId}/equity/grants/${id}/trigger_double`, data),
+  },
+  vestingEvents: equityScopedResource('vesting-events'),
+  exerciseRequests: {
+    ...equityScopedResource('exercise-requests'),
+    approve: (entityId, id, data) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/approve`, data),
+    reject: (entityId, id, data) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/reject`, data),
+    markPaid: (entityId, id, data) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/mark_paid`, data),
+    complete: (entityId, id) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/complete`, {}),
+  },
+  certificates: equityScopedResource('certificates'),
+  payrollTaxEvents: equityScopedResource('payroll-tax-events'),
+};
+
 export default api;

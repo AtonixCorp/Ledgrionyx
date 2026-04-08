@@ -715,6 +715,8 @@ export const EnterpriseProvider = ({ children }) => {
       local_currency: workspaceData.currency,
       fiscal_year_end: toFullDate(rawFye),
       status: 'active',
+      workspace_mode: workspaceData.workspace_mode || workspaceData.workspaceMode || 'accounting',
+      enabled_modules: workspaceData.enabled_modules || workspaceData.enabledModules || [],
     };
     const newEntity = await createEntity(payload);
     if (newEntity) {

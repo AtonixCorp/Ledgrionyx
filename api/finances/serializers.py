@@ -79,7 +79,7 @@ class EntitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Entity
-        fields = ['id', 'name', 'country', 'entity_type', 'status', 'registration_number', 'local_currency', 'main_bank', 'tax_authority_url', 'fiscal_year_end', 'next_filing_date', 'parent_entity', 'child_entities', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'country', 'entity_type', 'status', 'registration_number', 'local_currency', 'main_bank', 'tax_authority_url', 'fiscal_year_end', 'next_filing_date', 'workspace_mode', 'enabled_modules', 'parent_entity', 'child_entities', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
     def get_child_entities(self, obj):

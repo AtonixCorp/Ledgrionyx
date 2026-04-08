@@ -83,6 +83,13 @@ class Organization(models.Model):
 
 class Entity(models.Model):
     """Legal/business entity within an organization"""
+    WORKSPACE_MODE_CHOICES = [
+        ('accounting', 'Accounting'),
+        ('equity', 'Equity'),
+        ('combined', 'Combined'),
+        ('standalone', 'Standalone'),
+    ]
+
     ENTITY_TYPE_CHOICES = [
         ('sole_proprietor', 'Sole Proprietor'),
         ('llc', 'LLC'),
@@ -111,6 +118,8 @@ class Entity(models.Model):
     tax_authority_url = models.URLField(blank=True)
     fiscal_year_end = models.DateField(null=True, blank=True)
     next_filing_date = models.DateField(null=True, blank=True)
+    workspace_mode = models.CharField(max_length=20, choices=WORKSPACE_MODE_CHOICES, default='accounting')
+    enabled_modules = models.JSONField(default=list, blank=True)
     parent_entity = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
