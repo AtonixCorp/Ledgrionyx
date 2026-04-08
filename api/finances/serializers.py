@@ -8,6 +8,9 @@ from .models import (
     IntercompanyTransaction, IntercompanyEliminationEntry,
     TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
     EntityDepartment, EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
+    StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
+    LeaveType, LeaveBalance, LeaveRequest, PayrollBankOriginatorProfile, PayrollRun, Payslip, PayslipLineItem,
+    PayrollStatutoryReport, PayrollBankPaymentFile,
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
     RecurringTransaction, TaskRequest,
     # Core GL/COA models
@@ -473,6 +476,167 @@ class EntityStaffSerializer(serializers.ModelSerializer):
         model = EntityStaff
         fields = ['id', 'entity', 'user', 'user_email', 'employee_id', 'first_name', 'last_name', 'full_name', 'email', 'phone', 'department', 'department_name', 'role', 'role_name', 'employment_type', 'status', 'hire_date', 'termination_date', 'salary', 'currency', 'manager', 'manager_name', 'address', 'emergency_contact', 'notes', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+
+
+class StaffPayrollProfileSerializer(serializers.ModelSerializer):
+    staff_member_name = serializers.ReadOnlyField(source='staff_member.full_name')
+
+    class Meta:
+        model = StaffPayrollProfile
+        fields = [
+            'id', 'staff_member', 'staff_member_name', 'entity', 'pay_frequency', 'salary_basis',
+            'base_salary', 'standard_hours_per_period', 'income_tax_rate', 'employee_tax_rate',
+            'employer_tax_rate', 'default_bank_account_name', 'default_bank_account_number',
+            'default_bank_routing_number', 'default_bank_iban', 'default_bank_swift_code',
+            'default_bank_sort_code', 'payment_reference', 'tax_identifier',
+            'statutory_jurisdiction', 'is_active', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class PayrollComponentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayrollComponent
+        fields = [
+            'id', 'entity', 'code', 'name', 'component_type', 'calculation_type', 'amount',
+            'taxable', 'employer_contribution', 'is_active', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class StaffPayrollComponentAssignmentSerializer(serializers.ModelSerializer):
+    staff_member_name = serializers.ReadOnlyField(source='staff_member.full_name')
+    component_name = serializers.ReadOnlyField(source='component.name')
+    component_type = serializers.ReadOnlyField(source='component.component_type')
+
+    class Meta:
+        model = StaffPayrollComponentAssignment
+        fields = [
+            'id', 'staff_member', 'staff_member_name', 'component', 'component_name', 'component_type',
+            'amount_override', 'is_active', 'effective_start', 'effective_end', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class LeaveTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeaveType
+        fields = [
+            'id', 'entity', 'code', 'name', 'accrual_hours_per_run', 'max_balance_hours',
+            'carryover_limit_hours', 'is_paid_leave', 'is_active', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class LeaveBalanceSerializer(serializers.ModelSerializer):
+    staff_member_name = serializers.ReadOnlyField(source='staff_member.full_name')
+    leave_type_name = serializers.ReadOnlyField(source='leave_type.name')
+    current_balance_hours = serializers.ReadOnlyField()
+
+    class Meta:
+        model = LeaveBalance
+        fields = [
+            'id', 'staff_member', 'staff_member_name', 'leave_type', 'leave_type_name',
+            'opening_balance_hours', 'accrued_hours', 'used_hours', 'current_balance_hours',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'current_balance_hours']
+
+
+class LeaveRequestSerializer(serializers.ModelSerializer):
+    staff_member_name = serializers.ReadOnlyField(source='staff_member.full_name')
+    leave_type_name = serializers.ReadOnlyField(source='leave_type.name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
+
+    class Meta:
+        model = LeaveRequest
+        fields = [
+            'id', 'entity', 'staff_member', 'staff_member_name', 'leave_type', 'leave_type_name',
+            'start_date', 'end_date', 'hours_requested', 'status', 'approved_by',
+            'approved_by_name', 'approved_at', 'payroll_run', 'notes', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['approved_by', 'approved_at', 'payroll_run', 'created_at', 'updated_at']
+
+
+class PayrollBankOriginatorProfileSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+
+    class Meta:
+        model = PayrollBankOriginatorProfile
+        fields = [
+            'id', 'entity', 'entity_name', 'originator_name', 'originator_identifier', 'originating_bank_name',
+            'debit_account_name', 'debit_account_number', 'debit_routing_number', 'debit_iban',
+            'debit_swift_code', 'debit_sort_code', 'company_entry_description',
+            'company_discretionary_data', 'initiating_party_name', 'initiating_party_identifier',
+            'is_active', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class PayslipLineItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayslipLineItem
+        fields = ['id', 'category', 'code', 'description', 'amount', 'taxable', 'metadata', 'created_at']
+        read_only_fields = fields
+
+
+class PayslipSerializer(serializers.ModelSerializer):
+    staff_member_name = serializers.ReadOnlyField(source='staff_member.full_name')
+    line_items = PayslipLineItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Payslip
+        fields = [
+            'id', 'payroll_run', 'staff_member', 'staff_member_name', 'payroll_profile', 'gross_pay',
+            'employee_benefits_total', 'employer_benefits_total', 'deductions_total', 'taxable_pay',
+            'tax_withholding', 'employer_tax', 'net_pay', 'leave_accrued_hours', 'leave_used_hours',
+            'leave_balance_hours', 'bank_payment_reference', 'status', 'notes', 'line_items',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'line_items']
+
+
+class PayrollStatutoryReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayrollStatutoryReport
+        fields = ['id', 'payroll_run', 'report_type', 'jurisdiction', 'status', 'due_date', 'report_payload', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class PayrollBankPaymentFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayrollBankPaymentFile
+        fields = ['id', 'payroll_run', 'file_format', 'file_name', 'content', 'status', 'generated_at', 'updated_at']
+        read_only_fields = ['generated_at', 'updated_at']
+
+
+class PayrollRunSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+    organization_name = serializers.ReadOnlyField(source='organization.name')
+    processed_by_name = serializers.ReadOnlyField(source='processed_by.get_full_name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
+    payslips = PayslipSerializer(many=True, read_only=True)
+    statutory_reports = PayrollStatutoryReportSerializer(many=True, read_only=True)
+    bank_payment_file = PayrollBankPaymentFileSerializer(read_only=True)
+
+    class Meta:
+        model = PayrollRun
+        fields = [
+            'id', 'organization', 'organization_name', 'entity', 'entity_name', 'name', 'pay_frequency',
+            'period_start', 'period_end', 'payment_date', 'status', 'approval_status', 'employee_count', 'gross_pay_total',
+            'employee_benefits_total', 'employer_benefits_total', 'deductions_total',
+            'tax_withholding_total', 'employer_tax_total', 'net_pay_total', 'statutory_summary',
+            'requested_bank_file_format', 'requested_bank_institution', 'requested_bank_export_variant',
+            'journal_entry', 'processed_by', 'processed_by_name', 'processed_at',
+            'approved_by', 'approved_by_name', 'approval_submitted_at', 'approved_at', 'notes', 'payslips',
+            'statutory_reports', 'bank_payment_file', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'employee_count', 'gross_pay_total', 'employee_benefits_total', 'employer_benefits_total',
+            'deductions_total', 'tax_withholding_total', 'employer_tax_total', 'net_pay_total',
+            'statutory_summary', 'journal_entry', 'processed_by', 'processed_at', 'approved_by',
+            'approval_submitted_at', 'approved_at', 'created_at', 'updated_at',
+        ]
 
 
 class BankAccountSerializer(serializers.ModelSerializer):

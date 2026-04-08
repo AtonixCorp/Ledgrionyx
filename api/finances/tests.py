@@ -26,6 +26,7 @@ from .models import (
     DeveloperPortalAPILog,
     DeveloperPortalKeyRequest,
     Entity,
+    EntityDepartment,
     EntityRole,
     EntityStaff,
     Expense,
@@ -39,9 +40,20 @@ from .models import (
     Notification,
     NotificationPreference,
     OAuthApplication,
+    PayrollBankPaymentFile,
+    PayrollBankOriginatorProfile,
+    PayrollComponent,
+    PayrollRun,
+    PayrollStatutoryReport,
+    Payslip,
     RateLimitProfile,
     Role,
     Organization,
+    LeaveBalance,
+    LeaveRequest,
+    LeaveType,
+    StaffPayrollComponentAssignment,
+    StaffPayrollProfile,
     SystemEvent,
     TeamMember,
     UserProfile,
@@ -1621,6 +1633,270 @@ class IntercompanyEngineAPITests(TestCase):
             ).count(),
             1,
         )
+
+
+class PayrollEngineAPITests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='payroll-owner', email='payroll-owner@example.com', password='pass')
+        self.employee_user = User.objects.create_user(username='payroll-employee', email='employee@example.com', password='pass')
+
+        self.organization = Organization.objects.create(
+            owner=self.owner,
+            name='Payroll Org',
+            slug='payroll-org',
+            primary_country='US',
+            primary_currency='USD',
+        )
+        self.entity = Entity.objects.create(
+            organization=self.organization,
+            name='Payroll Entity',
+            country='US',
+            entity_type='corporation',
+            status='active',
+            local_currency='USD',
+            workspace_mode='accounting',
+        )
+        self.department = EntityDepartment.objects.create(entity=self.entity, name='Operations', code='OPS-PAY')
+        self.role = EntityRole.objects.create(entity=self.entity, name='Operations Lead', code='ROLE-PAY')
+        self.owner_staff = EntityStaff.objects.create(
+            entity=self.entity,
+            user=self.owner,
+            employee_id='EMP-PAY-OWNER',
+            first_name='Olive',
+            last_name='Owner',
+            email='payroll-owner@example.com',
+            department=self.department,
+            role=self.role,
+            employment_type='full_time',
+            status='active',
+            hire_date=timezone.now().date(),
+            salary=Decimal('0.00'),
+            currency='USD',
+        )
+        self.staff_member = EntityStaff.objects.create(
+            entity=self.entity,
+            user=self.employee_user,
+            employee_id='EMP-PAY-001',
+            first_name='Pat',
+            last_name='Payroll',
+            email='employee@example.com',
+            department=self.department,
+            role=self.role,
+            employment_type='full_time',
+            status='active',
+            hire_date=timezone.now().date(),
+            salary=Decimal('120000.00'),
+            currency='USD',
+        )
+        StaffPayrollProfile.objects.create(
+            staff_member=self.staff_member,
+            entity=self.entity,
+            pay_frequency='monthly',
+            salary_basis='annual',
+            base_salary=Decimal('120000.00'),
+            income_tax_rate=Decimal('0.1000'),
+            employee_tax_rate=Decimal('0.0500'),
+            employer_tax_rate=Decimal('0.0750'),
+            default_bank_account_name='Pat Payroll',
+            default_bank_account_number='123456789',
+            default_bank_routing_number='021000021',
+            payment_reference='PAY-PAT',
+            statutory_jurisdiction='US',
+        )
+        self.employer_benefit = PayrollComponent.objects.create(
+            entity=self.entity,
+            code='MED',
+            name='Medical Plan',
+            component_type='benefit',
+            calculation_type='fixed',
+            amount=Decimal('500.00'),
+            taxable=False,
+            employer_contribution=True,
+        )
+        self.deduction = PayrollComponent.objects.create(
+            entity=self.entity,
+            code='RET',
+            name='Retirement Deduction',
+            component_type='deduction',
+            calculation_type='fixed',
+            amount=Decimal('200.00'),
+            taxable=False,
+            employer_contribution=False,
+        )
+        StaffPayrollComponentAssignment.objects.create(staff_member=self.staff_member, component=self.employer_benefit)
+        StaffPayrollComponentAssignment.objects.create(staff_member=self.staff_member, component=self.deduction)
+
+        self.leave_type = LeaveType.objects.create(
+            entity=self.entity,
+            code='VAC',
+            name='Vacation',
+            accrual_hours_per_run=Decimal('10.00'),
+            max_balance_hours=Decimal('120.00'),
+            carryover_limit_hours=Decimal('40.00'),
+            is_paid_leave=True,
+        )
+        self.leave_balance = LeaveBalance.objects.create(
+            staff_member=self.staff_member,
+            leave_type=self.leave_type,
+            opening_balance_hours=Decimal('4.00'),
+        )
+        self.leave_request = LeaveRequest.objects.create(
+            entity=self.entity,
+            staff_member=self.staff_member,
+            leave_type=self.leave_type,
+            start_date=timezone.datetime(2025, 1, 3).date(),
+            end_date=timezone.datetime(2025, 1, 4).date(),
+            hours_requested=Decimal('8.00'),
+            status='approved',
+            approved_by=self.owner,
+            approved_at=timezone.now(),
+        )
+        PayrollBankOriginatorProfile.objects.create(
+            entity=self.entity,
+            originator_name='Payroll Entity LLC',
+            originator_identifier='WF-12345',
+            originating_bank_name='Wells Fargo',
+            debit_account_name='Payroll Operating',
+            debit_account_number='987654321',
+            debit_routing_number='021000021',
+            debit_sort_code='12-34-56',
+            debit_iban='DE89370400440532013000',
+            debit_swift_code='DEUTDEFF',
+            company_entry_description='PAYROLL',
+            company_discretionary_data='MONTHLY',
+            initiating_party_name='Payroll Entity LLC',
+            initiating_party_identifier='INIT-001',
+        )
+        self.payroll_run = PayrollRun.objects.create(
+            organization=self.organization,
+            entity=self.entity,
+            name='January 2025 Payroll',
+            pay_frequency='monthly',
+            requested_bank_file_format='aba',
+            period_start=timezone.datetime(2025, 1, 1).date(),
+            period_end=timezone.datetime(2025, 1, 31).date(),
+            payment_date=timezone.datetime(2025, 1, 31).date(),
+        )
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.owner)
+        self.employee_client = APIClient()
+        self.employee_client.force_authenticate(user=self.employee_user)
+
+    def test_create_payroll_run_defaults_country_specific_bank_format(self):
+        response = self.client.post(
+            '/api/payroll-runs/',
+            {
+                'organization': self.organization.id,
+                'entity': self.entity.id,
+                'name': 'February 2025 Payroll',
+                'pay_frequency': 'monthly',
+                'period_start': '2025-02-01',
+                'period_end': '2025-02-28',
+                'payment_date': '2025-02-28',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['requested_bank_file_format'], 'aba')
+        self.assertEqual(response.data['requested_bank_institution'], 'wells_fargo')
+        self.assertEqual(response.data['requested_bank_export_variant'], 'ppd')
+        self.assertEqual(response.data['approval_status'], 'draft')
+
+    def test_process_payroll_run_generates_outputs(self):
+        response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/process/', {}, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        self.payroll_run.refresh_from_db()
+        self.assertEqual(self.payroll_run.status, 'processed')
+        self.assertEqual(self.payroll_run.employee_count, 1)
+        self.assertEqual(self.payroll_run.gross_pay_total, Decimal('10000.00'))
+        self.assertEqual(self.payroll_run.employer_benefits_total, Decimal('500.00'))
+        self.assertEqual(self.payroll_run.deductions_total, Decimal('200.00'))
+        self.assertEqual(self.payroll_run.tax_withholding_total, Decimal('1500.00'))
+        self.assertEqual(self.payroll_run.employer_tax_total, Decimal('750.00'))
+        self.assertEqual(self.payroll_run.net_pay_total, Decimal('8300.00'))
+        self.assertIsNotNone(self.payroll_run.journal_entry)
+
+        payslip = Payslip.objects.get(payroll_run=self.payroll_run, staff_member=self.staff_member)
+        self.assertEqual(payslip.net_pay, Decimal('8300.00'))
+        self.assertEqual(payslip.leave_accrued_hours, Decimal('10.00'))
+        self.assertEqual(payslip.leave_used_hours, Decimal('8.00'))
+        self.assertEqual(payslip.leave_balance_hours, Decimal('6.00'))
+        self.assertEqual(payslip.line_items.count(), 6)
+
+        self.leave_balance.refresh_from_db()
+        self.leave_request.refresh_from_db()
+        self.assertEqual(self.leave_balance.current_balance_hours, Decimal('6.00'))
+        self.assertEqual(self.leave_request.status, 'processed')
+        self.assertEqual(self.leave_request.payroll_run, self.payroll_run)
+
+        self.assertEqual(PayrollStatutoryReport.objects.filter(payroll_run=self.payroll_run).count(), 3)
+        payment_file = PayrollBankPaymentFile.objects.get(payroll_run=self.payroll_run)
+        self.assertEqual(payment_file.file_format, 'aba')
+        self.assertIn('wells_fargo_ppd', payment_file.file_name)
+        self.assertIn('PAY-PAT', payment_file.content)
+        self.assertIn('830000', payment_file.content)
+        self.assertGreater(GeneralLedger.objects.filter(journal_entry=self.payroll_run.journal_entry).count(), 0)
+
+    def test_process_payroll_run_validates_required_bank_fields_for_selected_variant(self):
+        originator = PayrollBankOriginatorProfile.objects.get(entity=self.entity)
+        originator.debit_iban = ''
+        originator.debit_swift_code = ''
+        originator.save(update_fields=['debit_iban', 'debit_swift_code', 'updated_at'])
+
+        self.payroll_run.requested_bank_file_format = 'sepa'
+        self.payroll_run.requested_bank_institution = 'deutsche_bank'
+        self.payroll_run.requested_bank_export_variant = 'pain.001.001.03'
+        self.payroll_run.save(update_fields=['requested_bank_file_format', 'requested_bank_institution', 'requested_bank_export_variant', 'updated_at'])
+
+        response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/process/', {}, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Bank export validation failed', response.data['detail'])
+        self.assertIn('IBAN', response.data['detail'])
+        self.assertIn('SWIFT/BIC', response.data['detail'])
+
+    def test_process_payroll_run_requires_approval_when_matrix_configured(self):
+        AccountingApprovalMatrix.objects.create(
+            entity=self.entity,
+            name='Payroll Approval',
+            object_type='payroll_run',
+            minimum_amount=Decimal('0.00'),
+            approver_role=self.role,
+            require_reviewer=False,
+            require_approver=True,
+        )
+
+        blocked_response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/process/', {}, format='json')
+        self.assertEqual(blocked_response.status_code, 400)
+        self.assertIn('must be fully approved', blocked_response.data['detail'])
+
+        submit_response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/submit/', {}, format='json')
+        self.assertEqual(submit_response.status_code, 200)
+        self.payroll_run.refresh_from_db()
+        self.assertEqual(self.payroll_run.approval_status, 'pending_approval')
+
+        approve_response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/approve/', {'comments': 'Approved'}, format='json')
+        self.assertEqual(approve_response.status_code, 200)
+        self.payroll_run.refresh_from_db()
+        self.assertEqual(self.payroll_run.approval_status, 'approved')
+
+        process_response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/process/', {}, format='json')
+        self.assertEqual(process_response.status_code, 200)
+        self.payroll_run.refresh_from_db()
+        self.assertEqual(self.payroll_run.status, 'processed')
+
+    def test_mark_paid_updates_payroll_run_and_payslip_status(self):
+        self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/process/', {}, format='json')
+
+        response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/mark_paid/', {}, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        self.payroll_run.refresh_from_db()
+        self.assertEqual(self.payroll_run.status, 'paid')
+        self.assertEqual(Payslip.objects.get(payroll_run=self.payroll_run).status, 'paid')
 
 
 class BankingIntegrationAutomationTests(TestCase):

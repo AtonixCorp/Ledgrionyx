@@ -14,6 +14,9 @@ from .enterprise_views import (
     TaxExposureViewSet, TaxProfileViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
     RoleViewSet, PermissionViewSet, AuditLogViewSet,
     EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
+    StaffPayrollProfileViewSet, PayrollComponentViewSet, StaffPayrollComponentAssignmentViewSet,
+    LeaveTypeViewSet, LeaveBalanceViewSet, LeaveRequestViewSet, PayrollBankOriginatorProfileViewSet, PayrollRunViewSet,
+    PayslipViewSet, PayrollStatutoryReportViewSet, PayrollBankPaymentFileViewSet,
     BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet,
     BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet,
     CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, FinancialStatementsViewSet,
@@ -67,6 +70,17 @@ router.register(r'audit-logs', AuditLogViewSet, basename='audit-log')
 router.register(r'entity-departments', EntityDepartmentViewSet, basename='entity-department')
 router.register(r'entity-roles', EntityRoleViewSet, basename='entity-role')
 router.register(r'entity-staff', EntityStaffViewSet, basename='entity-staff')
+router.register(r'staff-payroll-profiles', StaffPayrollProfileViewSet, basename='staff-payroll-profile')
+router.register(r'payroll-components', PayrollComponentViewSet, basename='payroll-component')
+router.register(r'staff-payroll-component-assignments', StaffPayrollComponentAssignmentViewSet, basename='staff-payroll-component-assignment')
+router.register(r'leave-types', LeaveTypeViewSet, basename='leave-type')
+router.register(r'leave-balances', LeaveBalanceViewSet, basename='leave-balance')
+router.register(r'leave-requests', LeaveRequestViewSet, basename='leave-request')
+router.register(r'payroll-bank-originators', PayrollBankOriginatorProfileViewSet, basename='payroll-bank-originator')
+router.register(r'payroll-runs', PayrollRunViewSet, basename='payroll-run')
+router.register(r'payslips', PayslipViewSet, basename='payslip')
+router.register(r'payroll-statutory-reports', PayrollStatutoryReportViewSet, basename='payroll-statutory-report')
+router.register(r'payroll-bank-files', PayrollBankPaymentFileViewSet, basename='payroll-bank-file')
 router.register(r'bank-accounts', BankAccountViewSet, basename='bank-account')
 router.register(r'wallets', WalletViewSet, basename='wallet')
 router.register(r'compliance-documents', ComplianceDocumentViewSet, basename='compliance-document')

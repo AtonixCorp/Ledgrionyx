@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
@@ -527,6 +529,410 @@ class EntityStaff(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+
+class StaffPayrollProfile(models.Model):
+    """Payroll settings and tax/bank metadata for a staff member."""
+
+    PAY_FREQUENCY_CHOICES = [
+        ('weekly', 'Weekly'),
+        ('biweekly', 'Bi-Weekly'),
+        ('semimonthly', 'Semi-Monthly'),
+        ('monthly', 'Monthly'),
+    ]
+
+    SALARY_BASIS_CHOICES = [
+        ('annual', 'Annual Salary'),
+        ('monthly', 'Monthly Salary'),
+    ]
+
+    staff_member = models.OneToOneField(EntityStaff, on_delete=models.CASCADE, related_name='payroll_profile')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='staff_payroll_profiles')
+    pay_frequency = models.CharField(max_length=20, choices=PAY_FREQUENCY_CHOICES, default='monthly')
+    salary_basis = models.CharField(max_length=20, choices=SALARY_BASIS_CHOICES, default='annual')
+    base_salary = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    standard_hours_per_period = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('160.00'))
+    income_tax_rate = models.DecimalField(max_digits=7, decimal_places=4, default=0)
+    employee_tax_rate = models.DecimalField(max_digits=7, decimal_places=4, default=0)
+    employer_tax_rate = models.DecimalField(max_digits=7, decimal_places=4, default=0)
+    default_bank_account_name = models.CharField(max_length=255, blank=True)
+    default_bank_account_number = models.CharField(max_length=100, blank=True)
+    default_bank_routing_number = models.CharField(max_length=50, blank=True)
+    default_bank_iban = models.CharField(max_length=34, blank=True)
+    default_bank_swift_code = models.CharField(max_length=11, blank=True)
+    default_bank_sort_code = models.CharField(max_length=20, blank=True)
+    payment_reference = models.CharField(max_length=100, blank=True)
+    tax_identifier = models.CharField(max_length=100, blank=True)
+    statutory_jurisdiction = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['staff_member__last_name', 'staff_member__first_name']
+        indexes = [
+            models.Index(fields=['entity', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"Payroll Profile - {self.staff_member.full_name}"
+
+
+class PayrollComponent(models.Model):
+    """Reusable earnings, benefit, and deduction rules for payroll calculations."""
+
+    COMPONENT_TYPE_CHOICES = [
+        ('earning', 'Earning'),
+        ('benefit', 'Benefit'),
+        ('deduction', 'Deduction'),
+    ]
+
+    CALCULATION_TYPE_CHOICES = [
+        ('fixed', 'Fixed Amount'),
+        ('percent_of_base', 'Percent of Base Salary'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='payroll_components')
+    code = models.CharField(max_length=50)
+    name = models.CharField(max_length=255)
+    component_type = models.CharField(max_length=20, choices=COMPONENT_TYPE_CHOICES)
+    calculation_type = models.CharField(max_length=20, choices=CALCULATION_TYPE_CHOICES, default='fixed')
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    taxable = models.BooleanField(default=True)
+    employer_contribution = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'code')
+        ordering = ['component_type', 'name']
+
+    def __str__(self):
+        return f"{self.name} ({self.component_type})"
+
+
+class StaffPayrollComponentAssignment(models.Model):
+    """Assign payroll earnings, benefits, and deductions to individual staff members."""
+
+    staff_member = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='payroll_component_assignments')
+    component = models.ForeignKey(PayrollComponent, on_delete=models.CASCADE, related_name='staff_assignments')
+    amount_override = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    effective_start = models.DateField(null=True, blank=True)
+    effective_end = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('staff_member', 'component')
+        ordering = ['component__component_type', 'component__name']
+
+    def __str__(self):
+        return f"{self.staff_member.full_name} - {self.component.name}"
+
+
+class LeaveType(models.Model):
+    """Entity leave policy with accrual rules."""
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='leave_types')
+    code = models.CharField(max_length=50)
+    name = models.CharField(max_length=255)
+    accrual_hours_per_run = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    max_balance_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    carryover_limit_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    is_paid_leave = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('entity', 'code')
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} - {self.entity.name}"
+
+
+class LeaveBalance(models.Model):
+    """Running leave accrual and usage balance for a staff member."""
+
+    staff_member = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='leave_balances')
+    leave_type = models.ForeignKey(LeaveType, on_delete=models.CASCADE, related_name='balances')
+    opening_balance_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    accrued_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    used_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('staff_member', 'leave_type')
+        ordering = ['staff_member__last_name', 'leave_type__name']
+
+    @property
+    def current_balance_hours(self):
+        return (self.opening_balance_hours or 0) + (self.accrued_hours or 0) - (self.used_hours or 0)
+
+    def __str__(self):
+        return f"{self.staff_member.full_name} - {self.leave_type.name}"
+
+
+class PayrollBankOriginatorProfile(models.Model):
+    """Entity-level originator metadata used for bank payment exports."""
+
+    entity = models.OneToOneField(Entity, on_delete=models.CASCADE, related_name='payroll_bank_originator_profile')
+    originator_name = models.CharField(max_length=255)
+    originator_identifier = models.CharField(max_length=100, blank=True)
+    originating_bank_name = models.CharField(max_length=255, blank=True)
+    debit_account_name = models.CharField(max_length=255, blank=True)
+    debit_account_number = models.CharField(max_length=100, blank=True)
+    debit_routing_number = models.CharField(max_length=50, blank=True)
+    debit_iban = models.CharField(max_length=34, blank=True)
+    debit_swift_code = models.CharField(max_length=11, blank=True)
+    debit_sort_code = models.CharField(max_length=20, blank=True)
+    company_entry_description = models.CharField(max_length=20, blank=True)
+    company_discretionary_data = models.CharField(max_length=20, blank=True)
+    initiating_party_name = models.CharField(max_length=255, blank=True)
+    initiating_party_identifier = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['entity__name']
+
+    def __str__(self):
+        return f"{self.entity.name} Payroll Originator"
+
+
+class PayrollRun(models.Model):
+    """A payroll processing cycle for an entity and period."""
+
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('processing', 'Processing'),
+        ('processed', 'Processed'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled'),
+    ]
+    APPROVAL_STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('pending_review', 'Pending Review'),
+        ('pending_approval', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    PAY_FREQUENCY_CHOICES = StaffPayrollProfile.PAY_FREQUENCY_CHOICES
+    BANK_FILE_FORMAT_CHOICES = [
+        ('csv', 'CSV'),
+        ('sepa', 'SEPA'),
+        ('aba', 'ABA'),
+        ('bacs', 'BACS'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='payroll_runs')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='payroll_runs')
+    name = models.CharField(max_length=255)
+    pay_frequency = models.CharField(max_length=20, choices=PAY_FREQUENCY_CHOICES, default='monthly')
+    period_start = models.DateField()
+    period_end = models.DateField()
+    payment_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='draft')
+    employee_count = models.PositiveIntegerField(default=0)
+    gross_pay_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    employee_benefits_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    employer_benefits_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    deductions_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    tax_withholding_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    employer_tax_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    net_pay_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    statutory_summary = models.JSONField(default=dict, blank=True)
+    requested_bank_file_format = models.CharField(max_length=20, choices=BANK_FILE_FORMAT_CHOICES, default='csv')
+    requested_bank_institution = models.CharField(max_length=100, blank=True)
+    requested_bank_export_variant = models.CharField(max_length=100, blank=True)
+    journal_entry = models.ForeignKey('JournalEntry', on_delete=models.SET_NULL, null=True, blank=True, related_name='payroll_runs')
+    processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='payroll_runs_processed')
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='payroll_runs_approved')
+    processed_at = models.DateTimeField(null=True, blank=True)
+    approval_submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-payment_date', '-created_at']
+        indexes = [
+            models.Index(fields=['entity', 'status']),
+            models.Index(fields=['organization', 'payment_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} - {self.entity.name}"
+
+
+class Payslip(models.Model):
+    """Employee-level payroll statement generated from a pay run."""
+
+    STATUS_CHOICES = [
+        ('generated', 'Generated'),
+        ('paid', 'Paid'),
+        ('void', 'Void'),
+    ]
+
+    payroll_run = models.ForeignKey(PayrollRun, on_delete=models.CASCADE, related_name='payslips')
+    staff_member = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='payslips')
+    payroll_profile = models.ForeignKey(StaffPayrollProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='payslips')
+    gross_pay = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    employee_benefits_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    employer_benefits_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    deductions_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    taxable_pay = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    tax_withholding = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    employer_tax = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    net_pay = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    leave_accrued_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    leave_used_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    leave_balance_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    bank_payment_reference = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='generated')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('payroll_run', 'staff_member')
+        ordering = ['staff_member__last_name', 'staff_member__first_name']
+
+    def __str__(self):
+        return f"{self.staff_member.full_name} - {self.payroll_run.name}"
+
+
+class PayslipLineItem(models.Model):
+    """Detailed earnings, benefit, deduction, and tax lines for a payslip."""
+
+    CATEGORY_CHOICES = [
+        ('earning', 'Earning'),
+        ('benefit', 'Benefit'),
+        ('deduction', 'Deduction'),
+        ('withholding', 'Withholding'),
+        ('employer_tax', 'Employer Tax'),
+        ('leave', 'Leave'),
+    ]
+
+    payslip = models.ForeignKey(Payslip, on_delete=models.CASCADE, related_name='line_items')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    code = models.CharField(max_length=50)
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    taxable = models.BooleanField(default=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.description} - {self.payslip.staff_member.full_name}"
+
+
+class PayrollStatutoryReport(models.Model):
+    """Generated statutory payroll reporting package for a payroll run."""
+
+    REPORT_TYPE_CHOICES = [
+        ('withholding_return', 'Withholding Return'),
+        ('social_contribution', 'Social Contribution Report'),
+        ('payroll_register', 'Payroll Register'),
+    ]
+
+    STATUS_CHOICES = [
+        ('generated', 'Generated'),
+        ('filed', 'Filed'),
+        ('submitted', 'Submitted'),
+    ]
+
+    payroll_run = models.ForeignKey(PayrollRun, on_delete=models.CASCADE, related_name='statutory_reports')
+    report_type = models.CharField(max_length=30, choices=REPORT_TYPE_CHOICES)
+    jurisdiction = models.CharField(max_length=100)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='generated')
+    due_date = models.DateField(null=True, blank=True)
+    report_payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_report_type_display()} - {self.payroll_run.name}"
+
+
+class PayrollBankPaymentFile(models.Model):
+    """Exportable bank payment file generated from a payroll run."""
+
+    FORMAT_CHOICES = [
+        ('csv', 'CSV'),
+        ('sepa', 'SEPA'),
+        ('aba', 'ABA'),
+        ('bacs', 'BACS'),
+    ]
+
+    STATUS_CHOICES = [
+        ('generated', 'Generated'),
+        ('exported', 'Exported'),
+    ]
+
+    payroll_run = models.OneToOneField(PayrollRun, on_delete=models.CASCADE, related_name='bank_payment_file')
+    file_format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='csv')
+    file_name = models.CharField(max_length=255)
+    content = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='generated')
+    generated_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-generated_at']
+
+    def __str__(self):
+        return self.file_name
+
+
+class LeaveRequest(models.Model):
+    """Requested and approved leave that feeds payroll accrual and usage."""
+
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('processed', 'Processed In Payroll'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='leave_requests')
+    staff_member = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='leave_requests')
+    leave_type = models.ForeignKey(LeaveType, on_delete=models.PROTECT, related_name='leave_requests')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    hours_requested = models.DecimalField(max_digits=8, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='leave_requests_approved')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    payroll_run = models.ForeignKey(PayrollRun, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_leave_requests')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-start_date', '-created_at']
+        indexes = [
+            models.Index(fields=['entity', 'status']),
+            models.Index(fields=['staff_member', 'start_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.staff_member.full_name} - {self.leave_type.name}"
 
 
 class Role(models.Model):
@@ -2042,6 +2448,7 @@ ACCOUNTING_APPROVAL_OBJECT_CHOICES = [
     ('bill', 'Bill'),
     ('bill_payment', 'Bill Payment'),
     ('payment', 'Customer Payment'),
+    ('payroll_run', 'Payroll Run'),
 ]
 
 

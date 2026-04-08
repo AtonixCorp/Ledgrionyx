@@ -16,8 +16,10 @@ from .models import (
     BillPayment,
     Notification,
     Payment,
+    PayrollRun,
     PurchaseOrder,
 )
+from .payroll_engine import estimate_payroll_run_amount
 
 
 ACCOUNTING_OBJECT_CONFIG = {
@@ -53,6 +55,15 @@ ACCOUNTING_OBJECT_CONFIG = {
         'status_field': None,
         'final_status': None,
     },
+    'payroll_run': {
+        'model': PayrollRun,
+        'date_field': 'payment_date',
+        'amount_field': None,
+        'amount_resolver': estimate_payroll_run_amount,
+        'title_field': 'name',
+        'status_field': None,
+        'final_status': None,
+    },
 }
 
 
@@ -65,7 +76,20 @@ def infer_accounting_object_type(instance):
         return 'bill_payment'
     if isinstance(instance, Payment):
         return 'payment'
+    if isinstance(instance, PayrollRun):
+        return 'payroll_run'
     raise ValueError('Unsupported accounting object for approval workflow.')
+
+
+def _resolve_amount(instance, config):
+    resolver = config.get('amount_resolver')
+    if resolver:
+        return Decimal(str(resolver(instance) or 0))
+    return Decimal(getattr(instance, config['amount_field'], 0) or 0)
+
+
+def _resolve_title(instance, config, object_type):
+    return getattr(instance, config['title_field'], '') or f'{object_type}-{instance.id}'
 
 
 def get_accounting_object(object_type, object_id):
@@ -78,8 +102,8 @@ def get_accounting_object(object_type, object_id):
 def snapshot_accounting_object(instance, object_type=None):
     object_type = object_type or infer_accounting_object_type(instance)
     config = ACCOUNTING_OBJECT_CONFIG[object_type]
-    amount = getattr(instance, config['amount_field'], Decimal('0')) or Decimal('0')
-    title_value = getattr(instance, config['title_field'], '') or f'{object_type}-{instance.id}'
+    amount = _resolve_amount(instance, config)
+    title_value = _resolve_title(instance, config, object_type)
     return {
         'id': instance.id,
         'object_type': object_type,
@@ -109,7 +133,7 @@ def log_accounting_change(record, action, actor=None, stage='', details='', old_
 def get_matching_accounting_matrix(instance, object_type=None):
     object_type = object_type or infer_accounting_object_type(instance)
     config = ACCOUNTING_OBJECT_CONFIG[object_type]
-    amount = Decimal(getattr(instance, config['amount_field'], 0) or 0)
+    amount = _resolve_amount(instance, config)
     applicable = []
     matrices = AccountingApprovalMatrix.objects.filter(
         entity=instance.entity,
@@ -142,8 +166,8 @@ def get_matching_accounting_matrix(instance, object_type=None):
 def _get_or_create_record(instance, object_type=None):
     object_type = object_type or infer_accounting_object_type(instance)
     config = ACCOUNTING_OBJECT_CONFIG[object_type]
-    title_value = getattr(instance, config['title_field'], '') or f'{object_type}-{instance.id}'
-    amount = Decimal(getattr(instance, config['amount_field'], 0) or 0)
+    title_value = _resolve_title(instance, config, object_type)
+    amount = _resolve_amount(instance, config)
     record, _ = AccountingApprovalRecord.objects.get_or_create(
         object_type=object_type,
         object_id=instance.id,

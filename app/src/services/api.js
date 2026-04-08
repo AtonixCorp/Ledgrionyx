@@ -859,6 +859,95 @@ export const entityStaffAPI = {
   delete: (id) => api.delete(`/entity-staff/${id}/`),
 };
 
+export const staffPayrollProfilesAPI = {
+  getAll: (params) => api.get('/staff-payroll-profiles/', { params }),
+  getById: (id) => api.get(`/staff-payroll-profiles/${id}/`),
+  create: (data) => api.post('/staff-payroll-profiles/', data),
+  update: (id, data) => api.put(`/staff-payroll-profiles/${id}/`, data),
+  delete: (id) => api.delete(`/staff-payroll-profiles/${id}/`),
+  presets: (params) => api.get('/staff-payroll-profiles/presets/', { params }),
+  applyCountryPreset: (id) => api.post(`/staff-payroll-profiles/${id}/apply_country_preset/`, {}),
+};
+
+export const payrollComponentsAPI = {
+  getAll: (params) => api.get('/payroll-components/', { params }),
+  getById: (id) => api.get(`/payroll-components/${id}/`),
+  create: (data) => api.post('/payroll-components/', data),
+  update: (id, data) => api.put(`/payroll-components/${id}/`, data),
+  delete: (id) => api.delete(`/payroll-components/${id}/`),
+};
+
+export const staffPayrollComponentAssignmentsAPI = {
+  getAll: (params) => api.get('/staff-payroll-component-assignments/', { params }),
+  getById: (id) => api.get(`/staff-payroll-component-assignments/${id}/`),
+  create: (data) => api.post('/staff-payroll-component-assignments/', data),
+  update: (id, data) => api.put(`/staff-payroll-component-assignments/${id}/`, data),
+  delete: (id) => api.delete(`/staff-payroll-component-assignments/${id}/`),
+};
+
+export const leaveTypesAPI = {
+  getAll: (params) => api.get('/leave-types/', { params }),
+  getById: (id) => api.get(`/leave-types/${id}/`),
+  create: (data) => api.post('/leave-types/', data),
+  update: (id, data) => api.put(`/leave-types/${id}/`, data),
+  delete: (id) => api.delete(`/leave-types/${id}/`),
+};
+
+export const leaveBalancesAPI = {
+  getAll: (params) => api.get('/leave-balances/', { params }),
+  getById: (id) => api.get(`/leave-balances/${id}/`),
+  create: (data) => api.post('/leave-balances/', data),
+  update: (id, data) => api.put(`/leave-balances/${id}/`, data),
+  delete: (id) => api.delete(`/leave-balances/${id}/`),
+};
+
+export const leaveRequestsAPI = {
+  getAll: (params) => api.get('/leave-requests/', { params }),
+  getById: (id) => api.get(`/leave-requests/${id}/`),
+  create: (data) => api.post('/leave-requests/', data),
+  update: (id, data) => api.put(`/leave-requests/${id}/`, data),
+  delete: (id) => api.delete(`/leave-requests/${id}/`),
+  approve: (id) => api.post(`/leave-requests/${id}/approve/`, {}),
+  reject: (id) => api.post(`/leave-requests/${id}/reject/`, {}),
+};
+
+export const payrollBankOriginatorsAPI = {
+  getAll: (params) => api.get('/payroll-bank-originators/', { params }),
+  getById: (id) => api.get(`/payroll-bank-originators/${id}/`),
+  create: (data) => api.post('/payroll-bank-originators/', data),
+  update: (id, data) => api.put(`/payroll-bank-originators/${id}/`, data),
+  delete: (id) => api.delete(`/payroll-bank-originators/${id}/`),
+};
+
+export const payrollRunsAPI = {
+  getAll: (params) => api.get('/payroll-runs/', { params }),
+  getById: (id) => api.get(`/payroll-runs/${id}/`),
+  create: (data) => api.post('/payroll-runs/', data),
+  update: (id, data) => api.put(`/payroll-runs/${id}/`, data),
+  delete: (id) => api.delete(`/payroll-runs/${id}/`),
+  exportOptions: (params) => api.get('/payroll-runs/export_options/', { params }),
+  submit: (id) => api.post(`/payroll-runs/${id}/submit/`, {}),
+  approve: (id, data) => api.post(`/payroll-runs/${id}/approve/`, data || {}),
+  reject: (id, data) => api.post(`/payroll-runs/${id}/reject/`, data || {}),
+  process: (id) => api.post(`/payroll-runs/${id}/process/`, {}),
+  markPaid: (id) => api.post(`/payroll-runs/${id}/mark_paid/`, {}),
+};
+
+export const payslipsAPI = {
+  getAll: (params) => api.get('/payslips/', { params }),
+  getById: (id) => api.get(`/payslips/${id}/`),
+};
+
+export const payrollStatutoryReportsAPI = {
+  getAll: (params) => api.get('/payroll-statutory-reports/', { params }),
+  getById: (id) => api.get(`/payroll-statutory-reports/${id}/`),
+};
+
+export const payrollBankFilesAPI = {
+  getAll: (params) => api.get('/payroll-bank-files/', { params }),
+  getById: (id) => api.get(`/payroll-bank-files/${id}/`),
+};
+
 // Task Requests API
 export const taskRequestsAPI = {
   getAll: (params) => api.get('/task-requests/', { params }),

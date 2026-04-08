@@ -19,6 +19,9 @@ from .models import (
     Organization, Entity, TeamMember, Role, Permission, TaxExposure,
     TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
+    StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
+    LeaveType, LeaveBalance, LeaveRequest, PayrollBankOriginatorProfile, PayrollRun, Payslip, PayrollStatutoryReport,
+    PayrollBankPaymentFile,
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
     RecurringTransaction, TaskRequest, FixedAsset, AccrualEntry,
     # New models
@@ -49,6 +52,9 @@ from .serializers import (
     TaxExposureSerializer, TaxProfileSerializer, ComplianceDeadlineSerializer,
     CashflowForecastSerializer, AuditLogSerializer, OrgOverviewSerializer,
     EntityDepartmentSerializer, EntityRoleSerializer, EntityStaffSerializer,
+    StaffPayrollProfileSerializer, PayrollComponentSerializer, StaffPayrollComponentAssignmentSerializer,
+    LeaveTypeSerializer, LeaveBalanceSerializer, LeaveRequestSerializer, PayrollBankOriginatorProfileSerializer, PayrollRunSerializer,
+    PayslipSerializer, PayrollStatutoryReportSerializer, PayrollBankPaymentFileSerializer,
     BankAccountSerializer, WalletSerializer, ComplianceDocumentSerializer,
     BookkeepingCategorySerializer, BookkeepingAccountSerializer, TransactionSerializer, BookkeepingAuditLogSerializer,
     RecurringTransactionSerializer, TaskRequestSerializer,
@@ -94,15 +100,25 @@ from .accounting_controls import (
     snapshot_journal_entry,
     submit_journal_entry,
 )
+from .payroll_engine import mark_payroll_run_paid, process_payroll_run
 from .accounting_object_controls import (
     approve_accounting_object,
     build_accounting_inbox_items,
+    get_matching_accounting_matrix,
     get_accounting_object,
     infer_accounting_object_type,
     reject_accounting_object,
     submit_accounting_object,
 )
 from .intercompany_engine import post_intercompany_transaction
+from .payroll_bank_exports import list_bank_export_options
+from .payroll_presets import (
+    get_payroll_country_preset,
+    list_payroll_country_presets,
+    resolve_bank_export_variant,
+    resolve_bank_file_format,
+    resolve_bank_institution,
+)
 from .permissions import PermissionChecker
 
 
@@ -1505,6 +1521,331 @@ class EntityStaffViewSet(viewsets.ModelViewSet):
         serializer.save(entity=entity, user=linked_user)
 
 
+class StaffPayrollProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = StaffPayrollProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(StaffPayrollProfile.objects.select_related('staff_member', 'entity'), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        staff_member = get_object_or_404(_filter_queryset_by_entity_scope(EntityStaff.objects.all(), self.request.user), id=self.request.data.get('staff_member'))
+        preset = get_payroll_country_preset(staff_member.entity.country)
+        serializer.save(
+            entity=staff_member.entity,
+            staff_member=staff_member,
+            income_tax_rate=self.request.data.get('income_tax_rate', preset['income_tax_rate']),
+            employee_tax_rate=self.request.data.get('employee_tax_rate', preset['employee_tax_rate']),
+            employer_tax_rate=self.request.data.get('employer_tax_rate', preset['employer_tax_rate']),
+            statutory_jurisdiction=self.request.data.get('statutory_jurisdiction', preset['statutory_jurisdiction']),
+        )
+
+    @action(detail=False, methods=['get'])
+    def presets(self, request):
+        country = request.query_params.get('country')
+        if country:
+            return Response(get_payroll_country_preset(country))
+        return Response({'results': list_payroll_country_presets()})
+
+    @action(detail=True, methods=['post'])
+    def apply_country_preset(self, request, pk=None):
+        profile = self.get_object()
+        preset = get_payroll_country_preset(profile.entity.country)
+        profile.income_tax_rate = preset['income_tax_rate']
+        profile.employee_tax_rate = preset['employee_tax_rate']
+        profile.employer_tax_rate = preset['employer_tax_rate']
+        profile.statutory_jurisdiction = preset['statutory_jurisdiction']
+        profile.save(update_fields=['income_tax_rate', 'employee_tax_rate', 'employer_tax_rate', 'statutory_jurisdiction', 'updated_at'])
+        return Response(self.get_serializer(profile).data)
+
+
+class PayrollComponentViewSet(viewsets.ModelViewSet):
+    serializer_class = PayrollComponentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(PayrollComponent.objects.all(), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        component_type = self.request.query_params.get('component_type')
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        if component_type:
+            queryset = queryset.filter(component_type=component_type)
+        return queryset
+
+    def perform_create(self, serializer):
+        entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('entity'))
+        serializer.save(entity=entity)
+
+
+class StaffPayrollComponentAssignmentViewSet(viewsets.ModelViewSet):
+    serializer_class = StaffPayrollComponentAssignmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(
+            StaffPayrollComponentAssignment.objects.select_related('staff_member', 'component'),
+            self.request.user,
+            entity_relation='staff_member__entity',
+        )
+        staff_member_id = self.request.query_params.get('staff_member')
+        if staff_member_id:
+            queryset = queryset.filter(staff_member_id=staff_member_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        staff_member = get_object_or_404(_filter_queryset_by_entity_scope(EntityStaff.objects.all(), self.request.user), id=self.request.data.get('staff_member'))
+        component = get_object_or_404(_filter_queryset_by_entity_scope(PayrollComponent.objects.all(), self.request.user), id=self.request.data.get('component'))
+        if component.entity_id != staff_member.entity_id:
+            raise ValidationError({'component': 'Payroll component must belong to the same entity as the staff member.'})
+        serializer.save(staff_member=staff_member, component=component)
+
+
+class LeaveTypeViewSet(viewsets.ModelViewSet):
+    serializer_class = LeaveTypeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(LeaveType.objects.all(), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('entity'))
+        serializer.save(entity=entity)
+
+
+class LeaveBalanceViewSet(viewsets.ModelViewSet):
+    serializer_class = LeaveBalanceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(
+            LeaveBalance.objects.select_related('staff_member', 'leave_type'),
+            self.request.user,
+            entity_relation='staff_member__entity',
+        )
+        staff_member_id = self.request.query_params.get('staff_member')
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if staff_member_id:
+            queryset = queryset.filter(staff_member_id=staff_member_id)
+        if entity_id:
+            queryset = queryset.filter(staff_member__entity_id=entity_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        staff_member = get_object_or_404(_filter_queryset_by_entity_scope(EntityStaff.objects.all(), self.request.user), id=self.request.data.get('staff_member'))
+        leave_type = get_object_or_404(_filter_queryset_by_entity_scope(LeaveType.objects.all(), self.request.user), id=self.request.data.get('leave_type'))
+        if leave_type.entity_id != staff_member.entity_id:
+            raise ValidationError({'leave_type': 'Leave policy must belong to the same entity as the staff member.'})
+        serializer.save(staff_member=staff_member, leave_type=leave_type)
+
+
+class LeaveRequestViewSet(viewsets.ModelViewSet):
+    serializer_class = LeaveRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(LeaveRequest.objects.select_related('staff_member', 'leave_type', 'approved_by'), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        staff_member_id = self.request.query_params.get('staff_member')
+        status_filter = self.request.query_params.get('status')
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        if staff_member_id:
+            queryset = queryset.filter(staff_member_id=staff_member_id)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
+
+    def perform_create(self, serializer):
+        staff_member = get_object_or_404(_filter_queryset_by_entity_scope(EntityStaff.objects.all(), self.request.user), id=self.request.data.get('staff_member'))
+        leave_type = get_object_or_404(_filter_queryset_by_entity_scope(LeaveType.objects.all(), self.request.user), id=self.request.data.get('leave_type'))
+        if leave_type.entity_id != staff_member.entity_id:
+            raise ValidationError({'leave_type': 'Leave policy must belong to the same entity as the staff member.'})
+        serializer.save(entity=staff_member.entity, staff_member=staff_member, leave_type=leave_type)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        leave_request = self.get_object()
+        leave_request.status = 'approved'
+        leave_request.approved_by = request.user
+        leave_request.approved_at = timezone.now()
+        leave_request.save(update_fields=['status', 'approved_by', 'approved_at', 'updated_at'])
+        return Response(self.get_serializer(leave_request).data)
+
+
+class PayrollBankOriginatorProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = PayrollBankOriginatorProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(PayrollBankOriginatorProfile.objects.select_related('entity'), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('entity'))
+        serializer.save(entity=entity)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        leave_request = self.get_object()
+        leave_request.status = 'rejected'
+        leave_request.approved_by = request.user
+        leave_request.approved_at = timezone.now()
+        leave_request.save(update_fields=['status', 'approved_by', 'approved_at', 'updated_at'])
+        return Response(self.get_serializer(leave_request).data)
+
+
+class PayrollRunViewSet(viewsets.ModelViewSet):
+    serializer_class = PayrollRunSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = PayrollRun.objects.filter(organization__in=_accessible_organizations_queryset(self.request.user)).select_related('organization', 'entity', 'processed_by', 'journal_entry').prefetch_related('payslips__line_items', 'statutory_reports', 'bank_payment_file')
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        organization_id = self.request.query_params.get('organization_id') or self.request.query_params.get('organization')
+        status_filter = self.request.query_params.get('status')
+        if organization_id:
+            queryset = queryset.filter(organization_id=organization_id)
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
+
+    def perform_create(self, serializer):
+        entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('entity'))
+        organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=self.request.data.get('organization') or entity.organization_id)
+        if entity.organization_id != organization.id:
+            raise ValidationError({'organization': 'Selected organization must own the payroll entity.'})
+        serializer.save(
+            entity=entity,
+            organization=organization,
+            requested_bank_file_format=resolve_bank_file_format(entity.country, self.request.data.get('requested_bank_file_format', '')),
+            requested_bank_institution=resolve_bank_institution(entity.country, self.request.data.get('requested_bank_institution', '')),
+            requested_bank_export_variant=resolve_bank_export_variant(entity.country, self.request.data.get('requested_bank_export_variant', '')),
+        )
+
+    @action(detail=False, methods=['get'])
+    def export_options(self, request):
+        entity_id = request.query_params.get('entity_id') or request.query_params.get('entity')
+        country = request.query_params.get('country')
+        if entity_id and not country:
+            entity = _get_accessible_entity_or_404(request.user, entity_id)
+            country = entity.country
+        return Response({'results': list_bank_export_options(country)})
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        payroll_run = self.get_object()
+        try:
+            record = submit_accounting_object(payroll_run, request.user, object_type='payroll_run')
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        payroll_run.refresh_from_db()
+        return Response({'approval': record.id, 'payroll_run': self.get_serializer(payroll_run).data})
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        payroll_run = self.get_object()
+        try:
+            record = approve_accounting_object(
+                AccountingApprovalRecord.objects.get(object_type='payroll_run', object_id=payroll_run.id),
+                request.user,
+                comments=request.data.get('comments', ''),
+            )
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'This payroll run has not been submitted for approval.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        payroll_run.refresh_from_db()
+        return Response({'approval': record.id, 'payroll_run': self.get_serializer(payroll_run).data})
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        payroll_run = self.get_object()
+        try:
+            record = reject_accounting_object(
+                AccountingApprovalRecord.objects.get(object_type='payroll_run', object_id=payroll_run.id),
+                request.user,
+                comments=request.data.get('comments', ''),
+            )
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'This payroll run has not been submitted for approval.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        payroll_run.refresh_from_db()
+        return Response({'approval': record.id, 'payroll_run': self.get_serializer(payroll_run).data})
+
+    @action(detail=True, methods=['post'])
+    def process(self, request, pk=None):
+        payroll_run = self.get_object()
+        if get_matching_accounting_matrix(payroll_run, object_type='payroll_run') and payroll_run.approval_status != 'approved':
+            return Response({'detail': 'This payroll run must be fully approved before it can be processed.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        try:
+            process_payroll_run(payroll_run, request.user)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        payroll_run.refresh_from_db()
+        return Response(self.get_serializer(payroll_run).data)
+
+    @action(detail=True, methods=['post'])
+    def mark_paid(self, request, pk=None):
+        payroll_run = self.get_object()
+        mark_payroll_run_paid(payroll_run)
+        payroll_run.refresh_from_db()
+        return Response(self.get_serializer(payroll_run).data)
+
+
+class PayslipViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PayslipSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(Payslip.objects.select_related('payroll_run', 'staff_member', 'payroll_profile').prefetch_related('line_items'), self.request.user, entity_relation='payroll_run__entity')
+        payroll_run_id = self.request.query_params.get('payroll_run')
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if payroll_run_id:
+            queryset = queryset.filter(payroll_run_id=payroll_run_id)
+        if entity_id:
+            queryset = queryset.filter(payroll_run__entity_id=entity_id)
+        return queryset
+
+
+class PayrollStatutoryReportViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PayrollStatutoryReportSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(PayrollStatutoryReport.objects.select_related('payroll_run'), self.request.user, entity_relation='payroll_run__entity')
+        payroll_run_id = self.request.query_params.get('payroll_run')
+        if payroll_run_id:
+            queryset = queryset.filter(payroll_run_id=payroll_run_id)
+        return queryset
+
+
+class PayrollBankPaymentFileViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PayrollBankPaymentFileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = _filter_queryset_by_entity_scope(PayrollBankPaymentFile.objects.select_related('payroll_run'), self.request.user, entity_relation='payroll_run__entity')
+        payroll_run_id = self.request.query_params.get('payroll_run')
+        if payroll_run_id:
+            queryset = queryset.filter(payroll_run_id=payroll_run_id)
+        return queryset
+
+
 class BankAccountViewSet(viewsets.ModelViewSet):
     """ViewSet for managing bank accounts"""
     serializer_class = BankAccountSerializer
@@ -2885,11 +3226,14 @@ class AccountingApprovalMatrixViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        object_type = self.request.query_params.get('object_type')
         qs = _filter_queryset_by_entity_scope(AccountingApprovalMatrix.objects.all(), self.request.user).select_related(
             'entity', 'preparer_role', 'reviewer_role', 'approver_role'
         )
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
+        if object_type:
+            qs = qs.filter(object_type=object_type)
         return qs
 
     def perform_create(self, serializer):
@@ -2906,11 +3250,14 @@ class AccountingApprovalDelegationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        object_type = self.request.query_params.get('object_type')
         qs = _filter_queryset_by_entity_scope(AccountingApprovalDelegation.objects.all(), self.request.user).select_related(
             'entity', 'delegator', 'delegate', 'created_by'
         )
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
+        if object_type is not None:
+            qs = qs.filter(object_type=object_type)
         return qs
 
     def perform_create(self, serializer):

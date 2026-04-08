@@ -12,6 +12,7 @@ import {
   entityStaffAPI,
   journalEntriesAPI,
   paymentsAPI,
+  payrollRunsAPI,
   purchaseOrdersAPI,
 } from '../../services/api';
 
@@ -63,6 +64,7 @@ const actionApiForItem = (item) => {
   if (item.object_type === 'bill') return billsAPI;
   if (item.object_type === 'bill_payment') return billPaymentsAPI;
   if (item.object_type === 'payment') return paymentsAPI;
+  if (item.object_type === 'payroll_run') return payrollRunsAPI;
   return null;
 };
 
@@ -383,6 +385,7 @@ export default function ApprovalInbox() {
               <option value="bill">Bill</option>
               <option value="bill_payment">Bill Payment</option>
               <option value="payment">Customer Payment</option>
+              <option value="payroll_run">Payroll Run</option>
             </select>
           </div>
           <div>
@@ -415,6 +418,7 @@ export default function ApprovalInbox() {
             <option value="bill">Bill</option>
             <option value="bill_payment">Bill Payment</option>
             <option value="payment">Customer Payment</option>
+            <option value="payroll_run">Payroll Run</option>
           </select>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <select value={delegationForm.delegator} onChange={(event) => setDelegationForm((current) => ({ ...current, delegator: event.target.value }))} style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border-color-default)' }}><option value="">Delegator</option>{scopedStaff.map((member) => <option key={member.id} value={member.id}>{member.full_name || member.email}</option>)}</select>
