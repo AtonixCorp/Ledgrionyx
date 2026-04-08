@@ -281,3 +281,256 @@
   color: #0d1b2e;
   line-height: 1.3;
 }
+
+.wso-dashboard-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 28px;
+}
+
+.wso-dashboard-section {
+  background: #ffffff;
+  border: 1px solid #E0E2E5;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: 20px 24px;
+}
+
+.wso-dashboard-section.full-width {
+  grid-column: 1 / -1;
+}
+
+.wso-section-header,
+.wso-panel-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.wso-section-title,
+.wso-panel-header h3 {
+  color: #1E2328;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.wso-section-sub {
+  color: #6B7280;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+.wso-section-link {
+  background: #F8F9FB;
+  border: 1px solid #E0E2E5;
+  border-radius: 999px;
+  color: #1E2328;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  text-transform: uppercase;
+}
+
+.wso-section-link:hover {
+  background: #F2F3F4;
+}
+
+.wso-card-grid.compact {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.wso-mini-stat-card,
+.wso-toggle-card {
+  background: #F8F9FB;
+  border: 1px solid #E0E2E5;
+  border-radius: 12px;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.wso-mini-stat-label {
+  color: #6B7280;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.wso-mini-stat-value {
+  color: #1E2328;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.wso-inline-empty {
+  color: #9CA3AF;
+  font-size: 13px;
+  padding-top: 16px;
+}
+
+.wso-calendar-preview {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.wso-calendar-day {
+  color: #9CA3AF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 0;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.wso-calendar-cell {
+  align-items: center;
+  background: #F8F9FB;
+  border: 1px solid #E0E2E5;
+  border-radius: 10px;
+  color: #1E2328;
+  display: flex;
+  font-size: 13px;
+  font-weight: 600;
+  justify-content: center;
+  min-height: 52px;
+}
+
+.wso-calendar-cell.today {
+  background: rgba(196, 30, 58, 0.08);
+  border-color: rgba(196, 30, 58, 0.25);
+  color: #C41E3A;
+}
+
+.wso-file-dropzone {
+  background: #F8F9FB;
+  border: 1px dashed #C41E3A;
+  border-radius: 12px;
+  color: #C41E3A;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 18px;
+  text-align: center;
+}
+
+.wso-management-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wso-management-panel {
+  background: #FFFFFF;
+  border: 1px solid #E0E2E5;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.wso-permission-matrix {
+  border: 1px solid #E0E2E5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.wso-permission-row {
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(180px, 1.4fr) repeat(4, minmax(55px, 1fr));
+}
+
+.wso-permission-row span {
+  border-bottom: 1px solid #F2F3F4;
+  font-size: 12px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.wso-permission-row span:first-child {
+  text-align: left;
+}
+
+.wso-permission-row.header {
+  background: #F8F9FB;
+}
+
+.wso-permission-row.header span {
+  color: #6B7280;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.wso-settings-summary {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.wso-settings-row {
+  align-items: center;
+  color: #1E2328;
+  display: flex;
+  font-size: 13px;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.wso-settings-row span {
+  color: #6B7280;
+}
+
+.wso-toggle-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  margin-top: 16px;
+}
+
+.wso-toggle-card.enabled strong {
+  color: #C41E3A;
+}
+
+.wso-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wso-chip {
+  background: #F8F9FB;
+  border: 1px solid #E0E2E5;
+  border-radius: 999px;
+  color: #374151;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.wso-chip.active {
+  background: rgba(196, 30, 58, 0.08);
+  border-color: rgba(196, 30, 58, 0.28);
+  color: #C41E3A;
+}
+
+@media (max-width: 980px) {
+  .wso-dashboard-grid,
+  .wso-management-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .wso-permission-row {
+    grid-template-columns: minmax(140px, 1.5fr) repeat(4, minmax(44px, 1fr));
+  }
+}

@@ -2,7 +2,7 @@
 Workspace services — all business logic.
 Every service enforces membership + role before mutating data.
 Every write generates a WorkspaceLog entry via LogService.
-No cross-system dependencies.
+Selected workspace activity is mirrored into the shared platform audit stream.
 """
 from django.db import transaction
 from django.contrib.auth.models import User
@@ -103,11 +103,20 @@ class PermissionService:
 class LogService:
     @staticmethod
     def log(workspace_id, actor, action: str, metadata: dict = None):
+        metadata = metadata or {}
         WorkspaceLog.objects.create(
             workspace_id=workspace_id,
             actor=actor,
             action=action,
-            metadata=metadata or {},
+            metadata=metadata,
+        )
+        from finances.platform_foundation import log_workspace_activity_as_platform_event
+
+        log_workspace_activity_as_platform_event(
+            workspace_id=workspace_id,
+            actor=actor,
+            action=action,
+            metadata=metadata,
         )
 
 
@@ -292,6 +301,46 @@ class GroupService:
 
     @staticmethod
     @transaction.atomic
+    def update_group(workspace_id, actor: User, group_id, payload: dict) -> WorkspaceGroup:
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        try:
+            group = WorkspaceGroup.objects.get(pk=group_id, workspace_id=workspace_id)
+        except WorkspaceGroup.DoesNotExist:
+            raise NotFound('Group not found.')
+
+        updates = {}
+        if 'name' in payload:
+            name = payload.get('name', '').strip()
+            if not name:
+                raise ValidationError({'name': 'Group name is required.'})
+            if WorkspaceGroup.objects.filter(workspace_id=workspace_id, name=name).exclude(pk=group.pk).exists():
+                raise ValidationError({'name': 'A group with this name already exists.'})
+            group.name = name
+            updates['name'] = name
+
+        if 'description' in payload:
+            group.description = payload.get('description', '')
+            updates['description'] = group.description
+
+        if updates:
+            group.save()
+            LogService.log(workspace_id, actor, 'group.updated', {'group_id': str(group.pk), **updates})
+        return group
+
+    @staticmethod
+    @transaction.atomic
+    def delete_group(workspace_id, actor: User, group_id):
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        try:
+            group = WorkspaceGroup.objects.get(pk=group_id, workspace_id=workspace_id)
+        except WorkspaceGroup.DoesNotExist:
+            raise NotFound('Group not found.')
+        group_name = group.name
+        group.delete()
+        LogService.log(workspace_id, actor, 'group.deleted', {'group_id': str(group_id), 'name': group_name})
+
+    @staticmethod
+    @transaction.atomic
     def add_member(workspace_id, actor: User, group_id, user: User) -> WorkspaceGroupMember:
         PermissionService.assert_owner_or_admin(workspace_id, actor)
         try:
@@ -321,7 +370,7 @@ class GroupService:
     @staticmethod
     def list_groups(workspace_id, actor: User):
         PermissionService.assert_member(workspace_id, actor)
-        return WorkspaceGroup.objects.filter(workspace_id=workspace_id).prefetch_related('group_members')
+        return WorkspaceGroup.objects.filter(workspace_id=workspace_id).prefetch_related('group_members__user')
 
 
 # ─────────────────────────────────────────────────────────────────────────────

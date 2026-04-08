@@ -48,6 +48,7 @@ const Layout = ({ children }) => {
   const workspaceNav = [
     { to: '/app/enterprise/team',            label: 'Team & Permissions' },
     { to: '/app/enterprise/reports',         label: 'Reports' },
+    { to: '/app/enterprise/audit-explorer',  label: 'Platform Audit' },
     { to: '/app/enterprise/tax-compliance',  label: 'Tax Compliance' },
     { to: '/app/settings/branding',          label: 'Branding' },
   ];

@@ -7,19 +7,19 @@ from .views import (
     KPICalculationViewSet, ReportViewSet, ConsolidationViewSet,
     ConsolidationEntityViewSet, TaxCalculationViewSet
 )
-from .platform_views import health_check, ingest_platform_event
+from .platform_views import health_check, ingest_platform_event, internal_audit_events
 from .views import list_countries, get_country
 from .enterprise_views import (
     OrganizationViewSet, EntityViewSet, TeamMemberViewSet,
     TaxExposureViewSet, TaxProfileViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
-    RoleViewSet, PermissionViewSet, AuditLogViewSet,
+    RoleViewSet, PermissionViewSet, AuditLogViewSet, PlatformAuditEventViewSet,
     EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
     StaffPayrollProfileViewSet, PayrollComponentViewSet, StaffPayrollComponentAssignmentViewSet,
     LeaveTypeViewSet, LeaveBalanceViewSet, LeaveRequestViewSet, PayrollBankOriginatorProfileViewSet, PayrollRunViewSet,
     PayslipViewSet, PayrollStatutoryReportViewSet, PayrollBankPaymentFileViewSet,
     BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet,
     BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet,
-    CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, FinancialStatementsViewSet,
+    CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, PlatformTaskViewSet, FinancialStatementsViewSet,
     EnterpriseReportingViewSet,
     # New viewsets for Accounting module
     ChartOfAccountsViewSet, GeneralLedgerViewSet, JournalApprovalMatrixViewSet,
@@ -66,6 +66,7 @@ router.register(r'cashflow-forecasts', CashflowForecastViewSet, basename='cashfl
 router.register(r'roles', RoleViewSet, basename='role')
 router.register(r'permissions', PermissionViewSet, basename='permission')
 router.register(r'audit-logs', AuditLogViewSet, basename='audit-log')
+router.register(r'platform-audit-events', PlatformAuditEventViewSet, basename='platform-audit-event')
 
 # Entity-specific endpoints
 router.register(r'entity-departments', EntityDepartmentViewSet, basename='entity-department')
@@ -95,6 +96,7 @@ router.register(r'bookkeeping-audit-logs', BookkeepingAuditLogViewSet, basename=
 # Workflow & task queue endpoints
 router.register(r'recurring-transactions', RecurringTransactionViewSet, basename='recurring-transaction')
 router.register(r'task-requests', TaskRequestViewSet, basename='task-request')
+router.register(r'platform-tasks', PlatformTaskViewSet, basename='platform-task')
 
 # Financial statements endpoints (no model viewset, just actions)
 router.register(r'financial-statements', FinancialStatementsViewSet, basename='financial-statements')
@@ -217,6 +219,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('health/', health_check, name='health-check'),
     path('platform/events/', ingest_platform_event, name='platform-event-ingest'),
+    path('internal/audit-events', internal_audit_events, name='internal-audit-events'),
     path('tax/countries/', list_countries, name='tax_countries_list'),
     path('tax/countries/<str:code>/', get_country, name='tax_country_detail'),
 ]

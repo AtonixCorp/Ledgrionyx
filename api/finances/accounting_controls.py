@@ -16,6 +16,7 @@ from .models import (
     LedgerPeriod,
     Notification,
 )
+from .platform_foundation import log_platform_audit_event, sync_journal_entry_approval_task
 
 
 def snapshot_journal_entry(entry):
@@ -293,6 +294,23 @@ def submit_journal_entry(entry, actor):
         old_values=previous,
         new_values=snapshot_journal_entry(entry),
     )
+    sync_journal_entry_approval_task(entry)
+    log_platform_audit_event(
+        domain='finance',
+        actor=actor,
+        organization=entry.entity.organization,
+        entity=entry.entity,
+        event_type='journal_entry.submitted',
+        action='approval_requested',
+        resource_type='JournalEntry',
+        resource_id=str(entry.id),
+        subject_type='journal_entry',
+        subject_id=str(entry.id),
+        resource_name=entry.reference_number or entry.description or str(entry.id),
+        summary=f'Journal entry submitted for approval: {entry.reference_number or entry.id}',
+        diff={'before': previous, 'after': snapshot_journal_entry(entry)},
+        context={'status': entry.status, 'stage': _current_pending_step(entry).stage if _current_pending_step(entry) else ''},
+    )
     next_step = _current_pending_step(entry)
     if next_step:
         _deliver_journal_notifications(entry, next_step)
@@ -360,6 +378,24 @@ def approve_journal_entry(entry, actor, comments=''):
         old_values=previous,
         new_values=snapshot_journal_entry(entry),
     )
+    sync_journal_entry_approval_task(entry)
+    log_platform_audit_event(
+        domain='finance',
+        actor=actor,
+        organization=entry.entity.organization,
+        entity=entry.entity,
+        event_type='journal_entry.approved',
+        action='journal_posted' if entry.status == 'posted' else 'approval_progressed',
+        resource_type='JournalEntry',
+        resource_id=str(entry.id),
+        subject_type='journal_entry',
+        subject_id=str(entry.id),
+        resource_name=entry.reference_number or entry.description or str(entry.id),
+        summary=f'Journal entry approval updated: {entry.reference_number or entry.id}',
+        diff={'before': previous, 'after': snapshot_journal_entry(entry)},
+        context={'status': entry.status, 'stage': step.stage},
+        metadata={'comments': comments},
+    )
     return entry
 
 
@@ -393,6 +429,24 @@ def reject_journal_entry(entry, actor, comments=''):
         details=comments or 'Approval step rejected.',
         old_values=previous,
         new_values=snapshot_journal_entry(entry),
+    )
+    sync_journal_entry_approval_task(entry)
+    log_platform_audit_event(
+        domain='finance',
+        actor=actor,
+        organization=entry.entity.organization,
+        entity=entry.entity,
+        event_type='journal_entry.rejected',
+        action='approval_rejected',
+        resource_type='JournalEntry',
+        resource_id=str(entry.id),
+        subject_type='journal_entry',
+        subject_id=str(entry.id),
+        resource_name=entry.reference_number or entry.description or str(entry.id),
+        summary=f'Journal entry rejected: {entry.reference_number or entry.id}',
+        diff={'before': previous, 'after': snapshot_journal_entry(entry)},
+        context={'status': entry.status, 'stage': step.stage},
+        metadata={'comments': comments},
     )
     return entry
 

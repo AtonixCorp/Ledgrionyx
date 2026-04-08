@@ -10,6 +10,7 @@ from .views import (
     WorkspaceFileDetailView,
     WorkspaceFileListView,
     WorkspaceFolderListView,
+     WorkspaceGroupDetailView,
     WorkspaceGroupListView,
     WorkspaceGroupMemberView,
     WorkspaceListCreateView,
@@ -41,6 +42,7 @@ urlpatterns = [
 
     # ── Groups ──────────────────────────────────────────────────────────────
     path(f'workspaces/{WS}/groups',            WorkspaceGroupListView.as_view(),          name='workspace-groups'),
+     path(f'workspaces/{WS}/groups/<uuid:group_id>', WorkspaceGroupDetailView.as_view(),   name='workspace-group-detail'),
     path(f'workspaces/{WS}/groups/<uuid:group_id>/members',
          WorkspaceGroupMemberView.as_view(),                                               name='workspace-group-members'),
     path(f'workspaces/{WS}/groups/<uuid:group_id>/members/<int:user_id>',

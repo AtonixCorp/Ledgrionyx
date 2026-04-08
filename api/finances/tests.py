@@ -50,6 +50,8 @@ from .models import (
     Notification,
     NotificationPreference,
     OAuthApplication,
+    PlatformAuditEvent,
+    PlatformTask,
     BookkeepingAccount,
     BookkeepingCategory,
     PayrollBankPaymentFile,
@@ -79,6 +81,8 @@ from .models import (
     AccountingApprovalMatrix,
     AccountingApprovalDelegation,
 )
+from workspaces.models import Workspace
+from workspaces.services import LogService
 
 
 class ExpenseModelTest(TestCase):
@@ -2110,6 +2114,168 @@ class EnterpriseReportingDashboardAPITests(TestCase):
                 self.assertEqual(workflow_row['artifacts_expiring_within_window'], 2)
                 self.assertEqual(workflow_row['artifacts_already_expired'], 1)
                 self.assertIsNotNone(workflow_row['next_expiration_at'])
+
+
+class PlatformFoundationAPITests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='platform-owner', email='platform-owner@example.com', password='pass')
+        self.organization = Organization.objects.create(
+            owner=self.owner,
+            name='Platform Org',
+            slug='platform-org',
+            primary_country='US',
+            primary_currency='USD',
+        )
+        self.entity = Entity.objects.create(
+            organization=self.organization,
+            name='Platform Entity',
+            country='US',
+            entity_type='corporation',
+            status='active',
+            local_currency='USD',
+            workspace_mode='combined',
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.owner)
+
+    def test_creating_task_request_creates_platform_task_and_audit_event(self):
+        response = self.client.post(
+            '/api/task-requests/',
+            {
+                'organization': self.organization.id,
+                'entity': self.entity.id,
+                'task_type': 'generate_statement',
+                'priority': 'high',
+                'payload': {
+                    'description': 'Produce month-end income statement.',
+                    'entity_id': self.entity.id,
+                },
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        task_request_id = str(response.data['id'])
+        platform_task = PlatformTask.objects.get(source_object_type='TaskRequest', source_object_id=task_request_id)
+        self.assertEqual(platform_task.domain, 'finance')
+        self.assertEqual(platform_task.status, 'open')
+        self.assertEqual(platform_task.priority, 'high')
+        self.assertEqual(platform_task.organization_id, self.organization.id)
+        self.assertTrue(
+            PlatformAuditEvent.objects.filter(
+                domain='finance',
+                event_type='task_request.created',
+                resource_type='TaskRequest',
+                resource_id=task_request_id,
+            ).exists()
+        )
+
+        list_response = self.client.get('/api/platform-tasks/', {'organization': self.organization.id})
+        self.assertEqual(list_response.status_code, 200)
+        task_rows = list_response.data.get('results', list_response.data)
+        self.assertEqual(len(task_rows), 1)
+
+    def test_processing_task_request_updates_platform_task_and_emits_audit_events(self):
+        create_response = self.client.post(
+            '/api/task-requests/',
+            {
+                'organization': self.organization.id,
+                'entity': self.entity.id,
+                'task_type': 'custom',
+                'priority': 'normal',
+                'payload': {'description': 'Track custom ops request.'},
+            },
+            format='json',
+        )
+        task_request_id = create_response.data['id']
+
+        response = self.client.post(f'/api/task-requests/{task_request_id}/process/')
+        self.assertEqual(response.status_code, 200)
+
+        platform_task = PlatformTask.objects.get(source_object_type='TaskRequest', source_object_id=str(task_request_id))
+        self.assertEqual(platform_task.status, 'completed')
+        event_types = set(
+            PlatformAuditEvent.objects.filter(resource_type='TaskRequest', resource_id=str(task_request_id)).values_list('event_type', flat=True)
+        )
+        self.assertIn('task_request.processing_started', event_types)
+        self.assertIn('task_request.completed', event_types)
+
+    def test_workspace_logs_are_mirrored_into_platform_audit_stream(self):
+        workspace = Workspace.objects.create(owner=self.owner, name='Ops Workspace')
+
+        LogService.log(workspace.id, self.owner, 'file.uploaded', {'name': 'board-pack.pdf', 'file_id': 'file-123'})
+
+        event = PlatformAuditEvent.objects.get(domain='workspace', event_type='file.uploaded')
+        self.assertEqual(str(event.workspace_id), str(workspace.id))
+        self.assertEqual(event.resource_type, 'File')
+        self.assertEqual(event.resource_name, 'board-pack.pdf')
+
+        response = self.client.get('/api/platform-audit-events/', {'workspace_id': str(workspace.id)})
+        self.assertEqual(response.status_code, 200)
+        rows = response.data.get('results', response.data)
+        self.assertEqual(len(rows), 1)
+
+    def test_platform_audit_api_exposes_canonical_fields_and_filters(self):
+        workspace = Workspace.objects.create(owner=self.owner, name='Audit Workspace')
+
+        LogService.log(workspace.id, self.owner, 'file.uploaded', {'name': 'cap-table.csv', 'file_id': 'file-456'})
+
+        event = PlatformAuditEvent.objects.get(domain='workspace', event_type='file.uploaded')
+        response = self.client.get(
+            '/api/platform-audit-events/',
+            {
+                'action': 'file.uploaded',
+                'subject_type': 'workspace',
+                'subject_id': str(workspace.id),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        rows = response.data.get('results', response.data)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['actor_id'], str(self.owner.id))
+        self.assertEqual(rows[0]['subject_type'], 'workspace')
+        self.assertEqual(rows[0]['subject_id'], str(workspace.id))
+        self.assertEqual(rows[0]['action'], 'file.uploaded')
+        self.assertEqual(event.subject_type, 'workspace')
+
+    def test_platform_task_actions_support_canonical_state_contract(self):
+        create_response = self.client.post(
+            '/api/platform-tasks/',
+            {
+                'organization': self.organization.id,
+                'entity': self.entity.id,
+                'type': 'journal_entry_approval',
+                'title': 'Approve journal 1001',
+                'description': 'Review manual journal above threshold.',
+                'state': 'open',
+                'assignee_type': 'user',
+                'assignee_id': str(self.owner.id),
+                'origin_type': 'journal_entry',
+                'origin_id': '1001',
+                'priority': 'high',
+            },
+            format='json',
+        )
+
+        self.assertEqual(create_response.status_code, 201)
+        task_id = create_response.data['id']
+        self.assertEqual(create_response.data['state'], 'open')
+        self.assertEqual(create_response.data['type'], 'journal_entry_approval')
+        self.assertEqual(create_response.data['origin_type'], 'journal_entry')
+
+        start_response = self.client.post(f'/api/platform-tasks/{task_id}/start/', format='json')
+        self.assertEqual(start_response.status_code, 200)
+        self.assertEqual(start_response.data['state'], 'in_progress')
+
+        complete_response = self.client.post(f'/api/platform-tasks/{task_id}/complete/', {'completion_note': 'Approved'}, format='json')
+        self.assertEqual(complete_response.status_code, 200)
+        self.assertEqual(complete_response.data['state'], 'completed')
+
+        filtered_response = self.client.get('/api/platform-tasks/', {'assignee_id': self.owner.id, 'state': 'completed'})
+        self.assertEqual(filtered_response.status_code, 200)
+        rows = filtered_response.data.get('results', filtered_response.data)
+        self.assertEqual(len(rows), 1)
 
 
 class PayrollEngineAPITests(TestCase):

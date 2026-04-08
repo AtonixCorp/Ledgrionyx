@@ -351,6 +351,28 @@
   text-transform: uppercase;
 }
 
+.gc-section-header-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.gc-section-link {
+  background: transparent;
+  border: 1px solid var(--gc-line);
+  border-radius: 999px;
+  color: var(--gc-ink);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  text-transform: uppercase;
+}
+
+.gc-section-link:hover {
+  background: #F2F3F4;
+}
+
 /* ── Workspace Filters ─────────────────────────────────────────────────────── */
 .gc-workspace-filters {
   display: flex;
@@ -751,6 +773,32 @@
   white-space: nowrap;
 }
 
+.gc-task-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.gc-task-action {
+  background: #1E2328;
+  border: none;
+  border-radius: 999px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 10px;
+}
+
+.gc-task-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.gc-task-action-secondary {
+  background: #F2F3F4;
+  color: #1E2328;
+}
+
 /* ── Organizations ─────────────────────────────────────────────────────────── */
 .gc-org-item {
   align-items: center;
@@ -802,6 +850,11 @@
 @media (max-width: 1100px) {
   .gc-main-grid {
     grid-template-columns: 1fr;
+  }
+
+  .gc-task-item {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .gc-hero {

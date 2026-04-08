@@ -7,6 +7,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from finances.platform_foundation import log_platform_audit_event, sync_equity_scenario_approval_task
+
 from .automation import (
     notify_scenario_escalated,
     notify_scenario_reminder,
@@ -956,6 +958,23 @@ def create_scenario_approval_request(workspace, scenario_input: dict, requested_
         actor=requested_by,
         metadata={'reporting_period': reporting_period},
     )
+    sync_equity_scenario_approval_task(approval)
+    log_platform_audit_event(
+        domain='equity',
+        actor=requested_by,
+        organization=workspace.organization,
+        entity=workspace,
+        event_type='equity_scenario_approval.created',
+        action='approval_requested',
+        resource_type='EquityScenarioApproval',
+        resource_id=str(approval.id),
+        subject_type='equity_scenario_approval',
+        subject_id=str(approval.id),
+        resource_name=approval.title,
+        summary=f'Created equity approval request: {approval.title}',
+        context={'board_due_at': approval.board_due_at.isoformat() if approval.board_due_at else None, 'legal_due_at': approval.legal_due_at.isoformat() if approval.legal_due_at else None},
+        metadata={'reporting_period': reporting_period},
+    )
     notify_scenario_requested(approval, get_board_review_users(workspace), get_legal_review_users(workspace))
     return approval
 
@@ -987,6 +1006,23 @@ def approve_scenario_for_board(approval: EquityScenarioApproval, approver, comme
         comments or 'Board reviewer approved the scenario.',
         actor=approver,
     )
+    sync_equity_scenario_approval_task(approval)
+    log_platform_audit_event(
+        domain='equity',
+        actor=approver,
+        organization=approval.workspace.organization,
+        entity=approval.workspace,
+        event_type='equity_scenario_approval.board_approved',
+        action='approval_progressed',
+        resource_type='EquityScenarioApproval',
+        resource_id=str(approval.id),
+        subject_type='equity_scenario_approval',
+        subject_id=str(approval.id),
+        resource_name=approval.title,
+        summary=f'Board approval recorded for {approval.title}',
+        context={'status': approval.status, 'board_status': approval.board_status, 'legal_status': approval.legal_status},
+        metadata={'comments': comments},
+    )
     notify_scenario_review_decision(approval, reviewer_type='board', approved=True)
     return approval
 
@@ -1008,6 +1044,23 @@ def approve_scenario_for_legal(approval: EquityScenarioApproval, approver, comme
         'Legal approval recorded',
         comments or 'Legal reviewer approved the scenario.',
         actor=approver,
+    )
+    sync_equity_scenario_approval_task(approval)
+    log_platform_audit_event(
+        domain='equity',
+        actor=approver,
+        organization=approval.workspace.organization,
+        entity=approval.workspace,
+        event_type='equity_scenario_approval.legal_approved',
+        action='approval_progressed',
+        resource_type='EquityScenarioApproval',
+        resource_id=str(approval.id),
+        subject_type='equity_scenario_approval',
+        subject_id=str(approval.id),
+        resource_name=approval.title,
+        summary=f'Legal approval recorded for {approval.title}',
+        context={'status': approval.status, 'board_status': approval.board_status, 'legal_status': approval.legal_status},
+        metadata={'comments': comments},
     )
     notify_scenario_review_decision(approval, reviewer_type='legal', approved=True)
     return approval
@@ -1039,6 +1092,23 @@ def reject_scenario_approval(approval: EquityScenarioApproval, reviewer_type: st
         comments or f'{reviewer_type.title()} reviewer rejected the scenario.',
         actor=reviewer,
         metadata={'reviewer_type': reviewer_type},
+    )
+    sync_equity_scenario_approval_task(approval)
+    log_platform_audit_event(
+        domain='equity',
+        actor=reviewer,
+        organization=approval.workspace.organization,
+        entity=approval.workspace,
+        event_type='equity_scenario_approval.rejected',
+        action='approval_rejected',
+        resource_type='EquityScenarioApproval',
+        resource_id=str(approval.id),
+        subject_type='equity_scenario_approval',
+        subject_id=str(approval.id),
+        resource_name=approval.title,
+        summary=f'{reviewer_type.title()} rejected equity approval: {approval.title}',
+        context={'status': approval.status, 'reviewer_type': reviewer_type},
+        metadata={'comments': comments},
     )
     notify_scenario_review_decision(approval, reviewer_type=reviewer_type, approved=False)
     return approval

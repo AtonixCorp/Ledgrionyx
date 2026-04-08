@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 
 from django.db import models
@@ -1278,6 +1279,120 @@ class AuditLog(models.Model):
     def __str__(self):
         scope = f"Entity: {self.entity.name}" if self.entity else f"Organization: {self.organization.name}"
         return f"{self.action} {self.model_name} by {self.user} on {self.created_at} [{scope}]"
+
+
+class PlatformAuditEvent(models.Model):
+    """Cross-domain audit stream for finance, workspace, and future product areas."""
+
+    ACTOR_TYPE_CHOICES = [
+        ('user', 'User'),
+        ('system', 'System'),
+        ('external', 'External'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True, related_name='platform_audit_events')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, null=True, blank=True, related_name='platform_audit_events')
+    workspace_id = models.UUIDField(null=True, blank=True)
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='platform_audit_events')
+    actor_type = models.CharField(max_length=20, choices=ACTOR_TYPE_CHOICES, default='user')
+    actor_identifier = models.CharField(max_length=100, blank=True)
+    subject_type = models.CharField(max_length=100, blank=True)
+    subject_id = models.CharField(max_length=100, blank=True)
+    action = models.CharField(max_length=100, blank=True)
+    correlation_id = models.CharField(max_length=100, blank=True)
+
+    domain = models.CharField(max_length=50)
+    event_type = models.CharField(max_length=100)
+    resource_type = models.CharField(max_length=100)
+    resource_id = models.CharField(max_length=100)
+    resource_name = models.CharField(max_length=255, blank=True)
+    summary = models.CharField(max_length=255)
+    metadata = models.JSONField(default=dict, blank=True)
+    context = models.JSONField(default=dict, blank=True)
+    diff = models.JSONField(default=dict, blank=True)
+    search_text = models.TextField(blank=True)
+    occurred_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-occurred_at']
+        indexes = [
+            models.Index(fields=['domain', 'event_type']),
+            models.Index(fields=['organization', 'occurred_at']),
+            models.Index(fields=['workspace_id', 'occurred_at']),
+            models.Index(fields=['resource_type', 'resource_id']),
+            models.Index(fields=['subject_type', 'subject_id']),
+            models.Index(fields=['actor_identifier', 'occurred_at']),
+            models.Index(fields=['action', 'occurred_at']),
+            models.Index(fields=['correlation_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.domain}:{self.event_type} {self.resource_type}#{self.resource_id}"
+
+
+class PlatformTask(models.Model):
+    """Unified task layer that can aggregate work across product domains."""
+
+    ASSIGNEE_TYPE_CHOICES = [
+        ('user', 'User'),
+        ('role', 'Role'),
+        ('group', 'Group'),
+    ]
+
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('blocked', 'Blocked'),
+    ]
+
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('normal', 'Normal'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True, related_name='platform_tasks')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, null=True, blank=True, related_name='platform_tasks')
+    workspace_id = models.UUIDField(null=True, blank=True)
+    domain = models.CharField(max_length=50, default='platform')
+    task_type = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='normal')
+    assignee_type = models.CharField(max_length=20, choices=ASSIGNEE_TYPE_CHOICES, default='user')
+    assignee_id = models.CharField(max_length=100, blank=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_platform_tasks')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_platform_tasks')
+    origin_type = models.CharField(max_length=100, blank=True)
+    origin_id = models.CharField(max_length=100, blank=True)
+    source_object_type = models.CharField(max_length=100, blank=True)
+    source_object_id = models.CharField(max_length=100, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    due_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['status', '-created_at']
+        indexes = [
+            models.Index(fields=['domain', 'status']),
+            models.Index(fields=['organization', 'status']),
+            models.Index(fields=['workspace_id', 'status']),
+            models.Index(fields=['assigned_to', 'status']),
+            models.Index(fields=['source_object_type', 'source_object_id']),
+            models.Index(fields=['origin_type', 'origin_id']),
+            models.Index(fields=['assignee_type', 'assignee_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.title} [{self.status}]"
 
 
 # ===== FINANCIAL MODELING MODELS =====

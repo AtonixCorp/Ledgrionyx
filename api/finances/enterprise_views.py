@@ -7,6 +7,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
 from django.http import FileResponse
 from django.http import HttpResponse
 from django.db.models import Sum, Q, Count
@@ -16,10 +17,11 @@ from collections import defaultdict
 from decimal import Decimal
 
 from django.utils import timezone
+from workspaces.models import Workspace
 
 from .models import (
     Organization, Entity, TeamMember, Role, Permission, TaxExposure,
-    TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
+    TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask, EntityDepartment,
     Budget, Scenario, Consolidation,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
@@ -53,14 +55,14 @@ from .serializers import (
     OrganizationSerializer, EntitySerializer, EntityDetailSerializer,
     TeamMemberSerializer, RoleSerializer, PermissionSerializer,
     TaxExposureSerializer, TaxProfileSerializer, ComplianceDeadlineSerializer,
-    CashflowForecastSerializer, AuditLogSerializer, OrgOverviewSerializer,
+    CashflowForecastSerializer, AuditLogSerializer, PlatformAuditEventSerializer, OrgOverviewSerializer,
     EntityDepartmentSerializer, EntityRoleSerializer, EntityStaffSerializer,
     StaffPayrollProfileSerializer, PayrollComponentSerializer, StaffPayrollComponentAssignmentSerializer,
     LeaveTypeSerializer, LeaveBalanceSerializer, LeaveRequestSerializer, PayrollBankOriginatorProfileSerializer, PayrollRunSerializer,
     PayslipSerializer, PayrollStatutoryReportSerializer, PayrollBankPaymentFileSerializer,
     BankAccountSerializer, WalletSerializer, ComplianceDocumentSerializer,
     BookkeepingCategorySerializer, BookkeepingAccountSerializer, TransactionSerializer, BookkeepingAuditLogSerializer,
-    RecurringTransactionSerializer, TaskRequestSerializer,
+    RecurringTransactionSerializer, TaskRequestSerializer, PlatformTaskSerializer,
     # New serializers
     ChartOfAccountsSerializer, GeneralLedgerSerializer, JournalApprovalMatrixSerializer,
     JournalApprovalDelegationSerializer, JournalEntryApprovalStepSerializer,
@@ -133,6 +135,14 @@ from .enterprise_reporting import (
     normalize_schedule_trigger_config,
     run_due_automation_workflows,
 )
+from .platform_foundation import (
+    cancel_platform_tasks_for_origin,
+    log_platform_audit_event,
+    sync_compliance_deadline_to_platform_task,
+    sync_document_request_to_platform_task,
+    sync_task_request_to_platform_task,
+)
+from .platform_tasks import create_task as create_platform_task_record, update_task as update_platform_task_record, transition_task as transition_platform_task
 
 
 def _accessible_organizations_queryset(user):
@@ -173,6 +183,13 @@ def _accessible_entities_queryset(user, organization=None):
         | Q(organization_id__in=unrestricted_org_ids)
         | Q(id__in=scoped_entity_ids)
     ).distinct()
+
+
+def _accessible_workspaces_queryset(user):
+    if not user or not user.is_authenticated:
+        return Workspace.objects.none()
+
+    return Workspace.objects.filter(Q(owner=user) | Q(members__user=user)).distinct()
 
 
 def _get_accessible_entity_or_404(user, entity_id, organization=None):
@@ -928,6 +945,116 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             },
         }
 
+
+class PlatformTaskViewSet(viewsets.ModelViewSet):
+    """Unified task API for cross-domain work queues."""
+
+    serializer_class = PlatformTaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
+        accessible_workspaces = _accessible_workspaces_queryset(self.request.user).values_list('id', flat=True)
+        queryset = PlatformTask.objects.filter(
+            Q(organization__in=accessible_orgs)
+            | Q(workspace_id__in=accessible_workspaces)
+            | Q(assigned_to=self.request.user)
+            | Q(created_by=self.request.user)
+        ).select_related('organization', 'entity', 'assigned_to', 'created_by').distinct()
+
+        organization_id = self.request.query_params.get('organization') or self.request.query_params.get('organization_id')
+        entity_id = self.request.query_params.get('entity') or self.request.query_params.get('entity_id')
+        workspace_id = self.request.query_params.get('workspace_id')
+        status_filter = self.request.query_params.get('state') or self.request.query_params.get('status')
+        assigned_to = self.request.query_params.get('assignee_id') or self.request.query_params.get('assigned_to')
+        domain = self.request.query_params.get('domain')
+        task_type = self.request.query_params.get('type') or self.request.query_params.get('task_type')
+        origin_type = self.request.query_params.get('origin_type') or self.request.query_params.get('source_object_type')
+        origin_id = self.request.query_params.get('origin_id') or self.request.query_params.get('source_object_id')
+        search_query = self.request.query_params.get('q')
+
+        if organization_id:
+            queryset = queryset.filter(organization_id=organization_id)
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        if workspace_id:
+            queryset = queryset.filter(workspace_id=workspace_id)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        if assigned_to:
+            queryset = queryset.filter(assignee_id=str(assigned_to))
+        if domain:
+            queryset = queryset.filter(domain=domain)
+        if task_type:
+            queryset = queryset.filter(task_type=task_type)
+        if origin_type:
+            queryset = queryset.filter(origin_type=origin_type)
+        if origin_id:
+            queryset = queryset.filter(origin_id=str(origin_id))
+        if search_query:
+            queryset = queryset.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        organization = None
+        entity = None
+        workspace = None
+
+        org_id = self.request.data.get('organization') or self.request.data.get('organization_id')
+        entity_id = self.request.data.get('entity') or self.request.data.get('entity_id')
+        workspace_id = self.request.data.get('workspace_id')
+
+        if entity_id:
+            entity = _get_accessible_entity_or_404(self.request.user, entity_id)
+            organization = entity.organization
+        elif org_id:
+            organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=org_id)
+
+        if workspace_id:
+            workspace = get_object_or_404(_accessible_workspaces_queryset(self.request.user), id=workspace_id)
+
+        task = create_platform_task_record(
+            {
+                **request.data,
+                'organization': organization,
+                'entity': entity,
+                'workspace_id': getattr(workspace, 'id', None),
+                'created_by': self.request.user,
+            },
+            actor=self.request.user,
+        )
+        serializer = self.get_serializer(task)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=drf_status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        task = self.get_object()
+        task = update_platform_task_record(task, request.data, actor=request.user)
+        return Response(self.get_serializer(task).data)
+
+    def partial_update(self, request, *args, **kwargs):
+        task = self.get_object()
+        task = update_platform_task_record(task, request.data, actor=request.user)
+        return Response(self.get_serializer(task).data)
+
+    @action(detail=True, methods=['post'])
+    def start(self, request, pk=None):
+        task = self.get_object()
+        task = transition_platform_task(task, 'in_progress', actor=request.user)
+        return Response(self.get_serializer(task).data)
+
+    @action(detail=True, methods=['post'])
+    def complete(self, request, pk=None):
+        task = self.get_object()
+        task = transition_platform_task(task, 'completed', actor=request.user, metadata_patch={'completion_note': request.data.get('completion_note')} if request.data.get('completion_note') else None)
+        return Response(self.get_serializer(task).data)
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        task = self.get_object()
+        task = transition_platform_task(task, 'cancelled', actor=request.user)
+        return Response(self.get_serializer(task).data)
+
         return Response({
             'summary': {
                 'financialHealth': 'Stable with contained risk exposure' if health_score >= 80 else 'Stable with moderate operational risk' if health_score >= 65 else 'Elevated risk requires immediate review',
@@ -1367,6 +1494,69 @@ class ComplianceDeadlineViewSet(viewsets.ModelViewSet):
             qs = qs.filter(entity_id=entity_id)
         return qs
 
+    def perform_create(self, serializer):
+        entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('entity'))
+        deadline = serializer.save(entity=entity)
+        sync_compliance_deadline_to_platform_task(deadline)
+        log_platform_audit_event(
+            domain='compliance',
+            actor=self.request.user,
+            organization=entity.organization,
+            entity=entity,
+            event_type='compliance_deadline.created',
+            action='deadline_created',
+            resource_type='ComplianceDeadline',
+            resource_id=str(deadline.id),
+            subject_type='compliance_deadline',
+            subject_id=str(deadline.id),
+            resource_name=deadline.title,
+            summary=f'Created compliance deadline: {deadline.title}',
+            context={'status': deadline.status, 'deadline_date': deadline.deadline_date.isoformat() if deadline.deadline_date else None},
+        )
+
+    def perform_update(self, serializer):
+        previous = self.get_object()
+        before = {
+            'status': previous.status,
+            'deadline_date': previous.deadline_date.isoformat() if previous.deadline_date else None,
+            'title': previous.title,
+        }
+        deadline = serializer.save()
+        sync_compliance_deadline_to_platform_task(deadline)
+        log_platform_audit_event(
+            domain='compliance',
+            actor=self.request.user,
+            organization=deadline.entity.organization,
+            entity=deadline.entity,
+            event_type='compliance_deadline.updated',
+            action='deadline_updated',
+            resource_type='ComplianceDeadline',
+            resource_id=str(deadline.id),
+            subject_type='compliance_deadline',
+            subject_id=str(deadline.id),
+            resource_name=deadline.title,
+            summary=f'Updated compliance deadline: {deadline.title}',
+            diff={'before': before, 'after': {'status': deadline.status, 'deadline_date': deadline.deadline_date.isoformat() if deadline.deadline_date else None, 'title': deadline.title}},
+        )
+
+    def perform_destroy(self, instance):
+        log_platform_audit_event(
+            domain='compliance',
+            actor=self.request.user,
+            organization=instance.entity.organization,
+            entity=instance.entity,
+            event_type='compliance_deadline.deleted',
+            action='deadline_deleted',
+            resource_type='ComplianceDeadline',
+            resource_id=str(instance.id),
+            subject_type='compliance_deadline',
+            subject_id=str(instance.id),
+            resource_name=instance.title,
+            summary=f'Deleted compliance deadline: {instance.title}',
+        )
+        cancel_platform_tasks_for_origin(origin_type='compliance_deadline', origin_id=instance.id)
+        super().perform_destroy(instance)
+
     @action(detail=False, methods=['get'])
     def upcoming(self, request):
         """Get upcoming compliance deadlines (next 30 days)"""
@@ -1465,6 +1655,71 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         """Return audit logs for user's organizations"""
         return AuditLog.objects.filter(organization__in=_accessible_organizations_queryset(self.request.user))
+
+
+class PlatformAuditEventViewSet(viewsets.ReadOnlyModelViewSet):
+    """Cross-domain audit stream across finance and workspace activity."""
+
+    serializer_class = PlatformAuditEventSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
+        accessible_workspaces = _accessible_workspaces_queryset(self.request.user).values_list('id', flat=True)
+        queryset = PlatformAuditEvent.objects.filter(
+            Q(organization__in=accessible_orgs) | Q(workspace_id__in=accessible_workspaces)
+        ).select_related('organization', 'entity', 'actor')
+
+        organization_id = self.request.query_params.get('organization') or self.request.query_params.get('organization_id')
+        entity_id = self.request.query_params.get('entity') or self.request.query_params.get('entity_id')
+        workspace_id = self.request.query_params.get('workspace_id')
+        domain = self.request.query_params.get('domain')
+        event_type = self.request.query_params.get('event_type')
+        action = self.request.query_params.get('action')
+        actor_id = self.request.query_params.get('actor') or self.request.query_params.get('actor_id')
+        subject_type = self.request.query_params.get('subject_type')
+        subject_id = self.request.query_params.get('subject_id')
+        correlation_id = self.request.query_params.get('correlation_id')
+        from_value = self.request.query_params.get('from')
+        to_value = self.request.query_params.get('to')
+        search_query = self.request.query_params.get('q')
+
+        if organization_id:
+            queryset = queryset.filter(organization_id=organization_id)
+        if entity_id:
+            queryset = queryset.filter(entity_id=entity_id)
+        if workspace_id:
+            queryset = queryset.filter(workspace_id=workspace_id)
+        if domain:
+            queryset = queryset.filter(domain=domain)
+        if event_type:
+            queryset = queryset.filter(event_type=event_type)
+        if action:
+            queryset = queryset.filter(action=action)
+        if actor_id:
+            queryset = queryset.filter(Q(actor_id=actor_id) | Q(actor_identifier=str(actor_id)))
+        if subject_type:
+            queryset = queryset.filter(subject_type=subject_type)
+        if subject_id:
+            queryset = queryset.filter(subject_id=str(subject_id))
+        if correlation_id:
+            queryset = queryset.filter(correlation_id=correlation_id)
+        if from_value:
+            parsed_from = datetime.fromisoformat(from_value.replace('Z', '+00:00'))
+            queryset = queryset.filter(occurred_at__gte=parsed_from)
+        if to_value:
+            parsed_to = datetime.fromisoformat(to_value.replace('Z', '+00:00'))
+            queryset = queryset.filter(occurred_at__lte=parsed_to)
+        if search_query:
+            queryset = queryset.filter(
+                Q(summary__icontains=search_query)
+                | Q(resource_name__icontains=search_query)
+                | Q(resource_type__icontains=search_query)
+                | Q(subject_type__icontains=search_query)
+                | Q(action__icontains=search_query)
+                | Q(search_text__icontains=search_query)
+            )
+        return queryset
 
 
 # ============ Entity-Specific ViewSets ============
@@ -1912,7 +2167,59 @@ class ComplianceDocumentViewSet(viewsets.ModelViewSet):
         """Create compliance document for entity"""
         entity_id = self.request.data.get('entity')
         entity = _get_accessible_entity_or_404(self.request.user, entity_id)
-        serializer.save(entity=entity)
+        document = serializer.save(entity=entity)
+        log_platform_audit_event(
+            domain='document',
+            actor=self.request.user,
+            organization=entity.organization,
+            entity=entity,
+            event_type='compliance_document.created',
+            action='document_created',
+            resource_type='ComplianceDocument',
+            resource_id=str(document.id),
+            subject_type='document',
+            subject_id=str(document.id),
+            resource_name=document.title,
+            summary=f'Created compliance document: {document.title}',
+            context={'document_type': document.document_type, 'status': document.status},
+        )
+
+    def perform_update(self, serializer):
+        previous = self.get_object()
+        before = {'status': previous.status, 'title': previous.title, 'expiry_date': previous.expiry_date.isoformat() if previous.expiry_date else None}
+        document = serializer.save()
+        log_platform_audit_event(
+            domain='document',
+            actor=self.request.user,
+            organization=document.entity.organization,
+            entity=document.entity,
+            event_type='compliance_document.updated',
+            action='document_updated',
+            resource_type='ComplianceDocument',
+            resource_id=str(document.id),
+            subject_type='document',
+            subject_id=str(document.id),
+            resource_name=document.title,
+            summary=f'Updated compliance document: {document.title}',
+            diff={'before': before, 'after': {'status': document.status, 'title': document.title, 'expiry_date': document.expiry_date.isoformat() if document.expiry_date else None}},
+        )
+
+    def perform_destroy(self, instance):
+        log_platform_audit_event(
+            domain='document',
+            actor=self.request.user,
+            organization=instance.entity.organization,
+            entity=instance.entity,
+            event_type='compliance_document.deleted',
+            action='document_deleted',
+            resource_type='ComplianceDocument',
+            resource_id=str(instance.id),
+            subject_type='document',
+            subject_id=str(instance.id),
+            resource_name=instance.title,
+            summary=f'Deleted compliance document: {instance.title}',
+        )
+        super().perform_destroy(instance)
 
     @action(detail=False, methods=['get'])
     def expiring_soon(self, request):
@@ -2919,7 +3226,20 @@ class TaskRequestViewSet(viewsets.ModelViewSet):
         if org_id:
             organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=org_id)
 
-        serializer.save(created_by=self.request.user, organization=organization, entity=entity)
+        task_request = serializer.save(created_by=self.request.user, organization=organization, entity=entity)
+        sync_task_request_to_platform_task(task_request)
+        log_platform_audit_event(
+            domain='finance',
+            actor=self.request.user,
+            organization=task_request.organization,
+            entity=task_request.entity,
+            event_type='task_request.created',
+            resource_type='TaskRequest',
+            resource_id=str(task_request.id),
+            resource_name=task_request.get_task_type_display(),
+            summary=f"Created task request: {task_request.get_task_type_display()}",
+            metadata={'status': task_request.status, 'priority': task_request.priority},
+        )
 
     @action(detail=True, methods=['post'])
     def process(self, request, pk=None):
@@ -2934,6 +3254,19 @@ class TaskRequestViewSet(viewsets.ModelViewSet):
             return Response({'detail': f'Task is already {task.status}.'}, status=400)
 
         task.mark_processing()
+        sync_task_request_to_platform_task(task)
+        log_platform_audit_event(
+            domain='finance',
+            actor=request.user,
+            organization=task.organization,
+            entity=task.entity,
+            event_type='task_request.processing_started',
+            resource_type='TaskRequest',
+            resource_id=str(task.id),
+            resource_name=task.get_task_type_display(),
+            summary=f"Started task request: {task.get_task_type_display()}",
+            metadata={'status': task.status},
+        )
 
         try:
             if task.task_type == 'generate_statement':
@@ -2945,8 +3278,34 @@ class TaskRequestViewSet(viewsets.ModelViewSet):
                 }
 
             task.mark_completed(result=result)
+            sync_task_request_to_platform_task(task)
+            log_platform_audit_event(
+                domain='finance',
+                actor=request.user,
+                organization=task.organization,
+                entity=task.entity,
+                event_type='task_request.completed',
+                resource_type='TaskRequest',
+                resource_id=str(task.id),
+                resource_name=task.get_task_type_display(),
+                summary=f"Completed task request: {task.get_task_type_display()}",
+                metadata={'status': task.status},
+            )
         except Exception as exc:  # pragma: no cover - defensive
             task.mark_failed(error_message=str(exc))
+            sync_task_request_to_platform_task(task)
+            log_platform_audit_event(
+                domain='finance',
+                actor=request.user,
+                organization=task.organization,
+                entity=task.entity,
+                event_type='task_request.failed',
+                resource_type='TaskRequest',
+                resource_id=str(task.id),
+                resource_name=task.get_task_type_display(),
+                summary=f"Failed task request: {task.get_task_type_display()}",
+                metadata={'status': task.status, 'error_message': task.error_message},
+            )
             return Response({'detail': 'Task processing failed', 'error': str(exc)}, status=500)
 
         serializer = self.get_serializer(task)
@@ -4263,6 +4622,62 @@ class DocumentRequestViewSet(viewsets.ModelViewSet):
         if org_id:
             return DocumentRequest.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
         return DocumentRequest.objects.filter(organization__in=accessible_orgs)
+
+    def perform_create(self, serializer):
+        organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=self.request.data.get('organization'))
+        document_request = serializer.save(organization=organization, requested_by=self.request.user)
+        sync_document_request_to_platform_task(document_request)
+        log_platform_audit_event(
+            domain='document',
+            actor=self.request.user,
+            organization=organization,
+            event_type='document_request.created',
+            action='document_review_requested',
+            resource_type='DocumentRequest',
+            resource_id=str(document_request.id),
+            subject_type='document_request',
+            subject_id=str(document_request.id),
+            resource_name=document_request.document_type,
+            summary=f'Created document request for {document_request.document_type}',
+            context={'client_id': document_request.client_id, 'status': document_request.status},
+        )
+
+    def perform_update(self, serializer):
+        previous = self.get_object()
+        before = {'status': previous.status, 'due_date': previous.due_date.isoformat() if previous.due_date else None}
+        document_request = serializer.save()
+        sync_document_request_to_platform_task(document_request)
+        log_platform_audit_event(
+            domain='document',
+            actor=self.request.user,
+            organization=document_request.organization,
+            event_type='document_request.updated',
+            action='document_request_updated',
+            resource_type='DocumentRequest',
+            resource_id=str(document_request.id),
+            subject_type='document_request',
+            subject_id=str(document_request.id),
+            resource_name=document_request.document_type,
+            summary=f'Updated document request for {document_request.document_type}',
+            diff={'before': before, 'after': {'status': document_request.status, 'due_date': document_request.due_date.isoformat() if document_request.due_date else None}},
+        )
+
+    def perform_destroy(self, instance):
+        log_platform_audit_event(
+            domain='document',
+            actor=self.request.user,
+            organization=instance.organization,
+            event_type='document_request.deleted',
+            action='document_request_deleted',
+            resource_type='DocumentRequest',
+            resource_id=str(instance.id),
+            subject_type='document_request',
+            subject_id=str(instance.id),
+            resource_name=instance.document_type,
+            summary=f'Deleted document request for {instance.document_type}',
+        )
+        cancel_platform_tasks_for_origin(origin_type='document_request', origin_id=instance.id)
+        super().perform_destroy(instance)
 
 
 class ApprovalRequestViewSet(viewsets.ModelViewSet):

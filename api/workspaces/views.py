@@ -19,7 +19,7 @@ from .models import Workspace, WorkspaceLog
 from .serializers import (
     CalendarEventCreateSerializer, CalendarEventUpdateSerializer,
     FileUploadSerializer, FolderCreateSerializer,
-    GroupCreateSerializer, GroupMemberSerializer,
+    GroupCreateSerializer, GroupMemberSerializer, GroupUpdateSerializer,
     MeetingCreateSerializer, MeetingUpdateSerializer,
     MemberAddSerializer, MemberRoleSerializer,
     ModulesUpdateSerializer,
@@ -183,6 +183,20 @@ class WorkspaceGroupListView(APIView):
         ser.is_valid(raise_exception=True)
         group = GroupService.create_group(workspace_id, request.user, ser.validated_data)
         return Response(WorkspaceGroupSerializer(group).data, status=status.HTTP_201_CREATED)
+
+
+class WorkspaceGroupDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, workspace_id, group_id):
+        ser = GroupUpdateSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        group = GroupService.update_group(workspace_id, request.user, group_id, ser.validated_data)
+        return Response(WorkspaceGroupSerializer(group).data)
+
+    def delete(self, request, workspace_id, group_id):
+        GroupService.delete_group(workspace_id, request.user, group_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
     Expense, Income, Budget, UserProfile, Organization, Entity, Role, Permission,
-    TeamMember, TaxExposure, TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog,
+    TeamMember, TaxExposure, TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask,
     ModelTemplate, FinancialModel, Scenario, SensitivityAnalysis, AIInsight,
     CustomKPI, KPICalculation, Report, Consolidation, ConsolidationEntity,
     IntercompanyTransaction, IntercompanyEliminationEntry,
@@ -214,6 +214,30 @@ class AuditLogSerializer(serializers.ModelSerializer):
         model = AuditLog
         fields = ['id', 'organization', 'user', 'user_name', 'action', 'model_name', 'object_id', 'changes', 'ip_address', 'created_at']
         read_only_fields = ['created_at']
+
+
+class PlatformAuditEventSerializer(serializers.ModelSerializer):
+    actor_name = serializers.SerializerMethodField()
+    actor_id = serializers.SerializerMethodField()
+    organization_name = serializers.ReadOnlyField(source='organization.name')
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+
+    class Meta:
+        model = PlatformAuditEvent
+        fields = [
+            'id', 'organization', 'organization_name', 'entity', 'entity_name', 'workspace_id',
+            'actor', 'actor_name', 'actor_type', 'actor_id',
+            'subject_type', 'subject_id', 'action', 'context', 'diff', 'correlation_id',
+            'domain', 'event_type', 'resource_type', 'resource_id',
+            'resource_name', 'summary', 'metadata', 'occurred_at',
+        ]
+        read_only_fields = fields
+
+    def get_actor_name(self, obj):
+        return obj.actor.get_full_name() if obj.actor else 'System'
+
+    def get_actor_id(self, obj):
+        return obj.actor_identifier or str(obj.actor_id or '')
 
 
 # ============ Dashboard Summary Serializers ============
@@ -811,6 +835,33 @@ class TaskRequestSerializer(serializers.ModelSerializer):
             'completed_at',
         ]
         read_only_fields = ['status', 'result', 'error_message', 'created_at', 'started_at', 'completed_at']
+
+    def get_created_by_name(self, obj):
+        return obj.created_by.get_full_name() if obj.created_by else None
+
+
+class PlatformTaskSerializer(serializers.ModelSerializer):
+    organization_name = serializers.ReadOnlyField(source='organization.name')
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+    assigned_to_name = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+    state = serializers.CharField(source='status', required=False)
+    type = serializers.CharField(source='task_type', required=False)
+
+    class Meta:
+        model = PlatformTask
+        fields = [
+            'id', 'organization', 'organization_name', 'entity', 'entity_name', 'workspace_id',
+            'domain', 'task_type', 'type', 'title', 'description', 'status', 'state', 'priority',
+            'assignee_type', 'assignee_id',
+            'assigned_to', 'assigned_to_name', 'created_by', 'created_by_name',
+            'origin_type', 'origin_id', 'source_object_type', 'source_object_id', 'metadata', 'due_at',
+            'started_at', 'completed_at', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_by', 'created_by_name', 'started_at', 'completed_at', 'created_at', 'updated_at']
+
+    def get_assigned_to_name(self, obj):
+        return obj.assigned_to.get_full_name() if obj.assigned_to else None
 
     def get_created_by_name(self, obj):
         return obj.created_by.get_full_name() if obj.created_by else None

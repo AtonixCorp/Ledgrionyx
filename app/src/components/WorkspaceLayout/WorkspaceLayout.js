@@ -51,7 +51,6 @@ const WorkspaceLayout = ({ children }) => {
 
   const wsId   = workspaceId || resolvedWs?.id;
   const wsName = resolvedWs?.name || 'Workspace';
-  const wsStatus = resolvedWs?.status || 'active';
   const equityEnabled = hasEquityModule(resolvedWs);
 
   const [sidebarMinimized, setSidebarMinimized] = useState(false);
@@ -93,10 +92,6 @@ const WorkspaceLayout = ({ children }) => {
   const optionalModules = [
     { to: `${base}/email`,        label: 'Email' },
     { to: `${base}/marketing`,    label: 'Marketing' },
-  ];
-
-  const equityModules = [
-    { to: `/app/equity/${wsId}/registry`, label: 'ATC Equity Management' },
   ];
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
@@ -171,8 +166,6 @@ const WorkspaceLayout = ({ children }) => {
           <li className="ws-nav-divider" />
           {renderSection('Management', managementModules)}
           <li className="ws-nav-divider" />
-          {equityEnabled && renderSection('Equity', equityModules)}
-          {equityEnabled && <li className="ws-nav-divider" />}
           {renderSection('Optional', optionalModules)}
         </ul>
       </nav>

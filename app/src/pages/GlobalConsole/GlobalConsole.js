@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import ATCLogo from '../../components/branding/ATCLogo';
+import { platformAuditEventsAPI, platformTasksAPI } from '../../services/api';
 import { getWorkspaceLandingPath, WORKSPACE_MODE_LABELS } from '../../utils/workspaceModules';
 import './GlobalConsole.css';
 
@@ -29,14 +30,6 @@ const STATUS_META = {
   pending:  { label: 'Pending',  cls: 'status-pending' },
 };
 
-const ROLE_LABELS = {
-  ORG_OWNER:        'Owner',
-  CFO:              'CFO',
-  FINANCE_ANALYST:  'Analyst',
-  VIEWER:           'Viewer',
-  EXTERNAL_ADVISOR: 'Advisor',
-};
-
 // ─── derive simple workspace cards from entities ─────────────────────────────
 // Workspace roles are workspace-scoped; never inherit org/platform role here.
 function buildWorkspaceCards(entities) {
@@ -60,6 +53,33 @@ function buildWorkspaceCards(entities) {
 const PALETTE = ['ws-indigo', 'ws-teal', 'ws-violet', 'ws-rose', 'ws-amber', 'ws-sky'];
 const palette = (idx) => PALETTE[idx % PALETTE.length];
 
+const normalizeCollection = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.results)) return payload.results;
+  return [];
+};
+
+const toTaskPriority = (task) => {
+  if (task.state === 'blocked') return 'overdue';
+  if (task.priority === 'high' || task.priority === 'urgent') return 'high';
+  return 'medium';
+};
+
+const formatRelativeTime = (value) => {
+  if (!value) return 'Just now';
+  const deltaMs = new Date(value).getTime() - Date.now();
+  const deltaDays = Math.round(deltaMs / 86400000);
+  if (deltaDays === 0) return 'Today';
+  if (deltaDays > 0) return `In ${deltaDays}d`;
+  return `${Math.abs(deltaDays)}d ago`;
+};
+
+const auditSeverity = (event) => {
+  if (['approval_rejected', 'workflow_run_failed', 'deadline_deleted'].includes(event.action)) return 'critical';
+  if (['approval_requested', 'approval_progressed', 'workflow_run_started'].includes(event.action)) return 'high';
+  return 'medium';
+};
+
 const GlobalConsole = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -76,6 +96,10 @@ const GlobalConsole = () => {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [taskFilter, setTaskFilter] = useState('open');
+  const [tasks, setTasks] = useState([]);
+  const [auditEvents, setAuditEvents] = useState([]);
+  const [taskActionPendingId, setTaskActionPendingId] = useState(null);
   const profileRef = useRef(null);
 
   useEffect(() => {
@@ -88,36 +112,37 @@ const GlobalConsole = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Derive global tasks from compliance deadlines
-  const [tasks, setTasks] = useState([]);
-
   useEffect(() => {
     if (fetchGlobalNotifications) fetchGlobalNotifications();
   }, [fetchGlobalNotifications]);
 
   useEffect(() => {
-    // Build global tasks from overdue/upcoming deadlines
-    const now = new Date();
-    const derived = (complianceDeadlines || [])
-      .filter((d) => {
-        const dl = d.deadline_date ? new Date(d.deadline_date) : null;
-        return dl && Math.ceil((dl - now) / 86400000) <= 30;
-      })
-      .slice(0, 6)
-      .map((d, i) => {
-        const dl = new Date(d.deadline_date);
-        const days = Math.ceil((dl - now) / 86400000);
-        return {
-          id: d.id || i,
-          title: d.title,
-          type: d.deadline_type || 'compliance',
-          due: d.deadline_date,
-          daysLeft: days,
-          priority: days <= 0 ? 'overdue' : days <= 7 ? 'high' : 'medium',
-        };
-      });
-    setTasks(derived);
-  }, [complianceDeadlines]);
+    let active = true;
+
+    const loadPlatformData = async () => {
+      try {
+        const [taskResponse, auditResponse] = await Promise.all([
+          platformTasksAPI.getAll({ assignee_id: user?.id, state: taskFilter === 'all' ? undefined : taskFilter }),
+          platformAuditEventsAPI.getAll({ actor_id: user?.id }),
+        ]);
+        if (!active) return;
+        setTasks(normalizeCollection(taskResponse.data).slice(0, 8));
+        setAuditEvents(normalizeCollection(auditResponse.data).slice(0, 8));
+      } catch (error) {
+        if (!active) return;
+        setTasks([]);
+        setAuditEvents([]);
+      }
+    };
+
+    if (user?.id) {
+      loadPlatformData();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [taskFilter, user?.id]);
 
   // Filtered workspaces
   const workspaceCards = buildWorkspaceCards(entities);
@@ -143,19 +168,48 @@ const GlobalConsole = () => {
     // No workspace selected → stay on console. The button is disabled in this case anyway.
   };
 
-  const notifs = globalNotifications && globalNotifications.length > 0
-    ? globalNotifications
-    : (complianceDeadlines || []).slice(0, 4).map((d, i) => {
-        const dl = d.deadline_date ? new Date(d.deadline_date) : null;
-        const days = dl ? Math.ceil((dl - new Date()) / 86400000) : null;
-        return {
-          id: d.id || i,
-          type: 'tax_deadline',
-          message: `${d.title} — due ${d.deadline_date || '—'}`,
-          severity: days !== null && days <= 0 ? 'critical' : days !== null && days <= 7 ? 'high' : 'medium',
-          daysLeft: days,
-        };
-      });
+  const notifs = auditEvents.length > 0
+    ? auditEvents.slice(0, 4).map((event) => ({
+        id: event.id,
+        message: event.summary,
+        severity: auditSeverity(event),
+        daysLeft: null,
+      }))
+    : globalNotifications && globalNotifications.length > 0
+      ? globalNotifications
+      : (complianceDeadlines || []).slice(0, 4).map((d, i) => {
+          const dl = d.deadline_date ? new Date(d.deadline_date) : null;
+          const days = dl ? Math.ceil((dl - new Date()) / 86400000) : null;
+          return {
+            id: d.id || i,
+            type: 'tax_deadline',
+            message: `${d.title} — due ${d.deadline_date || '—'}`,
+            severity: days !== null && days <= 0 ? 'critical' : days !== null && days <= 7 ? 'high' : 'medium',
+            daysLeft: days,
+          };
+        });
+
+  const handleTaskAction = async (task, action) => {
+    setTaskActionPendingId(task.id);
+    try {
+      if (action === 'start') {
+        await platformTasksAPI.start(task.id);
+      } else if (action === 'complete') {
+        await platformTasksAPI.complete(task.id, {});
+      } else if (action === 'assign') {
+        await platformTasksAPI.update(task.id, { assignee_type: 'user', assignee_id: user.id });
+      }
+
+      const [taskResponse, auditResponse] = await Promise.all([
+        platformTasksAPI.getAll({ assignee_id: user?.id, state: taskFilter === 'all' ? undefined : taskFilter }),
+        platformAuditEventsAPI.getAll({ actor_id: user?.id }),
+      ]);
+      setTasks(normalizeCollection(taskResponse.data).slice(0, 8));
+      setAuditEvents(normalizeCollection(auditResponse.data).slice(0, 8));
+    } finally {
+      setTaskActionPendingId(null);
+    }
+  };
 
   const firstName = (user?.name || user?.email || 'User').split(' ')[0];
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
@@ -384,8 +438,19 @@ const GlobalConsole = () => {
           {/* Global Tasks */}
           <section className="gc-section gc-tasks-section">
             <div className="gc-section-header">
-              <h2>Global Tasks</h2>
+              <h2>My Tasks</h2>
               <span className="gc-section-count">{tasks.length}</span>
+            </div>
+            <div className="gc-filter-chips">
+              {['open', 'in_progress', 'completed', 'all'].map((state) => (
+                <button
+                  key={state}
+                  className={`gc-chip${taskFilter === state ? ' active' : ''}`}
+                  onClick={() => setTaskFilter(state)}
+                >
+                  {state === 'in_progress' ? 'In Progress' : state === 'all' ? 'All' : state.charAt(0).toUpperCase() + state.slice(1)}
+                </button>
+              ))}
             </div>
             {tasks.length === 0 ? (
               <div className="gc-task-empty">
@@ -395,13 +460,60 @@ const GlobalConsole = () => {
               <ul className="gc-task-list">
                 {tasks.map((t, i) => (
                   <li key={t.id || i} className={`gc-task-item priority-${t.priority}`}>
-                    <div className={`gc-task-priority-bar pbar-${t.priority}`} />
+                    <div className={`gc-task-priority-bar pbar-${toTaskPriority(t)}`} />
                     <div className="gc-task-body">
                       <p className="gc-task-title">{t.title}</p>
-                      <span className="gc-task-type">{t.type.replace('_', ' ')}</span>
+                      <span className="gc-task-type">{(t.type || t.task_type || 'task').replaceAll('_', ' ')}</span>
                     </div>
-                    <span className="gc-task-due">
-                      {t.daysLeft <= 0 ? 'Overdue' : `${t.daysLeft}d left`}
+                    <span className="gc-task-due">{t.due_at ? formatRelativeTime(t.due_at) : (t.state || t.status || 'open').replaceAll('_', ' ')}</span>
+                    <div className="gc-task-actions">
+                      {(t.state || t.status) === 'open' && (
+                        <button className="gc-task-action" disabled={taskActionPendingId === t.id} onClick={() => handleTaskAction(t, 'start')}>
+                          Start
+                        </button>
+                      )}
+                      {(t.state || t.status) === 'in_progress' && (
+                        <button className="gc-task-action" disabled={taskActionPendingId === t.id} onClick={() => handleTaskAction(t, 'complete')}>
+                          Complete
+                        </button>
+                      )}
+                      {!t.assignee_id && (
+                        <button className="gc-task-action gc-task-action-secondary" disabled={taskActionPendingId === t.id} onClick={() => handleTaskAction(t, 'assign')}>
+                          Assign to Me
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="gc-section gc-notif-section">
+            <div className="gc-section-header">
+              <h2>Audit Activity</h2>
+              <div className="gc-section-header-actions">
+                <span className="gc-section-count">{auditEvents.length}</span>
+                <button className="gc-section-link" onClick={() => navigate('/app/enterprise/audit-explorer')}>
+                  Open Explorer
+                </button>
+              </div>
+            </div>
+            {auditEvents.length === 0 ? (
+              <div className="gc-notif-empty">
+                <span>No recent audit activity</span>
+              </div>
+            ) : (
+              <ul className="gc-notif-list">
+                {auditEvents.slice(0, 6).map((event) => (
+                  <li key={event.id} className={`gc-notif-item sev-${auditSeverity(event)}`}>
+                    <div className="gc-notif-dot" />
+                    <div className="gc-notif-content">
+                      <p className="gc-notif-msg">{event.summary}</p>
+                      <span className="gc-notif-time">{formatRelativeTime(event.occurred_at)}</span>
+                    </div>
+                    <span className={`gc-notif-sev gc-sev-${auditSeverity(event)}`}>
+                      {event.action?.replaceAll('_', ' ') || 'event'}
                     </span>
                   </li>
                 ))}

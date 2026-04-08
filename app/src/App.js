@@ -31,6 +31,7 @@ import EnterpriseTaxCompliance from './pages/Enterprise/EnterpriseTaxCompliance'
 import EnterpriseCashflow from './pages/Enterprise/EnterpriseCashflow';
 import EnterpriseRiskExposure from './pages/Enterprise/EnterpriseRiskExposure';
 import EnterpriseReports from './pages/Enterprise/EnterpriseReports';
+import EnterpriseAuditExplorer from './pages/Enterprise/EnterpriseAuditExplorer';
 import EnterpriseTeam from './pages/Enterprise/EnterpriseTeam';
 import EnterpriseSettings from './pages/EnterpriseSettings/EnterpriseSettings';
 import FirmDashboard from './pages/Firm/FirmDashboard';
@@ -343,6 +344,11 @@ function App() {
               <Route path="/app/enterprise/reports" element={
                 <ProtectedRoute>
                   <Layout><EnterpriseReports /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/enterprise/audit-explorer" element={
+                <ProtectedRoute>
+                  <Layout><EnterpriseAuditExplorer /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/team" element={

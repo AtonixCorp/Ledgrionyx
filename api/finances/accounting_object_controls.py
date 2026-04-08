@@ -19,6 +19,7 @@ from .models import (
     PayrollRun,
     PurchaseOrder,
 )
+from .platform_foundation import log_platform_audit_event, sync_accounting_approval_to_platform_task
 from .payroll_engine import estimate_payroll_run_amount
 
 
@@ -424,6 +425,24 @@ def submit_accounting_object(instance, actor, object_type=None):
         old_values=old_snapshot,
         new_values=snapshot_accounting_object(instance, object_type),
     )
+    sync_accounting_approval_to_platform_task(record)
+    log_platform_audit_event(
+        domain='finance',
+        actor=actor,
+        organization=record.entity.organization,
+        entity=record.entity,
+        event_type='accounting_approval.submitted',
+        action='approval_requested',
+        resource_type='AccountingApprovalRecord',
+        resource_id=str(record.id),
+        subject_type=record.object_type,
+        subject_id=str(record.object_id),
+        resource_name=record.title,
+        summary=f'{record.get_object_type_display()} submitted for approval: {record.title}',
+        diff={'before': old_snapshot, 'after': snapshot_accounting_object(instance, object_type)},
+        context={'approval_status': record.status, 'stage': next_step.stage if next_step else ''},
+        metadata={'approval_record_id': record.id},
+    )
     if next_step:
         _deliver_approval_notifications(record, next_step)
     return record
@@ -473,6 +492,24 @@ def approve_accounting_object(record, actor, comments=''):
             details='Final approval posted business effects.',
             new_values=snapshot_accounting_object(instance, record.object_type),
         )
+        sync_accounting_approval_to_platform_task(record)
+        log_platform_audit_event(
+            domain='finance',
+            actor=actor,
+            organization=record.entity.organization,
+            entity=record.entity,
+            event_type='accounting_approval.completed',
+            action='approval_completed',
+            resource_type='AccountingApprovalRecord',
+            resource_id=str(record.id),
+            subject_type=record.object_type,
+            subject_id=str(record.object_id),
+            resource_name=record.title,
+            summary=f'{record.get_object_type_display()} approved: {record.title}',
+            diff={'before': previous, 'after': snapshot_accounting_object(instance, record.object_type)},
+            context={'approval_status': record.status},
+            metadata={'approval_record_id': record.id},
+        )
         return record
 
     _sync_instance_from_record(instance, record)
@@ -484,6 +521,24 @@ def approve_accounting_object(record, actor, comments=''):
         details='Delegated authority exercised.' if delegation else 'Approval step completed.',
         old_values=previous,
         new_values=snapshot_accounting_object(instance, record.object_type),
+    )
+    sync_accounting_approval_to_platform_task(record)
+    log_platform_audit_event(
+        domain='finance',
+        actor=actor,
+        organization=record.entity.organization,
+        entity=record.entity,
+        event_type='accounting_approval.progressed',
+        action='approval_progressed',
+        resource_type='AccountingApprovalRecord',
+        resource_id=str(record.id),
+        subject_type=record.object_type,
+        subject_id=str(record.object_id),
+        resource_name=record.title,
+        summary=f'{record.get_object_type_display()} approval advanced: {record.title}',
+        diff={'before': previous, 'after': snapshot_accounting_object(instance, record.object_type)},
+        context={'approval_status': record.status, 'stage': step.stage},
+        metadata={'approval_record_id': record.id},
     )
     return record
 
@@ -519,6 +574,24 @@ def reject_accounting_object(record, actor, comments=''):
         details=comments or 'Approval step rejected.',
         old_values=previous,
         new_values=snapshot_accounting_object(instance, record.object_type),
+    )
+    sync_accounting_approval_to_platform_task(record)
+    log_platform_audit_event(
+        domain='finance',
+        actor=actor,
+        organization=record.entity.organization,
+        entity=record.entity,
+        event_type='accounting_approval.rejected',
+        action='approval_rejected',
+        resource_type='AccountingApprovalRecord',
+        resource_id=str(record.id),
+        subject_type=record.object_type,
+        subject_id=str(record.object_id),
+        resource_name=record.title,
+        summary=f'{record.get_object_type_display()} rejected: {record.title}',
+        diff={'before': previous, 'after': snapshot_accounting_object(instance, record.object_type)},
+        context={'approval_status': record.status, 'stage': step.stage},
+        metadata={'approval_record_id': record.id, 'comments': comments},
     )
     return record
 

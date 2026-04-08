@@ -22,6 +22,8 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from equity.models import WorkspaceEquityProfile
 from equity.scenario_services import get_scenario_overview, simulate_financing_scenario
 
+from .platform_foundation import log_platform_audit_event
+
 from .models import (
     AuditLog,
     AutomationArtifact,
@@ -779,6 +781,21 @@ def _due_for_execution(workflow, *, now=None):
 def execute_automation_workflow(workflow, *, initiated_by=None, trigger_type='manual'):
     now = timezone.now()
     execution = AutomationExecution.objects.create(workflow=workflow, status='running', started_at=now)
+    log_platform_audit_event(
+        domain='automation',
+        actor=initiated_by,
+        organization=workflow.organization,
+        entity=workflow.entity,
+        event_type='automation_workflow.started',
+        action='workflow_run_started',
+        resource_type='AutomationWorkflow',
+        resource_id=str(workflow.id),
+        subject_type='automation_workflow',
+        subject_id=str(workflow.id),
+        resource_name=workflow.name,
+        summary=f'Automation workflow started: {workflow.name}',
+        context={'trigger_type': trigger_type, 'execution_id': execution.id},
+    )
     try:
         entities = [workflow.entity] if workflow.entity_id else list(workflow.organization.entities.filter(status='active'))
         action_results = []
@@ -859,12 +876,44 @@ def execute_automation_workflow(workflow, *, initiated_by=None, trigger_type='ma
             'actions': action_results,
         }
         execution.save(update_fields=['status', 'completed_at', 'execution_result'])
+        log_platform_audit_event(
+            domain='automation',
+            actor=initiated_by,
+            organization=workflow.organization,
+            entity=workflow.entity,
+            event_type='automation_workflow.completed',
+            action='workflow_run_completed',
+            resource_type='AutomationWorkflow',
+            resource_id=str(workflow.id),
+            subject_type='automation_workflow',
+            subject_id=str(workflow.id),
+            resource_name=workflow.name,
+            summary=f'Automation workflow completed: {workflow.name}',
+            context={'trigger_type': trigger_type, 'execution_id': execution.id},
+            metadata={'actions': action_results},
+        )
         return execution
     except Exception as exc:
         execution.status = 'failed'
         execution.completed_at = timezone.now()
         execution.error_message = str(exc)
         execution.save(update_fields=['status', 'completed_at', 'error_message'])
+        log_platform_audit_event(
+            domain='automation',
+            actor=initiated_by,
+            organization=workflow.organization,
+            entity=workflow.entity,
+            event_type='automation_workflow.failed',
+            action='workflow_run_failed',
+            resource_type='AutomationWorkflow',
+            resource_id=str(workflow.id),
+            subject_type='automation_workflow',
+            subject_id=str(workflow.id),
+            resource_name=workflow.name,
+            summary=f'Automation workflow failed: {workflow.name}',
+            context={'trigger_type': trigger_type, 'execution_id': execution.id},
+            metadata={'error_message': str(exc)},
+        )
         raise
 
 

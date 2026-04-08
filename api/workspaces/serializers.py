@@ -108,6 +108,11 @@ class GroupCreateSerializer(serializers.Serializer):
     description = serializers.CharField(allow_blank=True, required=False, default='')
 
 
+class GroupUpdateSerializer(serializers.Serializer):
+    name        = serializers.CharField(max_length=255, required=False)
+    description = serializers.CharField(allow_blank=True, required=False)
+
+
 class GroupMemberSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
 

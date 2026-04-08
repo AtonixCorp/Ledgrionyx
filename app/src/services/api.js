@@ -290,6 +290,29 @@ export const teamMembersAPI = {
   delete: (id) => api.delete(`/team-members/${id}/`),
 };
 
+export const workspaceMembersAPI = {
+  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/members`),
+  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/members`, data),
+  updateRole: (workspaceId, userId, data) => api.patch(`/workspaces/${workspaceId}/members/${userId}`, data),
+  delete: (workspaceId, userId) => api.delete(`/workspaces/${workspaceId}/members/${userId}`),
+};
+
+export const workspaceGroupsAPI = {
+  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/groups`),
+  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/groups`, data),
+  update: (workspaceId, groupId, data) => api.patch(`/workspaces/${workspaceId}/groups/${groupId}`, data),
+  delete: (workspaceId, groupId) => api.delete(`/workspaces/${workspaceId}/groups/${groupId}`),
+  addMember: (workspaceId, groupId, data) => api.post(`/workspaces/${workspaceId}/groups/${groupId}/members`, data),
+  removeMember: (workspaceId, groupId, userId) => api.delete(`/workspaces/${workspaceId}/groups/${groupId}/members/${userId}`),
+};
+
+export const workspaceMeetingsAPI = {
+  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/meetings`),
+  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/meetings`, data),
+  update: (workspaceId, meetingId, data) => api.patch(`/workspaces/${workspaceId}/meetings/${meetingId}`, data),
+  delete: (workspaceId, meetingId) => api.delete(`/workspaces/${workspaceId}/meetings/${meetingId}`),
+};
+
 // Roles API
 export const rolesAPI = {
   getAll: () => api.get('/roles/'),
@@ -820,6 +843,22 @@ export const automationArtifactsAPI = {
   getAll: (params) => api.get('/automation-artifacts/', { params }),
   getById: (id) => api.get(`/automation-artifacts/${id}/`),
   download: (id) => api.get(`/automation-artifacts/${id}/download/`, { responseType: 'blob' }),
+};
+
+export const platformAuditEventsAPI = {
+  getAll: (params) => api.get('/platform-audit-events/', { params }),
+  getById: (id) => api.get(`/platform-audit-events/${id}/`),
+};
+
+export const platformTasksAPI = {
+  getAll: (params) => api.get('/platform-tasks/', { params }),
+  getById: (id) => api.get(`/platform-tasks/${id}/`),
+  create: (data) => api.post('/platform-tasks/', data),
+  update: (id, data) => api.put(`/platform-tasks/${id}/`, data),
+  delete: (id) => api.delete(`/platform-tasks/${id}/`),
+  start: (id) => api.post(`/platform-tasks/${id}/start/`),
+  complete: (id, data) => api.post(`/platform-tasks/${id}/complete/`, data),
+  cancel: (id) => api.post(`/platform-tasks/${id}/cancel/`),
 };
 
 // ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE APIs ============
