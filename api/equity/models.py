@@ -29,6 +29,17 @@ class ShareClassType(models.TextChoices):
     CONVERTIBLE = 'convertible', 'Convertible'
 
 
+class AntiDilutionType(models.TextChoices):
+    NONE = 'none', 'None'
+    FULL_RATCHET = 'full_ratchet', 'Full Ratchet'
+    WEIGHTED_AVERAGE = 'weighted_average', 'Weighted Average'
+
+
+class AntiDilutionBasis(models.TextChoices):
+    BROAD_BASED = 'broad_based', 'Broad-Based'
+    NARROW_BASED = 'narrow_based', 'Narrow-Based'
+
+
 class InstrumentType(models.TextChoices):
     EQUITY = 'equity', 'Equity'
     SAFE = 'safe', 'SAFE'
@@ -178,6 +189,29 @@ class DeliveryStatus(models.TextChoices):
     FAILED = 'failed', 'Failed'
 
 
+class ScenarioReviewStatus(models.TextChoices):
+    PENDING = 'pending', 'Pending'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+
+
+class ScenarioApprovalStatus(models.TextChoices):
+    PENDING = 'pending', 'Pending'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+    COMMITTED = 'committed', 'Committed'
+
+
+class ScenarioApprovalEventType(models.TextChoices):
+    SUBMITTED = 'submitted', 'Submitted'
+    BOARD_APPROVED = 'board_approved', 'Board Approved'
+    LEGAL_APPROVED = 'legal_approved', 'Legal Approved'
+    REJECTED = 'rejected', 'Rejected'
+    REMINDER = 'reminder', 'Reminder Sent'
+    ESCALATED = 'escalated', 'Escalated'
+    COMMITTED = 'committed', 'Committed'
+
+
 class WorkspaceEquityProfile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace = models.OneToOneField(Entity, on_delete=models.CASCADE, related_name='equity_profile')
@@ -193,6 +227,27 @@ class WorkspaceEquityProfile(models.Model):
 
     def __str__(self):
         return f'{self.workspace.name} equity profile'
+
+
+class EquityScenarioApprovalPolicy(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    workspace = models.OneToOneField(Entity, on_delete=models.CASCADE, related_name='equity_scenario_approval_policy')
+    board_reviewers = models.ManyToManyField(EntityStaff, blank=True, related_name='equity_board_review_policies')
+    legal_reviewers = models.ManyToManyField(EntityStaff, blank=True, related_name='equity_legal_review_policies')
+    board_escalation_reviewers = models.ManyToManyField(EntityStaff, blank=True, related_name='equity_board_escalation_policies')
+    legal_escalation_reviewers = models.ManyToManyField(EntityStaff, blank=True, related_name='equity_legal_escalation_policies')
+    require_explicit_reviewers = models.BooleanField(default=False)
+    require_designated_backups = models.BooleanField(default=False)
+    board_sla_hours = models.PositiveIntegerField(default=72)
+    legal_sla_hours = models.PositiveIntegerField(default=72)
+    escalation_enabled = models.BooleanField(default=True)
+    escalation_grace_hours = models.PositiveIntegerField(default=24)
+    reminder_frequency_hours = models.PositiveIntegerField(default=24)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.workspace.name} scenario approval policy'
 
 
 class EquityShareholder(models.Model):
@@ -226,6 +281,14 @@ class EquityShareClass(models.Model):
     authorized_shares = models.BigIntegerField(default=0)
     issued_shares = models.BigIntegerField(default=0)
     liquidation_preference = models.CharField(max_length=255, blank=True, default='')
+    preference_multiple = models.DecimalField(max_digits=8, decimal_places=4, default=0)
+    participating_preference = models.BooleanField(default=False)
+    participation_cap_multiple = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
+    liquidation_seniority = models.PositiveIntegerField(default=0)
+    conversion_price = models.DecimalField(max_digits=14, decimal_places=4, default=0)
+    anti_dilution_type = models.CharField(max_length=30, choices=AntiDilutionType.choices, default=AntiDilutionType.NONE)
+    anti_dilution_basis = models.CharField(max_length=30, choices=AntiDilutionBasis.choices, default=AntiDilutionBasis.BROAD_BASED)
+    pro_rata_rights = models.BooleanField(default=False)
     voting_rights = models.BooleanField(default=True)
     par_value = models.DecimalField(max_digits=14, decimal_places=4, default=0)
     currency = models.CharField(max_length=10, default='USD')
@@ -251,6 +314,10 @@ class EquityHolding(models.Model):
     issued_at = models.DateField(null=True, blank=True)
     vesting_start = models.DateField(null=True, blank=True)
     vesting_end = models.DateField(null=True, blank=True)
+    issue_price_per_share = models.DecimalField(max_digits=14, decimal_places=4, default=0)
+    invested_amount = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    pro_rata_eligible = models.BooleanField(default=False)
+    pro_rata_take_up_percent = models.DecimalField(max_digits=8, decimal_places=2, default=100)
     strike_price = models.DecimalField(max_digits=14, decimal_places=4, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -265,16 +332,81 @@ class EquityFundingRound(models.Model):
     workspace = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='equity_funding_rounds')
     name = models.CharField(max_length=255)
     instrument_type = models.CharField(max_length=30, choices=InstrumentType.choices, default=InstrumentType.EQUITY)
+    share_class = models.ForeignKey(EquityShareClass, null=True, blank=True, on_delete=models.SET_NULL, related_name='funding_rounds')
     announced_at = models.DateField(null=True, blank=True)
     pre_money_valuation = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    post_money_valuation = models.DecimalField(max_digits=18, decimal_places=2, default=0)
     amount_raised = models.DecimalField(max_digits=18, decimal_places=2, default=0)
     price_per_share = models.DecimalField(max_digits=14, decimal_places=4, default=0)
+    new_shares_issued = models.BigIntegerField(default=0)
+    option_pool_top_up = models.BigIntegerField(default=0)
+    apply_pro_rata = models.BooleanField(default=True)
+    scenario_assumptions = models.JSONField(default=dict, blank=True)
     notes = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-announced_at', '-created_at']
+
+
+class EquityOptionPoolReserve(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    workspace = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='equity_option_pool_reserves')
+    share_class = models.ForeignKey(EquityShareClass, on_delete=models.CASCADE, related_name='option_pool_reserves')
+    funding_round = models.ForeignKey(EquityFundingRound, null=True, blank=True, on_delete=models.SET_NULL, related_name='option_pool_reserves')
+    reserved_shares = models.BigIntegerField(default=0)
+    allocated_shares = models.BigIntegerField(default=0)
+    notes = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+
+class EquityScenarioApproval(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    workspace = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='equity_scenario_approvals')
+    title = models.CharField(max_length=255)
+    reporting_period = models.CharField(max_length=100, blank=True, default='')
+    scenario_payload = models.JSONField(default=dict, blank=True)
+    analysis_payload = models.JSONField(default=dict, blank=True)
+    status = models.CharField(max_length=20, choices=ScenarioApprovalStatus.choices, default=ScenarioApprovalStatus.PENDING)
+    board_status = models.CharField(max_length=20, choices=ScenarioReviewStatus.choices, default=ScenarioReviewStatus.PENDING)
+    legal_status = models.CharField(max_length=20, choices=ScenarioReviewStatus.choices, default=ScenarioReviewStatus.PENDING)
+    board_due_at = models.DateTimeField(null=True, blank=True)
+    legal_due_at = models.DateTimeField(null=True, blank=True)
+    board_last_reminder_at = models.DateTimeField(null=True, blank=True)
+    legal_last_reminder_at = models.DateTimeField(null=True, blank=True)
+    board_escalated_at = models.DateTimeField(null=True, blank=True)
+    legal_escalated_at = models.DateTimeField(null=True, blank=True)
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='requested_equity_scenario_approvals')
+    board_approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='board_approved_equity_scenarios')
+    legal_approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='legal_approved_equity_scenarios')
+    board_decided_at = models.DateTimeField(null=True, blank=True)
+    legal_decided_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True, default='')
+    committed_round = models.ForeignKey(EquityFundingRound, null=True, blank=True, on_delete=models.SET_NULL, related_name='scenario_approval_records')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class EquityScenarioApprovalEvent(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    approval = models.ForeignKey(EquityScenarioApproval, on_delete=models.CASCADE, related_name='events')
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='equity_scenario_approval_events')
+    event_type = models.CharField(max_length=40, choices=ScenarioApprovalEventType.choices)
+    title = models.CharField(max_length=255)
+    message = models.TextField(blank=True, default='')
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class EquityValuation(models.Model):
@@ -362,6 +494,7 @@ class EquityGrant(models.Model):
     expiration_date = models.DateField(null=True, blank=True)
     fully_vested_at = models.DateField(null=True, blank=True)
     last_vesting_calculated_at = models.DateTimeField(null=True, blank=True)
+    grant_package_file = models.FileField(upload_to='equity/grant_packages/', null=True, blank=True)
     notes = models.TextField(blank=True, default='')
     metadata = models.JSONField(default=dict, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='created_equity_grants')
@@ -451,6 +584,7 @@ class EquityShareCertificate(models.Model):
     issue_date = models.DateField()
     status = models.CharField(max_length=20, choices=CertificateStatus.choices, default=CertificateStatus.DRAFT)
     certificate_payload = models.JSONField(default=dict, blank=True)
+    pdf_file = models.FileField(upload_to='equity/certificates/', null=True, blank=True)
     issued_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='issued_equity_certificates')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -522,6 +656,7 @@ class EquityDeliveryLog(models.Model):
     subject = models.CharField(max_length=255, blank=True, default='')
     message = models.TextField(blank=True, default='')
     document_payload = models.JSONField(default=dict, blank=True)
+    document_file = models.FileField(upload_to='equity/delivery_documents/', null=True, blank=True)
     provider_response = models.JSONField(default=dict, blank=True)
     error_message = models.TextField(blank=True, default='')
     delivered_at = models.DateTimeField(null=True, blank=True)

@@ -26,6 +26,8 @@ const ExerciseCenter = () => {
     rejectExerciseRequest,
     markExerciseRequestPaid,
     completeExerciseRequest,
+    downloadCertificatePdf,
+    regenerateCertificatePdf,
   } = useEquity();
   const [form, setForm] = useState(EMPTY_FORM);
 
@@ -188,7 +190,13 @@ const ExerciseCenter = () => {
                       <td>{certificate.grant_number || '—'}</td>
                       <td>{certificate.issued_to_name || '—'}</td>
                       <td>{certificate.issued_units}</td>
-                      <td>{certificate.status}</td>
+                        <td>
+                          <div className="eq-table-actions">
+                            <span>{certificate.status}</span>
+                            <button type="button" className="eq-inline-btn" onClick={() => downloadCertificatePdf(certificate.id, `certificate-${certificate.certificate_number}.pdf`)}>PDF</button>
+                            <button type="button" className="eq-inline-btn" onClick={() => regenerateCertificatePdf(certificate.id)}>Regen PDF</button>
+                          </div>
+                        </td>
                     </tr>
                   ))}
                   {!loading && certificates.length === 0 && (

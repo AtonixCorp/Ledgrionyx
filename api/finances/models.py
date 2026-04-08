@@ -1180,6 +1180,90 @@ class ConsolidationEntity(models.Model):
         return f"{self.entity.name} ({self.ownership_percentage}%)"
 
 
+class IntercompanyTransaction(models.Model):
+    """Cross-entity accounting transaction with mirrored subledger and journal propagation."""
+
+    TRANSACTION_TYPE_CHOICES = [
+        ('invoice', 'Intercompany Invoice'),
+        ('loan', 'Intercompany Loan'),
+        ('transfer_pricing', 'Transfer Pricing Charge'),
+        ('adjustment', 'Intercompany Adjustment'),
+    ]
+
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('posted', 'Posted'),
+        ('eliminated', 'Eliminated'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='intercompany_transactions')
+    source_entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='intercompany_source_transactions')
+    destination_entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='intercompany_destination_transactions')
+    transaction_type = models.CharField(max_length=30, choices=TRANSACTION_TYPE_CHOICES)
+    reference_number = models.CharField(max_length=100, unique=True)
+    transaction_date = models.DateField()
+    due_date = models.DateField(null=True, blank=True)
+    currency = models.CharField(max_length=3, default='USD')
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    transfer_pricing_markup_percent = models.DecimalField(max_digits=7, decimal_places=4, default=0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    source_invoice = models.OneToOneField('Invoice', on_delete=models.SET_NULL, null=True, blank=True, related_name='originating_intercompany_transaction')
+    destination_bill = models.OneToOneField('Bill', on_delete=models.SET_NULL, null=True, blank=True, related_name='originating_intercompany_transaction')
+    destination_loan = models.OneToOneField('Loan', on_delete=models.SET_NULL, null=True, blank=True, related_name='originating_intercompany_transaction')
+    source_journal_entry = models.OneToOneField('JournalEntry', on_delete=models.SET_NULL, null=True, blank=True, related_name='intercompany_source_transaction')
+    destination_journal_entry = models.OneToOneField('JournalEntry', on_delete=models.SET_NULL, null=True, blank=True, related_name='intercompany_destination_transaction')
+    posted_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='intercompany_transactions_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-transaction_date', '-created_at']
+        indexes = [
+            models.Index(fields=['organization', 'transaction_type', 'status']),
+            models.Index(fields=['source_entity', 'transaction_date']),
+            models.Index(fields=['destination_entity', 'transaction_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.reference_number} - {self.source_entity.name} -> {self.destination_entity.name}"
+
+
+class IntercompanyEliminationEntry(models.Model):
+    """Elimination and consolidation adjustment output generated from intercompany transactions."""
+
+    ELIMINATION_TYPE_CHOICES = [
+        ('revenue_expense', 'Revenue and Expense Elimination'),
+        ('receivable_payable', 'Receivable and Payable Elimination'),
+        ('loan_balance', 'Loan Balance Elimination'),
+        ('manual_adjustment', 'Manual Adjustment'),
+    ]
+
+    consolidation = models.ForeignKey(Consolidation, on_delete=models.CASCADE, related_name='intercompany_eliminations')
+    transaction = models.ForeignKey(IntercompanyTransaction, on_delete=models.CASCADE, related_name='elimination_entries')
+    elimination_type = models.CharField(max_length=30, choices=ELIMINATION_TYPE_CHOICES)
+    source_entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='intercompany_eliminations_out')
+    destination_entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='intercompany_eliminations_in')
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    currency = models.CharField(max_length=3, default='USD')
+    adjustment_payload = models.JSONField(default=dict, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['consolidation', 'elimination_type']),
+            models.Index(fields=['transaction', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.consolidation.name} - {self.transaction.reference_number} ({self.elimination_type})"
+
+
 class TaxCalculation(models.Model):
     """Tax calculations for different jurisdictions"""
     CALCULATION_TYPES = [
@@ -1748,7 +1832,10 @@ class JournalEntry(models.Model):
 
     STATUS_CHOICES = [
         ('draft', 'Draft'),
+        ('pending_review', 'Pending Review'),
+        ('pending_approval', 'Pending Approval'),
         ('posted', 'Posted'),
+        ('rejected', 'Rejected'),
         ('reversed', 'Reversed'),
     ]
 
@@ -1758,12 +1845,14 @@ class JournalEntry(models.Model):
     description = models.TextField()
     posting_date = models.DateField()
     memo = models.TextField(blank=True)
+    amount_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Approval workflow
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='journal_entries_created')
     approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='journal_entries_approved')
     approved_at = models.DateTimeField(null=True, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
 
     # Recurring journal template
     is_recurring = models.BooleanField(default=False)
@@ -1785,6 +1874,325 @@ class JournalEntry(models.Model):
 
     def __str__(self):
         return f"{self.reference_number} - {self.description[:50]}"
+
+
+class JournalApprovalMatrix(models.Model):
+    """Role-based approval matrix for journal entries."""
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='journal_approval_matrices')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    entry_type = models.CharField(max_length=20, choices=JournalEntry.ENTRY_TYPE_CHOICES, blank=True)
+    minimum_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    maximum_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    preparer_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='prepared_journal_matrices')
+    reviewer_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='review_journal_matrices')
+    approver_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='approve_journal_matrices')
+    require_reviewer = models.BooleanField(default=True)
+    require_approver = models.BooleanField(default=True)
+    allow_self_review = models.BooleanField(default=False)
+    allow_self_approval = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['entity', 'minimum_amount', 'name']
+        indexes = [
+            models.Index(fields=['entity', 'is_active']),
+            models.Index(fields=['entity', 'entry_type']),
+        ]
+
+    def __str__(self):
+        return f"{self.entity.name} - {self.name}"
+
+
+class JournalApprovalDelegation(models.Model):
+    """Delegation of journal approval authority for a bounded window and amount."""
+
+    STAGE_CHOICES = [
+        ('reviewer', 'Reviewer'),
+        ('approver', 'Approver'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='journal_approval_delegations')
+    delegator = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='journal_authority_delegated')
+    delegate = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='journal_authority_received')
+    stage = models.CharField(max_length=20, choices=STAGE_CHOICES)
+    minimum_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    maximum_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='journal_delegations_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-start_date', 'delegator__last_name']
+        indexes = [
+            models.Index(fields=['entity', 'stage', 'is_active']),
+            models.Index(fields=['start_date', 'end_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.delegator.full_name} -> {self.delegate.full_name} ({self.stage})"
+
+
+class JournalEntryApprovalStep(models.Model):
+    """Each control step that a journal entry must pass before posting."""
+
+    STAGE_CHOICES = [
+        ('preparer', 'Preparer'),
+        ('reviewer', 'Reviewer'),
+        ('approver', 'Approver'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('skipped', 'Skipped'),
+    ]
+
+    journal_entry = models.ForeignKey(JournalEntry, on_delete=models.CASCADE, related_name='approval_steps')
+    step_order = models.PositiveIntegerField()
+    stage = models.CharField(max_length=20, choices=STAGE_CHOICES)
+    assigned_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='journal_approval_steps')
+    assigned_staff = models.ForeignKey(EntityStaff, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_journal_approval_steps')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    acted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='journal_approval_actions')
+    acted_at = models.DateTimeField(null=True, blank=True)
+    comments = models.TextField(blank=True)
+    delegated_from = models.ForeignKey(JournalApprovalDelegation, on_delete=models.SET_NULL, null=True, blank=True, related_name='acted_steps')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['journal_entry', 'step_order']
+        unique_together = ('journal_entry', 'step_order')
+        indexes = [
+            models.Index(fields=['journal_entry', 'status']),
+            models.Index(fields=['assigned_role', 'status']),
+        ]
+
+    def __str__(self):
+        return f"{self.journal_entry.reference_number} - {self.stage} ({self.status})"
+
+
+class JournalEntryChangeLog(models.Model):
+    """Immutable journal workflow and change-management log."""
+
+    ACTION_CHOICES = [
+        ('created', 'Created'),
+        ('updated', 'Updated'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('reversed', 'Reversed'),
+        ('period_locked', 'Blocked By Period Lock'),
+        ('matrix_applied', 'Approval Matrix Applied'),
+    ]
+
+    journal_entry = models.ForeignKey(JournalEntry, on_delete=models.CASCADE, related_name='change_logs')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='journal_change_logs')
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='journal_change_logs')
+    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
+    stage = models.CharField(max_length=20, blank=True)
+    details = models.TextField(blank=True)
+    old_values = models.JSONField(default=dict, blank=True)
+    new_values = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['journal_entry', 'created_at']),
+            models.Index(fields=['entity', 'action']),
+        ]
+
+    def __str__(self):
+        return f"{self.journal_entry.reference_number} - {self.action}"
+
+
+ACCOUNTING_APPROVAL_STATUS_CHOICES = [
+    ('draft', 'Draft'),
+    ('pending_review', 'Pending Review'),
+    ('pending_approval', 'Pending Approval'),
+    ('approved', 'Approved'),
+    ('rejected', 'Rejected'),
+]
+
+ACCOUNTING_APPROVAL_STAGE_CHOICES = [
+    ('preparer', 'Preparer'),
+    ('reviewer', 'Reviewer'),
+    ('approver', 'Approver'),
+]
+
+ACCOUNTING_APPROVAL_STEP_STATUS_CHOICES = [
+    ('pending', 'Pending'),
+    ('approved', 'Approved'),
+    ('rejected', 'Rejected'),
+    ('skipped', 'Skipped'),
+]
+
+ACCOUNTING_APPROVAL_OBJECT_CHOICES = [
+    ('purchase_order', 'Purchase Order'),
+    ('bill', 'Bill'),
+    ('bill_payment', 'Bill Payment'),
+    ('payment', 'Customer Payment'),
+]
+
+
+class AccountingApprovalMatrix(models.Model):
+    """Role-based approval matrix for non-journal accounting objects."""
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='accounting_approval_matrices')
+    name = models.CharField(max_length=255)
+    object_type = models.CharField(max_length=30, choices=ACCOUNTING_APPROVAL_OBJECT_CHOICES)
+    description = models.TextField(blank=True)
+    minimum_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    maximum_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    preparer_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='prepared_accounting_matrices')
+    reviewer_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='review_accounting_matrices')
+    approver_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='approve_accounting_matrices')
+    require_reviewer = models.BooleanField(default=True)
+    require_approver = models.BooleanField(default=True)
+    allow_self_review = models.BooleanField(default=False)
+    allow_self_approval = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['entity', 'object_type', 'minimum_amount', 'name']
+        indexes = [
+            models.Index(fields=['entity', 'object_type', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.entity.name} - {self.name} ({self.object_type})"
+
+
+class AccountingApprovalDelegation(models.Model):
+    """Delegation of approval authority for supported accounting objects."""
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='accounting_approval_delegations')
+    object_type = models.CharField(max_length=30, choices=ACCOUNTING_APPROVAL_OBJECT_CHOICES, blank=True)
+    delegator = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='accounting_authority_delegated')
+    delegate = models.ForeignKey(EntityStaff, on_delete=models.CASCADE, related_name='accounting_authority_received')
+    stage = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STAGE_CHOICES)
+    minimum_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    maximum_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounting_delegations_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-start_date', 'delegator__last_name']
+        indexes = [
+            models.Index(fields=['entity', 'object_type', 'stage', 'is_active']),
+            models.Index(fields=['start_date', 'end_date']),
+        ]
+
+    def __str__(self):
+        return f"{self.delegator.full_name} -> {self.delegate.full_name} ({self.stage})"
+
+
+class AccountingApprovalRecord(models.Model):
+    """Approval workflow state for supported accounting objects."""
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='accounting_approval_records')
+    object_type = models.CharField(max_length=30, choices=ACCOUNTING_APPROVAL_OBJECT_CHOICES)
+    object_id = models.PositiveIntegerField()
+    title = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    status = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STATUS_CHOICES, default='draft')
+    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounting_approvals_requested')
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounting_approvals_approved')
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        unique_together = ('object_type', 'object_id')
+        indexes = [
+            models.Index(fields=['entity', 'status']),
+            models.Index(fields=['object_type', 'object_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_object_type_display()} - {self.title}"
+
+
+class AccountingApprovalStep(models.Model):
+    """Approval steps for supported accounting objects."""
+
+    approval = models.ForeignKey(AccountingApprovalRecord, on_delete=models.CASCADE, related_name='steps')
+    step_order = models.PositiveIntegerField()
+    stage = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STAGE_CHOICES)
+    assigned_role = models.ForeignKey(EntityRole, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounting_approval_steps')
+    assigned_staff = models.ForeignKey(EntityStaff, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_accounting_approval_steps')
+    status = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STEP_STATUS_CHOICES, default='pending')
+    acted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounting_approval_actions')
+    acted_at = models.DateTimeField(null=True, blank=True)
+    comments = models.TextField(blank=True)
+    delegated_from = models.ForeignKey(AccountingApprovalDelegation, on_delete=models.SET_NULL, null=True, blank=True, related_name='acted_steps')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['approval', 'step_order']
+        unique_together = ('approval', 'step_order')
+        indexes = [
+            models.Index(fields=['approval', 'status']),
+            models.Index(fields=['assigned_role', 'status']),
+        ]
+
+    def __str__(self):
+        return f"{self.approval.title} - {self.stage} ({self.status})"
+
+
+class AccountingApprovalChangeLog(models.Model):
+    """Immutable approval and change-management log for supported accounting objects."""
+
+    ACTION_CHOICES = [
+        ('created', 'Created'),
+        ('updated', 'Updated'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('executed', 'Executed'),
+        ('period_locked', 'Blocked By Period Lock'),
+        ('matrix_applied', 'Approval Matrix Applied'),
+    ]
+
+    approval = models.ForeignKey(AccountingApprovalRecord, on_delete=models.CASCADE, related_name='change_logs')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='accounting_change_logs')
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounting_change_logs')
+    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
+    stage = models.CharField(max_length=20, blank=True)
+    details = models.TextField(blank=True)
+    old_values = models.JSONField(default=dict, blank=True)
+    new_values = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['approval', 'created_at']),
+            models.Index(fields=['entity', 'action']),
+        ]
+
+    def __str__(self):
+        return f"{self.approval.title} - {self.action}"
 
 
 class RecurringJournalTemplate(models.Model):
@@ -2000,6 +2408,11 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     reference_number = models.CharField(max_length=100, blank=True)
+    approval_status = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STATUS_CHOICES, default='draft')
+    approval_submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments_approved')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments_created')
     
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -2073,6 +2486,10 @@ class PurchaseOrder(models.Model):
     
     currency = models.CharField(max_length=3, default='USD')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    approval_status = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STATUS_CHOICES, default='draft')
+    approval_submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='purchase_orders_approved')
+    approved_at = models.DateTimeField(null=True, blank=True)
     
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='purchase_orders_created')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2114,6 +2531,10 @@ class Bill(models.Model):
     
     currency = models.CharField(max_length=3, default='USD')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    approval_status = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STATUS_CHOICES, default='draft')
+    approval_submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='bills_approved')
+    approved_at = models.DateTimeField(null=True, blank=True)
     
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -2152,6 +2573,11 @@ class BillPayment(models.Model):
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     reference_number = models.CharField(max_length=100, blank=True)
+    approval_status = models.CharField(max_length=20, choices=ACCOUNTING_APPROVAL_STATUS_CHOICES, default='draft')
+    approval_submitted_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='bill_payments_approved')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='bill_payments_created')
     
     created_at = models.DateTimeField(auto_now_add=True)
 

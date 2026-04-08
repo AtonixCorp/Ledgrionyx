@@ -57,11 +57,15 @@ const EquityLayout = ({ children }) => {
 
   const base = workspaceId ? `/app/equity/${workspaceId}` : '/app/equity';
   const navItems = [
+    { to: `${base}/me`, label: 'My Equity' },
     { to: `${base}/registry`, label: 'Ownership Registry' },
     { to: `${base}/cap-table`, label: 'Cap Table' },
     { to: `${base}/grants`, label: 'Vesting & Grants' },
     { to: `${base}/exercises`, label: 'Exercise Center' },
+    { to: `${base}/automation`, label: 'Automation Center' },
     { to: `${base}/valuation`, label: 'Valuation' },
+    { to: `${base}/approvals`, label: 'Approval Inbox' },
+    { to: `${base}/scenarios`, label: 'Scenario Modeling' },
     { to: `${base}/transactions`, label: 'Equity Transactions' },
     { to: `${base}/governance`, label: 'Governance & Reporting' },
   ];

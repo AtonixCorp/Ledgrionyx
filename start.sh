@@ -38,6 +38,17 @@ if [ "${ENABLE_BANKING_SYNC_SCHEDULER:-1}" = "1" ]; then
 	BANKING_SYNC_PID=$!
 	echo "✅ Nightly banking sync scheduler enabled"
 fi
+
+if [ "${ENABLE_APPROVAL_DIGEST_SCHEDULER:-1}" = "1" ]; then
+	(
+		while true; do
+			"$VENV_PYTHON" manage.py send_approval_notification_digest --hours "${APPROVAL_DIGEST_LOOKBACK_HOURS:-24}" > /dev/null 2>&1
+			sleep "${APPROVAL_DIGEST_INTERVAL_SECONDS:-86400}"
+		done
+	) &
+	APPROVAL_DIGEST_PID=$!
+	echo "✅ Daily approval digest scheduler enabled"
+fi
 cd ..
 
 # Wait a moment
@@ -62,5 +73,5 @@ echo ""
 echo "Press Ctrl+C to stop all servers"
 
 # Wait for Ctrl+C
-trap "kill $API_PID $APP_PID ${BANKING_SYNC_PID:-} 2>/dev/null; exit" INT
+trap "kill $API_PID $APP_PID ${BANKING_SYNC_PID:-} ${APPROVAL_DIGEST_PID:-} 2>/dev/null; exit" INT
 wait

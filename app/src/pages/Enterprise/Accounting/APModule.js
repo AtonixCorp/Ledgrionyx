@@ -7,9 +7,12 @@ import '../../../styles/EntityPages.css';
 const STATUS_COLORS = {
   draft: 'var(--color-silver-dark)', sent: 'var(--color-cyan)', acknowledged: 'var(--color-cyan)', received: 'var(--color-success)', cancelled: 'var(--color-error)',
   posted: 'var(--color-cyan)', partially_paid: 'var(--color-warning)', paid: 'var(--color-success)', overdue: 'var(--color-error)',
+  pending_review: 'var(--color-warning)', pending_approval: 'var(--color-cyan)', rejected: 'var(--color-error)', approved: 'var(--color-success)',
   active: 'var(--color-success)', inactive: 'var(--color-silver-dark)', blocked: 'var(--color-error)'
 };
 const fmt = (v, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(parseFloat(v || 0));
+
+const APPROVAL_TEXT = (value) => String(value || 'draft').replace(/_/g, ' ');
 
 const TABS = [
   { id: 'vendors', label: 'Vendors', },
@@ -150,6 +153,21 @@ const BillsTab = ({ entityId }) => {
     setSaving(false);
   };
 
+  const handleSubmit = async (id) => {
+    try { await billsAPI.submit(id); await load(); } catch (e) { alert(e.response?.data?.detail || 'Submit failed'); }
+  };
+
+  const handleApprove = async (id) => {
+    const comments = window.prompt('Approval note (optional):', '') || '';
+    try { await billsAPI.approve(id, { comments }); await load(); } catch (e) { alert(e.response?.data?.detail || 'Approve failed'); }
+  };
+
+  const handleReject = async (id) => {
+    const comments = window.prompt('Rejection reason:', '');
+    if (comments === null) return;
+    try { await billsAPI.reject(id, { comments }); await load(); } catch (e) { alert(e.response?.data?.detail || 'Reject failed'); }
+  };
+
   return (
     <div>
       <div className="tab-toolbar">
@@ -163,9 +181,9 @@ const BillsTab = ({ entityId }) => {
       {loading ? <div className="acct-loading">Loading bills...</div> : (
         <div className="acct-table-wrap ap-table-wrap">
         <table className="acct-table">
-          <thead><tr><th>Bill #</th><th>Vendor</th><th>Bill Date</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Status</th></tr></thead>
+          <thead><tr><th>Bill #</th><th>Vendor</th><th>Bill Date</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Approval</th><th>Actions</th></tr></thead>
           <tbody>
-            {items.length === 0 ? <tr><td colSpan={8} className="empty-row">No bills found</td></tr> : items.map(b => (
+            {items.length === 0 ? <tr><td colSpan={9} className="empty-row">No bills found</td></tr> : items.map(b => (
               <tr key={b.id}>
                 <td><code className="acct-code">{b.bill_number}</code></td>
                 <td>{b.vendor_name || `Vendor ${b.vendor}`}</td>
@@ -174,7 +192,12 @@ const BillsTab = ({ entityId }) => {
                 <td>{fmt(b.total_amount)}</td>
                 <td style={{ color: 'var(--color-success)' }}>{fmt(b.paid_amount)}</td>
                 <td style={{ color: parseFloat(b.outstanding_amount) > 0 ? 'var(--color-error)' : 'var(--color-success)' }}>{fmt(b.outstanding_amount)}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[b.status] || 'var(--color-silver-dark)', color: 'white' }}>{b.status?.replace(/_/g,'')}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[b.approval_status] || 'var(--color-silver-dark)', color: 'white' }}>{APPROVAL_TEXT(b.approval_status)}</span></td>
+                <td className="acct-actions">
+                  {['draft', 'rejected'].includes(b.approval_status) ? <button className="btn-sm btn-success" onClick={() => handleSubmit(b.id)}>Submit</button> : null}
+                  {['pending_review', 'pending_approval'].includes(b.approval_status) ? <button className="btn-sm btn-success" onClick={() => handleApprove(b.id)}>Approve</button> : null}
+                  {['pending_review', 'pending_approval'].includes(b.approval_status) ? <button className="btn-sm btn-danger" onClick={() => handleReject(b.id)}>Reject</button> : null}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -243,6 +266,21 @@ const BillPaymentsTab = ({ entityId }) => {
     setSaving(false);
   };
 
+  const handleSubmit = async (id) => {
+    try { await billPaymentsAPI.submit(id); await load(); } catch (e) { alert(e.response?.data?.detail || 'Submit failed'); }
+  };
+
+  const handleApprove = async (id) => {
+    const comments = window.prompt('Approval note (optional):', '') || '';
+    try { await billPaymentsAPI.approve(id, { comments }); await load(); } catch (e) { alert(e.response?.data?.detail || 'Approve failed'); }
+  };
+
+  const handleReject = async (id) => {
+    const comments = window.prompt('Rejection reason:', '');
+    if (comments === null) return;
+    try { await billPaymentsAPI.reject(id, { comments }); await load(); } catch (e) { alert(e.response?.data?.detail || 'Reject failed'); }
+  };
+
   return (
     <div>
       <div className="tab-toolbar">
@@ -255,9 +293,9 @@ const BillPaymentsTab = ({ entityId }) => {
       {loading ? <div className="acct-loading">Loading payments...</div> : (
         <div className="acct-table-wrap ap-table-wrap">
         <table className="acct-table">
-          <thead><tr><th>Date</th><th>Vendor</th><th>Bill</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead>
+          <thead><tr><th>Date</th><th>Vendor</th><th>Bill</th><th>Amount</th><th>Method</th><th>Reference</th><th>Approval</th><th>Actions</th></tr></thead>
           <tbody>
-            {items.length === 0 ? <tr><td colSpan={7} className="empty-row">No bill payments recorded</td></tr> : items.map(p => (
+            {items.length === 0 ? <tr><td colSpan={8} className="empty-row">No bill payments recorded</td></tr> : items.map(p => (
               <tr key={p.id}>
                 <td>{p.payment_date}</td>
                 <td>{p.vendor_name || `Vendor ${p.vendor}`}</td>
@@ -265,7 +303,12 @@ const BillPaymentsTab = ({ entityId }) => {
                 <td style={{ color: 'var(--color-error)' }}><strong>{fmt(p.amount)}</strong></td>
                 <td><span className="tag">{p.payment_method?.replace(/_/g,'')}</span></td>
                 <td>{p.reference_number || '—'}</td>
-                <td><span className="status-badge" style={{ background: 'var(--color-cyan)', color: 'white' }}>{p.status}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.approval_status] || 'var(--color-cyan)', color: 'white' }}>{APPROVAL_TEXT(p.approval_status)}</span></td>
+                <td className="acct-actions">
+                  {['draft', 'rejected'].includes(p.approval_status) ? <button className="btn-sm btn-success" onClick={() => handleSubmit(p.id)}>Submit</button> : null}
+                  {['pending_review', 'pending_approval'].includes(p.approval_status) ? <button className="btn-sm btn-success" onClick={() => handleApprove(p.id)}>Approve</button> : null}
+                  {['pending_review', 'pending_approval'].includes(p.approval_status) ? <button className="btn-sm btn-danger" onClick={() => handleReject(p.id)}>Reject</button> : null}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -367,6 +410,21 @@ const PurchaseOrdersTab = ({ entityId }) => {
     setSaving(false);
   };
 
+  const handleSubmit = async (id) => {
+    try { await purchaseOrdersAPI.submit(id); await load(); } catch (e) { alert(e.response?.data?.detail || 'Submit failed'); }
+  };
+
+  const handleApprove = async (id) => {
+    const comments = window.prompt('Approval note (optional):', '') || '';
+    try { await purchaseOrdersAPI.approve(id, { comments }); await load(); } catch (e) { alert(e.response?.data?.detail || 'Approve failed'); }
+  };
+
+  const handleReject = async (id) => {
+    const comments = window.prompt('Rejection reason:', '');
+    if (comments === null) return;
+    try { await purchaseOrdersAPI.reject(id, { comments }); await load(); } catch (e) { alert(e.response?.data?.detail || 'Reject failed'); }
+  };
+
   return (
     <div>
       <div className="tab-toolbar">
@@ -379,16 +437,21 @@ const PurchaseOrdersTab = ({ entityId }) => {
       {loading ? <div className="acct-loading">Loading purchase orders...</div> : (
         <div className="acct-table-wrap ap-table-wrap">
         <table className="acct-table">
-          <thead><tr><th>PO #</th><th>Vendor</th><th>Date</th><th>Expected Delivery</th><th>Total</th><th>Status</th></tr></thead>
+          <thead><tr><th>PO #</th><th>Vendor</th><th>Date</th><th>Expected Delivery</th><th>Total</th><th>Approval</th><th>Actions</th></tr></thead>
           <tbody>
-            {items.length === 0 ? <tr><td colSpan={6} className="empty-row">No purchase orders found</td></tr> : items.map(p => (
+            {items.length === 0 ? <tr><td colSpan={7} className="empty-row">No purchase orders found</td></tr> : items.map(p => (
               <tr key={p.id}>
                 <td><code className="acct-code">{p.po_number}</code></td>
                 <td>{p.vendor_name || `Vendor ${p.vendor}`}</td>
                 <td>{p.po_date}</td>
                 <td>{p.expected_delivery_date || '—'}</td>
                 <td>{fmt(p.total_amount)}</td>
-                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.status] || 'var(--color-silver-dark)', color: 'white' }}>{p.status}</span></td>
+                <td><span className="status-badge" style={{ background: STATUS_COLORS[p.approval_status] || 'var(--color-silver-dark)', color: 'white' }}>{APPROVAL_TEXT(p.approval_status)}</span></td>
+                <td className="acct-actions">
+                  {['draft', 'rejected'].includes(p.approval_status) ? <button className="btn-sm btn-success" onClick={() => handleSubmit(p.id)}>Submit</button> : null}
+                  {['pending_review', 'pending_approval'].includes(p.approval_status) ? <button className="btn-sm btn-success" onClick={() => handleApprove(p.id)}>Approve</button> : null}
+                  {['pending_review', 'pending_approval'].includes(p.approval_status) ? <button className="btn-sm btn-danger" onClick={() => handleReject(p.id)}>Reject</button> : null}
+                </td>
               </tr>
             ))}
           </tbody>

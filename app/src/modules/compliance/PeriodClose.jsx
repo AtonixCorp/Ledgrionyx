@@ -191,8 +191,16 @@ export default function PeriodClose() {
   const totalItems = checklists.reduce((sum, checklist) => sum + (checklist.items?.length || 0), 0);
   const completedItems = checklists.reduce((sum, checklist) => sum + (checklist.items || []).filter((item) => item.status === 'completed').length, 0);
   const openChecklists = checklists.filter((checklist) => checklist.status !== 'completed').length;
+  const lockedPeriods = periods.filter((period) => period.status === 'closed' || period.no_posting_after).length;
   const progress = totalItems ? Math.round((completedItems / totalItems) * 100) : 0;
   const availablePeriods = periods.filter((period) => !checklistForm.entity || String(period.entity) === String(checklistForm.entity));
+  const periodColumns = [
+    { key: 'period_name', label: 'Period' },
+    { key: 'entity', label: 'Entity', render: (value) => entities.find((entity) => String(entity.id) === String(value))?.name || '—' },
+    { key: 'status', label: 'Status', render: (value) => <span className="status-badge" style={{ background: value === 'closed' ? 'var(--color-danger, #dc2626)' : 'var(--color-success, #16a34a)' }}>{value}</span> },
+    { key: 'no_posting_after', label: 'No Posting After', render: (value) => value || '—' },
+    { key: 'closed_at', label: 'Closed At', render: (value) => value ? new Date(value).toLocaleString() : '—' },
+  ];
   const checklistColumns = [
     { key: 'period', label: 'Period', render: (value) => periods.find((period) => String(period.id) === String(value))?.period_name || value || '—' },
     { key: 'entity_name', label: 'Entity', render: (_value, row) => entities.find((entity) => String(entity.id) === String(row.entity))?.name || row.entity || '—' },
@@ -217,7 +225,19 @@ export default function PeriodClose() {
         <Card className="stat-card"><div className="stat-label">Active Checklists</div><div className="stat-value">{openChecklists}</div></Card>
         <Card className="stat-card"><div className="stat-label">Completed Items</div><div className="stat-value">{completedItems}</div></Card>
         <Card className="stat-card"><div className="stat-label">Completion Rate</div><div className="stat-value">{progress}%</div></Card>
+        <Card className="stat-card"><div className="stat-label">Locked Periods</div><div className="stat-value">{lockedPeriods}</div></Card>
       </div>
+
+      <Card title="Ledger Period Locks" style={{ marginBottom: 24 }}>
+        {loading ? <div style={{ textAlign: 'center', padding: 32, color: 'var(--color-silver-dark)' }}>Loading ledger periods...</div> : <Table columns={periodColumns} data={periods} actions={(row) => row.status === 'closed' ? null : <button type="button" onClick={async () => {
+          try {
+            await ledgerPeriodsAPI.close(row.id);
+            await load();
+          } catch (requestError) {
+            setError(formatError(requestError, 'Failed to close ledger period.'));
+          }
+        }} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', background: 'transparent', color: '#dc2626', cursor: 'pointer' }}>Close & Lock</button>} />}
+      </Card>
 
       <Card title="Period Close Register">
         {loading ? <div style={{ textAlign: 'center', padding: 32, color: 'var(--color-silver-dark)' }}>Loading period close checklists...</div> : <Table columns={checklistColumns} data={checklists} actions={(row) => <div style={{ display: 'flex', gap: 6 }}><button type="button" onClick={() => navigate(`${BASE_PATH}/view/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', background: 'transparent', cursor: 'pointer' }}>View</button><button type="button" onClick={() => navigate(`${BASE_PATH}/edit/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', background: 'transparent', cursor: 'pointer' }}>Edit</button><button type="button" onClick={() => handleDeleteChecklist(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', background: 'transparent', color: '#dc2626', cursor: 'pointer' }}>Delete</button></div>} />}

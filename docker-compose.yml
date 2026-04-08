@@ -16,6 +16,8 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=finance_api.settings
       - PYTHONUNBUFFERED=1
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL:-http://localhost:3000}
+      - APPROVAL_NOTIFICATION_BASE_URL=${APPROVAL_NOTIFICATION_BASE_URL:-http://localhost:3000}
       - BANKING_TOKEN_ENCRYPTION_KEY=${BANKING_TOKEN_ENCRYPTION_KEY:-local-dev-banking-key-change-me}
       - PLAID_CLIENT_ID=${PLAID_CLIENT_ID:-}
       - PLAID_CLIENT_SECRET=${PLAID_CLIENT_SECRET:-}
@@ -45,7 +47,33 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=finance_api.settings
       - PYTHONUNBUFFERED=1
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL:-http://localhost:3000}
+      - APPROVAL_NOTIFICATION_BASE_URL=${APPROVAL_NOTIFICATION_BASE_URL:-http://localhost:3000}
       - BANKING_SYNC_INTERVAL_SECONDS=${BANKING_SYNC_INTERVAL_SECONDS:-86400}
+    depends_on:
+      - api
+
+  approval-digest:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: atonix-approval-digest
+    command: >
+      /bin/sh -c "while true; do
+      python manage.py send_approval_notification_digest --hours ${APPROVAL_DIGEST_LOOKBACK_HOURS:-24};
+      sleep ${APPROVAL_DIGEST_INTERVAL_SECONDS:-86400};
+      done"
+    volumes:
+      - ./api:/app
+    env_file:
+      - ./api/.env
+    environment:
+      - DJANGO_SETTINGS_MODULE=finance_api.settings
+      - PYTHONUNBUFFERED=1
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL:-http://localhost:3000}
+      - APPROVAL_NOTIFICATION_BASE_URL=${APPROVAL_NOTIFICATION_BASE_URL:-http://localhost:3000}
+      - APPROVAL_DIGEST_INTERVAL_SECONDS=${APPROVAL_DIGEST_INTERVAL_SECONDS:-86400}
+      - APPROVAL_DIGEST_LOOKBACK_HOURS=${APPROVAL_DIGEST_LOOKBACK_HOURS:-24}
     depends_on:
       - api
 

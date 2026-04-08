@@ -209,6 +209,21 @@ CMD ["gunicorn", "finance_api.wsgi:application", "--bind", "0.0.0.0:8000"]
 - Nightly fallback syncs run through `python manage.py sync_banking_integrations`; `docker-compose.yml` now includes a `banking-sync` service that executes this every 24 hours by default.
 - Run `python manage.py seed_source_filter_demo --reset` to recreate the mixed manual-plus-imported verification dataset used for source-filter QA.
 
+### Approval Notification Scheduling
+- Daily approval digests run through `python manage.py send_approval_notification_digest --hours 24`.
+- `start.sh` can run the digest loop automatically when `ENABLE_APPROVAL_DIGEST_SCHEDULER=1`.
+- `docker-compose.yml` includes an `approval-digest` service that executes the digest command every 24 hours by default.
+- Scheduler controls:
+   - `APPROVAL_DIGEST_INTERVAL_SECONDS` controls how often the digest loop runs.
+   - `APPROVAL_DIGEST_LOOKBACK_HOURS` controls the unread-approval lookback window included in each digest.
+
+### Approval Email Branding
+- Finance approval emails and digests render from `templates/email/base.html` and the approval-specific templates under `templates/email/`.
+- Configure production branding and links with these environment variables:
+   - `FRONTEND_BASE_URL` or `APPROVAL_NOTIFICATION_BASE_URL` for deep links back into the approval inbox.
+   - `EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, `EMAIL_USE_SSL`, and `DEFAULT_FROM_EMAIL` for outbound delivery.
+   - `EMAIL_BRAND_NAME`, `EMAIL_BRAND_TITLE`, `EMAIL_BRAND_FOOTER`, `EMAIL_SUPPORT_EMAIL`, and `EMAIL_SUPPORT_URL` for production-facing brand copy in finance emails.
+
 ## Testing
 
 ### Run Tests

@@ -4,8 +4,9 @@ import { Button, Card, PageHeader, Table, Modal, Input } from '../../components/
 import { billsAPI, vendorsAPI, entitiesAPI } from '../../services/api';
 
 const BASE_PATH = '/app/billing/bills';
-const STATUS_COLOR = { draft: '#6b7280', posted: '#3b82f6', partially_paid: '#f59e0b', paid: '#10b981', overdue: '#ef4444', cancelled: '#9ca3af' };
+const STATUS_COLOR = { draft: '#6b7280', posted: '#3b82f6', partially_paid: '#f59e0b', paid: '#10b981', overdue: '#ef4444', cancelled: '#9ca3af', pending_review: '#f59e0b', pending_approval: '#fb7185', rejected: '#ef4444', approved: '#10b981' };
 const BLANK = { bill_number: '', vendor: '', bill_date: '', due_date: '', subtotal: '', tax_amount: '0', total_amount: '', currency: 'USD', status: 'draft', description: '', notes: '', entity: '' };
+const formatApprovalStatus = (value) => String(value || 'draft').replace(/_/g, ' ');
 
 export default function Bills() {
   const navigate = useNavigate();
@@ -123,6 +124,39 @@ export default function Bills() {
     }
   };
 
+  const handleSubmit = async (id) => {
+    try {
+      await billsAPI.submit(id);
+      await load();
+    } catch (e) {
+      console.error('Failed to submit bill', e);
+      setError(e.response?.data?.detail || 'Failed to submit bill');
+    }
+  };
+
+  const handleApprove = async (id) => {
+    const comments = window.prompt('Approval note (optional):', '') || '';
+    try {
+      await billsAPI.approve(id, { comments });
+      await load();
+    } catch (e) {
+      console.error('Failed to approve bill', e);
+      setError(e.response?.data?.detail || 'Failed to approve bill');
+    }
+  };
+
+  const handleReject = async (id) => {
+    const comments = window.prompt('Rejection reason:', '');
+    if (comments === null) return;
+    try {
+      await billsAPI.reject(id, { comments });
+      await load();
+    } catch (e) {
+      console.error('Failed to reject bill', e);
+      setError(e.response?.data?.detail || 'Failed to reject bill');
+    }
+  };
+
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
 
   const columns = [
@@ -131,7 +165,7 @@ export default function Bills() {
     { key: 'bill_date', label: 'Bill Date' },
     { key: 'due_date', label: 'Due Date' },
     { key: 'total_amount', label: 'Total', render: v => <span style={{ fontFamily: 'monospace' }}>${parseFloat(v||0).toLocaleString('en-US',{minimumFractionDigits:2})}</span> },
-    { key: 'status', label: 'Status', render: v => <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_COLOR[v]||'#6b7280', padding: '2px 8px', background: (STATUS_COLOR[v]||'#6b7280')+'22', borderRadius: 4, textTransform: 'capitalize' }}>{v}</span> },
+    { key: 'approval_status', label: 'Approval', render: v => <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_COLOR[v]||'#6b7280', padding: '2px 8px', background: (STATUS_COLOR[v]||'#6b7280')+'22', borderRadius: 4, textTransform: 'capitalize' }}>{formatApprovalStatus(v)}</span> },
   ];
 
   return (
@@ -144,8 +178,11 @@ export default function Bills() {
         : <Table columns={columns} data={list} actions={row => (
             <div style={{ display: 'flex', gap: 6 }}>
               <button onClick={() => navigate(`${BASE_PATH}/view/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', cursor: 'pointer', background: 'transparent' }}>View</button>
-              <button onClick={() => navigate(`${BASE_PATH}/edit/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', cursor: 'pointer', background: 'transparent' }}>Edit</button>
-              <button onClick={() => handleDelete(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', cursor: 'pointer', background: 'transparent', color: '#dc2626' }}>Delete</button>
+              {['draft', 'rejected'].includes(row.approval_status) ? <button onClick={() => navigate(`${BASE_PATH}/edit/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', cursor: 'pointer', background: 'transparent' }}>Edit</button> : null}
+              {['draft', 'rejected'].includes(row.approval_status) ? <button onClick={() => handleSubmit(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #c084fc', cursor: 'pointer', background: 'transparent', color: '#7c3aed' }}>Submit</button> : null}
+              {['pending_review', 'pending_approval'].includes(row.approval_status) ? <button onClick={() => handleApprove(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #86efac', cursor: 'pointer', background: 'transparent', color: '#15803d' }}>Approve</button> : null}
+              {['pending_review', 'pending_approval'].includes(row.approval_status) ? <button onClick={() => handleReject(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', cursor: 'pointer', background: 'transparent', color: '#dc2626' }}>Reject</button> : null}
+              {['draft', 'rejected'].includes(row.approval_status) ? <button onClick={() => handleDelete(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', cursor: 'pointer', background: 'transparent', color: '#dc2626' }}>Delete</button> : null}
             </div>
           )} />}
       </Card>

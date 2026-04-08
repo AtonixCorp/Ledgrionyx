@@ -21,6 +21,7 @@ from .serializers import (
     CustomKPISerializer, KPICalculationSerializer, ReportSerializer,
     ConsolidationSerializer, ConsolidationEntitySerializer, TaxCalculationSerializer
 )
+from .intercompany_engine import run_consolidation_engine
 from rest_framework.decorators import api_view
 from django.http import JsonResponse, Http404
 import json
@@ -694,10 +695,16 @@ class ConsolidationViewSet(viewsets.ModelViewSet):
         consolidation.status = 'processing'
         consolidation.save()
 
-        # TODO: Implement consolidation logic
-        consolidation.status = 'completed'
-        consolidation.consolidated_pnl = {'message': 'Consolidation completed'}
-        consolidation.save()
+        try:
+            consolidation = run_consolidation_engine(consolidation)
+        except ValueError as exc:
+            consolidation.status = 'error'
+            consolidation.save(update_fields=['status', 'updated_at'])
+            raise ValidationError({'detail': str(exc)})
+        except Exception:
+            consolidation.status = 'error'
+            consolidation.save(update_fields=['status', 'updated_at'])
+            return Response({'detail': 'Consolidation run failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = self.get_serializer(consolidation)
         return Response(serializer.data)

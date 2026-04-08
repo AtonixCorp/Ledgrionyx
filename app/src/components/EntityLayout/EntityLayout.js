@@ -66,6 +66,8 @@ const EntityLayout = ({ children }) => {
         { to: `/enterprise/entity/${id}/chart-of-accounts`, label: 'Chart of Accounts' },
         { to: `/enterprise/entity/${id}/general-ledger`, label: 'General Ledger' },
         { to: `/enterprise/entity/${id}/journal-entries`, label: 'Journal Entries' },
+        { to: `/enterprise/entity/${id}/intercompany`, label: 'Intercompany Console' },
+        { to: `/enterprise/entity/${id}/approval-inbox`, label: 'Approval Inbox' },
         {
           label: 'Sub-Ledgers',
           submenu: [

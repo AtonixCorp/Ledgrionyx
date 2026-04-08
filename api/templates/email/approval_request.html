@@ -1,0 +1,38 @@
+{% extends "email/base.html" %}
+
+{% block email_title %}{{ title }}{% endblock %}
+{% block email_preheader %}{{ object_label }} requires attention in your ATC Capital approval queue.{% endblock %}
+{% block email_brand_title %}{{ email_brand_title|default:"Institutional Finance Operations" }}{% endblock %}
+
+{% block email_content %}
+<p class="eyebrow">Approval Required</p>
+<h1>{{ title }}</h1>
+<p>{{ recipient_name }},</p>
+<p>{{ message }}</p>
+
+{% if entity_name %}
+<div class="email-panel">
+    <ul class="meta-list">
+        <li><strong>Entity:</strong> {{ entity_name }}</li>
+        <li><strong>Workflow Object:</strong> {{ object_label }}</li>
+        <li><strong>Reference:</strong> {{ related_object_id }}</li>
+    </ul>
+</div>
+{% endif %}
+
+{% if action_url %}
+<p>
+    <a href="{{ action_url }}" class="cta-button">{{ action_label }}</a>
+</p>
+<p class="muted">Use the approval queue to review the full step history, delegated authority path, and audit trail before acting.</p>
+<p>If the button does not open in your mail client, use this link:<br><a href="{{ action_url }}">{{ action_url }}</a></p>
+{% endif %}
+
+<p>Approval actions taken from the queue are recorded as part of the immutable change history for this workflow item.</p>
+{% endblock %}
+
+{% block email_footer %}
+{{ email_brand_footer|default:"ATC Capital finance operations communications are designed for secure approval workflows, accountable execution, and institutional-grade control." }}
+{% if email_support_email %}<br><br>Support: <a href="mailto:{{ email_support_email }}">{{ email_support_email }}</a>{% endif %}
+{% if email_support_url %}<br>Operations portal: <a href="{{ email_support_url }}">{{ email_support_url }}</a>{% endif %}
+{% endblock %}

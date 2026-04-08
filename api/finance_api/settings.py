@@ -108,6 +108,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -163,6 +165,25 @@ PLATFORM_EVENT_LOGGER = os.getenv('PLATFORM_EVENT_LOGGER', 'platform_events')
 APP_VERSION = os.getenv('APP_VERSION', 'dev')
 DEPLOYMENT_ENVIRONMENT = os.getenv('DEPLOYMENT_ENVIRONMENT', 'local')
 BANKING_TOKEN_ENCRYPTION_KEY = os.getenv('BANKING_TOKEN_ENCRYPTION_KEY', '')
+FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000')
+APPROVAL_NOTIFICATION_BASE_URL = os.getenv('APPROVAL_NOTIFICATION_BASE_URL', FRONTEND_BASE_URL)
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '25'))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@atccapital.local')
+EMAIL_BRAND_NAME = os.getenv('EMAIL_BRAND_NAME', 'ATC Capital')
+EMAIL_BRAND_TITLE = os.getenv('EMAIL_BRAND_TITLE', 'Institutional Finance Operations')
+EMAIL_BRAND_FOOTER = os.getenv(
+    'EMAIL_BRAND_FOOTER',
+    'ATC Capital finance operations communications are designed for secure approval workflows, accountable execution, and institutional-grade control.',
+)
+EMAIL_SUPPORT_EMAIL = os.getenv('EMAIL_SUPPORT_EMAIL', 'support@atccapital.local')
+EMAIL_SUPPORT_URL = os.getenv('EMAIL_SUPPORT_URL', FRONTEND_BASE_URL)
 
 LOGGING = {
     'version': 1,

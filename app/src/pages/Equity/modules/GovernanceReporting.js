@@ -20,6 +20,7 @@ const GovernanceReporting = () => {
     createReport,
     updateReport,
     deleteReport,
+    downloadReportPdf,
   } = useEquity();
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -74,6 +75,15 @@ const GovernanceReporting = () => {
         { key: 'report_type', label: 'Type' },
         { key: 'reporting_period', label: 'Period' },
         { key: 'status', label: 'Status' },
+        {
+          key: 'export',
+          label: 'Export',
+          render: (record) => (
+            record.report_type === 'scenario_model' || record.payload?.analysis
+              ? <button type="button" className="eq-inline-btn" onClick={() => downloadReportPdf(record.id, `${(record.title || 'scenario-report').toLowerCase().replace(/\s+/g, '-')}.pdf`)}>PDF</button>
+              : '—'
+          ),
+        },
         { key: 'created_at', label: 'Generated' },
       ]}
       emptyTitle="No governance reports have been generated"
@@ -89,6 +99,7 @@ const GovernanceReporting = () => {
           options: [
             { value: 'board_report', label: 'Board report' },
             { value: 'investor_report', label: 'Investor report' },
+            { value: 'scenario_model', label: 'Scenario model' },
             { value: 'certificate', label: 'Certificate' },
             { value: 'beneficial_ownership', label: 'Beneficial ownership' },
             { value: 'regulatory_filing', label: 'Regulatory filing' },

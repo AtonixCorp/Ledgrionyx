@@ -5,12 +5,16 @@ from .models import (
     TeamMember, TaxExposure, TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog,
     ModelTemplate, FinancialModel, Scenario, SensitivityAnalysis, AIInsight,
     CustomKPI, KPICalculation, Report, Consolidation, ConsolidationEntity,
+    IntercompanyTransaction, IntercompanyEliminationEntry,
     TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
     EntityDepartment, EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
     RecurringTransaction, TaskRequest,
     # Core GL/COA models
-    ChartOfAccounts, GeneralLedger, JournalEntry, RecurringJournalTemplate, LedgerPeriod,
+    ChartOfAccounts, GeneralLedger, JournalEntry, JournalApprovalMatrix, JournalApprovalDelegation,
+    JournalEntryApprovalStep, JournalEntryChangeLog, AccountingApprovalMatrix,
+    AccountingApprovalDelegation, AccountingApprovalRecord, AccountingApprovalStep,
+    AccountingApprovalChangeLog, RecurringJournalTemplate, LedgerPeriod,
     # AR models
     Customer, Invoice, InvoiceLineItem, CreditNote, Payment,
     # AP models
@@ -343,13 +347,74 @@ class ConsolidationEntitySerializer(serializers.ModelSerializer):
         fields = ['id', 'consolidation', 'entity', 'entity_name', 'entity_country', 'ownership_percentage', 'acquisition_date', 'goodwill', 'pnl_data', 'balance_sheet_data', 'cashflow_data']
 
 
+class IntercompanyEliminationEntrySerializer(serializers.ModelSerializer):
+    transaction_reference = serializers.ReadOnlyField(source='transaction.reference_number')
+    source_entity_name = serializers.ReadOnlyField(source='source_entity.name')
+    destination_entity_name = serializers.ReadOnlyField(source='destination_entity.name')
+
+    class Meta:
+        model = IntercompanyEliminationEntry
+        fields = [
+            'id', 'consolidation', 'transaction', 'transaction_reference', 'elimination_type',
+            'source_entity', 'source_entity_name', 'destination_entity', 'destination_entity_name',
+            'amount', 'currency', 'adjustment_payload', 'notes', 'created_at'
+        ]
+        read_only_fields = ['created_at']
+
+
+class IntercompanyTransactionSerializer(serializers.ModelSerializer):
+    source_entity_name = serializers.ReadOnlyField(source='source_entity.name')
+    destination_entity_name = serializers.ReadOnlyField(source='destination_entity.name')
+    source_invoice_number = serializers.ReadOnlyField(source='source_invoice.invoice_number')
+    destination_bill_number = serializers.ReadOnlyField(source='destination_bill.bill_number')
+    destination_loan_label = serializers.ReadOnlyField(source='destination_loan.lender_name')
+    elimination_entries = IntercompanyEliminationEntrySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = IntercompanyTransaction
+        fields = [
+            'id', 'organization', 'source_entity', 'source_entity_name', 'destination_entity', 'destination_entity_name',
+            'transaction_type', 'reference_number', 'transaction_date', 'due_date', 'currency', 'amount',
+            'transfer_pricing_markup_percent', 'status', 'description', 'notes',
+            'source_invoice', 'source_invoice_number', 'destination_bill', 'destination_bill_number',
+            'destination_loan', 'destination_loan_label', 'source_journal_entry', 'destination_journal_entry',
+            'posted_at', 'created_by', 'created_at', 'updated_at', 'elimination_entries'
+        ]
+        read_only_fields = ['posted_at', 'created_at', 'updated_at', 'created_by']
+        extra_kwargs = {
+            'reference_number': {'required': False},
+        }
+
+    def validate(self, attrs):
+        source_entity = attrs.get('source_entity') or getattr(self.instance, 'source_entity', None)
+        destination_entity = attrs.get('destination_entity') or getattr(self.instance, 'destination_entity', None)
+        organization = attrs.get('organization') or getattr(self.instance, 'organization', None)
+        source_entity_id = getattr(source_entity, 'id', None)
+        destination_entity_id = getattr(destination_entity, 'id', None)
+
+        if source_entity and destination_entity and source_entity_id == destination_entity_id:
+            raise serializers.ValidationError({'destination_entity': 'Source and destination entities must be different.'})
+
+        if source_entity and destination_entity and source_entity.organization_id != destination_entity.organization_id:
+            raise serializers.ValidationError({'destination_entity': 'Both entities must belong to the same organization.'})
+
+        if organization and source_entity and organization.id != source_entity.organization_id:
+            raise serializers.ValidationError({'organization': 'Organization must match the source entity organization.'})
+
+        if organization and destination_entity and organization.id != destination_entity.organization_id:
+            raise serializers.ValidationError({'organization': 'Organization must match the destination entity organization.'})
+
+        return attrs
+
+
 class ConsolidationSerializer(serializers.ModelSerializer):
     organization_name = serializers.ReadOnlyField(source='organization.name')
     entities = ConsolidationEntitySerializer(source='entities.all', many=True, read_only=True)
+    intercompany_eliminations = IntercompanyEliminationEntrySerializer(many=True, read_only=True)
 
     class Meta:
         model = Consolidation
-        fields = ['id', 'name', 'organization', 'organization_name', 'status', 'consolidation_date', 'reporting_currency', 'include_minority_interest', 'eliminate_intercompany', 'consolidated_pnl', 'consolidated_balance_sheet', 'consolidated_cashflow', 'adjustments', 'total_assets', 'total_liabilities', 'shareholders_equity', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'organization', 'organization_name', 'status', 'consolidation_date', 'reporting_currency', 'include_minority_interest', 'eliminate_intercompany', 'consolidated_pnl', 'consolidated_balance_sheet', 'consolidated_cashflow', 'adjustments', 'total_assets', 'total_liabilities', 'shareholders_equity', 'entities', 'intercompany_eliminations', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
 
@@ -608,14 +673,301 @@ class GeneralLedgerSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at']
 
 
+class JournalEntryApprovalStepSerializer(serializers.ModelSerializer):
+    assigned_role_name = serializers.ReadOnlyField(source='assigned_role.name')
+    assigned_staff_name = serializers.SerializerMethodField()
+    acted_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = JournalEntryApprovalStep
+        fields = [
+            'id', 'step_order', 'stage', 'assigned_role', 'assigned_role_name',
+            'assigned_staff', 'assigned_staff_name', 'status', 'acted_by',
+            'acted_by_name', 'acted_at', 'comments', 'delegated_from',
+        ]
+        read_only_fields = fields
+
+    def get_assigned_staff_name(self, obj):
+        return obj.assigned_staff.full_name if obj.assigned_staff else None
+
+    def get_acted_by_name(self, obj):
+        return obj.acted_by.get_full_name() if obj.acted_by else None
+
+
+class JournalEntryChangeLogSerializer(serializers.ModelSerializer):
+    actor_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = JournalEntryChangeLog
+        fields = ['id', 'action', 'stage', 'actor', 'actor_name', 'details', 'old_values', 'new_values', 'created_at']
+        read_only_fields = fields
+
+    def get_actor_name(self, obj):
+        return obj.actor.get_full_name() if obj.actor else 'System'
+
+
+class AccountingApprovalStepSerializer(serializers.ModelSerializer):
+    assigned_role_name = serializers.ReadOnlyField(source='assigned_role.name')
+    assigned_staff_name = serializers.SerializerMethodField()
+    acted_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AccountingApprovalStep
+        fields = [
+            'id', 'step_order', 'stage', 'assigned_role', 'assigned_role_name',
+            'assigned_staff', 'assigned_staff_name', 'status', 'acted_by',
+            'acted_by_name', 'acted_at', 'comments', 'delegated_from',
+        ]
+        read_only_fields = fields
+
+    def get_assigned_staff_name(self, obj):
+        return obj.assigned_staff.full_name if obj.assigned_staff else None
+
+    def get_acted_by_name(self, obj):
+        return obj.acted_by.get_full_name() if obj.acted_by else None
+
+
+class AccountingApprovalChangeLogSerializer(serializers.ModelSerializer):
+    actor_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AccountingApprovalChangeLog
+        fields = ['id', 'action', 'stage', 'actor', 'actor_name', 'details', 'old_values', 'new_values', 'created_at']
+        read_only_fields = fields
+
+    def get_actor_name(self, obj):
+        return obj.actor.get_full_name() if obj.actor else 'System'
+
+
+class AccountingApprovalMatrixSerializer(serializers.ModelSerializer):
+    preparer_role_name = serializers.ReadOnlyField(source='preparer_role.name')
+    reviewer_role_name = serializers.ReadOnlyField(source='reviewer_role.name')
+    approver_role_name = serializers.ReadOnlyField(source='approver_role.name')
+
+    class Meta:
+        model = AccountingApprovalMatrix
+        fields = [
+            'id', 'entity', 'name', 'object_type', 'description', 'minimum_amount', 'maximum_amount',
+            'preparer_role', 'preparer_role_name', 'reviewer_role', 'reviewer_role_name',
+            'approver_role', 'approver_role_name', 'require_reviewer', 'require_approver',
+            'allow_self_review', 'allow_self_approval', 'is_active', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def validate(self, attrs):
+        entity = attrs.get('entity') or getattr(self.instance, 'entity', None)
+        object_type = attrs.get('object_type', getattr(self.instance, 'object_type', None))
+        minimum_amount = attrs.get('minimum_amount', getattr(self.instance, 'minimum_amount', 0))
+        maximum_amount = attrs.get('maximum_amount', getattr(self.instance, 'maximum_amount', None))
+
+        for role_field in ['preparer_role', 'reviewer_role', 'approver_role']:
+            role = attrs.get(role_field) or getattr(self.instance, role_field, None)
+            if role and entity and role.entity_id != entity.id:
+                raise serializers.ValidationError({role_field: 'Selected role must belong to the same entity.'})
+
+        if maximum_amount is not None and maximum_amount < minimum_amount:
+            raise serializers.ValidationError({'maximum_amount': 'Maximum amount must be greater than or equal to minimum amount.'})
+
+        if entity and object_type:
+            other_matrices = AccountingApprovalMatrix.objects.filter(entity=entity, object_type=object_type, is_active=True)
+            if self.instance:
+                other_matrices = other_matrices.exclude(id=self.instance.id)
+            for other in other_matrices:
+                other_minimum = other.minimum_amount or 0
+                other_maximum = other.maximum_amount
+                range_overlaps = (
+                    (maximum_amount is None or other_minimum <= maximum_amount)
+                    and (other_maximum is None or minimum_amount <= other_maximum)
+                )
+                if range_overlaps:
+                    raise serializers.ValidationError({'minimum_amount': f'Active matrix "{other.name}" already covers an overlapping amount range for this object type.'})
+        return attrs
+
+
+class AccountingApprovalDelegationSerializer(serializers.ModelSerializer):
+    delegator_name = serializers.ReadOnlyField(source='delegator.full_name')
+    delegate_name = serializers.ReadOnlyField(source='delegate.full_name')
+
+    class Meta:
+        model = AccountingApprovalDelegation
+        fields = [
+            'id', 'entity', 'object_type', 'delegator', 'delegator_name', 'delegate', 'delegate_name',
+            'stage', 'minimum_amount', 'maximum_amount', 'start_date', 'end_date', 'is_active',
+            'notes', 'created_by', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        entity = attrs.get('entity') or getattr(self.instance, 'entity', None)
+        delegator = attrs.get('delegator') or getattr(self.instance, 'delegator', None)
+        delegate = attrs.get('delegate') or getattr(self.instance, 'delegate', None)
+        if delegator and entity and delegator.entity_id != entity.id:
+            raise serializers.ValidationError({'delegator': 'Delegator must belong to the same entity.'})
+        if delegate and entity and delegate.entity_id != entity.id:
+            raise serializers.ValidationError({'delegate': 'Delegate must belong to the same entity.'})
+        if delegator and delegate and delegator.id == delegate.id:
+            raise serializers.ValidationError({'delegate': 'Delegator and delegate must be different staff members.'})
+        start_date = attrs.get('start_date', getattr(self.instance, 'start_date', None))
+        end_date = attrs.get('end_date', getattr(self.instance, 'end_date', None))
+        if start_date and end_date and end_date < start_date:
+            raise serializers.ValidationError({'end_date': 'End date must be on or after the start date.'})
+        minimum_amount = attrs.get('minimum_amount', getattr(self.instance, 'minimum_amount', 0))
+        maximum_amount = attrs.get('maximum_amount', getattr(self.instance, 'maximum_amount', None))
+        if maximum_amount is not None and maximum_amount < minimum_amount:
+            raise serializers.ValidationError({'maximum_amount': 'Maximum amount must be greater than or equal to minimum amount.'})
+        return attrs
+
+
+class AccountingApprovalRecordSerializer(serializers.ModelSerializer):
+    requested_by_name = serializers.SerializerMethodField()
+    approved_by_name = serializers.SerializerMethodField()
+    current_pending_stage = serializers.SerializerMethodField()
+    steps = AccountingApprovalStepSerializer(many=True, read_only=True)
+    change_logs = AccountingApprovalChangeLogSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = AccountingApprovalRecord
+        fields = [
+            'id', 'entity', 'object_type', 'object_id', 'title', 'amount', 'status',
+            'requested_by', 'requested_by_name', 'approved_by', 'approved_by_name',
+            'submitted_at', 'approved_at', 'current_pending_stage', 'steps', 'change_logs',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = fields
+
+    def get_requested_by_name(self, obj):
+        return obj.requested_by.get_full_name() if obj.requested_by else None
+
+    def get_approved_by_name(self, obj):
+        return obj.approved_by.get_full_name() if obj.approved_by else None
+
+    def get_current_pending_stage(self, obj):
+        step = obj.steps.filter(status='pending').order_by('step_order').first()
+        return step.stage if step else None
+
+
+class JournalApprovalMatrixSerializer(serializers.ModelSerializer):
+    preparer_role_name = serializers.ReadOnlyField(source='preparer_role.name')
+    reviewer_role_name = serializers.ReadOnlyField(source='reviewer_role.name')
+    approver_role_name = serializers.ReadOnlyField(source='approver_role.name')
+
+    class Meta:
+        model = JournalApprovalMatrix
+        fields = [
+            'id', 'entity', 'name', 'description', 'entry_type', 'minimum_amount', 'maximum_amount',
+            'preparer_role', 'preparer_role_name', 'reviewer_role', 'reviewer_role_name',
+            'approver_role', 'approver_role_name', 'require_reviewer', 'require_approver',
+            'allow_self_review', 'allow_self_approval', 'is_active', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def validate(self, attrs):
+        entity = attrs.get('entity') or getattr(self.instance, 'entity', None)
+        for role_field in ['preparer_role', 'reviewer_role', 'approver_role']:
+            role = attrs.get(role_field) or getattr(self.instance, role_field, None)
+            if role and entity and role.entity_id != entity.id:
+                raise serializers.ValidationError({role_field: 'Selected role must belong to the same entity.'})
+
+        minimum_amount = attrs.get('minimum_amount', getattr(self.instance, 'minimum_amount', 0))
+        maximum_amount = attrs.get('maximum_amount', getattr(self.instance, 'maximum_amount', None))
+        if maximum_amount is not None and maximum_amount < minimum_amount:
+            raise serializers.ValidationError({'maximum_amount': 'Maximum amount must be greater than or equal to minimum amount.'})
+
+        entry_type = attrs.get('entry_type', getattr(self.instance, 'entry_type', ''))
+        if entity:
+            other_matrices = JournalApprovalMatrix.objects.filter(entity=entity, is_active=True)
+            if self.instance:
+                other_matrices = other_matrices.exclude(id=self.instance.id)
+
+            for other in other_matrices:
+                type_overlap = (
+                    not entry_type
+                    or not other.entry_type
+                    or other.entry_type == entry_type
+                )
+                if not type_overlap:
+                    continue
+
+                other_minimum = other.minimum_amount or 0
+                other_maximum = other.maximum_amount
+                range_overlaps = (
+                    (maximum_amount is None or other_minimum <= maximum_amount)
+                    and (other_maximum is None or minimum_amount <= other_maximum)
+                )
+                if range_overlaps:
+                    raise serializers.ValidationError({
+                        'minimum_amount': f'Active matrix "{other.name}" already covers an overlapping amount range for this entity and entry type.',
+                    })
+        return attrs
+
+
+class JournalApprovalDelegationSerializer(serializers.ModelSerializer):
+    delegator_name = serializers.ReadOnlyField(source='delegator.full_name')
+    delegate_name = serializers.ReadOnlyField(source='delegate.full_name')
+
+    class Meta:
+        model = JournalApprovalDelegation
+        fields = [
+            'id', 'entity', 'delegator', 'delegator_name', 'delegate', 'delegate_name',
+            'stage', 'minimum_amount', 'maximum_amount', 'start_date', 'end_date',
+            'is_active', 'notes', 'created_by', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        entity = attrs.get('entity') or getattr(self.instance, 'entity', None)
+        delegator = attrs.get('delegator') or getattr(self.instance, 'delegator', None)
+        delegate = attrs.get('delegate') or getattr(self.instance, 'delegate', None)
+        if delegator and entity and delegator.entity_id != entity.id:
+            raise serializers.ValidationError({'delegator': 'Delegator must belong to the same entity.'})
+        if delegate and entity and delegate.entity_id != entity.id:
+            raise serializers.ValidationError({'delegate': 'Delegate must belong to the same entity.'})
+        if delegator and delegate and delegator.id == delegate.id:
+            raise serializers.ValidationError({'delegate': 'Delegator and delegate must be different staff members.'})
+
+        start_date = attrs.get('start_date', getattr(self.instance, 'start_date', None))
+        end_date = attrs.get('end_date', getattr(self.instance, 'end_date', None))
+        if start_date and end_date and end_date < start_date:
+            raise serializers.ValidationError({'end_date': 'End date must be on or after the start date.'})
+
+        minimum_amount = attrs.get('minimum_amount', getattr(self.instance, 'minimum_amount', 0))
+        maximum_amount = attrs.get('maximum_amount', getattr(self.instance, 'maximum_amount', None))
+        if maximum_amount is not None and maximum_amount < minimum_amount:
+            raise serializers.ValidationError({'maximum_amount': 'Maximum amount must be greater than or equal to minimum amount.'})
+        return attrs
+
+
 class JournalEntrySerializer(serializers.ModelSerializer):
     created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
     approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
+    approval_steps = JournalEntryApprovalStepSerializer(many=True, read_only=True)
+    change_logs = JournalEntryChangeLogSerializer(many=True, read_only=True)
+    current_pending_stage = serializers.SerializerMethodField()
+    approval_state = serializers.SerializerMethodField()
 
     class Meta:
         model = JournalEntry
-        fields = ['id', 'entity', 'entry_type', 'reference_number', 'description', 'posting_date', 'memo', 'status', 'created_by', 'created_by_name', 'approved_by', 'approved_by_name', 'approved_at', 'is_recurring', 'recurring_template', 'reversing_entry', 'original_entry', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at', 'approved_at']
+        fields = [
+            'id', 'entity', 'entry_type', 'reference_number', 'description', 'posting_date', 'memo',
+            'amount_total', 'status', 'created_by', 'created_by_name', 'approved_by', 'approved_by_name',
+            'approved_at', 'submitted_at', 'is_recurring', 'recurring_template', 'reversing_entry',
+            'original_entry', 'approval_steps', 'change_logs', 'current_pending_stage', 'approval_state',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'approved_at', 'submitted_at']
+
+    def get_current_pending_stage(self, obj):
+        step = obj.approval_steps.filter(status='pending').order_by('step_order').first()
+        return step.stage if step else None
+
+    def get_approval_state(self, obj):
+        steps = list(obj.approval_steps.all())
+        return {
+            'total_steps': len(steps),
+            'completed_steps': len([step for step in steps if step.status == 'approved']),
+            'rejected_steps': len([step for step in steps if step.status == 'rejected']),
+            'current_stage': self.get_current_pending_stage(obj),
+        }
 
 
 class RecurringJournalTemplateSerializer(serializers.ModelSerializer):
@@ -675,10 +1027,12 @@ class CreditNoteSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     customer_name = serializers.ReadOnlyField(source='customer.customer_name')
     invoice_number = serializers.ReadOnlyField(source='invoice.invoice_number')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
 
     class Meta:
         model = Payment
-        fields = ['id', 'entity', 'invoice', 'invoice_number', 'customer', 'customer_name', 'payment_date', 'amount', 'payment_method', 'reference_number', 'created_at']
+        fields = ['id', 'entity', 'invoice', 'invoice_number', 'customer', 'customer_name', 'payment_date', 'amount', 'payment_method', 'reference_number', 'approval_status', 'approval_submitted_at', 'created_by', 'created_by_name', 'approved_by', 'approved_by_name', 'approved_at', 'created_at']
         read_only_fields = ['created_at']
 
 
@@ -694,10 +1048,11 @@ class VendorSerializer(serializers.ModelSerializer):
 class PurchaseOrderSerializer(serializers.ModelSerializer):
     vendor_name = serializers.ReadOnlyField(source='vendor.vendor_name')
     created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
 
     class Meta:
         model = PurchaseOrder
-        fields = ['id', 'entity', 'vendor', 'vendor_name', 'po_number', 'po_date', 'expected_delivery_date', 'subtotal', 'tax_amount', 'total_amount', 'currency', 'status', 'created_by', 'created_by_name', 'created_at', 'updated_at']
+        fields = ['id', 'entity', 'vendor', 'vendor_name', 'po_number', 'po_date', 'expected_delivery_date', 'subtotal', 'tax_amount', 'total_amount', 'currency', 'status', 'approval_status', 'approval_submitted_at', 'created_by', 'created_by_name', 'approved_by', 'approved_by_name', 'approved_at', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
 
@@ -705,20 +1060,23 @@ class BillSerializer(serializers.ModelSerializer):
     vendor_name = serializers.ReadOnlyField(source='vendor.vendor_name')
     po_number = serializers.ReadOnlyField(source='purchase_order.po_number')
     created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
 
     class Meta:
         model = Bill
-        fields = ['id', 'entity', 'vendor', 'vendor_name', 'purchase_order', 'po_number', 'bill_number', 'bill_date', 'due_date', 'subtotal', 'tax_amount', 'total_amount', 'paid_amount', 'outstanding_amount', 'currency', 'status', 'description', 'notes', 'created_by', 'created_by_name', 'created_at', 'updated_at']
+        fields = ['id', 'entity', 'vendor', 'vendor_name', 'purchase_order', 'po_number', 'bill_number', 'bill_date', 'due_date', 'subtotal', 'tax_amount', 'total_amount', 'paid_amount', 'outstanding_amount', 'currency', 'status', 'approval_status', 'approval_submitted_at', 'description', 'notes', 'created_by', 'created_by_name', 'approved_by', 'approved_by_name', 'approved_at', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at', 'outstanding_amount']
 
 
 class BillPaymentSerializer(serializers.ModelSerializer):
     vendor_name = serializers.ReadOnlyField(source='vendor.vendor_name')
     bill_number = serializers.ReadOnlyField(source='bill.bill_number')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
 
     class Meta:
         model = BillPayment
-        fields = ['id', 'entity', 'bill', 'bill_number', 'vendor', 'vendor_name', 'payment_date', 'amount', 'payment_method', 'reference_number', 'created_at']
+        fields = ['id', 'entity', 'bill', 'bill_number', 'vendor', 'vendor_name', 'payment_date', 'amount', 'payment_method', 'reference_number', 'approval_status', 'approval_submitted_at', 'created_by', 'created_by_name', 'approved_by', 'approved_by_name', 'approved_at', 'created_at']
         read_only_fields = ['created_at']
 
 

@@ -56,6 +56,7 @@ const Layout = ({ children }) => {
     { to: '/app/accounting/chart-of-accounts', label: 'Chart of Accounts' },
     { to: '/app/accounting/general-ledger',    label: 'General Ledger' },
     { to: '/app/accounting/journal-entries',   label: 'Journal Entries' },
+    { to: '/app/accounting/intercompany',      label: 'Intercompany Console' },
     {
       label: 'Sub-Ledgers',
       submenu: [

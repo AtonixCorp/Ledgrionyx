@@ -2,6 +2,8 @@ import hashlib
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.core import mail
+from django.core.management import call_command
 from django.test import TestCase
 from django.test import override_settings
 from django.utils import timezone
@@ -17,23 +19,39 @@ from .models import (
     Budget,
     ChartOfAccounts,
     Customer,
+    Consolidation,
+    ConsolidationEntity,
     DeveloperAPI,
     DeveloperAPIEndpoint,
     DeveloperPortalAPILog,
     DeveloperPortalKeyRequest,
     Entity,
+    EntityRole,
+    EntityStaff,
     Expense,
     GeneralLedger,
     Income,
+    Invoice,
+    IntercompanyEliminationEntry,
+    IntercompanyTransaction,
     JournalEntry,
+    LedgerPeriod,
+    Notification,
+    NotificationPreference,
     OAuthApplication,
     RateLimitProfile,
+    Role,
     Organization,
     SystemEvent,
     TeamMember,
     UserProfile,
     Vendor,
     WebhookDelivery,
+    Bill,
+    Payment,
+    AccountingApprovalRecord,
+    AccountingApprovalMatrix,
+    AccountingApprovalDelegation,
 )
 
 
@@ -1136,6 +1154,473 @@ class CoreFinancialAPIV1Tests(TestCase):
         )
         self.assertEqual(deliveries_response.status_code, 200)
         self.assertGreaterEqual(len(deliveries_response.data), 2)
+
+
+@override_settings(
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+    DEFAULT_FROM_EMAIL='no-reply@atccapital.test',
+    APPROVAL_NOTIFICATION_BASE_URL='https://console.atc-capital.test',
+)
+class AccountingApprovalWorkflowAPITests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='approval-owner', email='approval-owner@example.com', password='pass')
+        self.reviewer = User.objects.create_user(username='approval-reviewer', email='approval-reviewer@example.com', password='pass')
+        self.approver = User.objects.create_user(username='approval-approver', email='approval-approver@example.com', password='pass')
+        self.delegate = User.objects.create_user(username='approval-delegate', email='approval-delegate@example.com', password='pass')
+
+        self.organization = Organization.objects.create(
+            owner=self.owner,
+            name='Approval Org',
+            slug='approval-org',
+            primary_country='US',
+            primary_currency='USD',
+        )
+        self.entity = Entity.objects.create(
+            organization=self.organization,
+            name='Approval Entity',
+            country='US',
+            entity_type='corporation',
+            status='active',
+            local_currency='USD',
+            workspace_mode='accounting',
+        )
+        self.entity.create_default_structure()
+
+        finance_analyst_role, _ = Role.objects.get_or_create(code='FINANCE_ANALYST', defaults={'name': 'Finance Analyst', 'description': 'Finance analyst'})
+        cfo_role, _ = Role.objects.get_or_create(code='CFO', defaults={'name': 'Chief Financial Officer', 'description': 'Chief Financial Officer'})
+        advisor_role, _ = Role.objects.get_or_create(code='EXTERNAL_ADVISOR', defaults={'name': 'External Advisor', 'description': 'External advisor'})
+
+        self.reviewer_membership = TeamMember.objects.create(organization=self.organization, user=self.reviewer, role=finance_analyst_role, is_active=True)
+        self.reviewer_membership.scoped_entities.add(self.entity)
+        self.approver_membership = TeamMember.objects.create(organization=self.organization, user=self.approver, role=cfo_role, is_active=True)
+        self.approver_membership.scoped_entities.add(self.entity)
+        self.delegate_membership = TeamMember.objects.create(organization=self.organization, user=self.delegate, role=advisor_role, is_active=True)
+        self.delegate_membership.scoped_entities.add(self.entity)
+
+        self.accountant_role = EntityRole.objects.get(entity=self.entity, name='Accountant')
+        self.finance_manager_role = EntityRole.objects.get(entity=self.entity, name='Finance Manager')
+        self.entity_cfo_role = EntityRole.objects.get(entity=self.entity, name='CFO')
+
+        EntityStaff.objects.create(
+            entity=self.entity,
+            user=self.owner,
+            employee_id='EMP-AP-OWNER',
+            first_name='Prep',
+            last_name='Owner',
+            email=self.owner.email,
+            department=self.accountant_role.department,
+            role=self.accountant_role,
+            hire_date=timezone.now().date(),
+        )
+        self.reviewer_staff = EntityStaff.objects.create(
+            entity=self.entity,
+            user=self.reviewer,
+            employee_id='EMP-AP-REVIEW',
+            first_name='Review',
+            last_name='User',
+            email=self.reviewer.email,
+            department=self.finance_manager_role.department,
+            role=self.finance_manager_role,
+            hire_date=timezone.now().date(),
+        )
+        self.approver_staff = EntityStaff.objects.create(
+            entity=self.entity,
+            user=self.approver,
+            employee_id='EMP-AP-APPROVE',
+            first_name='Approve',
+            last_name='User',
+            email=self.approver.email,
+            department=self.entity_cfo_role.department,
+            role=self.entity_cfo_role,
+            hire_date=timezone.now().date(),
+        )
+        self.delegate_staff = EntityStaff.objects.create(
+            entity=self.entity,
+            user=self.delegate,
+            employee_id='EMP-AP-DELEGATE',
+            first_name='Delegate',
+            last_name='User',
+            email=self.delegate.email,
+            department=self.accountant_role.department,
+            role=self.accountant_role,
+            hire_date=timezone.now().date(),
+        )
+
+        self.vendor = Vendor.objects.create(
+            entity=self.entity,
+            vendor_code='VEN-AP-001',
+            vendor_name='Approval Vendor',
+            email='vendor@example.com',
+            address='1 Main Street',
+            city='New York',
+            country='US',
+            postal_code='10001',
+            currency='USD',
+            status='active',
+        )
+        self.customer = Customer.objects.create(
+            entity=self.entity,
+            customer_code='CUS-AP-001',
+            customer_name='Approval Customer',
+            email='customer@example.com',
+            address='1 Main Street',
+            city='New York',
+            country='US',
+            postal_code='10001',
+            currency='USD',
+            status='active',
+        )
+
+        NotificationPreference.objects.get_or_create(user=self.reviewer)
+        NotificationPreference.objects.get_or_create(user=self.approver)
+        NotificationPreference.objects.get_or_create(user=self.delegate)
+
+        self.owner_client = APIClient()
+        self.owner_client.force_authenticate(user=self.owner)
+        self.reviewer_client = APIClient()
+        self.reviewer_client.force_authenticate(user=self.reviewer)
+        self.approver_client = APIClient()
+        self.approver_client.force_authenticate(user=self.approver)
+        self.delegate_client = APIClient()
+        self.delegate_client.force_authenticate(user=self.delegate)
+
+    def _create_bill(self, bill_number='BILL-AP-001', bill_date=None):
+        bill_date = bill_date or timezone.now().date()
+        return Bill.objects.create(
+            entity=self.entity,
+            vendor=self.vendor,
+            bill_number=bill_number,
+            bill_date=bill_date,
+            due_date=bill_date,
+            subtotal=Decimal('1000.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=Decimal('1000.00'),
+            paid_amount=Decimal('0.00'),
+            outstanding_amount=Decimal('1000.00'),
+            currency='USD',
+            created_by=self.owner,
+        )
+
+    def _create_invoice(self):
+        return Invoice.objects.create(
+            entity=self.entity,
+            customer=self.customer,
+            invoice_number='INV-AP-001',
+            invoice_date=timezone.now().date(),
+            due_date=timezone.now().date(),
+            subtotal=Decimal('750.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=Decimal('750.00'),
+            paid_amount=Decimal('0.00'),
+            outstanding_amount=Decimal('750.00'),
+            currency='USD',
+            status='posted',
+            created_by=self.owner,
+        )
+
+    def _create_bill_matrix(self):
+        return AccountingApprovalMatrix.objects.create(
+            entity=self.entity,
+            name='Bill Approval Matrix',
+            object_type='bill',
+            minimum_amount=Decimal('0.00'),
+            preparer_role=self.accountant_role,
+            reviewer_role=self.finance_manager_role,
+            approver_role=self.entity_cfo_role,
+            require_reviewer=True,
+            require_approver=True,
+        )
+
+    def _create_payment_matrix(self):
+        return AccountingApprovalMatrix.objects.create(
+            entity=self.entity,
+            name='Payment Approval Matrix',
+            object_type='payment',
+            minimum_amount=Decimal('0.00'),
+            preparer_role=self.accountant_role,
+            reviewer_role=self.finance_manager_role,
+            approver_role=self.entity_cfo_role,
+            require_reviewer=True,
+            require_approver=True,
+        )
+
+    def test_bill_workflow_api_posts_after_final_approval_and_sends_emails(self):
+        bill = self._create_bill()
+        self._create_bill_matrix()
+        mail.outbox = []
+
+        response = self.owner_client.post(f'/api/bills/{bill.id}/submit/', {}, format='json')
+        self.assertEqual(response.status_code, 200)
+        bill.refresh_from_db()
+        self.assertEqual(bill.approval_status, 'pending_review')
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.reviewer.email])
+        self.assertIn('Review bill', mail.outbox[0].alternatives[0][0])
+        self.assertIn(f'objectType=bill&amp;objectId={bill.id}', mail.outbox[0].alternatives[0][0])
+
+        inbox_response = self.reviewer_client.get('/api/accounting-approval-inbox/', {'entity': self.entity.id})
+        self.assertEqual(inbox_response.status_code, 200)
+        self.assertEqual(len(inbox_response.data['pending']), 1)
+        self.assertEqual(inbox_response.data['pending'][0]['object_type'], 'bill')
+
+        review_response = self.reviewer_client.post(f'/api/bills/{bill.id}/approve/', {'comments': 'Reviewed'}, format='json')
+        self.assertEqual(review_response.status_code, 200)
+        bill.refresh_from_db()
+        self.assertEqual(bill.approval_status, 'pending_approval')
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].to, [self.approver.email])
+
+        approval_response = self.approver_client.post(f'/api/bills/{bill.id}/approve/', {'comments': 'Approved'}, format='json')
+        self.assertEqual(approval_response.status_code, 200)
+        bill.refresh_from_db()
+        record = AccountingApprovalRecord.objects.get(object_type='bill', object_id=bill.id)
+        self.assertEqual(bill.status, 'posted')
+        self.assertEqual(bill.approval_status, 'approved')
+        self.assertEqual(record.status, 'approved')
+        self.assertEqual(Notification.objects.filter(notification_type='approval_request', related_content_type='bill').count(), 2)
+
+    def test_payment_api_defers_invoice_effects_until_final_approval(self):
+        invoice = self._create_invoice()
+        payment = Payment.objects.create(
+            entity=self.entity,
+            invoice=invoice,
+            customer=self.customer,
+            payment_date=timezone.now().date(),
+            amount=Decimal('250.00'),
+            payment_method='bank_transfer',
+            reference_number='PAY-AP-001',
+            created_by=self.owner,
+        )
+        self._create_payment_matrix()
+
+        submit_response = self.owner_client.post(f'/api/payments/{payment.id}/submit/', {}, format='json')
+        self.assertEqual(submit_response.status_code, 200)
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.paid_amount, Decimal('0.00'))
+        self.assertEqual(invoice.outstanding_amount, Decimal('750.00'))
+
+        review_response = self.reviewer_client.post(f'/api/payments/{payment.id}/approve/', {'comments': 'Reviewed'}, format='json')
+        self.assertEqual(review_response.status_code, 200)
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.paid_amount, Decimal('0.00'))
+
+        approval_response = self.approver_client.post(f'/api/payments/{payment.id}/approve/', {'comments': 'Approved'}, format='json')
+        self.assertEqual(approval_response.status_code, 200)
+        invoice.refresh_from_db()
+        payment.refresh_from_db()
+        self.assertEqual(payment.approval_status, 'approved')
+        self.assertEqual(invoice.paid_amount, Decimal('250.00'))
+        self.assertEqual(invoice.outstanding_amount, Decimal('500.00'))
+        self.assertEqual(invoice.status, 'partially_paid')
+
+    def test_bill_submit_api_rejects_locked_period(self):
+        locked_date = timezone.now().date()
+        bill = self._create_bill(bill_number='BILL-LOCK-001', bill_date=locked_date)
+        self._create_bill_matrix()
+        LedgerPeriod.objects.create(
+            entity=self.entity,
+            period_name='Locked Month',
+            start_date=locked_date.replace(day=1),
+            end_date=locked_date.replace(day=28),
+            status='closed',
+            no_posting_after=locked_date,
+            closed_by=self.owner,
+        )
+
+        response = self.owner_client.post(f'/api/bills/{bill.id}/submit/', {}, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('locked period', response.data['detail'].lower())
+
+    def test_bill_api_allows_delegated_final_approval(self):
+        bill = self._create_bill(bill_number='BILL-DELEGATE-001')
+        self._create_bill_matrix()
+        AccountingApprovalDelegation.objects.create(
+            entity=self.entity,
+            object_type='bill',
+            delegator=self.approver_staff,
+            delegate=self.delegate_staff,
+            stage='approver',
+            minimum_amount=Decimal('0.00'),
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+            is_active=True,
+            created_by=self.owner,
+        )
+
+        submit_response = self.owner_client.post(f'/api/bills/{bill.id}/submit/', {}, format='json')
+        self.assertEqual(submit_response.status_code, 200)
+        review_response = self.reviewer_client.post(f'/api/bills/{bill.id}/approve/', {'comments': 'Reviewed'}, format='json')
+        self.assertEqual(review_response.status_code, 200)
+        delegated_response = self.delegate_client.post(f'/api/bills/{bill.id}/approve/', {'comments': 'Delegated approval'}, format='json')
+        self.assertEqual(delegated_response.status_code, 200)
+
+        bill.refresh_from_db()
+        record = AccountingApprovalRecord.objects.get(object_type='bill', object_id=bill.id)
+        final_step = record.steps.get(stage='approver')
+        self.assertEqual(bill.approval_status, 'approved')
+        self.assertEqual(final_step.acted_by, self.delegate)
+        self.assertIsNotNone(final_step.delegated_from)
+
+    def test_approval_digest_command_sends_grouped_email(self):
+        Notification.objects.create(
+            user=self.reviewer,
+            organization=self.organization,
+            notification_type='approval_request',
+            priority='high',
+            title='Bill approval required',
+            message='BILL-DIGEST-001 is awaiting reviewer approval.',
+            related_entity=self.entity,
+            related_content_type='bill',
+            related_object_id='1',
+            action_url='/enterprise/entity/1/approval-inbox',
+        )
+        Notification.objects.create(
+            user=self.reviewer,
+            organization=self.organization,
+            notification_type='approval_request',
+            priority='high',
+            title='Payment approval required',
+            message='PAY-DIGEST-001 is awaiting approver approval.',
+            related_entity=self.entity,
+            related_content_type='payment',
+            related_object_id='2',
+            action_url='/enterprise/entity/1/approval-inbox',
+        )
+
+        mail.outbox = []
+        call_command('send_approval_notification_digest', hours=48)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.reviewer.email])
+        self.assertIn('Bill approval required', mail.outbox[0].body)
+        self.assertIn('Payment approval required', mail.outbox[0].body)
+        self.assertIn('Open the full approval inbox', mail.outbox[0].alternatives[0][0])
+
+
+class IntercompanyEngineAPITests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='ic-owner', email='ic-owner@example.com', password='pass')
+        self.organization = Organization.objects.create(
+            owner=self.owner,
+            name='Intercompany Org',
+            slug='intercompany-org',
+            primary_country='US',
+            primary_currency='USD',
+        )
+        self.parent_entity = Entity.objects.create(
+            organization=self.organization,
+            name='Parent HoldCo',
+            country='US',
+            entity_type='corporation',
+            status='active',
+            local_currency='USD',
+            workspace_mode='accounting',
+        )
+        self.subsidiary_entity = Entity.objects.create(
+            organization=self.organization,
+            name='Operating Subsidiary',
+            country='US',
+            entity_type='subsidiary',
+            status='active',
+            local_currency='USD',
+            workspace_mode='accounting',
+            parent_entity=self.parent_entity,
+        )
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.owner)
+
+        self.consolidation = Consolidation.objects.create(
+            name='March Consolidation',
+            organization=self.organization,
+            consolidation_date=timezone.now().date(),
+            reporting_currency='USD',
+            eliminate_intercompany=True,
+        )
+        ConsolidationEntity.objects.create(consolidation=self.consolidation, entity=self.parent_entity, ownership_percentage=Decimal('100.0000'))
+        ConsolidationEntity.objects.create(consolidation=self.consolidation, entity=self.subsidiary_entity, ownership_percentage=Decimal('100.0000'))
+
+    def test_intercompany_invoice_posts_mirrored_documents_and_is_eliminated_in_consolidation(self):
+        response = self.client.post(
+            '/api/intercompany-transactions/',
+            {
+                'organization': self.organization.id,
+                'source_entity': self.parent_entity.id,
+                'destination_entity': self.subsidiary_entity.id,
+                'transaction_type': 'invoice',
+                'transaction_date': str(self.consolidation.consolidation_date),
+                'due_date': str(self.consolidation.consolidation_date),
+                'currency': 'USD',
+                'amount': '1500.00',
+                'description': 'Shared services allocation',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        transaction_record = IntercompanyTransaction.objects.get(id=response.data['id'])
+        self.assertEqual(transaction_record.status, 'posted')
+        self.assertIsNotNone(transaction_record.source_invoice_id)
+        self.assertIsNotNone(transaction_record.destination_bill_id)
+        self.assertIsNotNone(transaction_record.source_journal_entry_id)
+        self.assertIsNotNone(transaction_record.destination_journal_entry_id)
+
+        self.assertEqual(Invoice.objects.filter(id=transaction_record.source_invoice_id, status='posted').count(), 1)
+        self.assertEqual(Bill.objects.filter(id=transaction_record.destination_bill_id, status='posted').count(), 1)
+        self.assertEqual(GeneralLedger.objects.filter(journal_entry_id=transaction_record.source_journal_entry_id).count(), 1)
+        self.assertEqual(GeneralLedger.objects.filter(journal_entry_id=transaction_record.destination_journal_entry_id).count(), 1)
+
+        consolidation_response = self.client.post(f'/api/consolidations/{self.consolidation.id}/run_consolidation/')
+        self.assertEqual(consolidation_response.status_code, 200)
+
+        self.consolidation.refresh_from_db()
+        transaction_record.refresh_from_db()
+        self.assertEqual(self.consolidation.status, 'completed')
+        self.assertEqual(transaction_record.status, 'eliminated')
+        self.assertAlmostEqual(self.consolidation.consolidated_pnl['revenue'], 0.0)
+        self.assertAlmostEqual(self.consolidation.consolidated_pnl['expenses'], 0.0)
+        self.assertAlmostEqual(self.consolidation.consolidated_balance_sheet['assets'], 0.0)
+        self.assertAlmostEqual(self.consolidation.consolidated_balance_sheet['liabilities'], 0.0)
+        self.assertEqual(
+            IntercompanyEliminationEntry.objects.filter(consolidation=self.consolidation, transaction=transaction_record).count(),
+            2,
+        )
+
+    def test_intercompany_loan_creates_destination_loan_and_loan_balance_elimination(self):
+        response = self.client.post(
+            '/api/intercompany-transactions/',
+            {
+                'organization': self.organization.id,
+                'source_entity': self.parent_entity.id,
+                'destination_entity': self.subsidiary_entity.id,
+                'transaction_type': 'loan',
+                'transaction_date': str(self.consolidation.consolidation_date),
+                'due_date': str(self.consolidation.consolidation_date),
+                'currency': 'USD',
+                'amount': '5000.00',
+                'transfer_pricing_markup_percent': '5.0000',
+                'description': 'Working capital facility',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        transaction_record = IntercompanyTransaction.objects.get(id=response.data['id'])
+        self.assertEqual(transaction_record.status, 'posted')
+        self.assertIsNotNone(transaction_record.destination_loan_id)
+        self.assertEqual(transaction_record.destination_loan.principal_remaining, Decimal('5000.00'))
+
+        consolidation_response = self.client.post(f'/api/consolidations/{self.consolidation.id}/run_consolidation/')
+        self.assertEqual(consolidation_response.status_code, 200)
+
+        self.assertEqual(
+            IntercompanyEliminationEntry.objects.filter(
+                consolidation=self.consolidation,
+                transaction=transaction_record,
+                elimination_type='loan_balance',
+            ).count(),
+            1,
+        )
 
 
 class BankingIntegrationAutomationTests(TestCase):

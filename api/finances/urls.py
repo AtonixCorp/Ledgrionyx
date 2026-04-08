@@ -18,7 +18,12 @@ from .enterprise_views import (
     BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet,
     CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, FinancialStatementsViewSet,
     # New viewsets for Accounting module
-    ChartOfAccountsViewSet, GeneralLedgerViewSet, JournalEntryViewSet,
+    ChartOfAccountsViewSet, GeneralLedgerViewSet, JournalApprovalMatrixViewSet,
+    JournalApprovalDelegationViewSet, JournalEntryApprovalStepViewSet, JournalEntryChangeLogViewSet,
+    AccountingApprovalMatrixViewSet, AccountingApprovalDelegationViewSet,
+    AccountingApprovalRecordViewSet, AccountingApprovalStepViewSet,
+    AccountingApprovalChangeLogViewSet, AccountingApprovalInboxViewSet,
+    JournalEntryViewSet,
     RecurringJournalTemplateViewSet, LedgerPeriodViewSet,
     CustomerViewSet, InvoiceViewSet, CreditNoteViewSet, PaymentViewSet,
     VendorViewSet, PurchaseOrderViewSet, BillViewSet, BillPaymentViewSet,
@@ -28,6 +33,7 @@ from .enterprise_views import (
     PeriodCloseChecklistViewSet, PeriodCloseItemViewSet,
     ExchangeRateViewSet, FXGainLossViewSet,
     NotificationViewSet, NotificationPreferenceViewSet,
+    IntercompanyTransactionViewSet, IntercompanyEliminationEntryViewSet,
     # NEW VIEWSETS
     ClientViewSet, ClientPortalViewSet, ClientMessageViewSet, ClientDocumentViewSet,
     DocumentRequestViewSet, ApprovalRequestViewSet, DocumentTemplateViewSet, LoanViewSet,
@@ -97,6 +103,16 @@ router.register(r'tax-calculations', TaxCalculationViewSet, basename='tax-calcul
 # NEW: Chart of Accounts & General Ledger
 router.register(r'chart-of-accounts', ChartOfAccountsViewSet, basename='chart-of-accounts')
 router.register(r'general-ledger', GeneralLedgerViewSet, basename='general-ledger')
+router.register(r'journal-approval-matrices', JournalApprovalMatrixViewSet, basename='journal-approval-matrix')
+router.register(r'journal-approval-delegations', JournalApprovalDelegationViewSet, basename='journal-approval-delegation')
+router.register(r'journal-approval-steps', JournalEntryApprovalStepViewSet, basename='journal-approval-step')
+router.register(r'journal-change-logs', JournalEntryChangeLogViewSet, basename='journal-change-log')
+router.register(r'accounting-approval-matrices', AccountingApprovalMatrixViewSet, basename='accounting-approval-matrix')
+router.register(r'accounting-approval-delegations', AccountingApprovalDelegationViewSet, basename='accounting-approval-delegation')
+router.register(r'accounting-approval-records', AccountingApprovalRecordViewSet, basename='accounting-approval-record')
+router.register(r'accounting-approval-steps', AccountingApprovalStepViewSet, basename='accounting-approval-step')
+router.register(r'accounting-approval-change-logs', AccountingApprovalChangeLogViewSet, basename='accounting-approval-change-log')
+router.register(r'accounting-approval-inbox', AccountingApprovalInboxViewSet, basename='accounting-approval-inbox')
 router.register(r'journal-entries', JournalEntryViewSet, basename='journal-entry')
 router.register(r'recurring-journal-templates', RecurringJournalTemplateViewSet, basename='recurring-journal-template')
 router.register(r'ledger-periods', LedgerPeriodViewSet, basename='ledger-period')
@@ -136,6 +152,10 @@ router.register(r'fx-gainloss', FXGainLossViewSet, basename='fx-gainloss')
 # NEW: Notifications
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'notification-preferences', NotificationPreferenceViewSet, basename='notification-preference')
+
+# NEW: Intercompany accounting and eliminations
+router.register(r'intercompany-transactions', IntercompanyTransactionViewSet, basename='intercompany-transaction')
+router.register(r'intercompany-eliminations', IntercompanyEliminationEntryViewSet, basename='intercompany-elimination')
 
 # NEW: Client Management
 router.register(r'clients', ClientViewSet, basename='client')

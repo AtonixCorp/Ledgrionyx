@@ -103,6 +103,52 @@
             color: #64748b;
         }
 
+        .eyebrow {
+            margin: 0 0 10px;
+            font-size: 11px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #8c9bb0;
+            font-weight: 700;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 13px 22px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #0b1f3a 0%, #12315b 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .meta-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .meta-list li {
+            margin: 0 0 8px;
+        }
+
+        .digest-item {
+            margin: 0 0 14px;
+            padding: 18px 20px;
+            border-radius: 16px;
+            background-color: #f5f7fb;
+            border: 1px solid #d7dee8;
+        }
+
+        .digest-item h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .muted {
+            color: #64748b;
+        }
+
         .preheader {
             display: none;
             visibility: hidden;
@@ -141,8 +187,8 @@
                                     <path d="M26.9 35H37.2" stroke="#C8A44D" stroke-width="3.5" stroke-linecap="round"/>
                                 </svg>
                                 <div class="brand-copy">
-                                    <strong>ATC Capital</strong>
-                                    <span>{% block email_brand_title %}Institutional Platform{% endblock %}</span>
+                                    <strong>{% block email_brand_name %}{{ email_brand_name|default:"ATC Capital" }}{% endblock %}</strong>
+                                    <span>{% block email_brand_title %}{{ email_brand_title|default:"Institutional Platform" }}{% endblock %}</span>
                                 </div>
                             </div>
                         </td>
@@ -155,7 +201,7 @@
                     <tr>
                         <td class="email-footer">
                             {% block email_footer %}
-                            ATC Capital developer communications are structured for operational clarity, predictable onboarding, and institutional-grade trust.
+                            {{ email_brand_footer|default:"ATC Capital developer communications are structured for operational clarity, predictable onboarding, and institutional-grade trust." }}
                             {% endblock %}
                         </td>
                     </tr>

@@ -40,6 +40,7 @@ import APIIntegrations from './pages/Firm/APIIntegrations';
 import ChartOfAccounts from './pages/Enterprise/Accounting/ChartOfAccounts';
 import GeneralLedger from './pages/Enterprise/Accounting/GeneralLedger';
 import JournalEntries from './pages/Enterprise/Accounting/JournalEntries';
+import IntercompanyConsole from './pages/Enterprise/Accounting/IntercompanyConsole';
 import ARModule from './pages/Enterprise/Accounting/ARModule';
 import APModule from './pages/Enterprise/Accounting/APModule';
 import Inventory from './pages/Enterprise/Accounting/Inventory';
@@ -55,6 +56,8 @@ import AppTasks from './modules/overview/Tasks';
 import AppChartOfAccounts from './modules/accounting/coa/ChartOfAccounts';
 import AppGeneralLedger from './modules/accounting/general-ledger/GeneralLedger';
 import AppJournalEntries from './modules/accounting/journals/JournalEntries';
+import AppAccountingApprovalInbox from './modules/accounting/ApprovalInbox';
+import AppIntercompanyConsole from './modules/accounting/IntercompanyConsole';
 import AppReconciliation from './modules/accounting/reconciliation/Reconciliation';
 import AppAccountsReceivable from './modules/subledgers/ar/AccountsReceivable';
 import AppAccountsPayable from './modules/subledgers/ap/AccountsPayable';
@@ -125,11 +128,15 @@ import WorkspaceSettings     from './pages/Workspace/modules/WorkspaceSettings';
 import WorkspaceEmail        from './pages/Workspace/modules/WorkspaceEmail';
 import WorkspaceMarketing    from './pages/Workspace/modules/WorkspaceMarketing';
 import EquityLayout from './components/EquityLayout/EquityLayout';
+import MyEquity from './pages/Equity/modules/MyEquity';
 import OwnershipRegistry from './pages/Equity/modules/OwnershipRegistry';
 import CapTable from './pages/Equity/modules/CapTable';
 import VestingGrants from './pages/Equity/modules/VestingGrants';
 import ExerciseCenter from './pages/Equity/modules/ExerciseCenter';
+import AutomationCenter from './pages/Equity/modules/AutomationCenter';
 import Valuation from './pages/Equity/modules/Valuation';
+import ApprovalInbox from './pages/Equity/modules/ApprovalInbox';
+import ScenarioModeling from './pages/Equity/modules/ScenarioModeling';
 import EquityTransactions from './pages/Equity/modules/EquityTransactions';
 import GovernanceReporting from './pages/Equity/modules/GovernanceReporting';
 
@@ -268,6 +275,11 @@ function App() {
                   <EntityLayout><JournalEntries /></EntityLayout>
                 </ProtectedRoute>
               } />
+              <Route path="/enterprise/entity/:entityId/intercompany" element={
+                <ProtectedRoute>
+                  <EntityLayout><IntercompanyConsole /></EntityLayout>
+                </ProtectedRoute>
+              } />
               <Route path="/enterprise/entity/:entityId/accounts-receivable" element={
                 <ProtectedRoute>
                   <EntityLayout><ARModule /></EntityLayout>
@@ -306,6 +318,11 @@ function App() {
               <Route path="/enterprise/entity/:entityId/notifications" element={
                 <ProtectedRoute>
                   <EntityLayout><NotificationsCenter /></EntityLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/enterprise/entity/:entityId/approval-inbox" element={
+                <ProtectedRoute>
+                  <EntityLayout><AppAccountingApprovalInbox /></EntityLayout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/tax-compliance" element={
@@ -373,6 +390,8 @@ function App() {
               {renderModuleCrudRoutes('/app/accounting/chart-of-accounts', AppChartOfAccounts)}
               {renderModulePageRoutes('/app/accounting/general-ledger', AppGeneralLedger)}
               {renderModuleCrudRoutes('/app/accounting/journal-entries', AppJournalEntries)}
+              {renderModulePageRoutes('/app/accounting/approval-inbox', AppAccountingApprovalInbox)}
+              {renderModulePageRoutes('/app/accounting/intercompany', AppIntercompanyConsole)}
               {renderModuleCrudRoutes('/app/accounting/reconciliation', AppReconciliation)}
 
               {/* Sub-Ledgers */}
@@ -465,14 +484,22 @@ function App() {
                 element={<WorkspaceRoute><WorkspaceLayout><WorkspaceMarketing /></WorkspaceLayout></WorkspaceRoute>} />
               <Route path="/app/equity/:workspaceId/registry"
                 element={<WorkspaceRoute><EquityLayout><OwnershipRegistry /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/me"
+                element={<WorkspaceRoute><EquityLayout><MyEquity /></EquityLayout></WorkspaceRoute>} />
               <Route path="/app/equity/:workspaceId/cap-table"
                 element={<WorkspaceRoute><EquityLayout><CapTable /></EquityLayout></WorkspaceRoute>} />
               <Route path="/app/equity/:workspaceId/grants"
                 element={<WorkspaceRoute><EquityLayout><VestingGrants /></EquityLayout></WorkspaceRoute>} />
               <Route path="/app/equity/:workspaceId/exercises"
                 element={<WorkspaceRoute><EquityLayout><ExerciseCenter /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/automation"
+                element={<WorkspaceRoute><EquityLayout><AutomationCenter /></EquityLayout></WorkspaceRoute>} />
               <Route path="/app/equity/:workspaceId/valuation"
                 element={<WorkspaceRoute><EquityLayout><Valuation /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/approvals"
+                element={<WorkspaceRoute><EquityLayout><ApprovalInbox /></EquityLayout></WorkspaceRoute>} />
+              <Route path="/app/equity/:workspaceId/scenarios"
+                element={<WorkspaceRoute><EquityLayout><ScenarioModeling /></EquityLayout></WorkspaceRoute>} />
               <Route path="/app/equity/:workspaceId/transactions"
                 element={<WorkspaceRoute><EquityLayout><EquityTransactions /></EquityLayout></WorkspaceRoute>} />
               <Route path="/app/equity/:workspaceId/governance"

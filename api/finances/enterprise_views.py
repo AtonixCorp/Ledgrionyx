@@ -3,6 +3,7 @@ Enterprise-specific viewsets and views
 """
 from rest_framework import status as drf_status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -21,7 +22,10 @@ from .models import (
     BookkeepingCategory, BookkeepingAccount, Transaction, BookkeepingAuditLog,
     RecurringTransaction, TaskRequest, FixedAsset, AccrualEntry,
     # New models
-    ChartOfAccounts, GeneralLedger, JournalEntry, RecurringJournalTemplate, LedgerPeriod,
+    ChartOfAccounts, GeneralLedger, JournalEntry, JournalApprovalMatrix, JournalApprovalDelegation,
+    JournalEntryApprovalStep, JournalEntryChangeLog, AccountingApprovalMatrix,
+    AccountingApprovalDelegation, AccountingApprovalRecord, AccountingApprovalStep,
+    AccountingApprovalChangeLog, RecurringJournalTemplate, LedgerPeriod,
     Customer, Invoice, InvoiceLineItem, CreditNote, Payment,
     Vendor, PurchaseOrder, Bill, BillPayment,
     InventoryItem, InventoryTransaction, InventoryCostOfGoodsSold,
@@ -30,6 +34,7 @@ from .models import (
     PeriodCloseChecklist, PeriodCloseItem,
     ExchangeRate, FXGainLoss,
     Notification, NotificationPreference,
+    IntercompanyTransaction, IntercompanyEliminationEntry,
     # NEW MODELS
     Client, ClientPortal, ClientMessage, ClientDocument, DocumentRequest, ApprovalRequest,
     DocumentTemplate, Loan, LoanPayment, KYCProfile, AMLTransaction, FirmService,
@@ -48,7 +53,12 @@ from .serializers import (
     BookkeepingCategorySerializer, BookkeepingAccountSerializer, TransactionSerializer, BookkeepingAuditLogSerializer,
     RecurringTransactionSerializer, TaskRequestSerializer,
     # New serializers
-    ChartOfAccountsSerializer, GeneralLedgerSerializer, JournalEntrySerializer,
+    ChartOfAccountsSerializer, GeneralLedgerSerializer, JournalApprovalMatrixSerializer,
+    JournalApprovalDelegationSerializer, JournalEntryApprovalStepSerializer,
+    JournalEntryChangeLogSerializer, JournalEntrySerializer,
+    AccountingApprovalMatrixSerializer, AccountingApprovalDelegationSerializer,
+    AccountingApprovalRecordSerializer, AccountingApprovalStepSerializer,
+    AccountingApprovalChangeLogSerializer,
     RecurringJournalTemplateSerializer, LedgerPeriodSerializer,
     CustomerSerializer, InvoiceSerializer, InvoiceLineItemSerializer, CreditNoteSerializer, PaymentSerializer,
     VendorSerializer, PurchaseOrderSerializer, BillSerializer, BillPaymentSerializer,
@@ -58,6 +68,7 @@ from .serializers import (
     PeriodCloseChecklistSerializer, PeriodCloseItemSerializer,
     ExchangeRateSerializer, FXGainLossSerializer,
     NotificationSerializer, NotificationPreferenceSerializer,
+    IntercompanyTransactionSerializer, IntercompanyEliminationEntrySerializer,
     # NEW SERIALIZERS
     ClientSerializer, ClientPortalSerializer, ClientMessageSerializer, ClientDocumentSerializer,
     DocumentRequestSerializer, ApprovalRequestSerializer, DocumentTemplateSerializer, LoanSerializer,
@@ -74,6 +85,24 @@ from .banking_services import (
     prepare_oauth_consent,
     sync_banking_integration,
 )
+from .accounting_controls import (
+    approve_journal_entry,
+    build_journal_inbox_items,
+    ensure_period_is_open,
+    log_journal_change,
+    reject_journal_entry,
+    snapshot_journal_entry,
+    submit_journal_entry,
+)
+from .accounting_object_controls import (
+    approve_accounting_object,
+    build_accounting_inbox_items,
+    get_accounting_object,
+    infer_accounting_object_type,
+    reject_accounting_object,
+    submit_accounting_object,
+)
+from .intercompany_engine import post_intercompany_transaction
 from .permissions import PermissionChecker
 
 
@@ -2606,26 +2635,117 @@ class JournalEntryViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Return journal entries for user's entities"""
-        entity_id = self.request.query_params.get('entity_id')
-        qs = _filter_queryset_by_entity_scope(JournalEntry.objects.all(), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(
+            JournalEntry.objects.all(),
+            self.request.user,
+        ).select_related('entity', 'created_by', 'approved_by').prefetch_related(
+            'approval_steps__assigned_role',
+            'approval_steps__assigned_staff',
+            'approval_steps__acted_by',
+            'change_logs__actor',
+        )
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            qs = qs.filter(status=status_filter)
         return qs
     
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity')
         entity = _get_accessible_entity_or_404(self.request.user, entity_id)
-        serializer.save(entity=entity, created_by=self.request.user)
+        posting_date = serializer.validated_data.get('posting_date')
+        ensure_period_is_open(entity, posting_date)
+        entry = serializer.save(entity=entity, created_by=self.request.user)
+        log_journal_change(
+            entry,
+            'created',
+            actor=self.request.user,
+            new_values=snapshot_journal_entry(entry),
+            details='Journal entry created in draft state.',
+        )
+
+    def perform_update(self, serializer):
+        entry = serializer.instance
+        if entry.status not in ['draft', 'rejected']:
+            raise ValueError('Only draft or rejected journal entries can be edited.')
+
+        previous = snapshot_journal_entry(entry)
+        posting_date = serializer.validated_data.get('posting_date', entry.posting_date)
+        ensure_period_is_open(entry.entity, posting_date, entry=entry, actor=self.request.user)
+        updated_entry = serializer.save()
+        log_journal_change(
+            updated_entry,
+            'updated',
+            actor=self.request.user,
+            old_values=previous,
+            new_values=snapshot_journal_entry(updated_entry),
+            details='Journal entry updated before approval.',
+        )
+
+    def perform_destroy(self, instance):
+        if instance.status not in ['draft', 'rejected']:
+            raise ValueError('Only draft or rejected journal entries can be deleted.')
+        log_journal_change(
+            instance,
+            'updated',
+            actor=self.request.user,
+            old_values=snapshot_journal_entry(instance),
+            details='Journal entry deleted before approval.',
+        )
+        instance.delete()
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        journal_entry = self.get_object()
+        try:
+            submit_journal_entry(journal_entry, request.user)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(journal_entry)
+        return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
-        """Approve a journal entry"""
+        """Advance the next approval step for a journal entry"""
         journal_entry = self.get_object()
-        journal_entry.status = 'posted'
-        journal_entry.approved_by = request.user
-        journal_entry.approved_at = timezone.now()
-        journal_entry.save()
+        try:
+            approve_journal_entry(journal_entry, request.user, comments=request.data.get('comments', ''))
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
         
+        serializer = self.get_serializer(journal_entry)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Reject the current journal approval step"""
+        journal_entry = self.get_object()
+        try:
+            reject_journal_entry(journal_entry, request.user, comments=request.data.get('comments', ''))
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+
         serializer = self.get_serializer(journal_entry)
         return Response(serializer.data)
     
@@ -2633,6 +2753,12 @@ class JournalEntryViewSet(viewsets.ModelViewSet):
     def reverse(self, request, pk=None):
         """Create a reversal journal entry"""
         original_entry = self.get_object()
+        if original_entry.status != 'posted':
+            return Response({'detail': 'Only posted journal entries can be reversed.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        try:
+            ensure_period_is_open(original_entry.entity, timezone.now().date(), entry=original_entry, actor=request.user)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
         
         reversal = JournalEntry.objects.create(
             entity=original_entry.entity,
@@ -2641,15 +2767,237 @@ class JournalEntryViewSet(viewsets.ModelViewSet):
             description=f"Reversal of {original_entry.reference_number}",
             posting_date=timezone.now().date(),
             status='draft',
+            amount_total=original_entry.amount_total,
             created_by=request.user,
-            original_entry=original_entry
+            original_entry=original_entry,
         )
         
         original_entry.reversing_entry = reversal
-        original_entry.save()
+        original_entry.save(update_fields=['reversing_entry'])
+        log_journal_change(
+            original_entry,
+            'reversed',
+            actor=request.user,
+            details=f'Reversal draft {reversal.reference_number} created.',
+            new_values={'reversal_entry': reversal.id, 'reference_number': reversal.reference_number},
+        )
+        log_journal_change(
+            reversal,
+            'created',
+            actor=request.user,
+            details=f'Reversal draft created from {original_entry.reference_number}.',
+            new_values=snapshot_journal_entry(reversal),
+        )
         
         serializer = self.get_serializer(reversal)
         return Response(serializer.data)
+
+
+class JournalApprovalMatrixViewSet(viewsets.ModelViewSet):
+    """ViewSet for journal entry approval matrix configuration."""
+
+    serializer_class = JournalApprovalMatrixSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(JournalApprovalMatrix.objects.all(), self.request.user).select_related(
+            'entity', 'preparer_role', 'reviewer_role', 'approver_role'
+        )
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
+        serializer.save(entity=entity)
+
+
+class JournalApprovalDelegationViewSet(viewsets.ModelViewSet):
+    """ViewSet for delegated approval authority."""
+
+    serializer_class = JournalApprovalDelegationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(JournalApprovalDelegation.objects.all(), self.request.user).select_related(
+            'entity', 'delegator', 'delegate', 'created_by'
+        )
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
+        serializer.save(entity=entity, created_by=self.request.user)
+
+
+class JournalEntryApprovalStepViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only access to journal approval steps."""
+
+    serializer_class = JournalEntryApprovalStepSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(
+            JournalEntryApprovalStep.objects.all(),
+            self.request.user,
+            entity_relation='journal_entry__entity',
+        ).select_related('assigned_role', 'assigned_staff', 'acted_by', 'journal_entry')
+        if entity_id:
+            qs = qs.filter(journal_entry__entity_id=entity_id)
+        journal_entry_id = self.request.query_params.get('journal_entry')
+        if journal_entry_id:
+            qs = qs.filter(journal_entry_id=journal_entry_id)
+        return qs
+
+
+class JournalEntryChangeLogViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only access to journal workflow and change logs."""
+
+    serializer_class = JournalEntryChangeLogSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(
+            JournalEntryChangeLog.objects.all(),
+            self.request.user,
+            entity_relation='entity',
+        ).select_related('actor', 'journal_entry', 'entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        journal_entry_id = self.request.query_params.get('journal_entry')
+        if journal_entry_id:
+            qs = qs.filter(journal_entry_id=journal_entry_id)
+        return qs
+
+
+class AccountingApprovalMatrixViewSet(viewsets.ModelViewSet):
+    """ViewSet for accounting object approval matrix configuration."""
+
+    serializer_class = AccountingApprovalMatrixSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(AccountingApprovalMatrix.objects.all(), self.request.user).select_related(
+            'entity', 'preparer_role', 'reviewer_role', 'approver_role'
+        )
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
+        serializer.save(entity=entity)
+
+
+class AccountingApprovalDelegationViewSet(viewsets.ModelViewSet):
+    """ViewSet for delegated authority on supported accounting objects."""
+
+    serializer_class = AccountingApprovalDelegationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(AccountingApprovalDelegation.objects.all(), self.request.user).select_related(
+            'entity', 'delegator', 'delegate', 'created_by'
+        )
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+    def perform_create(self, serializer):
+        entity_id = self.request.data.get('entity')
+        entity = _get_accessible_entity_or_404(self.request.user, entity_id)
+        serializer.save(entity=entity, created_by=self.request.user)
+
+
+class AccountingApprovalRecordViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only access to accounting approval records."""
+
+    serializer_class = AccountingApprovalRecordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(AccountingApprovalRecord.objects.all(), self.request.user).select_related(
+            'entity', 'requested_by', 'approved_by'
+        ).prefetch_related('steps__assigned_role', 'steps__assigned_staff', 'steps__acted_by', 'change_logs__actor')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        object_type = self.request.query_params.get('object_type')
+        if object_type:
+            qs = qs.filter(object_type=object_type)
+        return qs
+
+
+class AccountingApprovalStepViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only access to accounting approval steps."""
+
+    serializer_class = AccountingApprovalStepSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(
+            AccountingApprovalStep.objects.all(),
+            self.request.user,
+            entity_relation='approval__entity',
+        ).select_related('approval', 'assigned_role', 'assigned_staff', 'acted_by')
+        if entity_id:
+            qs = qs.filter(approval__entity_id=entity_id)
+        approval_id = self.request.query_params.get('approval')
+        if approval_id:
+            qs = qs.filter(approval_id=approval_id)
+        return qs
+
+
+class AccountingApprovalChangeLogViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only access to accounting approval change logs."""
+
+    serializer_class = AccountingApprovalChangeLogSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        qs = _filter_queryset_by_entity_scope(
+            AccountingApprovalChangeLog.objects.all(),
+            self.request.user,
+            entity_relation='entity',
+        ).select_related('approval', 'actor', 'entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        approval_id = self.request.query_params.get('approval')
+        if approval_id:
+            qs = qs.filter(approval_id=approval_id)
+        return qs
+
+
+class AccountingApprovalInboxViewSet(viewsets.ViewSet):
+    """Unified inbox for journal and accounting object approvals."""
+
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        entity_id = request.query_params.get('entity_id') or request.query_params.get('entity')
+        entity = _get_accessible_entity_or_404(request.user, entity_id) if entity_id else None
+        items = build_journal_inbox_items(request.user, entity=entity) + build_accounting_inbox_items(request.user, entity=entity)
+        items.sort(key=lambda item: item.get('submitted_at') or '', reverse=True)
+        return Response({
+            'pending': [item for item in items if item.get('status') in ['pending_review', 'pending_approval']],
+            'history': [item for item in items if item.get('status') in ['approved', 'posted', 'rejected']],
+            'summary': {
+                'pending_count': len([item for item in items if item.get('status') in ['pending_review', 'pending_approval']]),
+                'history_count': len([item for item in items if item.get('status') in ['approved', 'posted', 'rejected']]),
+            },
+        })
 
 
 class RecurringJournalTemplateViewSet(viewsets.ModelViewSet):
@@ -2694,9 +3042,11 @@ class LedgerPeriodViewSet(viewsets.ModelViewSet):
         """Close an accounting period"""
         period = self.get_object()
         period.status = 'closed'
+        if not period.no_posting_after:
+            period.no_posting_after = period.end_date
         period.closed_at = timezone.now()
         period.closed_by = request.user
-        period.save()
+        period.save(update_fields=['status', 'no_posting_after', 'closed_at', 'closed_by'])
         
         serializer = self.get_serializer(period)
         return Response(serializer.data)
@@ -2822,16 +3172,56 @@ class PaymentViewSet(viewsets.ModelViewSet):
         entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         invoice = serializer.validated_data['invoice']
         customer = serializer.validated_data.get('customer') or invoice.customer
-        instance = serializer.save(entity=entity, customer=customer)
-        
-        # Update invoice paid amount
-        instance.invoice.paid_amount += instance.amount
-        instance.invoice.outstanding_amount = instance.invoice.total_amount - instance.invoice.paid_amount
-        if instance.invoice.outstanding_amount <= 0:
-            instance.invoice.status = 'paid'
-        else:
-            instance.invoice.status = 'partially_paid'
-        instance.invoice.save()
+        try:
+            ensure_period_is_open(entity, serializer.validated_data['payment_date'])
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
+        serializer.save(entity=entity, customer=customer, created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected payments can be edited.'})
+        try:
+            ensure_period_is_open(serializer.instance.entity, serializer.validated_data.get('payment_date', serializer.instance.payment_date))
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected payments can be deleted.'})
+        instance.delete()
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        payment = self.get_object()
+        try:
+            record = submit_accounting_object(payment, request.user, object_type='payment')
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        payment = self.get_object()
+        try:
+            record = approve_accounting_object(AccountingApprovalRecord.objects.get(object_type='payment', object_id=payment.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this payment.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        payment = self.get_object()
+        try:
+            record = reject_accounting_object(AccountingApprovalRecord.objects.get(object_type='payment', object_id=payment.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this payment.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
 
 
 # ============================================================================
@@ -2876,7 +3266,59 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         subtotal = Decimal(str(self.request.data.get('subtotal') or '0'))
         tax_amount = Decimal(str(self.request.data.get('tax_amount') or '0'))
         total_amount = Decimal(str(self.request.data.get('total_amount') or (subtotal + tax_amount)))
+        try:
+            ensure_period_is_open(entity, serializer.validated_data['po_date'])
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
         serializer.save(entity=entity, created_by=self.request.user, total_amount=total_amount)
+
+    def perform_update(self, serializer):
+        if serializer.instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected purchase orders can be edited.'})
+        try:
+            ensure_period_is_open(serializer.instance.entity, serializer.validated_data.get('po_date', serializer.instance.po_date))
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
+        subtotal = Decimal(str(self.request.data.get('subtotal') or serializer.instance.subtotal or '0'))
+        tax_amount = Decimal(str(self.request.data.get('tax_amount') or serializer.instance.tax_amount or '0'))
+        total_amount = Decimal(str(self.request.data.get('total_amount') or (subtotal + tax_amount)))
+        serializer.save(subtotal=subtotal, tax_amount=tax_amount, total_amount=total_amount)
+
+    def perform_destroy(self, instance):
+        if instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected purchase orders can be deleted.'})
+        instance.delete()
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        purchase_order = self.get_object()
+        try:
+            record = submit_accounting_object(purchase_order, request.user, object_type='purchase_order')
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        purchase_order = self.get_object()
+        try:
+            record = approve_accounting_object(AccountingApprovalRecord.objects.get(object_type='purchase_order', object_id=purchase_order.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this purchase order.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        purchase_order = self.get_object()
+        try:
+            record = reject_accounting_object(AccountingApprovalRecord.objects.get(object_type='purchase_order', object_id=purchase_order.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this purchase order.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
 
 
 class BillViewSet(viewsets.ModelViewSet):
@@ -2898,16 +3340,19 @@ class BillViewSet(viewsets.ModelViewSet):
         subtotal = Decimal(str(self.request.data.get('subtotal') or '0'))
         tax_amount = Decimal(str(self.request.data.get('tax_amount') or '0'))
         total_amount = Decimal(str(self.request.data.get('total_amount') or (subtotal + tax_amount)))
-        serializer.save(
-            entity=entity,
-            created_by=self.request.user,
-            subtotal=subtotal,
-            tax_amount=tax_amount,
-            total_amount=total_amount,
-            outstanding_amount=total_amount,
-        )
+        try:
+            ensure_period_is_open(entity, serializer.validated_data['bill_date'])
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
+        serializer.save(entity=entity, created_by=self.request.user, subtotal=subtotal, tax_amount=tax_amount, total_amount=total_amount, outstanding_amount=total_amount)
 
     def perform_update(self, serializer):
+        if serializer.instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected bills can be edited.'})
+        try:
+            ensure_period_is_open(serializer.instance.entity, serializer.validated_data.get('bill_date', serializer.instance.bill_date))
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
         subtotal = Decimal(str(self.request.data.get('subtotal') or serializer.instance.subtotal or '0'))
         tax_amount = Decimal(str(self.request.data.get('tax_amount') or serializer.instance.tax_amount or '0'))
         total_amount = Decimal(str(self.request.data.get('total_amount') or (subtotal + tax_amount)))
@@ -2929,6 +3374,42 @@ class BillViewSet(viewsets.ModelViewSet):
             status=status,
         )
 
+    def perform_destroy(self, instance):
+        if instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected bills can be deleted.'})
+        instance.delete()
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        bill = self.get_object()
+        try:
+            record = submit_accounting_object(bill, request.user, object_type='bill')
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        bill = self.get_object()
+        try:
+            record = approve_accounting_object(AccountingApprovalRecord.objects.get(object_type='bill', object_id=bill.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this bill.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        bill = self.get_object()
+        try:
+            record = reject_accounting_object(AccountingApprovalRecord.objects.get(object_type='bill', object_id=bill.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this bill.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
 
 class BillPaymentViewSet(viewsets.ModelViewSet):
     """ViewSet for bill payments"""
@@ -2948,16 +3429,56 @@ class BillPaymentViewSet(viewsets.ModelViewSet):
         entity = _get_accessible_entity_or_404(self.request.user, entity_id)
         bill = serializer.validated_data['bill']
         vendor = serializer.validated_data.get('vendor') or bill.vendor
-        instance = serializer.save(entity=entity, vendor=vendor)
-        
-        # Update bill paid amount
-        instance.bill.paid_amount += instance.amount
-        instance.bill.outstanding_amount = instance.bill.total_amount - instance.bill.paid_amount
-        if instance.bill.outstanding_amount <= 0:
-            instance.bill.status = 'paid'
-        else:
-            instance.bill.status = 'partially_paid'
-        instance.bill.save()
+        try:
+            ensure_period_is_open(entity, serializer.validated_data['payment_date'])
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
+        serializer.save(entity=entity, vendor=vendor, created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected bill payments can be edited.'})
+        try:
+            ensure_period_is_open(serializer.instance.entity, serializer.validated_data.get('payment_date', serializer.instance.payment_date))
+        except ValueError as exc:
+            raise ValidationError({'detail': str(exc)})
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.approval_status not in ['draft', 'rejected']:
+            raise ValidationError({'detail': 'Only draft or rejected bill payments can be deleted.'})
+        instance.delete()
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        bill_payment = self.get_object()
+        try:
+            record = submit_accounting_object(bill_payment, request.user, object_type='bill_payment')
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        bill_payment = self.get_object()
+        try:
+            record = approve_accounting_object(AccountingApprovalRecord.objects.get(object_type='bill_payment', object_id=bill_payment.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this bill payment.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        bill_payment = self.get_object()
+        try:
+            record = reject_accounting_object(AccountingApprovalRecord.objects.get(object_type='bill_payment', object_id=bill_payment.id), request.user, comments=request.data.get('comments', ''))
+        except AccountingApprovalRecord.DoesNotExist:
+            return Response({'detail': 'No approval workflow exists for this bill payment.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        return Response(AccountingApprovalRecordSerializer(record).data)
 
 
 # ============================================================================
@@ -3222,7 +3743,11 @@ class NotificationViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Return notifications for current user"""
-        return Notification.objects.filter(user=self.request.user)
+        qs = Notification.objects.filter(user=self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(related_entity_id=entity_id)
+        return qs
     
     @action(detail=False, methods=['get'])
     def unread(self, request):
@@ -3231,6 +3756,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
             user=request.user,
             status='unread'
         ).order_by('-sent_at')
+        entity_id = request.query_params.get('entity_id') or request.query_params.get('entity')
+        if entity_id:
+            notifications = notifications.filter(related_entity_id=entity_id)
         
         serializer = self.get_serializer(notifications, many=True)
         return Response(serializer.data)
@@ -3353,6 +3881,108 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
         if org_id:
             return DocumentTemplate.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
         return DocumentTemplate.objects.filter(organization__in=accessible_orgs)
+
+
+# ============ LOAN MANAGEMENT VIEWSETS ============
+
+class IntercompanyTransactionViewSet(viewsets.ModelViewSet):
+    """ViewSet for mirrored intercompany accounting workflows."""
+
+    serializer_class = IntercompanyTransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
+        queryset = IntercompanyTransaction.objects.filter(organization__in=accessible_orgs)
+        organization_id = self.request.query_params.get('organization')
+        entity_id = self.request.query_params.get('entity')
+        status_filter = self.request.query_params.get('status')
+
+        if organization_id:
+            queryset = queryset.filter(organization_id=organization_id)
+        if entity_id:
+            queryset = queryset.filter(Q(source_entity_id=entity_id) | Q(destination_entity_id=entity_id))
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        return queryset.select_related(
+            'organization',
+            'source_entity',
+            'destination_entity',
+            'source_invoice',
+            'destination_bill',
+            'destination_loan',
+        )
+
+    def perform_create(self, serializer):
+        source_entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('source_entity'))
+        destination_entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('destination_entity'))
+
+        if source_entity.organization_id != destination_entity.organization_id:
+            raise ValidationError({'destination_entity': 'Both entities must belong to the same organization.'})
+        if source_entity.id == destination_entity.id:
+            raise ValidationError({'destination_entity': 'Source and destination entities must be different.'})
+
+        organization = get_object_or_404(
+            _accessible_organizations_queryset(self.request.user),
+            id=self.request.data.get('organization') or source_entity.organization_id,
+        )
+        if organization.id != source_entity.organization_id:
+            raise ValidationError({'organization': 'Organization must match the selected entities.'})
+
+        reference_number = self.request.data.get('reference_number') or (
+            f"IC-{organization.id}-{timezone.now().strftime('%Y%m%d%H%M%S%f')}"
+        )
+        transaction_record = serializer.save(
+            organization=organization,
+            source_entity=source_entity,
+            destination_entity=destination_entity,
+            reference_number=reference_number,
+            created_by=self.request.user,
+        )
+
+        auto_post = str(self.request.data.get('auto_post', 'true')).lower() not in {'0', 'false', 'no'}
+        if auto_post:
+            try:
+                post_intercompany_transaction(transaction_record, acting_user=self.request.user)
+            except ValueError as exc:
+                raise ValidationError({'detail': str(exc)})
+
+    def perform_update(self, serializer):
+        if serializer.instance.status != 'draft':
+            raise ValidationError({'detail': 'Only draft intercompany transactions can be edited.'})
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.status != 'draft':
+            raise ValidationError({'detail': 'Only draft intercompany transactions can be deleted.'})
+        instance.delete()
+
+    @action(detail=True, methods=['post'])
+    def post(self, request, pk=None):
+        transaction_record = self.get_object()
+        try:
+            post_intercompany_transaction(transaction_record, acting_user=request.user)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=drf_status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(transaction_record)
+        return Response(serializer.data)
+
+
+class IntercompanyEliminationEntryViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only viewset for consolidation elimination outputs."""
+
+    serializer_class = IntercompanyEliminationEntrySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
+        queryset = IntercompanyEliminationEntry.objects.filter(
+            consolidation__organization__in=accessible_orgs
+        )
+        consolidation_id = self.request.query_params.get('consolidation')
+        if consolidation_id:
+            queryset = queryset.filter(consolidation_id=consolidation_id)
+        return queryset.select_related('transaction', 'source_entity', 'destination_entity', 'consolidation')
 
 
 # ============ LOAN MANAGEMENT VIEWSETS ============

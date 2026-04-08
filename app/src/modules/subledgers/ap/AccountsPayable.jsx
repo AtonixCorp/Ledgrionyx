@@ -26,10 +26,15 @@ const STATUS_COLORS = {
   paid: '#059669',
   overdue: '#dc2626',
   cancelled: '#9ca3af',
+  pending_review: '#f59e0b',
+  pending_approval: '#fb7185',
+  rejected: '#dc2626',
+  approved: '#059669',
 };
 
 const parseList = (response) => response.data.results || response.data;
 const formatMoney = (value) => `$${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+const formatApprovalStatus = (value) => String(value || 'draft').replace(/_/g, ' ');
 const formatError = (error, fallback) => {
   const data = error.response?.data;
   if (!data) return fallback;
@@ -172,6 +177,36 @@ export default function AccountsPayable() {
     }
   };
 
+  const handleSubmit = async (recordId) => {
+    try {
+      await billsAPI.submit(recordId);
+      await load();
+    } catch (requestError) {
+      setError(formatError(requestError, 'Failed to submit bill for approval.'));
+    }
+  };
+
+  const handleApprove = async (recordId) => {
+    const comments = window.prompt('Approval note (optional):', '') || '';
+    try {
+      await billsAPI.approve(recordId, { comments });
+      await load();
+    } catch (requestError) {
+      setError(formatError(requestError, 'Failed to approve bill.'));
+    }
+  };
+
+  const handleReject = async (recordId) => {
+    const comments = window.prompt('Rejection reason:', '');
+    if (comments === null) return;
+    try {
+      await billsAPI.reject(recordId, { comments });
+      await load();
+    } catch (requestError) {
+      setError(formatError(requestError, 'Failed to reject bill.'));
+    }
+  };
+
   const totalOutstanding = records.reduce((sum, record) => sum + Number(record.outstanding_amount || 0), 0);
   const overdueCount = records.filter((record) => record.status === 'overdue').length;
   const paidCount = records.filter((record) => record.status === 'paid').length;
@@ -184,11 +219,11 @@ export default function AccountsPayable() {
     { key: 'total_amount', label: 'Total', render: (value) => <span style={{ fontFamily: 'monospace' }}>{formatMoney(value)}</span> },
     { key: 'outstanding_amount', label: 'Outstanding', render: (value) => <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{formatMoney(value)}</span> },
     {
-      key: 'status',
-      label: 'Status',
+      key: 'approval_status',
+      label: 'Approval',
       render: (value) => (
         <span style={{ color: STATUS_COLORS[value] || '#6b7280', fontWeight: 700, textTransform: 'capitalize' }}>
-          {String(value || '').replace(/_/g, ' ')}
+          {formatApprovalStatus(value)}
         </span>
       ),
     },
@@ -224,8 +259,11 @@ export default function AccountsPayable() {
             actions={(row) => (
               <div style={{ display: 'flex', gap: 6 }}>
                 <button type="button" onClick={() => navigate(`${BASE_PATH}/view/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', background: 'transparent', cursor: 'pointer' }}>View</button>
-                <button type="button" onClick={() => navigate(`${BASE_PATH}/edit/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', background: 'transparent', cursor: 'pointer' }}>Edit</button>
-                <button type="button" onClick={() => handleDelete(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', background: 'transparent', color: '#dc2626', cursor: 'pointer' }}>Delete</button>
+                {['draft', 'rejected'].includes(row.approval_status) ? <button type="button" onClick={() => navigate(`${BASE_PATH}/edit/${row.id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', background: 'transparent', cursor: 'pointer' }}>Edit</button> : null}
+                {['draft', 'rejected'].includes(row.approval_status) ? <button type="button" onClick={() => handleSubmit(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #c084fc', background: 'transparent', cursor: 'pointer', color: '#7c3aed' }}>Submit</button> : null}
+                {['pending_review', 'pending_approval'].includes(row.approval_status) ? <button type="button" onClick={() => handleApprove(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #86efac', background: 'transparent', cursor: 'pointer', color: '#15803d' }}>Approve</button> : null}
+                {['pending_review', 'pending_approval'].includes(row.approval_status) ? <button type="button" onClick={() => handleReject(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', background: 'transparent', cursor: 'pointer', color: '#dc2626' }}>Reject</button> : null}
+                {['draft', 'rejected'].includes(row.approval_status) ? <button type="button" onClick={() => handleDelete(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', background: 'transparent', color: '#dc2626', cursor: 'pointer' }}>Delete</button> : null}
               </div>
             )}
           />

@@ -3,6 +3,8 @@ import { Button, Card, PageHeader, Table, Modal, Input } from '../../components/
 import { paymentsAPI, invoicesAPI, customersAPI, entitiesAPI } from '../../services/api';
 
 const BLANK = { payment_date: '', amount: '', payment_method: 'bank_transfer', reference_number: '', entity: '', invoice: '', customer: '' };
+const STATUS_COLOR = { draft: '#6b7280', pending_review: '#f59e0b', pending_approval: '#fb7185', rejected: '#ef4444', approved: '#10b981' };
+const formatApprovalStatus = (value) => String(value || 'draft').replace(/_/g, ' ');
 
 export default function PaymentScheduling() {
   const [list, setList] = useState([]);
@@ -53,12 +55,46 @@ export default function PaymentScheduling() {
   const openEdit = (item) => { setEditItem(item); setForm({ payment_date: item.payment_date || '', amount: item.amount || '', payment_method: item.payment_method || 'bank_transfer', reference_number: item.reference_number || '', entity: item.entity || '', invoice: item.invoice || '', customer: item.customer || '' }); setError(''); setShowModal(true); };
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
 
+  const handleSubmit = async (id) => {
+    try {
+      await paymentsAPI.submit(id);
+      await load();
+    } catch (e) {
+      const d = e.response?.data;
+      setError(d ? Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | ') : 'Failed to submit payment');
+    }
+  };
+
+  const handleApprove = async (id) => {
+    const comments = window.prompt('Approval note (optional):', '') || '';
+    try {
+      await paymentsAPI.approve(id, { comments });
+      await load();
+    } catch (e) {
+      const d = e.response?.data;
+      setError(d ? Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | ') : 'Failed to approve payment');
+    }
+  };
+
+  const handleReject = async (id) => {
+    const comments = window.prompt('Rejection reason:', '');
+    if (comments === null) return;
+    try {
+      await paymentsAPI.reject(id, { comments });
+      await load();
+    } catch (e) {
+      const d = e.response?.data;
+      setError(d ? Object.entries(d).map(([k,v]) => `${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' | ') : 'Failed to reject payment');
+    }
+  };
+
   const columns = [
     { key: 'payment_date', label: 'Date' },
     { key: 'amount', label: 'Amount', render: v => <span style={{ fontFamily: 'monospace' }}>${parseFloat(v||0).toLocaleString('en-US',{minimumFractionDigits:2})}</span> },
     { key: 'payment_method', label: 'Method', render: v => v?.replace(/_/g,' ') },
     { key: 'reference_number', label: 'Reference' },
     { key: 'invoice_number', label: 'Invoice', render: (v, row) => row.invoice_number || '—' },
+    { key: 'approval_status', label: 'Approval', render: v => <span style={{ fontSize: 12, fontWeight: 700, color: STATUS_COLOR[v]||'#6b7280', padding: '2px 8px', background: (STATUS_COLOR[v]||'#6b7280')+'22', borderRadius: 4, textTransform: 'capitalize' }}>{formatApprovalStatus(v)}</span> },
   ];
 
   return (
@@ -69,7 +105,12 @@ export default function PaymentScheduling() {
         {loading ? <div style={{ textAlign: 'center', padding: 32, color: 'var(--color-silver-dark)' }}>Loading...</div>
         : list.length === 0 ? <div style={{ textAlign: 'center', padding: 48, color: 'var(--color-silver-dark)' }}><p style={{ fontSize: 15, fontWeight: 500 }}>No payments scheduled yet.</p></div>
         : <Table columns={columns} data={list} actions={row => (
-            <button onClick={() => openEdit(row)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', cursor: 'pointer', background: 'transparent' }}>Edit</button>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {['draft', 'rejected'].includes(row.approval_status) ? <button onClick={() => openEdit(row)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid var(--border-color-default)', cursor: 'pointer', background: 'transparent' }}>Edit</button> : null}
+              {['draft', 'rejected'].includes(row.approval_status) ? <button onClick={() => handleSubmit(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #c084fc', cursor: 'pointer', background: 'transparent', color: '#7c3aed' }}>Submit</button> : null}
+              {['pending_review', 'pending_approval'].includes(row.approval_status) ? <button onClick={() => handleApprove(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #86efac', cursor: 'pointer', background: 'transparent', color: '#15803d' }}>Approve</button> : null}
+              {['pending_review', 'pending_approval'].includes(row.approval_status) ? <button onClick={() => handleReject(row.id)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 4, border: '1px solid #fca5a5', cursor: 'pointer', background: 'transparent', color: '#dc2626' }}>Reject</button> : null}
+            </div>
           )} />}
       </Card>
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editItem ? 'Edit Payment' : 'Schedule Payment'}

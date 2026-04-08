@@ -13,6 +13,16 @@ from django.utils import timezone
 
 from finances.models import ChartOfAccounts, JournalEntry, TaxCalculation, UserProfile, GeneralLedger
 
+from .automation import (
+    notify_certificate_released,
+    notify_exercise_status,
+    notify_exercise_submitted,
+    notify_upcoming_vesting,
+    notify_vesting_milestone,
+    sync_exercise_payment,
+    sync_payroll_tax_event,
+)
+
 from .models import (
     AccelerationType,
     ApprovalDecisionStatus,
@@ -224,8 +234,11 @@ def apply_acceleration(
 @transaction.atomic
 def mark_vesting_events_as_of(grant: EquityGrant, as_of: date | None = None) -> None:
     as_of = ensure_date(as_of or timezone.now().date())
-    pending_events = grant.vesting_events.filter(status=VestingEventStatus.PENDING, vest_date__lte=as_of)
-    pending_events.update(status=VestingEventStatus.VESTED)
+    pending_events = list(grant.vesting_events.filter(status=VestingEventStatus.PENDING, vest_date__lte=as_of))
+    for event in pending_events:
+        event.status = VestingEventStatus.VESTED
+        event.save(update_fields=['status', 'updated_at'])
+        notify_vesting_milestone(event)
     grant.last_vesting_calculated_at = timezone.now()
     grant.save(update_fields=['last_vesting_calculated_at', 'updated_at'])
 
@@ -266,6 +279,39 @@ def calculate_grant_summary(grant: EquityGrant, as_of: date | None = None) -> di
         'available_to_exercise': int(available_to_exercise),
         'unvested_units': int(unvested_units),
         'lifecycle_status': lifecycle_status,
+    }
+
+
+def run_vesting_notification_sweep(as_of: date | None = None, reminder_days: tuple[int, ...] = (30, 7, 1)) -> dict:
+    as_of = ensure_date(as_of or timezone.now().date())
+    matured_grants = 0
+    reminder_count = 0
+
+    grants = EquityGrant.objects.select_related('workspace', 'shareholder', 'employee__user', 'share_class').all()
+    for grant in grants:
+        due_events = grant.vesting_events.filter(status=VestingEventStatus.PENDING, vest_date__lte=as_of)
+        if due_events.exists():
+            mark_vesting_events_as_of(grant, as_of)
+            matured_grants += 1
+
+        for days_until in reminder_days:
+            target_date = as_of + timedelta(days=days_until)
+            upcoming_events = grant.vesting_events.filter(
+                status=VestingEventStatus.PENDING,
+                vest_date=target_date,
+            )
+            for event in upcoming_events:
+                event_name = f'vesting_reminder_{days_until}d'
+                already_sent = event.delivery_logs.filter(event_name=event_name, status='sent').exists()
+                if already_sent:
+                    continue
+                notify_upcoming_vesting(event, days_until)
+                reminder_count += 1
+
+    return {
+        'as_of': as_of.isoformat(),
+        'grants_matured': matured_grants,
+        'reminders_sent': reminder_count,
     }
 
 
@@ -338,6 +384,8 @@ def create_exercise_request(
         exercise_request.status = ExerciseRequestStatus.FINANCE_REVIEW
         exercise_request.save(update_fields=['status', 'updated_at'])
 
+    notify_exercise_submitted(exercise_request)
+
     return exercise_request
 
 
@@ -362,6 +410,8 @@ def approve_exercise_request(exercise_request: EquityExerciseRequest, approver: 
         exercise_request.status = ExerciseRequestStatus.APPROVED
         exercise_request.approved_units = exercise_request.requested_units
     exercise_request.save(update_fields=['status', 'approved_units', 'updated_at'])
+    if exercise_request.status == ExerciseRequestStatus.APPROVED:
+        notify_exercise_status(exercise_request, approved=True)
     return exercise_request
 
 
@@ -376,6 +426,7 @@ def reject_exercise_request(exercise_request: EquityExerciseRequest, approver: U
     approval.save(update_fields=['status', 'decided_at', 'comments', 'updated_at'])
     exercise_request.status = ExerciseRequestStatus.REJECTED
     exercise_request.save(update_fields=['status', 'updated_at'])
+    notify_exercise_status(exercise_request, approved=False)
     return exercise_request
 
 
@@ -529,7 +580,7 @@ def complete_exercise_request(exercise_request: EquityExerciseRequest, actor: Us
         issued_by=actor,
     )
 
-    EquityPayrollTaxEvent.objects.create(
+    payroll_tax_event = EquityPayrollTaxEvent.objects.create(
         workspace=grant.workspace,
         grant=grant,
         exercise_request=exercise_request,
@@ -547,6 +598,9 @@ def complete_exercise_request(exercise_request: EquityExerciseRequest, actor: Us
             'payment_method': exercise_request.payment_method,
         },
     )
+
+    payment_sync_result = sync_exercise_payment(exercise_request)
+    payroll_sync_result = sync_payroll_tax_event(payroll_tax_event)
 
     exercise_request.tax_calculation = tax_calculation
     exercise_request.journal_entry = journal_entry
@@ -578,5 +632,17 @@ def complete_exercise_request(exercise_request: EquityExerciseRequest, actor: Us
             units_remaining -= event.units
             event.save(update_fields=['status', 'updated_at'])
 
+    if payment_sync_result.get('results') or payroll_sync_result.get('results'):
+        exercise_request.notes = '\n'.join(
+            item for item in [
+                exercise_request.notes.strip(),
+                f"Payment sync: {'ok' if payment_sync_result.get('successful') else 'pending/failed'} ({payment_sync_result.get('configured_adapters', 0)} adapters)",
+                f"Payroll sync: {'ok' if payroll_sync_result.get('successful') else 'pending/failed'} ({payroll_sync_result.get('configured_adapters', 0)} adapters)",
+            ]
+            if item
+        )
+        exercise_request.save(update_fields=['notes', 'updated_at'])
+
+    notify_certificate_released(certificate)
     calculate_grant_summary(grant)
     return exercise_request

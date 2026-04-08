@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useEnterprise } from './EnterpriseContext';
-import { equityAPI } from '../services/api';
+import { entityStaffAPI, equityAPI } from '../services/api';
 import { hasEquityModule } from '../utils/workspaceModules';
 
 const EquityContext = createContext(null);
@@ -15,14 +15,28 @@ const asList = (payload) => {
   return [];
 };
 
+const triggerBlobDownload = (blob, filename) => {
+  const objectUrl = window.URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.URL.revokeObjectURL(objectUrl);
+};
+
 export const EquityProvider = ({ children }) => {
   const { activeWorkspace } = useEnterprise();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [scenarioApprovalPolicy, setScenarioApprovalPolicy] = useState(null);
+  const [reviewerCandidates, setReviewerCandidates] = useState([]);
   const [shareholders, setShareholders] = useState([]);
   const [shareClasses, setShareClasses] = useState([]);
   const [holdings, setHoldings] = useState([]);
+  const [optionPoolReserves, setOptionPoolReserves] = useState([]);
   const [fundingRounds, setFundingRounds] = useState([]);
   const [valuations, setValuations] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -32,6 +46,21 @@ export const EquityProvider = ({ children }) => {
   const [exerciseRequests, setExerciseRequests] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [payrollTaxEvents, setPayrollTaxEvents] = useState([]);
+  const [adapterConfigs, setAdapterConfigs] = useState([]);
+  const [adapterPresets, setAdapterPresets] = useState({ payroll: [], payment: [] });
+  const [deliveryLogs, setDeliveryLogs] = useState([]);
+  const [scenarioApprovals, setScenarioApprovals] = useState([]);
+  const [scenarioApprovalInbox, setScenarioApprovalInbox] = useState({ pending: [], overdue: [], summary: {} });
+  const [scenarioOverview, setScenarioOverview] = useState(null);
+  const [scenarioAnalysis, setScenarioAnalysis] = useState(null);
+  const [selfService, setSelfService] = useState({
+    employee: null,
+    grants: [],
+    vestingEvents: [],
+    exerciseRequests: [],
+    certificates: [],
+    deliveryLogs: [],
+  });
   const [saving, setSaving] = useState(false);
 
   const workspaceId = activeWorkspace?.id;
@@ -45,9 +74,12 @@ export const EquityProvider = ({ children }) => {
     try {
       const [
         profileRes,
+        approvalPolicyRes,
+        reviewerCandidatesRes,
         shareholdersRes,
         shareClassesRes,
         holdingsRes,
+        optionPoolReservesRes,
         roundsRes,
         valuationsRes,
         transactionsRes,
@@ -57,11 +89,21 @@ export const EquityProvider = ({ children }) => {
         exerciseRequestsRes,
         certificatesRes,
         payrollTaxEventsRes,
+        adapterConfigsRes,
+        adapterPresetsRes,
+        deliveryLogsRes,
+        scenarioApprovalsRes,
+        scenarioApprovalInboxRes,
+        scenarioOverviewRes,
+        selfServiceRes,
       ] = await Promise.all([
         equityAPI.profile.list(entityId),
+        equityAPI.scenarioApprovalPolicy.list(entityId),
+        entityStaffAPI.getAll({ entity: entityId }),
         equityAPI.shareholders.list(entityId),
         equityAPI.shareClasses.list(entityId),
         equityAPI.holdings.list(entityId),
+        equityAPI.optionPoolReserves.list(entityId),
         equityAPI.fundingRounds.list(entityId),
         equityAPI.valuations.list(entityId),
         equityAPI.transactions.list(entityId),
@@ -71,12 +113,22 @@ export const EquityProvider = ({ children }) => {
         equityAPI.exerciseRequests.list(entityId),
         equityAPI.certificates.list(entityId),
         equityAPI.payrollTaxEvents.list(entityId),
+        equityAPI.adapterConfigs.list(entityId),
+        equityAPI.adapterConfigs.presets(entityId),
+        equityAPI.deliveryLogs.list(entityId),
+        equityAPI.scenarioApprovals.list(entityId),
+        equityAPI.scenarioApprovals.inbox(entityId),
+        equityAPI.scenarios.overview(entityId),
+        equityAPI.selfService.dashboard(entityId),
       ]);
 
       setProfile(asList(profileRes.data)[0] || null);
+      setScenarioApprovalPolicy(asList(approvalPolicyRes.data)[0] || null);
+      setReviewerCandidates(asList(reviewerCandidatesRes.data).filter((item) => String(item.entity) === String(entityId)));
       setShareholders(asList(shareholdersRes.data));
       setShareClasses(asList(shareClassesRes.data));
       setHoldings(asList(holdingsRes.data));
+      setOptionPoolReserves(asList(optionPoolReservesRes.data));
       setFundingRounds(asList(roundsRes.data));
       setValuations(asList(valuationsRes.data));
       setTransactions(asList(transactionsRes.data));
@@ -86,6 +138,24 @@ export const EquityProvider = ({ children }) => {
       setExerciseRequests(asList(exerciseRequestsRes.data));
       setCertificates(asList(certificatesRes.data));
       setPayrollTaxEvents(asList(payrollTaxEventsRes.data));
+      setAdapterConfigs(asList(adapterConfigsRes.data));
+      setAdapterPresets(adapterPresetsRes.data || { payroll: [], payment: [] });
+      setDeliveryLogs(asList(deliveryLogsRes.data));
+      setScenarioApprovals(asList(scenarioApprovalsRes.data));
+      setScenarioApprovalInbox({
+        pending: asList(scenarioApprovalInboxRes.data?.pending),
+        overdue: asList(scenarioApprovalInboxRes.data?.overdue),
+        summary: scenarioApprovalInboxRes.data?.summary || {},
+      });
+      setScenarioOverview(scenarioOverviewRes.data || null);
+      setSelfService({
+        employee: selfServiceRes.data?.employee || null,
+        grants: asList(selfServiceRes.data?.grants),
+        vestingEvents: asList(selfServiceRes.data?.vesting_events),
+        exerciseRequests: asList(selfServiceRes.data?.exercise_requests),
+        certificates: asList(selfServiceRes.data?.certificates),
+        deliveryLogs: asList(selfServiceRes.data?.delivery_logs),
+      });
     } catch (err) {
       setError(err?.response?.data?.detail || err.message || 'Failed to load equity data.');
     } finally {
@@ -173,9 +243,12 @@ export const EquityProvider = ({ children }) => {
     workspaceId,
     equityEnabled,
     profile,
+    scenarioApprovalPolicy,
+    reviewerCandidates,
     shareholders,
     shareClasses,
     holdings,
+    optionPoolReserves,
     fundingRounds,
     valuations,
     transactions,
@@ -185,6 +258,14 @@ export const EquityProvider = ({ children }) => {
     exerciseRequests,
     certificates,
     payrollTaxEvents,
+    adapterConfigs,
+    adapterPresets,
+    deliveryLogs,
+    scenarioApprovals,
+    scenarioApprovalInbox,
+    scenarioOverview,
+    scenarioAnalysis,
+    selfService,
     summary,
     saving,
     refreshEquity,
@@ -194,6 +275,118 @@ export const EquityProvider = ({ children }) => {
     createShareClass: (payload) => mutateResource('shareClasses', 'create', payload),
     updateShareClass: (id, payload) => mutateResource('shareClasses', 'update', payload, id),
     deleteShareClass: (id) => mutateResource('shareClasses', 'delete', null, id),
+    createHolding: (payload) => mutateResource('holdings', 'create', payload),
+    updateHolding: (id, payload) => mutateResource('holdings', 'update', payload, id),
+    deleteHolding: (id) => mutateResource('holdings', 'delete', null, id),
+    createOptionPoolReserve: (payload) => mutateResource('optionPoolReserves', 'create', payload),
+    updateOptionPoolReserve: (id, payload) => mutateResource('optionPoolReserves', 'update', payload, id),
+    deleteOptionPoolReserve: (id) => mutateResource('optionPoolReserves', 'delete', null, id),
+    createFundingRound: (payload) => mutateResource('fundingRounds', 'create', payload),
+    updateFundingRound: (id, payload) => mutateResource('fundingRounds', 'update', payload, id),
+    deleteFundingRound: (id) => mutateResource('fundingRounds', 'delete', null, id),
+    analyzeScenario: async (payload) => {
+      if (!workspaceId) {
+        throw new Error('No active workspace is selected.');
+      }
+      setSaving(true);
+      setError(null);
+      try {
+        const response = await equityAPI.scenarios.analyze(workspaceId, payload);
+        setScenarioAnalysis(response?.data || null);
+        return response?.data;
+      } catch (err) {
+        const details = err?.response?.data;
+        const message = details?.detail || JSON.stringify(details) || err.message || 'Scenario analysis failed.';
+        setError(message);
+        throw err;
+      } finally {
+        setSaving(false);
+      }
+    },
+    commitScenario: async (payload) => {
+      if (!workspaceId) {
+        throw new Error('No active workspace is selected.');
+      }
+      setSaving(true);
+      setError(null);
+      try {
+        const response = await equityAPI.scenarios.commit(workspaceId, payload);
+        await refreshEquity(workspaceId);
+        return response?.data;
+      } catch (err) {
+        const details = err?.response?.data;
+        const message = details?.detail || JSON.stringify(details) || err.message || 'Scenario commit failed.';
+        setError(message);
+        throw err;
+      } finally {
+        setSaving(false);
+      }
+    },
+    requestScenarioApproval: async (payload) => {
+      if (!workspaceId) {
+        throw new Error('No active workspace is selected.');
+      }
+      setSaving(true);
+      setError(null);
+      try {
+        const response = await equityAPI.scenarios.requestApproval(workspaceId, payload);
+        await refreshEquity(workspaceId);
+        return response?.data;
+      } catch (err) {
+        const details = err?.response?.data;
+        const message = details?.detail || JSON.stringify(details) || err.message || 'Scenario approval request failed.';
+        setError(message);
+        throw err;
+      } finally {
+        setSaving(false);
+      }
+    },
+    updateScenarioApprovalPolicy: (id, payload) => mutateResource('scenarioApprovalPolicy', 'update', payload, id),
+    runScenarioApprovalSlaSweep: async () => {
+      if (!workspaceId) {
+        throw new Error('No active workspace is selected.');
+      }
+      setSaving(true);
+      setError(null);
+      try {
+        const response = await equityAPI.scenarioApprovals.runSlaSweep(workspaceId);
+        await refreshEquity(workspaceId);
+        return response?.data;
+      } catch (err) {
+        const details = err?.response?.data;
+        const message = details?.detail || JSON.stringify(details) || err.message || 'Scenario SLA sweep failed.';
+        setError(message);
+        throw err;
+      } finally {
+        setSaving(false);
+      }
+    },
+    boardApproveScenario: (id, payload = {}) => runResourceAction('scenarioApprovals', 'boardApprove', id, payload),
+    legalApproveScenario: (id, payload = {}) => runResourceAction('scenarioApprovals', 'legalApprove', id, payload),
+    rejectScenarioApproval: (id, payload = {}) => runResourceAction('scenarioApprovals', 'reject', id, payload),
+    saveScenarioReport: async (payload) => {
+      if (!workspaceId) {
+        throw new Error('No active workspace is selected.');
+      }
+      setSaving(true);
+      setError(null);
+      try {
+        const response = await equityAPI.scenarios.saveReport(workspaceId, payload);
+        await refreshEquity(workspaceId);
+        return response?.data;
+      } catch (err) {
+        const details = err?.response?.data;
+        const message = details?.detail || JSON.stringify(details) || err.message || 'Scenario report save failed.';
+        setError(message);
+        throw err;
+      } finally {
+        setSaving(false);
+      }
+    },
+    exportScenarioPdf: async (payload, filename = 'scenario-report.pdf') => {
+      const response = await equityAPI.scenarios.exportPdf(workspaceId, payload);
+      triggerBlobDownload(response.data, filename);
+    },
     createValuation: (payload) => mutateResource('valuations', 'create', payload),
     updateValuation: (id, payload) => mutateResource('valuations', 'update', payload, id),
     deleteValuation: (id) => mutateResource('valuations', 'delete', null, id),
@@ -203,10 +396,19 @@ export const EquityProvider = ({ children }) => {
     createReport: (payload) => mutateResource('reports', 'create', payload),
     updateReport: (id, payload) => mutateResource('reports', 'update', payload, id),
     deleteReport: (id) => mutateResource('reports', 'delete', null, id),
+    downloadReportPdf: async (id, filename = 'scenario-report.pdf') => {
+      const response = await equityAPI.reports.downloadPdf(workspaceId, id);
+      triggerBlobDownload(response.data, filename);
+    },
     createGrant: (payload) => mutateResource('grants', 'create', payload),
     updateGrant: (id, payload) => mutateResource('grants', 'update', payload, id),
     deleteGrant: (id) => mutateResource('grants', 'delete', null, id),
     rebuildGrantSchedule: (id) => runResourceAction('grants', 'rebuildSchedule', id),
+    regenerateGrantPackage: (id) => runResourceAction('grants', 'regeneratePackage', id),
+    downloadGrantPackage: async (id, filename = 'grant-package.pdf') => {
+      const response = await equityAPI.grants.downloadPackage(workspaceId, id);
+      triggerBlobDownload(response.data, filename);
+    },
     terminateGrant: (id, payload) => runResourceAction('grants', 'terminate', id, payload),
     triggerSingleAcceleration: (id, payload) => runResourceAction('grants', 'triggerSingle', id, payload),
     triggerDoubleAcceleration: (id, payload) => runResourceAction('grants', 'triggerDouble', id, payload),
@@ -217,6 +419,45 @@ export const EquityProvider = ({ children }) => {
     rejectExerciseRequest: (id, payload) => runResourceAction('exerciseRequests', 'reject', id, payload),
     markExerciseRequestPaid: (id, payload) => runResourceAction('exerciseRequests', 'markPaid', id, payload),
     completeExerciseRequest: (id) => runResourceAction('exerciseRequests', 'complete', id),
+    syncExercisePayment: (id) => runResourceAction('exerciseRequests', 'syncPayment', id),
+    downloadCertificatePdf: async (id, filename = 'certificate.pdf') => {
+      const response = await equityAPI.certificates.downloadPdf(workspaceId, id);
+      triggerBlobDownload(response.data, filename);
+    },
+    regenerateCertificatePdf: (id) => runResourceAction('certificates', 'regeneratePdf', id),
+    createAdapterConfig: (payload) => mutateResource('adapterConfigs', 'create', payload),
+    updateAdapterConfig: (id, payload) => mutateResource('adapterConfigs', 'update', payload, id),
+    deleteAdapterConfig: (id) => mutateResource('adapterConfigs', 'delete', null, id),
+    testAdapterConnection: (id) => runResourceAction('adapterConfigs', 'testConnection', id),
+    syncPayrollTaxEvent: (id) => runResourceAction('payrollTaxEvents', 'sync', id),
+    runVestingSweep: async () => {
+      const response = await equityAPI.selfService.runVestingSweep(workspaceId);
+      await refreshEquity(workspaceId);
+      return response.data;
+    },
+    downloadDeliveryDocument: async (id, filename = 'equity-document.pdf') => {
+      const response = await equityAPI.deliveryLogs.downloadDocument(workspaceId, id);
+      triggerBlobDownload(response.data, filename);
+    },
+    submitSelfServiceExercise: async (payload) => {
+      if (!workspaceId) {
+        throw new Error('No active workspace is selected.');
+      }
+      setSaving(true);
+      setError(null);
+      try {
+        const response = await equityAPI.selfService.submitExercise(workspaceId, payload);
+        await refreshEquity(workspaceId);
+        return response?.data;
+      } catch (err) {
+        const details = err?.response?.data;
+        const message = details?.detail || JSON.stringify(details) || err.message || 'Exercise request failed.';
+        setError(message);
+        throw err;
+      } finally {
+        setSaving(false);
+      }
+    },
   };
 
   return <EquityContext.Provider value={value}>{children}</EquityContext.Provider>;

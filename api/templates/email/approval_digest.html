@@ -1,0 +1,30 @@
+{% extends "email/base.html" %}
+
+{% block email_title %}Finance Approval Digest{% endblock %}
+{% block email_preheader %}You have {{ notification_count }} pending finance approval request{{ notification_count|pluralize }}.{% endblock %}
+{% block email_brand_title %}{{ email_brand_title|default:"Institutional Finance Operations" }}{% endblock %}
+
+{% block email_content %}
+<p class="eyebrow">Daily Approval Summary</p>
+<h1>Finance Approval Digest</h1>
+<p>{{ recipient_name }},</p>
+<p>You have {{ notification_count }} unread finance approval request{{ notification_count|pluralize }} awaiting action.</p>
+
+{% for item in items %}
+<div class="digest-item">
+    <p class="eyebrow">{{ item.entity_name }}</p>
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.message }}</p>
+    <p><a href="{{ item.action_url }}" class="cta-button">{{ item.action_label }}</a></p>
+</div>
+{% endfor %}
+
+<p>Use the inbox to review step status, delegated authority, and prior approval notes before taking action.</p>
+<p><a href="{{ digest_url }}">Open the full approval inbox</a></p>
+{% endblock %}
+
+{% block email_footer %}
+{{ email_brand_footer|default:"ATC Capital finance operations communications are designed for secure approval workflows, accountable execution, and institutional-grade control." }}
+{% if email_support_email %}<br><br>Support: <a href="mailto:{{ email_support_email }}">{{ email_support_email }}</a>{% endif %}
+{% if email_support_url %}<br>Operations portal: <a href="{{ email_support_url }}">{{ email_support_url }}</a>{% endif %}
+{% endblock %}

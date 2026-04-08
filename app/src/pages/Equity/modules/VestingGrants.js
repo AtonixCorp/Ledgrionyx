@@ -34,6 +34,8 @@ const VestingGrants = () => {
     createGrant,
     updateGrant,
     deleteGrant,
+    downloadGrantPackage,
+    regenerateGrantPackage,
     rebuildGrantSchedule,
     triggerSingleAcceleration,
     triggerDoubleAcceleration,
@@ -270,6 +272,8 @@ const VestingGrants = () => {
                     <td>
                       <div className="eq-table-actions">
                         <button type="button" className="eq-inline-btn" onClick={() => handleEdit(grant)}>Edit</button>
+                        <button type="button" className="eq-inline-btn" onClick={() => downloadGrantPackage(grant.id, `grant-package-${grant.grant_number}.pdf`)}>PDF</button>
+                        <button type="button" className="eq-inline-btn" onClick={() => regenerateGrantPackage(grant.id)}>Regen PDF</button>
                         <button type="button" className="eq-inline-btn" onClick={() => rebuildGrantSchedule(grant.id)}>Rebuild</button>
                         <button type="button" className="eq-inline-btn" onClick={() => triggerSingleAcceleration(grant.id, { trigger_date: today })}>Single</button>
                         <button type="button" className="eq-inline-btn" onClick={() => triggerDoubleAcceleration(grant.id, { trigger_date: today })}>Double</button>

@@ -196,7 +196,7 @@ export const reportsAPI = {
 
 // Consolidations API
 export const consolidationsAPI = {
-  getAll: () => api.get('/consolidations/'),
+  getAll: (params) => api.get('/consolidations/', { params }),
   getById: (id) => api.get(`/consolidations/${id}/`),
   create: (data) => api.post('/consolidations/', data),
   update: (id, data) => api.put(`/consolidations/${id}/`, data),
@@ -211,6 +211,21 @@ export const consolidationEntitiesAPI = {
   create: (data) => api.post('/consolidation-entities/', data),
   update: (id, data) => api.put(`/consolidation-entities/${id}/`, data),
   delete: (id) => api.delete(`/consolidation-entities/${id}/`),
+};
+
+// Intercompany Accounting API
+export const intercompanyTransactionsAPI = {
+  getAll: (params = {}) => api.get('/intercompany-transactions/', { params }),
+  getById: (id) => api.get(`/intercompany-transactions/${id}/`),
+  create: (data) => api.post('/intercompany-transactions/', data),
+  update: (id, data) => api.put(`/intercompany-transactions/${id}/`, data),
+  delete: (id) => api.delete(`/intercompany-transactions/${id}/`),
+  post: (id) => api.post(`/intercompany-transactions/${id}/post/`),
+};
+
+export const intercompanyEliminationsAPI = {
+  getAll: (params = {}) => api.get('/intercompany-eliminations/', { params }),
+  getById: (id) => api.get(`/intercompany-eliminations/${id}/`),
 };
 
 // Tax Calculations API
@@ -322,6 +337,53 @@ export const generalLedgerAPI = {
   getById: (id) => api.get(`/general-ledger/${id}/`),
 };
 
+// Journal Approval Matrices API
+export const journalApprovalMatricesAPI = {
+  getAll: (params) => api.get('/journal-approval-matrices/', { params }),
+  getById: (id) => api.get(`/journal-approval-matrices/${id}/`),
+  create: (data) => api.post('/journal-approval-matrices/', data),
+  update: (id, data) => api.put(`/journal-approval-matrices/${id}/`, data),
+  delete: (id) => api.delete(`/journal-approval-matrices/${id}/`),
+};
+
+// Journal Approval Delegations API
+export const journalApprovalDelegationsAPI = {
+  getAll: (params) => api.get('/journal-approval-delegations/', { params }),
+  getById: (id) => api.get(`/journal-approval-delegations/${id}/`),
+  create: (data) => api.post('/journal-approval-delegations/', data),
+  update: (id, data) => api.put(`/journal-approval-delegations/${id}/`, data),
+  delete: (id) => api.delete(`/journal-approval-delegations/${id}/`),
+};
+
+// Accounting Approval Matrices API
+export const accountingApprovalMatricesAPI = {
+  getAll: (params) => api.get('/accounting-approval-matrices/', { params }),
+  getById: (id) => api.get(`/accounting-approval-matrices/${id}/`),
+  create: (data) => api.post('/accounting-approval-matrices/', data),
+  update: (id, data) => api.put(`/accounting-approval-matrices/${id}/`, data),
+  delete: (id) => api.delete(`/accounting-approval-matrices/${id}/`),
+};
+
+// Accounting Approval Delegations API
+export const accountingApprovalDelegationsAPI = {
+  getAll: (params) => api.get('/accounting-approval-delegations/', { params }),
+  getById: (id) => api.get(`/accounting-approval-delegations/${id}/`),
+  create: (data) => api.post('/accounting-approval-delegations/', data),
+  update: (id, data) => api.put(`/accounting-approval-delegations/${id}/`, data),
+  delete: (id) => api.delete(`/accounting-approval-delegations/${id}/`),
+};
+
+// Accounting Approval Inbox API
+export const accountingApprovalInboxAPI = {
+  getAll: (params) => api.get('/accounting-approval-inbox/', { params }),
+};
+
+// Journal Change Logs API
+export const journalChangeLogsAPI = {
+  getAll: (params) => api.get('/journal-change-logs/', { params }),
+  getById: (id) => api.get(`/journal-change-logs/${id}/`),
+};
+
 // Journal Entries API
 export const journalEntriesAPI = {
   getAll: (params) => api.get('/journal-entries/', { params }),
@@ -329,7 +391,9 @@ export const journalEntriesAPI = {
   create: (data) => api.post('/journal-entries/', data),
   update: (id, data) => api.put(`/journal-entries/${id}/`, data),
   delete: (id) => api.delete(`/journal-entries/${id}/`),
-  approve: (id) => api.post(`/journal-entries/${id}/approve/`),
+  submit: (id) => api.post(`/journal-entries/${id}/submit/`),
+  approve: (id, data) => api.post(`/journal-entries/${id}/approve/`, data),
+  reject: (id, data) => api.post(`/journal-entries/${id}/reject/`, data),
   reverse: (id) => api.post(`/journal-entries/${id}/reverse/`),
 };
 
@@ -388,6 +452,9 @@ export const paymentsAPI = {
   create: (data) => api.post('/payments/', data),
   update: (id, data) => api.put(`/payments/${id}/`, data),
   delete: (id) => api.delete(`/payments/${id}/`),
+  submit: (id) => api.post(`/payments/${id}/submit/`),
+  approve: (id, data) => api.post(`/payments/${id}/approve/`, data),
+  reject: (id, data) => api.post(`/payments/${id}/reject/`, data),
 };
 
 // ============ ACCOUNTS PAYABLE APIs ============
@@ -408,6 +475,9 @@ export const purchaseOrdersAPI = {
   create: (data) => api.post('/purchase-orders/', data),
   update: (id, data) => api.put(`/purchase-orders/${id}/`, data),
   delete: (id) => api.delete(`/purchase-orders/${id}/`),
+  submit: (id) => api.post(`/purchase-orders/${id}/submit/`),
+  approve: (id, data) => api.post(`/purchase-orders/${id}/approve/`, data),
+  reject: (id, data) => api.post(`/purchase-orders/${id}/reject/`, data),
 };
 
 // Bills API
@@ -417,6 +487,9 @@ export const billsAPI = {
   create: (data) => api.post('/bills/', data),
   update: (id, data) => api.put(`/bills/${id}/`, data),
   delete: (id) => api.delete(`/bills/${id}/`),
+  submit: (id) => api.post(`/bills/${id}/submit/`),
+  approve: (id, data) => api.post(`/bills/${id}/approve/`, data),
+  reject: (id, data) => api.post(`/bills/${id}/reject/`, data),
 };
 
 // Bill Payments API
@@ -426,6 +499,9 @@ export const billPaymentsAPI = {
   create: (data) => api.post('/bill-payments/', data),
   update: (id, data) => api.put(`/bill-payments/${id}/`, data),
   delete: (id) => api.delete(`/bill-payments/${id}/`),
+  submit: (id) => api.post(`/bill-payments/${id}/submit/`),
+  approve: (id, data) => api.post(`/bill-payments/${id}/approve/`, data),
+  reject: (id, data) => api.post(`/bill-payments/${id}/reject/`, data),
 };
 
 // ============ INVENTORY APIs ============
@@ -531,7 +607,7 @@ export const fxGainLossAPI = {
 // Notifications API
 export const notificationsAPI = {
   getAll: (params) => api.get('/notifications/', { params }),
-  getUnread: () => api.get('/notifications/unread/'),
+  getUnread: (params) => api.get('/notifications/unread/', { params }),
   getById: (id) => api.get(`/notifications/${id}/`),
   markRead: (id) => api.post(`/notifications/${id}/mark_read/`),
   delete: (id) => api.delete(`/notifications/${id}/`),
@@ -837,10 +913,15 @@ const equityScopedResource = (resource) => ({
 
 export const equityAPI = {
   profile: equityScopedResource('profile'),
+  scenarioApprovalPolicy: equityScopedResource('scenario-approval-policy'),
   shareholders: equityScopedResource('shareholders'),
   shareClasses: equityScopedResource('share-classes'),
   holdings: equityScopedResource('holdings'),
-  fundingRounds: equityScopedResource('funding-rounds'),
+  optionPoolReserves: equityScopedResource('option-pool-reserves'),
+  fundingRounds: {
+    ...equityScopedResource('funding-rounds'),
+    analyze: (entityId, data) => api.post(`/entities/${entityId}/equity/funding-rounds/analyze`, data),
+  },
   valuations: equityScopedResource('valuations'),
   transactions: equityScopedResource('transactions'),
   reports: equityScopedResource('reports'),
@@ -851,6 +932,8 @@ export const equityAPI = {
     terminate: (entityId, id, data) => api.post(`/entities/${entityId}/equity/grants/${id}/terminate`, data),
     triggerSingle: (entityId, id, data) => api.post(`/entities/${entityId}/equity/grants/${id}/trigger_single`, data),
     triggerDouble: (entityId, id, data) => api.post(`/entities/${entityId}/equity/grants/${id}/trigger_double`, data),
+    downloadPackage: (entityId, id) => api.get(`/entities/${entityId}/equity/grants/${id}/download_package`, { responseType: 'blob' }),
+    regeneratePackage: (entityId, id) => api.post(`/entities/${entityId}/equity/grants/${id}/regenerate_package`, {}),
   },
   vestingEvents: equityScopedResource('vesting-events'),
   exerciseRequests: {
@@ -859,9 +942,49 @@ export const equityAPI = {
     reject: (entityId, id, data) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/reject`, data),
     markPaid: (entityId, id, data) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/mark_paid`, data),
     complete: (entityId, id) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/complete`, {}),
+    syncPayment: (entityId, id) => api.post(`/entities/${entityId}/equity/exercise-requests/${id}/sync_payment`, {}),
   },
-  certificates: equityScopedResource('certificates'),
-  payrollTaxEvents: equityScopedResource('payroll-tax-events'),
+  certificates: {
+    ...equityScopedResource('certificates'),
+    downloadPdf: (entityId, id) => api.get(`/entities/${entityId}/equity/certificates/${id}/download_pdf`, { responseType: 'blob' }),
+    regeneratePdf: (entityId, id) => api.post(`/entities/${entityId}/equity/certificates/${id}/regenerate_pdf`, {}),
+  },
+  payrollTaxEvents: {
+    ...equityScopedResource('payroll-tax-events'),
+    sync: (entityId, id) => api.post(`/entities/${entityId}/equity/payroll-tax-events/${id}/sync`, {}),
+  },
+  adapterConfigs: {
+    ...equityScopedResource('adapter-configs'),
+    testConnection: (entityId, id) => api.post(`/entities/${entityId}/equity/adapter-configs/${id}/test_connection`, {}),
+    presets: (entityId, params) => api.get(`/entities/${entityId}/equity/adapter-configs/presets`, { params }),
+  },
+  deliveryLogs: {
+    ...equityScopedResource('delivery-logs'),
+    downloadDocument: (entityId, id) => api.get(`/entities/${entityId}/equity/delivery-logs/${id}/download_document`, { responseType: 'blob' }),
+  },
+  selfService: {
+    dashboard: (entityId) => api.get(`/entities/${entityId}/equity/me/dashboard`),
+    submitExercise: (entityId, data) => api.post(`/entities/${entityId}/equity/me/submit_exercise`, data),
+    runVestingSweep: (entityId) => api.post(`/entities/${entityId}/equity/me/run_vesting_sweep`, {}),
+  },
+  scenarios: {
+    overview: (entityId) => api.get(`/entities/${entityId}/equity/scenarios/overview`),
+    analyze: (entityId, data) => api.post(`/entities/${entityId}/equity/scenarios`, data),
+    commit: (entityId, data) => api.post(`/entities/${entityId}/equity/scenarios/commit`, data),
+    requestApproval: (entityId, data) => api.post(`/entities/${entityId}/equity/scenarios/request_approval`, data),
+    saveReport: (entityId, data) => api.post(`/entities/${entityId}/equity/scenarios/save_report`, data),
+    exportPdf: (entityId, data) => api.post(`/entities/${entityId}/equity/scenarios/export_pdf`, data, { responseType: 'blob' }),
+  },
+  scenarioApprovals: {
+    ...equityScopedResource('scenario-approvals'),
+    inbox: (entityId) => api.get(`/entities/${entityId}/equity/scenario-approvals/inbox`),
+    runSlaSweep: (entityId) => api.post(`/entities/${entityId}/equity/scenario-approvals/run_sla_sweep`, {}),
+    boardApprove: (entityId, id, data) => api.post(`/entities/${entityId}/equity/scenario-approvals/${id}/board_approve`, data),
+    legalApprove: (entityId, id, data) => api.post(`/entities/${entityId}/equity/scenario-approvals/${id}/legal_approve`, data),
+    reject: (entityId, id, data) => api.post(`/entities/${entityId}/equity/scenario-approvals/${id}/reject`, data),
+  },
 };
+
+equityAPI.reports.downloadPdf = (entityId, id) => api.get(`/entities/${entityId}/equity/reports/${id}/download_pdf`, { responseType: 'blob' });
 
 export default api;
