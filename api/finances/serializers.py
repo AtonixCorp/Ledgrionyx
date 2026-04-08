@@ -39,7 +39,7 @@ from .models import (
     DocumentTemplate, Loan, LoanPayment, KYCProfile, AMLTransaction, FirmService,
     ClientInvoice, ClientInvoiceLineItem, ClientSubscription, WhiteLabelBranding,
     BankingIntegration, BankingTransaction, EmbeddedPayment, AutomationWorkflow,
-    AutomationExecution, FirmMetric, ClientMarketplaceIntegration
+    AutomationExecution, AutomationArtifact, FirmMetric, ClientMarketplaceIntegration
 )
 from .banking_security import mask_secret
 
@@ -1561,10 +1561,25 @@ class EmbeddedPaymentSerializer(serializers.ModelSerializer):
 
 # ============ WORKFLOW AUTOMATION SERIALIZERS ============
 
+class AutomationArtifactSerializer(serializers.ModelSerializer):
+    download_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AutomationArtifact
+        fields = ['id', 'workflow', 'execution', 'organization', 'entity', 'artifact_type', 'export_format', 'file_name', 'metadata', 'download_url', 'created_at']
+        read_only_fields = fields
+
+    def get_download_url(self, obj):
+        request = self.context.get('request')
+        relative_url = f'/api/automation-artifacts/{obj.id}/download/'
+        return request.build_absolute_uri(relative_url) if request else relative_url
+
 class AutomationExecutionSerializer(serializers.ModelSerializer):
+    artifacts = AutomationArtifactSerializer(many=True, read_only=True)
+
     class Meta:
         model = AutomationExecution
-        fields = ['id', 'workflow', 'status', 'triggered_at', 'started_at', 'completed_at', 'execution_result', 'error_message']
+        fields = ['id', 'workflow', 'status', 'triggered_at', 'started_at', 'completed_at', 'execution_result', 'error_message', 'artifacts']
         read_only_fields = ['triggered_at', 'started_at', 'completed_at']
 
 
@@ -1574,7 +1589,7 @@ class AutomationWorkflowSerializer(serializers.ModelSerializer):
     class Meta:
         model = AutomationWorkflow
         fields = ['id', 'organization', 'entity', 'name', 'description', 'trigger_type', 'trigger_config', 'actions', 'is_active', 'created_by', 'created_at', 'updated_at', 'executions']
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
 
 
 # ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE SERIALIZERS ============

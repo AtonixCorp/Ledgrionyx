@@ -1,4 +1,5 @@
 import hashlib
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -16,8 +17,12 @@ from .models import (
     BankingConsentLog,
     BankingIntegration,
     BankingTransaction,
+    AutomationWorkflow,
     Budget,
+    CashflowForecast,
     ChartOfAccounts,
+    ComplianceDeadline,
+    ComplianceDocument,
     Customer,
     Consolidation,
     ConsolidationEntity,
@@ -40,6 +45,8 @@ from .models import (
     Notification,
     NotificationPreference,
     OAuthApplication,
+    BookkeepingAccount,
+    BookkeepingCategory,
     PayrollBankPaymentFile,
     PayrollBankOriginatorProfile,
     PayrollComponent,
@@ -56,6 +63,8 @@ from .models import (
     StaffPayrollProfile,
     SystemEvent,
     TeamMember,
+    TaxExposure,
+    Transaction,
     UserProfile,
     Vendor,
     WebhookDelivery,
@@ -1635,6 +1644,304 @@ class IntercompanyEngineAPITests(TestCase):
         )
 
 
+class EnterpriseReportingDashboardAPITests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username='report-owner', email='report-owner@example.com', password='pass')
+        self.organization = Organization.objects.create(
+            owner=self.owner,
+            name='Reporting Org',
+            slug='reporting-org',
+            primary_country='US',
+            primary_currency='USD',
+        )
+        self.entity = Entity.objects.create(
+            organization=self.organization,
+            name='Reporting Entity',
+            country='US',
+            entity_type='corporation',
+            status='active',
+            local_currency='USD',
+            workspace_mode='combined',
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.owner)
+
+        income_category = BookkeepingCategory.objects.create(entity=self.entity, name='Revenue', type='income')
+        expense_category = BookkeepingCategory.objects.create(entity=self.entity, name='Operations', type='expense')
+        income_account = BookkeepingAccount.objects.create(entity=self.entity, name='Revenue Account', type='cash', currency='USD')
+        expense_account = BookkeepingAccount.objects.create(entity=self.entity, name='Expense Account', type='cash', currency='USD')
+
+        Transaction.objects.create(
+            entity=self.entity,
+            type='income',
+            category=income_category,
+            account=income_account,
+            amount=Decimal('1500.00'),
+            currency='USD',
+            payment_method='bank',
+            description='Consulting revenue',
+            date=timezone.now().date(),
+            created_by=self.owner,
+        )
+        Transaction.objects.create(
+            entity=self.entity,
+            type='expense',
+            category=expense_category,
+            account=expense_account,
+            amount=Decimal('450.00'),
+            currency='USD',
+            payment_method='bank',
+            description='Operating spend',
+            date=timezone.now().date(),
+            created_by=self.owner,
+        )
+
+        BankAccount.objects.create(
+            entity=self.entity,
+            provider='manual',
+            provider_account_id='acct-1',
+            account_name='Operating Account',
+            account_number='1234',
+            bank_name='Bank',
+            currency='USD',
+            balance=Decimal('5000.00'),
+            available_balance=Decimal('5000.00'),
+        )
+        Budget.objects.create(entity=self.entity, category='Operations', limit=Decimal('1200.00'), spent=Decimal('300.00'), currency='USD')
+        CashflowForecast.objects.create(
+            entity=self.entity,
+            month=timezone.now().date().replace(day=1),
+            category='Operations',
+            forecasted_amount=Decimal('400.00'),
+            currency='USD',
+        )
+        ComplianceDeadline.objects.create(
+            organization=self.organization,
+            entity=self.entity,
+            title='Federal filing',
+            deadline_type='tax_filing',
+            deadline_date=timezone.now().date() + timedelta(days=10),
+            status='due_soon',
+        )
+        TaxExposure.objects.create(
+            entity=self.entity,
+            country='US',
+            tax_type='Corporate Income Tax',
+            period='annual',
+            tax_year=timezone.now().year,
+            period_start=timezone.now().date().replace(month=1, day=1),
+            period_end=timezone.now().date().replace(month=12, day=31),
+            estimated_amount=Decimal('900.00'),
+            actual_amount=Decimal('850.00'),
+            paid_amount=Decimal('300.00'),
+            currency='USD',
+            status='ready',
+            filing_deadline=timezone.now().date() + timedelta(days=30),
+            payment_deadline=timezone.now().date() + timedelta(days=45),
+        )
+        ComplianceDocument.objects.create(
+            entity=self.entity,
+            document_type='license',
+            title='Business License',
+            issuing_authority='State Authority',
+            issue_date=timezone.now().date() - timedelta(days=30),
+            expiry_date=timezone.now().date() + timedelta(days=365),
+            status='active',
+        )
+
+        vendor = Vendor.objects.create(
+            entity=self.entity,
+            vendor_code='VEN-1',
+            vendor_name='Vendor One',
+            email='vendor@example.com',
+            address='123 Street',
+        )
+        Bill.objects.create(
+            entity=self.entity,
+            vendor=vendor,
+            bill_number='BILL-1',
+            bill_date=timezone.now().date(),
+            due_date=timezone.now().date() + timedelta(days=15),
+            subtotal=Decimal('200.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=Decimal('200.00'),
+            outstanding_amount=Decimal('200.00'),
+            created_by=self.owner,
+        )
+
+        customer = Customer.objects.create(
+            entity=self.entity,
+            customer_code='CUS-1',
+            customer_name='Customer One',
+            email='customer@example.com',
+            address='456 Street',
+        )
+        Invoice.objects.create(
+            entity=self.entity,
+            customer=customer,
+            invoice_number='INV-1',
+            invoice_date=timezone.now().date(),
+            due_date=timezone.now().date() + timedelta(days=15),
+            subtotal=Decimal('350.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=Decimal('350.00'),
+            outstanding_amount=Decimal('350.00'),
+            created_by=self.owner,
+        )
+
+        from equity.models import (
+            EquityFundingRound,
+            EquityHolding,
+            EquityShareClass,
+            EquityShareholder,
+            InstrumentType,
+            ShareClassType,
+            ShareholderType,
+            WorkspaceEquityProfile,
+        )
+
+        WorkspaceEquityProfile.objects.create(workspace=self.entity, equity_enabled=True, workspace_type='combined')
+        share_class = EquityShareClass.objects.create(
+            workspace=self.entity,
+            name='Series Seed Preferred',
+            class_type=ShareClassType.PREFERRED,
+            authorized_shares=1500000,
+            issued_shares=1000000,
+            liquidation_preference='1x non-participating',
+            preference_multiple=Decimal('1.0'),
+            liquidation_seniority=1,
+            conversion_price=Decimal('1.25'),
+            pro_rata_rights=True,
+            currency='USD',
+        )
+        shareholder = EquityShareholder.objects.create(
+            workspace=self.entity,
+            name='Founder One',
+            shareholder_type=ShareholderType.INDIVIDUAL,
+            email='founder@example.com',
+            created_by=self.owner,
+        )
+        EquityHolding.objects.create(
+            workspace=self.entity,
+            shareholder=shareholder,
+            share_class=share_class,
+            quantity=800000,
+            diluted_quantity=800000,
+            ownership_percent=Decimal('80.00'),
+            issued_at=timezone.now().date() - timedelta(days=365),
+            issue_price_per_share=Decimal('1.25'),
+            invested_amount=Decimal('1000000.00'),
+            pro_rata_eligible=True,
+            pro_rata_take_up_percent=Decimal('100.00'),
+        )
+        EquityFundingRound.objects.create(
+            workspace=self.entity,
+            name='Series Seed',
+            instrument_type=InstrumentType.EQUITY,
+            share_class=share_class,
+            announced_at=timezone.now().date() - timedelta(days=60),
+            pre_money_valuation=Decimal('12000000.00'),
+            post_money_valuation=Decimal('15000000.00'),
+            amount_raised=Decimal('3000000.00'),
+            price_per_share=Decimal('1.25'),
+            new_shares_issued=240000,
+            option_pool_top_up=0,
+            apply_pro_rata=True,
+        )
+
+        from .models import FinancialModel, Scenario
+
+        model = FinancialModel.objects.create(
+            name='Base Operating Model',
+            model_type='dcf',
+            user=self.owner,
+            organization=self.organization,
+            status='completed',
+        )
+        Scenario.objects.create(
+            name='Expansion Case',
+            scenario_type='best',
+            financial_model=model,
+            enterprise_value=Decimal('12500000.00'),
+            irr=Decimal('0.2200'),
+            probability=Decimal('35.00'),
+        )
+
+    def test_dashboard_returns_consolidated_reporting_pack(self):
+        response = self.client.get(
+            '/api/enterprise-reporting/dashboard/',
+            {
+                'organization_id': self.organization.id,
+                'start_date': timezone.now().date().replace(month=1, day=1).isoformat(),
+                'end_date': timezone.now().date().isoformat(),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['organization']['id'], self.organization.id)
+        self.assertEqual(response.data['summary']['entities_covered'], 1)
+        self.assertEqual(response.data['summary']['revenue'], 1500.0)
+        self.assertEqual(response.data['summary']['expenses'], 450.0)
+        self.assertEqual(response.data['summary']['cash_on_hand'], 5000.0)
+        self.assertEqual(response.data['budgeting_and_forecasting']['summary']['budget_limit'], 1200.0)
+        self.assertEqual(response.data['scenario_dashboard']['count'], 1)
+        self.assertEqual(response.data['equity_waterfalls']['enabled_entities'], 1)
+        self.assertTrue(response.data['equity_waterfalls']['entities'][0]['fallback_generated'])
+        self.assertGreater(len(response.data['equity_waterfalls']['entities'][0]['waterfalls']), 0)
+        self.assertEqual(response.data['automated_compliance_reports']['status_counts']['due_soon'], 1)
+
+    def test_export_endpoints_return_board_pack_files(self):
+        pdf_response = self.client.get('/api/enterprise-reporting/export_pdf/', {'organization_id': self.organization.id})
+        xlsx_response = self.client.get('/api/enterprise-reporting/export_xlsx/', {'organization_id': self.organization.id})
+
+        self.assertEqual(pdf_response.status_code, 200)
+        self.assertIn('application/pdf', pdf_response['Content-Type'])
+        self.assertIn('.pdf', pdf_response['Content-Disposition'])
+        self.assertGreater(len(pdf_response.content), 500)
+
+        self.assertEqual(xlsx_response.status_code, 200)
+        self.assertIn('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', xlsx_response['Content-Type'])
+        self.assertIn('.xlsx', xlsx_response['Content-Disposition'])
+        self.assertGreater(len(xlsx_response.content), 500)
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_scheduled_automation_workflow_delivers_reporting_pack(self):
+        workflow = AutomationWorkflow.objects.create(
+            organization=self.organization,
+            entity=self.entity,
+            name='Monthly Board Pack',
+            description='Deliver a monthly board pack to finance leadership.',
+            trigger_type='schedule',
+            trigger_config={
+                'frequency': 'monthly',
+                'next_run_at': (timezone.now() - timedelta(minutes=5)).isoformat(),
+            },
+            actions=[
+                {
+                    'type': 'enterprise_reporting_pack',
+                    'format': 'pdf',
+                    'months_back': 12,
+                    'recipients': ['cfo@example.com'],
+                    'subject': 'Monthly board pack',
+                }
+            ],
+            is_active=True,
+            created_by=self.owner,
+        )
+
+        call_command('run_scheduled_automation_workflows')
+
+        workflow.refresh_from_db()
+        execution = workflow.executions.first()
+        self.assertIsNotNone(execution)
+        self.assertEqual(execution.status, 'completed')
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['cfo@example.com'])
+        self.assertTrue(mail.outbox[0].attachments)
+        self.assertTrue(mail.outbox[0].attachments[0][0].endswith('.pdf'))
+        self.assertIn('next_run_at', workflow.trigger_config)
+
+
 class PayrollEngineAPITests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user(username='payroll-owner', email='payroll-owner@example.com', password='pass')
@@ -1836,6 +2143,8 @@ class PayrollEngineAPITests(TestCase):
         payment_file = PayrollBankPaymentFile.objects.get(payroll_run=self.payroll_run)
         self.assertEqual(payment_file.file_format, 'aba')
         self.assertIn('wells_fargo_ppd', payment_file.file_name)
+        self.assertIn('Payroll Entity LLC', payment_file.content)
+        self.assertIn('PAYROLL', payment_file.content)
         self.assertIn('PAY-PAT', payment_file.content)
         self.assertIn('830000', payment_file.content)
         self.assertGreater(GeneralLedger.objects.filter(journal_entry=self.payroll_run.journal_entry).count(), 0)
@@ -1857,6 +2166,18 @@ class PayrollEngineAPITests(TestCase):
         self.assertIn('Bank export validation failed', response.data['detail'])
         self.assertIn('IBAN', response.data['detail'])
         self.assertIn('SWIFT/BIC', response.data['detail'])
+
+    def test_process_payroll_run_validates_wells_fargo_originator_rules(self):
+        originator = PayrollBankOriginatorProfile.objects.get(entity=self.entity)
+        originator.originator_identifier = 'IDENTIFIER-TOO-LONG'
+        originator.company_entry_description = 'PAYROLL-INVALID'
+        originator.save(update_fields=['originator_identifier', 'company_entry_description', 'updated_at'])
+
+        response = self.client.post(f'/api/payroll-runs/{self.payroll_run.id}/process/', {}, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('originator identifier', response.data['detail'])
+        self.assertIn('company entry description', response.data['detail'])
 
     def test_process_payroll_run_requires_approval_when_matrix_configured(self):
         AccountingApprovalMatrix.objects.create(

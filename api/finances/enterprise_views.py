@@ -7,6 +7,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.http import FileResponse
+from django.http import HttpResponse
 from django.db.models import Sum, Q, Count
 from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
@@ -18,6 +20,7 @@ from django.utils import timezone
 from .models import (
     Organization, Entity, TeamMember, Role, Permission, TaxExposure,
     TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, EntityDepartment,
+    Budget, Scenario, Consolidation,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
     LeaveType, LeaveBalance, LeaveRequest, PayrollBankOriginatorProfile, PayrollRun, Payslip, PayrollStatutoryReport,
@@ -44,7 +47,7 @@ from .models import (
     ClientInvoice, ClientInvoiceLineItem, ClientSubscription, WhiteLabelBranding,
     BankingIntegration, BankingTransaction, BankingConsentLog, BankingSyncRun,
     BankingCategorizationRule, BankingCategorizationDecision, EmbeddedPayment, AutomationWorkflow,
-    AutomationExecution, FirmMetric, ClientMarketplaceIntegration
+    AutomationExecution, AutomationArtifact, FirmMetric, ClientMarketplaceIntegration
 )
 from .serializers import (
     OrganizationSerializer, EntitySerializer, EntityDetailSerializer,
@@ -81,7 +84,7 @@ from .serializers import (
     LoanPaymentSerializer, KYCProfileSerializer, AMLTransactionSerializer, FirmServiceSerializer,
     ClientInvoiceSerializer, ClientInvoiceLineItemSerializer, ClientSubscriptionSerializer,
     WhiteLabelBrandingSerializer, BankingIntegrationSerializer, BankingTransactionSerializer,
-    EmbeddedPaymentSerializer, AutomationWorkflowSerializer, AutomationExecutionSerializer,
+    EmbeddedPaymentSerializer, AutomationWorkflowSerializer, AutomationExecutionSerializer, AutomationArtifactSerializer,
     FirmMetricSerializer, ClientMarketplaceIntegrationSerializer
 )
 from .banking_services import (
@@ -120,6 +123,14 @@ from .payroll_presets import (
     resolve_bank_institution,
 )
 from .permissions import PermissionChecker
+from equity.models import EquityReport, WorkspaceEquityProfile
+from equity.scenario_services import get_scenario_overview
+from .enterprise_reporting import (
+    build_enterprise_reporting_dashboard,
+    execute_automation_workflow,
+    export_enterprise_reporting_payload,
+    run_due_automation_workflows,
+)
 
 
 def _accessible_organizations_queryset(user):
@@ -2478,6 +2489,56 @@ class FinancialStatementsViewSet(viewsets.ViewSet):
         })
 
 
+class EnterpriseReportingViewSet(viewsets.ViewSet):
+    """Organization-scoped enterprise reporting and automation payloads."""
+
+    permission_classes = [IsAuthenticated]
+
+    def _parse_date(self, value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError as exc:
+            raise ValidationError({'detail': f'Invalid date format: {value}. Use YYYY-MM-DD.'}) from exc
+
+    def _get_reporting_context(self, request):
+        organization_id = request.query_params.get('organization_id') or request.query_params.get('organization')
+        if not organization_id:
+            raise ValidationError({'detail': 'organization_id required'})
+        organization = get_object_or_404(_accessible_organizations_queryset(request.user), id=organization_id)
+        end = self._parse_date(request.query_params.get('end_date')) or timezone.now().date()
+        start = self._parse_date(request.query_params.get('start_date')) or (end - timedelta(days=365))
+        entities = list(_accessible_entities_queryset(request.user, organization=organization).select_related('organization'))
+        return organization, entities, start, end
+
+    @action(detail=False, methods=['get'])
+    def dashboard(self, request):
+        organization, entities, start, end = self._get_reporting_context(request)
+        payload = build_enterprise_reporting_dashboard(organization, entities, start, end)
+        return Response(payload)
+
+    def _export(self, request, export_format):
+        organization, entities, start, end = self._get_reporting_context(request)
+        payload = build_enterprise_reporting_dashboard(organization, entities, start, end)
+        content, content_type, filename = export_enterprise_reporting_payload(payload, export_format)
+        response = HttpResponse(content, content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    @action(detail=False, methods=['get'])
+    def export_pdf(self, request):
+        return self._export(request, 'pdf')
+
+    @action(detail=False, methods=['get'])
+    def export_xlsx(self, request):
+        return self._export(request, 'xlsx')
+
+    @action(detail=False, methods=['get'])
+    def export_json(self, request):
+        return self._export(request, 'json')
+
+
 class CashflowTreasuryViewSet(viewsets.ViewSet):
     """ViewSet for cashflow and treasury data"""
     permission_classes = [IsAuthenticated]
@@ -4690,6 +4751,39 @@ class AutomationWorkflowViewSet(viewsets.ModelViewSet):
             return AutomationWorkflow.objects.filter(organization__in=accessible_orgs, organization_id=org_id)
         return AutomationWorkflow.objects.filter(organization__in=accessible_orgs)
 
+    def perform_create(self, serializer):
+        organization = get_object_or_404(
+            _accessible_organizations_queryset(self.request.user),
+            id=self.request.data.get('organization'),
+        )
+        entity_id = self.request.data.get('entity')
+        entity = None
+        if entity_id:
+            entity = get_object_or_404(_accessible_entities_queryset(self.request.user, organization=organization), id=entity_id)
+        serializer.save(organization=organization, entity=entity, created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        organization = get_object_or_404(
+            _accessible_organizations_queryset(self.request.user),
+            id=self.request.data.get('organization') or serializer.instance.organization_id,
+        )
+        entity_id = self.request.data.get('entity')
+        entity = None
+        if entity_id:
+            entity = get_object_or_404(_accessible_entities_queryset(self.request.user, organization=organization), id=entity_id)
+        serializer.save(organization=organization, entity=entity)
+
+    @action(detail=True, methods=['post'])
+    def execute(self, request, pk=None):
+        workflow = self.get_object()
+        execution = execute_automation_workflow(workflow, initiated_by=request.user, trigger_type='manual')
+        return Response(self.get_serializer(workflow).data | {'last_execution': AutomationExecutionSerializer(execution).data})
+
+    @action(detail=False, methods=['post'])
+    def run_due(self, request):
+        results = run_due_automation_workflows()
+        return Response(results)
+
 
 class AutomationExecutionViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for automation executions"""
@@ -4702,6 +4796,31 @@ class AutomationExecutionViewSet(viewsets.ReadOnlyModelViewSet):
         if workflow_id:
             return AutomationExecution.objects.filter(workflow__organization__in=accessible_orgs, workflow_id=workflow_id)
         return AutomationExecution.objects.filter(workflow__organization__in=accessible_orgs)
+
+
+class AutomationArtifactViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for persisted automation artifacts."""
+
+    serializer_class = AutomationArtifactSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        accessible_orgs = _accessible_organizations_queryset(self.request.user)
+        queryset = AutomationArtifact.objects.filter(organization__in=accessible_orgs)
+        workflow_id = self.request.query_params.get('workflow')
+        execution_id = self.request.query_params.get('execution')
+        if workflow_id:
+            queryset = queryset.filter(workflow_id=workflow_id)
+        if execution_id:
+            queryset = queryset.filter(execution_id=execution_id)
+        return queryset.select_related('workflow', 'execution', 'organization', 'entity')
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        artifact = self.get_object()
+        response = FileResponse(artifact.file_path.open('rb'), as_attachment=True, filename=artifact.file_name)
+        response['Content-Type'] = 'application/octet-stream'
+        return response
 
 
 # ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE VIEWSETS ============

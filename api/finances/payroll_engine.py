@@ -208,7 +208,6 @@ def _process_leave_for_staff(staff_member, payroll_run):
             request.status = 'processed'
             request.payroll_run = payroll_run
             request.save(update_fields=['status', 'payroll_run', 'updated_at'])
-
         balance.accrued_hours = new_accrued
         balance.used_hours = _amount(balance.used_hours) + used_for_type
         balance.save(update_fields=['accrued_hours', 'used_hours', 'updated_at'])
@@ -290,6 +289,184 @@ def _statutory_report_payload(payroll_run):
     return jurisdiction, base_payload
 
 
+def _sanitize_fixed_width(value, length):
+    return str(value or '')[:length].ljust(length)
+
+
+def _sanitize_numeric(value, length):
+    digits = ''.join(ch for ch in str(value or '') if ch.isdigit())
+    return digits[:length].rjust(length, '0')
+
+
+def _amount_in_cents(value, length=10):
+    return str(int((value or DECIMAL_ZERO) * 100)).rjust(length, '0')
+
+
+def _build_wells_fargo_ppd_content(payroll_run, originator_profile, payslips, scheme):
+    header = ''.join([
+        'WFPPD',
+        _sanitize_fixed_width(originator_profile.originator_name, 23),
+        _sanitize_fixed_width(originator_profile.originator_identifier, 10),
+        _sanitize_fixed_width(originator_profile.company_entry_description or 'PAYROLL', 10),
+        _sanitize_fixed_width(originator_profile.company_discretionary_data, 20),
+        payroll_run.payment_date.strftime('%Y%m%d'),
+        str(len(payslips)).rjust(6, '0'),
+    ])
+    details = []
+    total = DECIMAL_ZERO
+    for sequence, payslip in enumerate(payslips, start=1):
+        profile = payslip.payroll_profile
+        total += payslip.net_pay or DECIMAL_ZERO
+        details.append(''.join([
+            '6',
+            _sanitize_numeric(profile.default_bank_routing_number if profile else '', 9),
+            _sanitize_numeric(profile.default_bank_account_number if profile else '', 17),
+            _amount_in_cents(payslip.net_pay, 10),
+            _sanitize_fixed_width(payslip.staff_member.full_name, 22),
+            _sanitize_fixed_width((payslip.bank_payment_reference or '')[:scheme['reference_max_length']], 10),
+            str(sequence).rjust(7, '0'),
+        ]))
+    control = ''.join([
+        '8',
+        _sanitize_numeric(originator_profile.debit_routing_number, 9),
+        _sanitize_numeric(originator_profile.debit_account_number, 17),
+        _amount_in_cents(total, 12),
+        str(len(payslips)).rjust(6, '0'),
+    ])
+    return '\n'.join([header, *details, control])
+
+
+def _build_chase_ppd_content(payroll_run, originator_profile, payslips, scheme):
+    lines = [
+        ','.join([
+            'CHASEHDR',
+            payroll_run.payment_date.strftime('%Y%m%d'),
+            _sanitize_fixed_width(originator_profile.originator_name, 23).strip(),
+            _sanitize_fixed_width(originator_profile.originator_identifier, 12).strip(),
+            _sanitize_fixed_width(originator_profile.company_entry_description or 'PAYROLL', 10).strip(),
+            str(len(payslips)),
+        ])
+    ]
+    total = DECIMAL_ZERO
+    for payslip in payslips:
+        profile = payslip.payroll_profile
+        total += payslip.net_pay or DECIMAL_ZERO
+        lines.append(','.join([
+            'CHASEDTL',
+            _sanitize_numeric(profile.default_bank_routing_number if profile else '', 9),
+            _sanitize_numeric(profile.default_bank_account_number if profile else '', 17),
+            _amount_in_cents(payslip.net_pay, 10),
+            _sanitize_fixed_width(payslip.staff_member.full_name, 22).strip(),
+            _sanitize_fixed_width((payslip.bank_payment_reference or '')[:scheme['reference_max_length']], 12).strip(),
+        ]))
+    lines.append(','.join([
+        'CHASECTL',
+        _sanitize_numeric(originator_profile.debit_routing_number, 9),
+        _sanitize_numeric(originator_profile.debit_account_number, 17),
+        _amount_in_cents(total, 12),
+        str(len(payslips)),
+    ]))
+    return '\n'.join(lines)
+
+
+def _build_sepa_content(payroll_run, originator_profile, payslips, scheme):
+    rows = []
+    for index, payslip in enumerate(payslips, start=1):
+        profile = payslip.payroll_profile
+        rows.append(
+            f"<CdtTrfTxInf><PmtId><InstrId>PMT-{payroll_run.id}-{index}</InstrId><EndToEndId>{(payslip.bank_payment_reference or '')[:scheme['reference_max_length']]}</EndToEndId></PmtId><Amt><InstdAmt Ccy=\"{payroll_run.entity.local_currency}\">{payslip.net_pay}</InstdAmt></Amt><CdtrAgt><FinInstnId><BIC>{(profile.default_bank_swift_code if profile else '')}</BIC></FinInstnId></CdtrAgt><Cdtr><Nm>{payslip.staff_member.full_name}</Nm></Cdtr><CdtrAcct><Id><IBAN>{(profile.default_bank_iban if profile else '')}</IBAN></Id></CdtrAcct><RmtInf><Ustrd>{(payslip.bank_payment_reference or '')[:scheme['reference_max_length']]}</Ustrd></RmtInf></CdtTrfTxInf>"
+        )
+    total = sum((payslip.net_pay or DECIMAL_ZERO) for payslip in payslips)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<Document xmlns="{scheme.get("xml_namespace", "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03")}">'
+        '<CstmrCdtTrfInitn>'
+        f'<GrpHdr><MsgId>PAYROLL-{payroll_run.id}</MsgId><CreDtTm>{timezone.now().strftime("%Y-%m-%dT%H:%M:%S")}</CreDtTm><NbOfTxs>{len(payslips)}</NbOfTxs><CtrlSum>{total}</CtrlSum><InitgPty><Nm>{originator_profile.initiating_party_name or originator_profile.originator_name}</Nm><Id><OrgId><Othr><Id>{originator_profile.initiating_party_identifier or originator_profile.originator_identifier or f"PAYROLL-{payroll_run.entity_id}"}</Id></Othr></OrgId></Id></InitgPty></GrpHdr>'
+        f'<PmtInf><PmtInfId>PAYROLL-{payroll_run.id}</PmtInfId><PmtMtd>TRF</PmtMtd><BtchBookg>true</BtchBookg><NbOfTxs>{len(payslips)}</NbOfTxs><CtrlSum>{total}</CtrlSum><PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl></PmtTpInf><ReqdExctnDt>{payroll_run.payment_date.isoformat()}</ReqdExctnDt><Dbtr><Nm>{originator_profile.originator_name}</Nm></Dbtr><DbtrAcct><Id><IBAN>{originator_profile.debit_iban}</IBAN></Id></DbtrAcct><DbtrAgt><FinInstnId><BIC>{originator_profile.debit_swift_code}</BIC></FinInstnId></DbtrAgt><ChrgBr>SLEV</ChrgBr>{"".join(rows)}</PmtInf>'
+        '</CstmrCdtTrfInitn>'
+        '</Document>'
+    )
+
+
+def _build_barclays_bacs_content(originator_profile, payslips, scheme):
+    lines = [
+        ''.join([
+            'BH',
+            _sanitize_fixed_width(originator_profile.originator_name, 18),
+            _sanitize_fixed_width(originator_profile.originator_identifier, 6),
+            _sanitize_fixed_width(originator_profile.debit_account_name, 18),
+            _sanitize_numeric(originator_profile.debit_account_number, 8),
+            _sanitize_numeric(originator_profile.debit_sort_code, 6),
+        ])
+    ]
+    total = DECIMAL_ZERO
+    for payslip in payslips:
+        profile = payslip.payroll_profile
+        total += payslip.net_pay or DECIMAL_ZERO
+        lines.append(''.join([
+            'BD',
+            _sanitize_fixed_width(profile.default_bank_account_name if profile else '', 18),
+            _sanitize_numeric(profile.default_bank_account_number if profile else '', 8),
+            _sanitize_numeric(profile.default_bank_sort_code if profile else '', 6),
+            _amount_in_cents(payslip.net_pay, 11),
+            _sanitize_fixed_width((payslip.bank_payment_reference or '')[:scheme['reference_max_length']], 18),
+        ]))
+    lines.append(''.join(['BT', _amount_in_cents(total, 13), str(len(payslips)).rjust(6, '0')]))
+    return '\n'.join(lines)
+
+
+def _build_hsbc_bacs_content(originator_profile, payslips, scheme):
+    lines = [
+        ','.join([
+            'HSBCBH',
+            _sanitize_fixed_width(originator_profile.originator_name, 18).strip(),
+            _sanitize_fixed_width(originator_profile.originator_identifier, 10).strip(),
+            _sanitize_fixed_width(originator_profile.debit_account_name, 18).strip(),
+            _sanitize_numeric(originator_profile.debit_account_number, 8),
+            _sanitize_numeric(originator_profile.debit_sort_code, 6),
+        ])
+    ]
+    total = DECIMAL_ZERO
+    for payslip in payslips:
+        profile = payslip.payroll_profile
+        total += payslip.net_pay or DECIMAL_ZERO
+        lines.append(','.join([
+            'HSBCBD',
+            _sanitize_fixed_width(profile.default_bank_account_name if profile else '', 18).strip(),
+            _sanitize_numeric(profile.default_bank_account_number if profile else '', 8),
+            _sanitize_numeric(profile.default_bank_sort_code if profile else '', 6),
+            _amount_in_cents(payslip.net_pay, 11),
+            _sanitize_fixed_width((payslip.bank_payment_reference or '')[:scheme['reference_max_length']], 18).strip(),
+        ]))
+    lines.append(','.join(['HSBCBT', _amount_in_cents(total, 13), str(len(payslips)).rjust(6, '0')]))
+    return '\n'.join(lines)
+
+
+def _build_adp_workforce_now_content(originator_profile, payslips, scheme):
+    buffer = StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow([
+        'company_code', 'company_name', 'debit_account_number', 'employee_id', 'employee_name',
+        'account_type', 'account_name', 'account_number', 'amount_cents', 'reference',
+    ])
+    company_code = (originator_profile.originator_identifier or f'PAYROLL-{originator_profile.entity_id}')[:20]
+    for payslip in payslips:
+        profile = payslip.payroll_profile
+        writer.writerow([
+            company_code,
+            originator_profile.originator_name[:40],
+            originator_profile.debit_account_number,
+            payslip.staff_member.employee_id,
+            payslip.staff_member.full_name[:35],
+            'CHECKING',
+            (profile.default_bank_account_name if profile else '')[:35],
+            profile.default_bank_account_number if profile else '',
+            _amount_in_cents(payslip.net_pay, 10),
+            (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
+        ])
+    return buffer.getvalue()
+
+
 def _generate_statutory_reports(payroll_run):
     jurisdiction, payload = _statutory_report_payload(payroll_run)
     due_date = payroll_run.payment_date
@@ -321,33 +498,9 @@ def _generate_bank_payment_file(payroll_run):
 
     if file_format == 'aba':
         if scheme['institution_code'] == 'wells_fargo' and scheme['variant_code'] == 'ppd':
-            lines = [
-                f"WF-PPD|{originator_profile.originator_name}|{originator_profile.originator_identifier}|{payroll_run.payment_date.isoformat()}|{len(payslips)}"
-            ]
-            for payslip in payslips:
-                profile = payslip.payroll_profile
-                lines.append('|'.join([
-                    (profile.default_bank_routing_number if profile else ''),
-                    (profile.default_bank_account_number if profile else ''),
-                    str(int((payslip.net_pay or DECIMAL_ZERO) * 100)),
-                    payslip.staff_member.full_name,
-                    (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
-                ]))
-            lines.append(f"WF-PPD-TOTAL|{originator_profile.debit_routing_number}|{originator_profile.debit_account_number}|{str(int(sum((payslip.net_pay or DECIMAL_ZERO) for payslip in payslips) * 100))}")
+            content = _build_wells_fargo_ppd_content(payroll_run, originator_profile, payslips, scheme)
         elif scheme['institution_code'] == 'chase' and scheme['variant_code'] == 'ppd':
-            lines = [
-                f"CHASE-PPD,{originator_profile.originator_name},{originator_profile.originator_identifier},{payroll_run.payment_date.isoformat()},{len(payslips)}"
-            ]
-            for payslip in payslips:
-                profile = payslip.payroll_profile
-                lines.append(','.join([
-                    profile.default_bank_routing_number if profile else '',
-                    profile.default_bank_account_number if profile else '',
-                    str(int((payslip.net_pay or DECIMAL_ZERO) * 100)),
-                    payslip.staff_member.full_name,
-                    (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
-                ]))
-            lines.append(f"CHASE-TOTAL,{originator_profile.debit_routing_number},{originator_profile.debit_account_number},{str(int(sum((payslip.net_pay or DECIMAL_ZERO) for payslip in payslips) * 100))}")
+            content = _build_chase_ppd_content(payroll_run, originator_profile, payslips, scheme)
         else:
             lines = [
                 f"101 {(originator_profile.debit_routing_number or '000000000')[:9]:<9} {originator_profile.originator_name[:23]:<23}{payroll_run.payment_date:%y%m%d}A094101"
@@ -358,48 +511,22 @@ def _generate_bank_payment_file(payroll_run):
                     f"6{(profile.default_bank_routing_number if profile else '')[:9]:<9}{(profile.default_bank_account_number if profile else '')[:17]:<17}{str(int((payslip.net_pay or DECIMAL_ZERO) * 100)):>10}{payslip.staff_member.full_name[:22]:<22}{(payslip.bank_payment_reference or '')[:scheme['reference_max_length']]:<15}"
                 )
             lines.append(f"9000001{len(payslips):06d}{str(int(sum((payslip.net_pay or DECIMAL_ZERO) for payslip in payslips) * 100)):>12}")
-        content = '\n'.join(lines)
+            content = '\n'.join(lines)
         extension = scheme['extension']
     elif file_format == 'sepa':
-        rows = []
-        for payslip in payslips:
-            profile = payslip.payroll_profile
-            rows.append(
-                f"    <CdtTrfTxInf><PmtId><EndToEndId>{(payslip.bank_payment_reference or '')[:scheme['reference_max_length']]}</EndToEndId></PmtId><Amt><InstdAmt Ccy=\"{payroll_run.entity.local_currency}\">{payslip.net_pay}</InstdAmt></Amt><Cdtr><Nm>{payslip.staff_member.full_name}</Nm></Cdtr><CdtrAcct><Id><IBAN>{(profile.default_bank_iban if profile else '')}</IBAN></Id></CdtrAcct><CdtrAgt><FinInstnId><BIC>{(profile.default_bank_swift_code if profile else '')}</BIC></FinInstnId></CdtrAgt></CdtTrfTxInf>"
-            )
-        content = (
-            '<?xml version="1.0" encoding="UTF-8"?>\n'
-            f'<Document xmlns="{scheme.get("xml_namespace", "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03")}"><CstmrCdtTrfInitn><GrpHdr>'
-            f'<MsgId>PAYROLL-{payroll_run.id}</MsgId><NbOfTxs>{len(payslips)}</NbOfTxs>'
-            f'<CtrlSum>{sum((payslip.net_pay or DECIMAL_ZERO) for payslip in payslips)}</CtrlSum>'
-            f'</GrpHdr><PmtInf><PmtInfId>PAYROLL-{payroll_run.id}</PmtInfId><Dbtr><Nm>{originator_profile.originator_name}</Nm></Dbtr><DbtrAcct><Id><IBAN>{originator_profile.debit_iban}</IBAN></Id></DbtrAcct><DbtrAgt><FinInstnId><BIC>{originator_profile.debit_swift_code}</BIC></FinInstnId></DbtrAgt><UltmtDbtr><Nm>{originator_profile.initiating_party_name or originator_profile.originator_name}</Nm></UltmtDbtr>{"".join(rows)}</PmtInf></CstmrCdtTrfInitn></Document>'
-        )
+        content = _build_sepa_content(payroll_run, originator_profile, payslips, scheme)
         extension = scheme['extension']
     elif file_format == 'bacs':
         if scheme['institution_code'] == 'barclays':
-            lines = [f'BARCLAYS|{originator_profile.originator_name}|{originator_profile.originator_identifier}|{originator_profile.debit_account_number}|{originator_profile.debit_sort_code}']
-            for payslip in payslips:
-                profile = payslip.payroll_profile
-                lines.append('|'.join([
-                    profile.default_bank_account_name if profile else '',
-                    profile.default_bank_account_number if profile else '',
-                    profile.default_bank_sort_code if profile else '',
-                    str(payslip.net_pay),
-                    (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
-                ]))
+            content = _build_barclays_bacs_content(originator_profile, payslips, scheme)
         elif scheme['institution_code'] == 'hsbc':
-            lines = [f'HSBC_BACS,{originator_profile.originator_name},{originator_profile.originator_identifier},{originator_profile.debit_account_number},{originator_profile.debit_sort_code}']
-            for payslip in payslips:
-                profile = payslip.payroll_profile
-                lines.append(','.join([
-                    profile.default_bank_account_name if profile else '',
-                    profile.default_bank_account_number if profile else '',
-                    profile.default_bank_sort_code if profile else '',
-                    str(payslip.net_pay),
-                    (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
-                ]))
+            content = _build_hsbc_bacs_content(originator_profile, payslips, scheme)
         else:
-            lines = [f'originator_name,originator_account_number,originator_sort_code', f'{originator_profile.originator_name},{originator_profile.debit_account_number},{originator_profile.debit_sort_code}', 'account_name,account_number,sort_code,amount,reference']
+            lines = [
+                'originator_name,originator_account_number,originator_sort_code',
+                f'{originator_profile.originator_name},{originator_profile.debit_account_number},{originator_profile.debit_sort_code}',
+                'account_name,account_number,sort_code,amount,reference',
+            ]
             for payslip in payslips:
                 profile = payslip.payroll_profile
                 lines.append(','.join([
@@ -409,30 +536,17 @@ def _generate_bank_payment_file(payroll_run):
                     str(payslip.net_pay),
                     (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
                 ]))
-        content = '\n'.join(lines)
+            content = '\n'.join(lines)
         extension = scheme['extension']
     else:
-        buffer = StringIO()
-        writer = csv.writer(buffer)
         if scheme['institution_code'] == 'adp' and scheme['variant_code'] == 'workforce_now':
-            writer.writerow(['company_name', 'company_id', 'employee_id', 'employee_name', 'institution', 'account_name', 'account_number', 'amount', 'reference'])
+            content = _build_adp_workforce_now_content(originator_profile, payslips, scheme)
         else:
+            buffer = StringIO()
+            writer = csv.writer(buffer)
             writer.writerow(['originator_name', 'originator_account_number', 'employee_id', 'employee_name', 'account_name', 'account_number', 'routing_number', 'amount', 'reference'])
-        for payslip in payslips:
-            profile = payslip.payroll_profile
-            if scheme['institution_code'] == 'adp' and scheme['variant_code'] == 'workforce_now':
-                writer.writerow([
-                    originator_profile.originator_name,
-                    originator_profile.originator_identifier,
-                    payslip.staff_member.employee_id,
-                    payslip.staff_member.full_name,
-                    scheme['institution_code'],
-                    profile.default_bank_account_name if profile else '',
-                    profile.default_bank_account_number if profile else '',
-                    str(payslip.net_pay),
-                    (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
-                ])
-            else:
+            for payslip in payslips:
+                profile = payslip.payroll_profile
                 writer.writerow([
                     originator_profile.originator_name,
                     originator_profile.debit_account_number,
@@ -444,7 +558,7 @@ def _generate_bank_payment_file(payroll_run):
                     str(payslip.net_pay),
                     (payslip.bank_payment_reference or '')[:scheme['reference_max_length']],
                 ])
-        content = buffer.getvalue()
+            content = buffer.getvalue()
         extension = scheme['extension']
 
     PayrollBankPaymentFile.objects.update_or_create(

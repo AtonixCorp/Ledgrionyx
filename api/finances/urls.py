@@ -20,6 +20,7 @@ from .enterprise_views import (
     BankAccountViewSet, WalletViewSet, ComplianceDocumentViewSet,
     BookkeepingCategoryViewSet, BookkeepingAccountViewSet, TransactionViewSet, BookkeepingAuditLogViewSet,
     CashflowTreasuryViewSet, RecurringTransactionViewSet, TaskRequestViewSet, FinancialStatementsViewSet,
+    EnterpriseReportingViewSet,
     # New viewsets for Accounting module
     ChartOfAccountsViewSet, GeneralLedgerViewSet, JournalApprovalMatrixViewSet,
     JournalApprovalDelegationViewSet, JournalEntryApprovalStepViewSet, JournalEntryChangeLogViewSet,
@@ -43,7 +44,7 @@ from .enterprise_views import (
     LoanPaymentViewSet, KYCProfileViewSet, AMLTransactionViewSet, FirmServiceViewSet,
     ClientInvoiceViewSet, ClientInvoiceLineItemViewSet, ClientSubscriptionViewSet,
     WhiteLabelBrandingViewSet, BankingIntegrationViewSet, BankingTransactionViewSet,
-    EmbeddedPaymentViewSet, AutomationWorkflowViewSet, AutomationExecutionViewSet,
+    EmbeddedPaymentViewSet, AutomationWorkflowViewSet, AutomationExecutionViewSet, AutomationArtifactViewSet,
     FirmMetricViewSet, ClientMarketplaceIntegrationViewSet
 )
 
@@ -97,6 +98,7 @@ router.register(r'task-requests', TaskRequestViewSet, basename='task-request')
 
 # Financial statements endpoints (no model viewset, just actions)
 router.register(r'financial-statements', FinancialStatementsViewSet, basename='financial-statements')
+router.register(r'enterprise-reporting', EnterpriseReportingViewSet, basename='enterprise-reporting')
 
 # Cashflow & Treasury endpoints
 router.register(r'cashflow-treasury', CashflowTreasuryViewSet, basename='cashflow-treasury')
@@ -205,6 +207,7 @@ router.register(r'embedded-payments', EmbeddedPaymentViewSet, basename='embedded
 # NEW: Workflow Automation
 router.register(r'automation-workflows', AutomationWorkflowViewSet, basename='automation-workflow')
 router.register(r'automation-executions', AutomationExecutionViewSet, basename='automation-execution')
+router.register(r'automation-artifacts', AutomationArtifactViewSet, basename='automation-artifact')
 
 # NEW: Firm Dashboard
 router.register(r'firm-metrics', FirmMetricViewSet, basename='firm-metric')

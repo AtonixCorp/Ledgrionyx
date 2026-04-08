@@ -805,12 +805,20 @@ export const automationWorkflowsAPI = {
   create: (data) => api.post('/automation-workflows/', data),
   update: (id, data) => api.put(`/automation-workflows/${id}/`, data),
   delete: (id) => api.delete(`/automation-workflows/${id}/`),
+  execute: (id) => api.post(`/automation-workflows/${id}/execute/`),
+  runDue: () => api.post('/automation-workflows/run_due/'),
 };
 
 // Automation Executions API
 export const automationExecutionsAPI = {
   getAll: (params) => api.get('/automation-executions/', { params }),
   getById: (id) => api.get(`/automation-executions/${id}/`),
+};
+
+export const automationArtifactsAPI = {
+  getAll: (params) => api.get('/automation-artifacts/', { params }),
+  getById: (id) => api.get(`/automation-artifacts/${id}/`),
+  download: (id) => api.get(`/automation-artifacts/${id}/download/`, { responseType: 'blob' }),
 };
 
 // ============ FIRM DASHBOARD & BUSINESS INTELLIGENCE APIs ============
@@ -981,6 +989,12 @@ export const financialStatementsAPI = {
   incomeStatement: (params) => api.get('/financial-statements/income_statement/', { params }),
   balanceSheet: (params) => api.get('/financial-statements/balance_sheet/', { params }),
   cashFlow: (params) => api.get('/financial-statements/cash_flow_statement/', { params }),
+};
+
+export const enterpriseReportingAPI = {
+  dashboard: (params) => api.get('/enterprise-reporting/dashboard/', { params }),
+  exportPdf: (params) => api.get('/enterprise-reporting/export_pdf/', { params, responseType: 'blob' }),
+  exportXlsx: (params) => api.get('/enterprise-reporting/export_xlsx/', { params, responseType: 'blob' }),
 };
 
 // Tax Profiles API
