@@ -290,29 +290,31 @@ export const teamMembersAPI = {
   delete: (id) => api.delete(`/team-members/${id}/`),
 };
 
+const workspaceApiPath = (workspaceId, suffix = '') => `/v1/workspaces/${workspaceId}${suffix}`;
+
 export const workspaceMembersAPI = {
-  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/members`),
-  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/members`, data),
-  updateRole: (workspaceId, userId, data) => api.patch(`/workspaces/${workspaceId}/members/${userId}`, data),
-  delete: (workspaceId, userId) => api.delete(`/workspaces/${workspaceId}/members/${userId}`),
+  getAll: (workspaceId) => api.get(workspaceApiPath(workspaceId, '/members')),
+  create: (workspaceId, data) => api.post(workspaceApiPath(workspaceId, '/members'), data),
+  updateRole: (workspaceId, userId, data) => api.patch(workspaceApiPath(workspaceId, `/members/${userId}`), data),
+  delete: (workspaceId, userId) => api.delete(workspaceApiPath(workspaceId, `/members/${userId}`)),
 };
 
 export const workspaceDepartmentsAPI = {
-  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/departments`),
-  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/departments`, data),
-  update: (workspaceId, departmentId, data) => api.patch(`/workspaces/${workspaceId}/departments/${departmentId}`, data),
-  delete: (workspaceId, departmentId) => api.delete(`/workspaces/${workspaceId}/departments/${departmentId}`),
-  addMember: (workspaceId, departmentId, data) => api.post(`/workspaces/${workspaceId}/departments/${departmentId}/members`, data),
-  removeMember: (workspaceId, departmentId, userId) => api.delete(`/workspaces/${workspaceId}/departments/${departmentId}/members/${userId}`),
+  getAll: (workspaceId) => api.get(workspaceApiPath(workspaceId, '/departments')),
+  create: (workspaceId, data) => api.post(workspaceApiPath(workspaceId, '/departments'), data),
+  update: (workspaceId, departmentId, data) => api.patch(workspaceApiPath(workspaceId, `/departments/${departmentId}`), data),
+  delete: (workspaceId, departmentId) => api.delete(workspaceApiPath(workspaceId, `/departments/${departmentId}`)),
+  addMember: (workspaceId, departmentId, data) => api.post(workspaceApiPath(workspaceId, `/departments/${departmentId}/members`), data),
+  removeMember: (workspaceId, departmentId, userId) => api.delete(workspaceApiPath(workspaceId, `/departments/${departmentId}/members/${userId}`)),
 };
 
 export const workspaceGroupsAPI = workspaceDepartmentsAPI;
 
 export const workspaceMeetingsAPI = {
-  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/meetings`),
-  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/meetings`, data),
-  update: (workspaceId, meetingId, data) => api.patch(`/workspaces/${workspaceId}/meetings/${meetingId}`, data),
-  delete: (workspaceId, meetingId) => api.delete(`/workspaces/${workspaceId}/meetings/${meetingId}`),
+  getAll: (workspaceId) => api.get(workspaceApiPath(workspaceId, '/meetings')),
+  create: (workspaceId, data) => api.post(workspaceApiPath(workspaceId, '/meetings'), data),
+  update: (workspaceId, meetingId, data) => api.patch(workspaceApiPath(workspaceId, `/meetings/${meetingId}`), data),
+  delete: (workspaceId, meetingId) => api.delete(workspaceApiPath(workspaceId, `/meetings/${meetingId}`)),
 };
 
 // Roles API

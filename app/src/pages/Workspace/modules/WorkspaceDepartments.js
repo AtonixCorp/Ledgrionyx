@@ -354,8 +354,14 @@ const WorkspaceDepartments = () => {
       {error && <div className="wsm-alert wsm-alert-error">{error}</div>}
       {notice && <div className="wsm-alert wsm-alert-success">{notice}</div>}
 
-      <div className="wsm-section" style={{ marginBottom: 24 }}>
-        <div className="wsm-section-title">Finance Org Structure</div>
+      <section className="wsm-department-section">
+        <div className="wsm-department-section-head">
+          <div>
+            <span className="wsm-section-kicker">Workspace Blueprint</span>
+            <div className="wsm-section-title">Finance Org Structure</div>
+          </div>
+          <p className="wsm-department-section-copy">Each card maps a finance function to ownership, staffing, and operating scope inside this workspace.</p>
+        </div>
         <div className="wsm-department-dashboard-grid">
           {departmentCards.map((department) => (
             <button
@@ -369,93 +375,103 @@ const WorkspaceDepartments = () => {
                 <span>{department.memberCount} member{department.memberCount === 1 ? '' : 's'}</span>
               </div>
               <p>{department.description}</p>
-              <div className="wsm-department-meta">Owner: {department.ownerName}</div>
-              <div className="wsm-department-meta">Cost Center: {department.costCenter}</div>
+              <div className="wsm-department-meta-row">
+                <div className="wsm-department-meta">
+                  <span className="wsm-department-meta-label">Owner</span>
+                  <span>{department.ownerName}</span>
+                </div>
+                <div className="wsm-department-meta">
+                  <span className="wsm-department-meta-label">Cost Center</span>
+                  <span>{department.costCenter}</span>
+                </div>
+              </div>
               <div className="wsm-department-modules">{department.modules}</div>
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="wsm-toolbar">
-        <input
-          className="wsm-search"
-          type="text"
-          placeholder="Search departments…"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-      </div>
+      <section className="wsm-department-section">
+        <div className="wsm-department-section-head wsm-department-section-head-directory">
+          <div>
+            <span className="wsm-section-kicker">Directory</span>
+            <div className="wsm-section-title">Department Directory</div>
+          </div>
+          <div className="wsm-toolbar wsm-toolbar-compact">
+            <input
+              className="wsm-search"
+              type="text"
+              placeholder="Search departments…"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </div>
+        </div>
 
-      <div className="wsm-table-wrap">
-        <table className="wsm-table">
-          <thead>
-            <tr>
-              <th>Department</th>
-              <th>Description</th>
-              <th>Owner</th>
-              <th>Cost Center</th>
-              <th>Members</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7}><div className="wsm-empty">Loading departments…</div></td>
-              </tr>
-            ) : filteredDepartments.length === 0 ? (
-              <tr>
-                <td colSpan={7}><div className="wsm-empty">No departments found. Create one to organize finance ownership and members.</div></td>
-              </tr>
-            ) : (
-              filteredDepartments.map((department) => (
-                <tr key={department.id}>
-                  <td>
-                    <div className="wsm-group-name">{department.name}</div>
-                  </td>
-                  <td>{department.description || '—'}</td>
-                  <td>{getUserDisplayName(department.owner)}</td>
-                  <td>{department.cost_center || '—'}</td>
-                  <td>
-                    <div className="wsm-group-pill-row">
-                      {(department.members || []).length === 0 ? (
-                        <span className="wsm-group-empty">No members</span>
-                      ) : (
-                        (department.members || []).slice(0, 3).map((member) => (
-                          <span key={member.id} className="wsm-group-pill">{getUserDisplayName(member.user)}</span>
-                        ))
-                      )}
-                      {(department.members || []).length > 3 && (
-                        <span className="wsm-group-pill wsm-group-pill-muted">+{department.members.length - 3} more</span>
-                      )}
-                    </div>
-                  </td>
-                  <td>{department.created_at ? new Date(department.created_at).toLocaleDateString() : '—'}</td>
-                  <td>
-                    <div className="wsm-inline-actions">
-                      <button className="wsm-btn-secondary" onClick={() => handleOpenDepartment(department)}>Manage Members</button>
-                      {canManageDepartments && (
-                        <>
-                          <button className="wsm-btn-secondary" onClick={() => handleEditDepartment(department)}>Edit</button>
-                          <button
-                            className="wsm-btn-danger wsm-btn-danger-inline"
-                            onClick={() => handleDeleteDepartment(department)}
-                            disabled={actionKey === `delete-${department.id}`}
-                          >
-                            {actionKey === `delete-${department.id}` ? 'Deleting…' : 'Delete'}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+        {loading ? (
+          <div className="wsm-empty wsm-empty-panel">Loading departments…</div>
+        ) : filteredDepartments.length === 0 ? (
+          <div className="wsm-empty wsm-empty-panel">No departments found. Create one to organize finance ownership and members.</div>
+        ) : (
+          <div className="wsm-department-list-grid">
+            {filteredDepartments.map((department) => (
+              <article key={department.id} className="wsm-department-list-card">
+                <div className="wsm-department-list-top">
+                  <div>
+                    <h3 className="wsm-department-list-title">{department.name}</h3>
+                    <p className="wsm-department-list-description">{department.description || 'No department description added yet.'}</p>
+                  </div>
+                  <button className="wsm-btn-secondary" onClick={() => handleOpenDepartment(department)}>Manage Members</button>
+                </div>
+
+                <div className="wsm-department-list-meta">
+                  <div className="wsm-department-statline">
+                    <span className="wsm-department-meta-label">Owner</span>
+                    <strong>{getUserDisplayName(department.owner)}</strong>
+                  </div>
+                  <div className="wsm-department-statline">
+                    <span className="wsm-department-meta-label">Cost Center</span>
+                    <strong>{department.cost_center || '—'}</strong>
+                  </div>
+                  <div className="wsm-department-statline">
+                    <span className="wsm-department-meta-label">Created</span>
+                    <strong>{department.created_at ? new Date(department.created_at).toLocaleDateString() : '—'}</strong>
+                  </div>
+                </div>
+
+                <div className="wsm-department-member-summary">
+                  <span className="wsm-department-meta-label">Members</span>
+                  <div className="wsm-group-pill-row">
+                    {(department.members || []).length === 0 ? (
+                      <span className="wsm-group-empty">No members</span>
+                    ) : (
+                      (department.members || []).slice(0, 4).map((member) => (
+                        <span key={member.id} className="wsm-group-pill">{getUserDisplayName(member.user)}</span>
+                      ))
+                    )}
+                    {(department.members || []).length > 4 && (
+                      <span className="wsm-group-pill wsm-group-pill-muted">+{department.members.length - 4} more</span>
+                    )}
+                  </div>
+                </div>
+
+                {canManageDepartments && (
+                  <div className="wsm-inline-actions wsm-inline-actions-spread">
+                    <button className="wsm-btn-secondary" onClick={() => handleEditDepartment(department)}>Edit</button>
+                    <button
+                      className="wsm-btn-danger wsm-btn-danger-inline"
+                      onClick={() => handleDeleteDepartment(department)}
+                      disabled={actionKey === `delete-${department.id}`}
+                    >
+                      {actionKey === `delete-${department.id}` ? 'Deleting…' : 'Delete'}
+                    </button>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
 
       {showCreate && (
         <div className="wsm-modal-overlay" onClick={() => !saving && resetCreateForm()}>

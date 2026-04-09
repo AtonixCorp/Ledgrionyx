@@ -59,6 +59,10 @@ def _get_workspace_or_404(workspace_id) -> Workspace:
         raise NotFound('Workspace not found.')
 
 
+def _resolve_workspace_id_or_404(workspace_ref):
+    return WorkspaceService.resolve_workspace_id(workspace_ref)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /workspaces          — create
 # GET  /workspaces          — list user's workspaces
@@ -87,10 +91,12 @@ class WorkspaceDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ws = WorkspaceService.get_workspace(workspace_id, request.user)
         return Response(WorkspaceSerializer(ws).data)
 
     def patch(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = WorkspaceUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         ws = WorkspaceService.update_workspace(workspace_id, request.user, ser.validated_data)
@@ -105,6 +111,7 @@ class WorkspaceTierView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = TierUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         ws = WorkspaceService.change_tier(workspace_id, request.user, ser.validated_data['tier'])
@@ -119,6 +126,7 @@ class WorkspaceStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = StatusUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         ws = WorkspaceService.change_status(workspace_id, request.user, ser.validated_data['status'])
@@ -134,10 +142,12 @@ class WorkspaceMemberListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         members = MemberService.list_members(workspace_id, request.user)
         return Response(WorkspaceMemberSerializer(members, many=True).data)
 
     def post(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = MemberAddSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         user = _get_user_or_404(ser.validated_data['user_id'])
@@ -154,6 +164,7 @@ class WorkspaceMemberDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, workspace_id, user_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = MemberRoleSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         target = _get_user_or_404(user_id)
@@ -161,6 +172,7 @@ class WorkspaceMemberDetailView(APIView):
         return Response(WorkspaceMemberSerializer(member).data)
 
     def delete(self, request, workspace_id, user_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         target = _get_user_or_404(user_id)
         MemberService.remove_member(workspace_id, request.user, target)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -175,10 +187,12 @@ class WorkspaceDepartmentListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         departments = DepartmentService.list_departments(workspace_id, request.user)
         return Response(WorkspaceDepartmentSerializer(departments, many=True).data)
 
     def post(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = DepartmentCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         department = DepartmentService.create_department(workspace_id, request.user, ser.validated_data)
@@ -189,12 +203,14 @@ class WorkspaceDepartmentDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, workspace_id, group_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = DepartmentUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         department = DepartmentService.update_department(workspace_id, request.user, group_id, ser.validated_data)
         return Response(WorkspaceDepartmentSerializer(department).data)
 
     def delete(self, request, workspace_id, group_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         DepartmentService.delete_department(workspace_id, request.user, group_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -208,6 +224,7 @@ class WorkspaceDepartmentMemberView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, workspace_id, group_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = DepartmentMemberSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         user = _get_user_or_404(ser.validated_data['user_id'])
@@ -215,6 +232,7 @@ class WorkspaceDepartmentMemberView(APIView):
         return Response({'id': str(gm.pk), 'user_id': user.pk}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, workspace_id, group_id, user_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         target = _get_user_or_404(user_id)
         DepartmentService.remove_member(workspace_id, request.user, group_id, target)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -234,10 +252,12 @@ class WorkspaceMeetingListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         meetings = MeetingService.list_meetings(workspace_id, request.user)
         return Response(WorkspaceMeetingSerializer(meetings, many=True).data)
 
     def post(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = MeetingCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         meeting = MeetingService.create_meeting(workspace_id, request.user, ser.validated_data)
@@ -253,12 +273,14 @@ class WorkspaceMeetingDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, workspace_id, meeting_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = MeetingUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         meeting = MeetingService.update_meeting(workspace_id, request.user, meeting_id, ser.validated_data)
         return Response(WorkspaceMeetingSerializer(meeting).data)
 
     def delete(self, request, workspace_id, meeting_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         MeetingService.cancel_meeting(workspace_id, request.user, meeting_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -272,12 +294,14 @@ class WorkspaceCalendarEventListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         start = request.query_params.get('start')
         end   = request.query_params.get('end')
         events = CalendarService.list_events(workspace_id, request.user, start, end)
         return Response(WorkspaceCalendarEventSerializer(events, many=True).data)
 
     def post(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = CalendarEventCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         event = CalendarService.create_event(workspace_id, request.user, ser.validated_data)
@@ -293,12 +317,14 @@ class WorkspaceCalendarEventDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, workspace_id, event_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = CalendarEventUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         event = CalendarService.update_event(workspace_id, request.user, event_id, ser.validated_data)
         return Response(WorkspaceCalendarEventSerializer(event).data)
 
     def delete(self, request, workspace_id, event_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         CalendarService.delete_event(workspace_id, request.user, event_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -312,11 +338,13 @@ class WorkspaceFileListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         folder_id = request.query_params.get('folder_id')
         files = FileService.list_files(workspace_id, request.user, folder_id)
         return Response(WorkspaceFileSerializer(files, many=True).data)
 
     def post(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = FileUploadSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         d = ser.validated_data
@@ -335,6 +363,7 @@ class WorkspaceFileDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, workspace_id, file_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         FileService.delete_file(workspace_id, request.user, file_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -348,11 +377,13 @@ class WorkspaceFolderListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         parent_id = request.query_params.get('parent_id')
         folders = FileService.list_folders(workspace_id, request.user, parent_id)
         return Response(WorkspaceFolderSerializer(folders, many=True).data)
 
     def post(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = FolderCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         folder = FileService.create_folder(
@@ -371,12 +402,14 @@ class WorkspaceModuleView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         PermissionService.assert_member(workspace_id, request.user)
         from .models import WorkspaceModule
         modules = WorkspaceModule.objects.filter(workspace_id=workspace_id)
         return Response(WorkspaceModuleSerializer(modules, many=True).data)
 
     def patch(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         ser = ModulesUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         modules = SettingsService.update_modules(workspace_id, request.user, ser.validated_data)
@@ -392,10 +425,12 @@ class WorkspaceSettingsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         settings = SettingsService.get_settings(workspace_id, request.user)
         return Response(settings)
 
     def patch(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         if not isinstance(request.data, dict):
             return Response({'detail': 'Expected a JSON object.'}, status=status.HTTP_400_BAD_REQUEST)
         settings = SettingsService.update_settings(workspace_id, request.user, request.data)
@@ -410,6 +445,7 @@ class WorkspaceLogView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         PermissionService.assert_owner_or_admin(workspace_id, request.user)
         logs = WorkspaceLog.objects.filter(workspace_id=workspace_id).select_related('actor')[:200]
         return Response(WorkspaceLogSerializer(logs, many=True).data)
@@ -423,6 +459,7 @@ class WorkspaceMyPermissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
+        workspace_id = _resolve_workspace_id_or_404(workspace_id)
         role = PermissionService.get_role(workspace_id, request.user)
         if role is None:
             return Response({'detail': 'Not a member of this workspace.'}, status=status.HTTP_403_FORBIDDEN)

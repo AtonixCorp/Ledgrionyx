@@ -387,10 +387,71 @@
 
 /* ━━━ RESPONSIVE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @media (max-width: 768px) {
-  .ws-sidebar {
-    width: var(--sb-min-width);
-    min-width: var(--sb-min-width);
+  .ws-with-sidebar {
+    flex-direction: column;
   }
+
+  .ws-sidebar {
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    position: static;
+    overflow-y: visible;
+  }
+
+  .ws-sidebar-header {
+    padding: 12px 14px;
+  }
+
+  .ws-nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px 10px 12px;
+    flex: initial;
+  }
+
+  .ws-nav-menu li {
+    flex: 0 0 auto;
+  }
+
+  .ws-nav-divider {
+    display: none;
+  }
+
+  .ws-nav-link {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .ws-nav-link.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--ws-accent);
+  }
+
+  .ws-topbar {
+    padding: 0 14px;
+  }
+
+  .ws-topbar-left {
+    min-width: 0;
+  }
+
+  .ws-topbar-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+  }
+
+  .ws-main {
+    padding: 16px 0 24px;
+  }
+
   .ws-sidebar-title,
   .ws-sidebar-sub,
   .ws-back-to-console,

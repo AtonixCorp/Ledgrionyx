@@ -347,7 +347,7 @@ export const EnterpriseProvider = ({ children }) => {
   const fetchTaxExposures = useCallback(async (orgId) => {
     if (!orgId) return;
     try {
-      const response = await fetch(apiUrl(`/api/tax-exposures/by_country/?organization_id=${orgId}`), {
+      const response = await fetch(apiUrl(`/api/tax-profiles/by_country/?organization_id=${orgId}`), {
         headers: buildAuthHeaders(),
       });
       if (response.ok) {

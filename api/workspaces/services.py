@@ -182,6 +182,41 @@ class LogService:
 class WorkspaceService:
 
     @staticmethod
+    def ensure_workspace_for_entity(entity):
+        workspace = Workspace.objects.filter(linked_entity=entity).first()
+        if workspace:
+            return workspace
+        return WorkspaceService.create_workspace(
+            entity.organization.owner,
+            {
+                'name': entity.name,
+                'description': f'Collaboration workspace for {entity.name}',
+                'linked_entity_id': entity.id,
+            },
+        )
+
+    @staticmethod
+    def resolve_workspace_id(workspace_ref):
+        if isinstance(workspace_ref, Workspace):
+            return workspace_ref.pk
+
+        try:
+            return Workspace.objects.only('id').get(pk=workspace_ref).pk
+        except (Workspace.DoesNotExist, ValueError, TypeError):
+            pass
+
+        ref_value = str(workspace_ref).strip()
+        if ref_value.isdigit():
+            Entity = apps.get_model('finances', 'Entity')
+            try:
+                entity = Entity.objects.select_related('organization').get(pk=int(ref_value))
+            except Entity.DoesNotExist:
+                raise NotFound('Workspace not found.')
+            return WorkspaceService.ensure_workspace_for_entity(entity).pk
+
+        raise NotFound('Workspace not found.')
+
+    @staticmethod
     def _resolve_linked_entity(linked_entity_id, *, current_workspace_id=None):
         if linked_entity_id in (None, ''):
             return None

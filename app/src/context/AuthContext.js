@@ -25,6 +25,37 @@ export const AuthProvider = ({ children }) => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
 
+  const parseApiError = useCallback(async (response, fallbackMessage) => {
+    try {
+      const data = await response.json();
+      if (typeof data?.detail === 'string' && data.detail) {
+        return data.detail;
+      }
+      if (typeof data?.error?.message === 'string' && data.error.message) {
+        return data.error.message;
+      }
+      if (data?.error?.details && typeof data.error.details === 'object') {
+        const detailMessage = Object.entries(data.error.details)
+          .map(([field, value]) => `${field}: ${Array.isArray(value) ? value.join(', ') : value}`)
+          .join(' | ');
+        if (detailMessage) {
+          return detailMessage;
+        }
+      }
+      if (data && typeof data === 'object') {
+        const flatMessage = Object.entries(data)
+          .map(([field, value]) => `${field}: ${Array.isArray(value) ? value.join(', ') : value}`)
+          .join(' | ');
+        if (flatMessage) {
+          return flatMessage;
+        }
+      }
+    } catch {
+      // ignore parse failures and fall back below
+    }
+    return fallbackMessage;
+  }, []);
+
   useEffect(() => {
     const initialize = async () => {
       const token = localStorage.getItem('token');
@@ -83,13 +114,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!tokenRes.ok) {
-        let details = 'Invalid credentials';
-        try {
-          const data = await tokenRes.json();
-          details = data?.detail || details;
-        } catch {
-          // ignore
-        }
+        const details = await parseApiError(tokenRes, 'Invalid credentials');
         return { success: false, error: details };
       }
 
@@ -146,13 +171,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        let details = 'Registration failed';
-        try {
-          const data = await response.json();
-          details = data?.detail || JSON.stringify(data);
-        } catch {
-          // ignore
-        }
+        const details = await parseApiError(response, 'Registration failed');
         return { success: false, error: details };
       }
 

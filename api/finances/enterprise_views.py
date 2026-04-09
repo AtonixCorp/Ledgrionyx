@@ -945,6 +945,29 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             },
         }
 
+        return Response({
+            'summary': {
+                'financialHealth': 'Stable with contained risk exposure' if health_score >= 80 else 'Stable with moderate operational risk' if health_score >= 65 else 'Elevated risk requires immediate review',
+                'immediateAttention': f"{_format_count(len(alert_items))} alerts and {_format_count(sum(1 for item in task_items if not item['done']))} open workflow items",
+                'liveActivity': f"{_format_count(len(feed_items))} material accounting events across {_format_count(entity_count)} entities",
+                'nextAction': next((item['title'] for item in task_items if not item['done']), 'No urgent workflow blockers'),
+            },
+            'kpis': kpis,
+            'chartSeries': chart_series,
+            'reconciliationItems': reconciliation_items,
+            'feedItems': feed_items,
+            'taskItems': task_items,
+            'alertItems': alert_items,
+            'documentItems': document_items,
+            'rightPanelContent': right_panel_content,
+            'metadata': {
+                'organizationName': organization.name,
+                'defaultContext': 'cash',
+                'lastUpdated': timezone.now().isoformat(),
+                'entityCount': entity_count,
+            },
+        })
+
 
 class PlatformTaskViewSet(viewsets.ModelViewSet):
     """Unified task API for cross-domain work queues."""
@@ -1060,29 +1083,6 @@ class PlatformTaskViewSet(viewsets.ModelViewSet):
         task = self.get_object()
         task = transition_platform_task(task, 'cancelled', actor=request.user)
         return Response(self.get_serializer(task).data)
-
-        return Response({
-            'summary': {
-                'financialHealth': 'Stable with contained risk exposure' if health_score >= 80 else 'Stable with moderate operational risk' if health_score >= 65 else 'Elevated risk requires immediate review',
-                'immediateAttention': f"{_format_count(len(alert_items))} alerts and {_format_count(sum(1 for item in task_items if not item['done']))} open workflow items",
-                'liveActivity': f"{_format_count(len(feed_items))} material accounting events across {_format_count(entity_count)} entities",
-                'nextAction': next((item['title'] for item in task_items if not item['done']), 'No urgent workflow blockers'),
-            },
-            'kpis': kpis,
-            'chartSeries': chart_series,
-            'reconciliationItems': reconciliation_items,
-            'feedItems': feed_items,
-            'taskItems': task_items,
-            'alertItems': alert_items,
-            'documentItems': document_items,
-            'rightPanelContent': right_panel_content,
-            'metadata': {
-                'organizationName': organization.name,
-                'defaultContext': 'cash',
-                'lastUpdated': timezone.now().isoformat(),
-                'entityCount': entity_count,
-            },
-        })
 
     @action(detail=True, methods=['get'])
     def firm_dashboard(self, request, pk=None):
@@ -1356,6 +1356,7 @@ class EntityViewSet(viewsets.ModelViewSet):
         from django.db import IntegrityError
         from rest_framework.exceptions import ValidationError
         from equity.models import WorkspaceEquityProfile
+        from workspaces.services import WorkspaceService
         
         org_id = self.request.data.get('organization_id')
         if not org_id:
@@ -1373,6 +1374,7 @@ class EntityViewSet(viewsets.ModelViewSet):
             entity = serializer.save(organization=organization, enabled_modules=enabled_modules)
             # Create default structure for the new entity
             entity.create_default_structure()
+            WorkspaceService.ensure_workspace_for_entity(entity)
 
             # Create a default tax profile for the entity country
             TaxProfile.objects.get_or_create(

@@ -102,6 +102,15 @@ class WorkspaceDepartmentAndMeetingAPITests(APITestCase):
         self.assertEqual(update_response.data['linked_entity_id'], self.entity.id)
         self.assertEqual(update_response.data['linked_entity_name'], 'Linked Entity')
 
+    def test_entity_id_alias_resolves_workspace_members_endpoint(self):
+        self.workspace.linked_entity = self.entity
+        self.workspace.save(update_fields=['linked_entity'])
+
+        response = self.client.get(f'/api/v1/workspaces/{self.entity.id}/members')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
     def test_meeting_can_be_created_updated_and_cancelled(self):
         start_at = timezone.now() + timedelta(days=2)
         end_at = start_at + timedelta(hours=1)
