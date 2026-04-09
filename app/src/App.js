@@ -120,7 +120,7 @@ import WorkspaceRoute from './components/WorkspaceRoute';
 import WorkspaceLayout from './components/WorkspaceLayout/WorkspaceLayout';
 import WorkspaceOverview     from './pages/Workspace/modules/WorkspaceOverview';
 import WorkspaceMembers      from './pages/Workspace/modules/WorkspaceMembers';
-import WorkspaceGroups       from './pages/Workspace/modules/WorkspaceGroups';
+import WorkspaceDepartments  from './pages/Workspace/modules/WorkspaceDepartments';
 import WorkspaceMeetings     from './pages/Workspace/modules/WorkspaceMeetings';
 import WorkspaceCalendar     from './pages/Workspace/modules/WorkspaceCalendar';
 import WorkspaceFiles        from './pages/Workspace/modules/WorkspaceFiles';
@@ -472,8 +472,10 @@ function App() {
                 element={<WorkspaceRoute><WorkspaceLayout><WorkspaceOverview /></WorkspaceLayout></WorkspaceRoute>} />
               <Route path="/app/workspace/:workspaceId/members"
                 element={<WorkspaceRoute><WorkspaceLayout><WorkspaceMembers /></WorkspaceLayout></WorkspaceRoute>} />
+              <Route path="/app/workspace/:workspaceId/departments"
+                element={<WorkspaceRoute><WorkspaceLayout><WorkspaceDepartments /></WorkspaceLayout></WorkspaceRoute>} />
               <Route path="/app/workspace/:workspaceId/groups"
-                element={<WorkspaceRoute><WorkspaceLayout><WorkspaceGroups /></WorkspaceLayout></WorkspaceRoute>} />
+                element={<Navigate to="../departments" replace />} />
               <Route path="/app/workspace/:workspaceId/meetings"
                 element={<WorkspaceRoute><WorkspaceLayout><WorkspaceMeetings /></WorkspaceLayout></WorkspaceRoute>} />
               <Route path="/app/workspace/:workspaceId/calendar"

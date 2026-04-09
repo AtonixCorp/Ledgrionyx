@@ -40,13 +40,19 @@ urlpatterns = [
     path(f'workspaces/{WS}/members',           WorkspaceMemberListView.as_view(),         name='workspace-members'),
     path(f'workspaces/{WS}/members/<int:user_id>', WorkspaceMemberDetailView.as_view(),   name='workspace-member-detail'),
 
-    # ── Groups ──────────────────────────────────────────────────────────────
+    # ── Groups / Departments ───────────────────────────────────────────────
     path(f'workspaces/{WS}/groups',            WorkspaceGroupListView.as_view(),          name='workspace-groups'),
      path(f'workspaces/{WS}/groups/<uuid:group_id>', WorkspaceGroupDetailView.as_view(),   name='workspace-group-detail'),
     path(f'workspaces/{WS}/groups/<uuid:group_id>/members',
          WorkspaceGroupMemberView.as_view(),                                               name='workspace-group-members'),
     path(f'workspaces/{WS}/groups/<uuid:group_id>/members/<int:user_id>',
          WorkspaceGroupMemberView.as_view(),                                               name='workspace-group-member-detail'),
+    path(f'workspaces/{WS}/departments',       WorkspaceGroupListView.as_view(),           name='workspace-departments'),
+    path(f'workspaces/{WS}/departments/<uuid:group_id>', WorkspaceGroupDetailView.as_view(), name='workspace-department-detail'),
+    path(f'workspaces/{WS}/departments/<uuid:group_id>/members',
+         WorkspaceGroupMemberView.as_view(),                                               name='workspace-department-members'),
+    path(f'workspaces/{WS}/departments/<uuid:group_id>/members/<int:user_id>',
+         WorkspaceGroupMemberView.as_view(),                                               name='workspace-department-member-detail'),
 
     # ── Meetings ────────────────────────────────────────────────────────────
     path(f'workspaces/{WS}/meetings',          WorkspaceMeetingListView.as_view(),        name='workspace-meetings'),

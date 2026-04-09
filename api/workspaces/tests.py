@@ -5,11 +5,11 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import WorkspaceMember
-from .services import WorkspaceService
+from .models import WorkspaceGroup, WorkspaceMember
+from .services import FINANCE_DEPARTMENT_TEMPLATES, WorkspaceService
 
 
-class WorkspaceGroupAndMeetingAPITests(APITestCase):
+class WorkspaceDepartmentAndMeetingAPITests(APITestCase):
     def setUp(self):
         self.owner = User.objects.create_user(
             username='workspace-owner',
@@ -28,24 +28,34 @@ class WorkspaceGroupAndMeetingAPITests(APITestCase):
         WorkspaceMember.objects.create(workspace=self.workspace, user=self.member, role='member')
         self.client.force_authenticate(self.owner)
 
-    def test_group_can_be_created_updated_and_deleted(self):
+    def test_workspace_is_seeded_with_default_departments(self):
+        names = list(
+            WorkspaceGroup.objects.filter(workspace=self.workspace)
+            .order_by('name')
+            .values_list('name', flat=True)
+        )
+        self.assertEqual(len(names), len(FINANCE_DEPARTMENT_TEMPLATES))
+        self.assertIn('Controllership', names)
+        self.assertIn('Tax', names)
+
+    def test_department_can_be_created_updated_and_deleted(self):
         create_response = self.client.post(
-            f'/api/v1/workspaces/{self.workspace.id}/groups',
-            {'name': 'Board Group', 'description': 'Initial review group'},
+            f'/api/v1/workspaces/{self.workspace.id}/departments',
+            {'name': 'Board Review Office', 'description': 'Quarterly review and governance department'},
             format='json',
         )
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
         group_id = create_response.data['id']
 
         update_response = self.client.patch(
-            f'/api/v1/workspaces/{self.workspace.id}/groups/{group_id}',
-            {'name': 'Board Review Group', 'description': 'Updated review group'},
+            f'/api/v1/workspaces/{self.workspace.id}/departments/{group_id}',
+            {'name': 'Board Review Department', 'description': 'Updated review department'},
             format='json',
         )
         self.assertEqual(update_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(update_response.data['name'], 'Board Review Group')
+        self.assertEqual(update_response.data['name'], 'Board Review Department')
 
-        delete_response = self.client.delete(f'/api/v1/workspaces/{self.workspace.id}/groups/{group_id}')
+        delete_response = self.client.delete(f'/api/v1/workspaces/{self.workspace.id}/departments/{group_id}')
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_meeting_can_be_created_updated_and_cancelled(self):

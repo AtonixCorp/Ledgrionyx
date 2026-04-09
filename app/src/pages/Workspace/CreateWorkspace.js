@@ -245,7 +245,7 @@ const EMPTY_FORM = {
 const ACCOUNTING_MODULE_OPTIONS = [
   { key: 'overview', label: 'Workspace Overview', detail: 'Home dashboard and entity launchpad.' },
   { key: 'members', label: 'Members', detail: 'Team invitations and membership visibility.' },
-  { key: 'groups', label: 'Groups', detail: 'Internal team structure and access grouping.' },
+  { key: 'groups', label: 'Departments', detail: 'Finance department structure, ownership, and access grouping.' },
   { key: 'meetings', label: 'Meetings', detail: 'Meeting scheduling, records, and follow-ups.' },
   { key: 'calendar', label: 'Calendar', detail: 'Operational timeline and key dates.' },
   { key: 'files', label: 'Files', detail: 'Document storage and workspace file access.' },

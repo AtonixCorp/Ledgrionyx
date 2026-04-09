@@ -297,14 +297,16 @@ export const workspaceMembersAPI = {
   delete: (workspaceId, userId) => api.delete(`/workspaces/${workspaceId}/members/${userId}`),
 };
 
-export const workspaceGroupsAPI = {
-  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/groups`),
-  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/groups`, data),
-  update: (workspaceId, groupId, data) => api.patch(`/workspaces/${workspaceId}/groups/${groupId}`, data),
-  delete: (workspaceId, groupId) => api.delete(`/workspaces/${workspaceId}/groups/${groupId}`),
-  addMember: (workspaceId, groupId, data) => api.post(`/workspaces/${workspaceId}/groups/${groupId}/members`, data),
-  removeMember: (workspaceId, groupId, userId) => api.delete(`/workspaces/${workspaceId}/groups/${groupId}/members/${userId}`),
+export const workspaceDepartmentsAPI = {
+  getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/departments`),
+  create: (workspaceId, data) => api.post(`/workspaces/${workspaceId}/departments`, data),
+  update: (workspaceId, departmentId, data) => api.patch(`/workspaces/${workspaceId}/departments/${departmentId}`, data),
+  delete: (workspaceId, departmentId) => api.delete(`/workspaces/${workspaceId}/departments/${departmentId}`),
+  addMember: (workspaceId, departmentId, data) => api.post(`/workspaces/${workspaceId}/departments/${departmentId}/members`, data),
+  removeMember: (workspaceId, departmentId, userId) => api.delete(`/workspaces/${workspaceId}/departments/${departmentId}/members/${userId}`),
 };
+
+export const workspaceGroupsAPI = workspaceDepartmentsAPI;
 
 export const workspaceMeetingsAPI = {
   getAll: (workspaceId) => api.get(`/workspaces/${workspaceId}/meetings`),

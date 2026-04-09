@@ -78,7 +78,7 @@ const WorkspaceLayout = ({ children }) => {
   const coreModules = [
     { to: `${base}/overview`,     label: 'Overview' },
     { to: `${base}/members`,      label: 'Members' },
-    { to: `${base}/groups`,       label: 'Groups' },
+    { to: `${base}/departments`,  label: 'Departments' },
     { to: `${base}/meetings`,     label: 'Meetings' },
     { to: `${base}/calendar`,     label: 'Calendar' },
     { to: `${base}/files`,        label: 'Files' },

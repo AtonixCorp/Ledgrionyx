@@ -5,7 +5,7 @@ import './WorkspaceModules.css';
 const MODULES = [
   { key: 'overview',    name: 'Overview',   desc: 'Workspace activity summary, stats, and highlights.', required: true  },
   { key: 'members',     name: 'Members',    desc: 'Member directory and role management.',               required: true  },
-  { key: 'groups',      name: 'Groups',     desc: 'Organise members into focused sub-groups.',          required: true  },
+  { key: 'groups',      name: 'Departments',desc: 'Organise members into finance departments and operating units.', required: true  },
   { key: 'meetings',    name: 'Meetings',   desc: 'Schedule and track workspace meetings.',             required: true  },
   { key: 'calendar',    name: 'Calendar',   desc: 'Shared event and milestone calendar.',               required: true  },
   { key: 'files',       name: 'Files',      desc: 'Upload, share, and manage documents.',               required: true  },

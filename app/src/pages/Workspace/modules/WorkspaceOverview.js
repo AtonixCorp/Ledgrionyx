@@ -54,7 +54,7 @@ const PERMISSION_PREVIEW = [
 
 const REQUIRED_MODULES = [
   { key: 'members', name: 'Members' },
-  { key: 'groups', name: 'Groups' },
+  { key: 'groups', name: 'Departments' },
   { key: 'meetings', name: 'Meetings' },
   { key: 'calendar', name: 'Calendar' },
   { key: 'files', name: 'Files' },
@@ -274,12 +274,12 @@ const WorkspaceOverview = () => {
         <section className="wso-dashboard-section">
           <div className="wso-section-header">
             <div>
-              <h2 className="wso-section-title">Groups</h2>
-              <p className="wso-section-sub">Organize members into teams, pods, and working groups.</p>
+              <h2 className="wso-section-title">Departments</h2>
+              <p className="wso-section-sub">Organize members into finance departments, teams, and operating units.</p>
             </div>
-            <button className="wso-section-link" onClick={() => goToWorkspaceModule('groups')}>Open Groups</button>
+            <button className="wso-section-link" onClick={() => goToWorkspaceModule('departments')}>Open Departments</button>
           </div>
-          <div className="wso-inline-empty">No groups yet. Create one to structure permissions and collaboration.</div>
+          <div className="wso-inline-empty">No departments yet. Create one to structure ownership, permissions, and collaboration.</div>
         </section>
 
         <section className="wso-dashboard-section">

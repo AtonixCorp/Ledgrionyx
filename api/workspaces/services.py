@@ -23,6 +23,50 @@ from .models import (
 )
 
 
+FINANCE_DEPARTMENT_TEMPLATES = [
+    {
+        'name': 'Controllership',
+        'description': 'Owns accounting policy, chart of accounts governance, journal oversight, and close quality.',
+    },
+    {
+        'name': 'Accounts Payable',
+        'description': 'Runs supplier operations, invoice workflows, payment approvals, and outbound obligations.',
+    },
+    {
+        'name': 'Accounts Receivable',
+        'description': 'Manages customer billing, collections, receivables aging, and cash application.',
+    },
+    {
+        'name': 'Treasury',
+        'description': 'Handles cash positioning, liquidity planning, banking operations, and payment execution.',
+    },
+    {
+        'name': 'Payroll',
+        'description': 'Coordinates payroll operations, pay runs, banking outputs, and payroll-linked obligations.',
+    },
+    {
+        'name': 'Tax',
+        'description': 'Oversees tax calculations, monitoring, filings, deadlines, and cross-jurisdiction compliance.',
+    },
+    {
+        'name': 'FP&A',
+        'description': 'Drives budgeting, forecasting, planning cycles, management targets, and variance analysis.',
+    },
+    {
+        'name': 'Financial Reporting',
+        'description': 'Produces statements, management packs, analytics, board reporting, and formal financial outputs.',
+    },
+    {
+        'name': 'Risk, Audit, and Compliance',
+        'description': 'Owns audit readiness, compliance controls, risk visibility, approvals, and close governance.',
+    },
+    {
+        'name': 'Intercompany and Consolidation',
+        'description': 'Coordinates intercompany operations, eliminations, consolidation control, and multi-entity reporting.',
+    },
+]
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 3.7  PermissionService  (used by every other service)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -127,6 +171,17 @@ class LogService:
 class WorkspaceService:
 
     @staticmethod
+    def _seed_default_departments(workspace: Workspace):
+        WorkspaceGroup.objects.bulk_create([
+            WorkspaceGroup(
+                workspace=workspace,
+                name=template['name'],
+                description=template['description'],
+            )
+            for template in FINANCE_DEPARTMENT_TEMPLATES
+        ])
+
+    @staticmethod
     @transaction.atomic
     def create_workspace(user: User, payload: dict) -> Workspace:
         """Create workspace, seed modules, insert owner member, log."""
@@ -149,6 +204,8 @@ class WorkspaceService:
 
         # Owner is automatically a member with role=owner
         WorkspaceMember.objects.create(workspace=ws, user=user, role=MemberRole.OWNER)
+
+        WorkspaceService._seed_default_departments(ws)
 
         LogService.log(ws.id, user, 'workspace.created', {'name': ws.name})
         return ws
@@ -245,7 +302,7 @@ class MemberService:
         if membership.role == MemberRole.OWNER:
             raise PermissionDenied('Cannot remove the workspace owner.')
         membership.delete()
-        # Remove from all groups in this workspace
+        # Remove from all departments in this workspace
         WorkspaceGroupMember.objects.filter(
             group__workspace_id=workspace_id, user=user
         ).delete()
@@ -296,7 +353,7 @@ class GroupService:
             name=name,
             description=payload.get('description', ''),
         )
-        LogService.log(workspace_id, actor, 'group.created', {'group_id': str(group.pk), 'name': name})
+        LogService.log(workspace_id, actor, 'department.created', {'department_id': str(group.pk), 'name': name})
         return group
 
     @staticmethod
@@ -324,7 +381,7 @@ class GroupService:
 
         if updates:
             group.save()
-            LogService.log(workspace_id, actor, 'group.updated', {'group_id': str(group.pk), **updates})
+            LogService.log(workspace_id, actor, 'department.updated', {'department_id': str(group.pk), **updates})
         return group
 
     @staticmethod
@@ -337,7 +394,7 @@ class GroupService:
             raise NotFound('Group not found.')
         group_name = group.name
         group.delete()
-        LogService.log(workspace_id, actor, 'group.deleted', {'group_id': str(group_id), 'name': group_name})
+        LogService.log(workspace_id, actor, 'department.deleted', {'department_id': str(group_id), 'name': group_name})
 
     @staticmethod
     @transaction.atomic
@@ -353,7 +410,7 @@ class GroupService:
         gm, created = WorkspaceGroupMember.objects.get_or_create(group=group, user=user)
         if not created:
             raise ValidationError({'user': 'User is already in this group.'})
-        LogService.log(workspace_id, actor, 'group.member_added', {'group_id': str(group.pk), 'user_id': str(user.pk)})
+        LogService.log(workspace_id, actor, 'department.member_added', {'department_id': str(group.pk), 'user_id': str(user.pk)})
         return gm
 
     @staticmethod
@@ -365,7 +422,7 @@ class GroupService:
         ).delete()
         if not deleted:
             raise NotFound('Group member not found.')
-        LogService.log(workspace_id, actor, 'group.member_removed', {'group_id': str(group_id), 'user_id': str(user.pk)})
+        LogService.log(workspace_id, actor, 'department.member_removed', {'department_id': str(group_id), 'user_id': str(user.pk)})
 
     @staticmethod
     def list_groups(workspace_id, actor: User):
