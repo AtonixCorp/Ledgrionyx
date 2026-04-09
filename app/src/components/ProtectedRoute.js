@@ -9,9 +9,9 @@ import { useEnterprise } from '../context/EnterpriseContext';
  * Roles come from EnterpriseContext.currentUserRole.
  * If roles haven't loaded yet (null), access is allowed (fail-open during load).
  */
-const ProtectedRoute = ({ children, requiredRoles }) => {
+const ProtectedRoute = ({ children, requiredRoles, requiredPermission }) => {
   const { isAuthenticated, loading } = useAuth();
-  const { currentUserRole } = useEnterprise();
+  const { currentUserRole, hasPermission } = useEnterprise();
 
   if (loading) {
     return (
@@ -56,6 +56,27 @@ const ProtectedRoute = ({ children, requiredRoles }) => {
         </div>
         <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-silver-dark)' }}>
           Your current role does not have permission to view this page.
+        </div>
+      </div>
+    );
+  }
+
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh',
+        fontFamily: 'var(--font-family)',
+        gap: '12px',
+      }}>
+        <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 600, color: 'var(--color-midnight)' }}>
+          Access Restricted
+        </div>
+        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-silver-dark)' }}>
+          Your current accounting access does not permit this page.
         </div>
       </div>
     );

@@ -828,6 +828,71 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   padding: 0;
 }
 
+.standalone-module-shell {
+  min-height: 100vh;
+  padding: 32px 24px 56px;
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.10), transparent 28%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.standalone-module-header {
+  max-width: 1200px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.standalone-module-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.10);
+}
+
+.standalone-module-title {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.05;
+  color: #0f172a;
+}
+
+.standalone-module-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+  color: #0f172a;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.standalone-module-back:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 23, 42, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.standalone-module-body {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .stats-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -861,6 +926,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-base);
+}
+
+@media (max-width: 768px) {
+  .standalone-module-shell {
+    padding: 24px 16px 40px;
+  }
+
+  .standalone-module-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .standalone-module-back {
+    width: fit-content;
+  }
 }
 
 /* =============================================================================

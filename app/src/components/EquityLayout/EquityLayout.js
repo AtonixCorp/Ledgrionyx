@@ -8,7 +8,7 @@ import './EquityLayout.css';
 
 const EquityLayout = ({ children }) => {
   const { user, logout } = useAuth();
-  const { activeWorkspace, entities, setActiveWorkspace } = useEnterprise();
+  const { activeWorkspace, entities, setActiveWorkspace, getWorkspacePermissionSummary } = useEnterprise();
   const navigate = useNavigate();
   const { workspaceId } = useParams();
   const [sidebarMinimized, setSidebarMinimized] = useState(false);
@@ -56,18 +56,19 @@ const EquityLayout = ({ children }) => {
   };
 
   const base = workspaceId ? `/app/equity/${workspaceId}` : '/app/equity';
+  const permissionSummary = getWorkspacePermissionSummary(workspaceId || resolvedWorkspace?.id);
   const navItems = [
-    { to: `${base}/me`, label: 'My Equity' },
-    { to: `${base}/registry`, label: 'Ownership Registry' },
-    { to: `${base}/cap-table`, label: 'Cap Table' },
-    { to: `${base}/grants`, label: 'Vesting & Grants' },
-    { to: `${base}/exercises`, label: 'Exercise Center' },
-    { to: `${base}/automation`, label: 'Automation Center' },
-    { to: `${base}/valuation`, label: 'Valuation' },
-    { to: `${base}/approvals`, label: 'Approval Inbox' },
-    { to: `${base}/scenarios`, label: 'Scenario Modeling' },
-    { to: `${base}/transactions`, label: 'Equity Transactions' },
-    { to: `${base}/governance`, label: 'Governance & Reporting' },
+    { key: 'me', to: `${base}/me`, label: 'My Equity' },
+    { key: 'registry', to: `${base}/registry`, label: 'Ownership Registry' },
+    { key: 'cap-table', to: `${base}/cap-table`, label: 'Cap Table' },
+    { key: 'grants', to: `${base}/grants`, label: 'Vesting & Grants' },
+    { key: 'exercises', to: `${base}/exercises`, label: 'Exercise Center' },
+    { key: 'automation', to: `${base}/automation`, label: 'Automation Center' },
+    { key: 'valuation', to: `${base}/valuation`, label: 'Valuation' },
+    { key: 'approvals', to: `${base}/approvals`, label: 'Approval Inbox' },
+    { key: 'scenarios', to: `${base}/scenarios`, label: 'Scenario Modeling' },
+    { key: 'transactions', to: `${base}/transactions`, label: 'Equity Transactions' },
+    { key: 'governance', to: `${base}/governance`, label: 'Governance & Reporting' },
   ];
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
@@ -97,7 +98,7 @@ const EquityLayout = ({ children }) => {
         )}
 
         <ul className="eq-nav-list">
-          {navItems.map((item) => (
+          {navItems.filter((item) => !permissionSummary || permissionSummary.equity_sections?.[item.key]).map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}

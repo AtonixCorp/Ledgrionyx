@@ -22,6 +22,7 @@ from .models import (
     WorkspaceModule,
     WorkspaceSetting,
 )
+from .accounting_permissions import AccountingPermissionService
 
 
 FINANCE_DEPARTMENT_TEMPLATES = [
@@ -134,13 +135,30 @@ class PermissionService:
         Raises PermissionDenied with a clear message on failure.
         """
         role = cls.assert_member(workspace_id, user)
-        min_role = cls._ACTION_MIN_ROLE.get(action, MemberRole.OWNER)
-        if cls._ROLE_WEIGHT.get(role, -1) < cls._ROLE_WEIGHT.get(min_role, 99):
+        summary = AccountingPermissionService.get_permission_summary(workspace_id, user)
+        if not summary:
+            raise PermissionDenied('You are not a member of this workspace.')
+
+        if not summary['actions'].get(action, False):
+            min_role = cls._ACTION_MIN_ROLE.get(action, MemberRole.OWNER)
             raise PermissionDenied(
-                f'Action "{action}" requires role "{min_role}" or higher. '
-                f'Your role is "{role}".'
+                f'Action "{action}" requires accounting access equivalent to "{min_role}" or higher. '
+                f'Your workspace role is "{role}".'
             )
         return role
+
+    @staticmethod
+    def get_permission_summary(workspace_id, user):
+        return AccountingPermissionService.get_permission_summary(workspace_id, user)
+
+    @staticmethod
+    def assert_workspace_section(workspace_id, user, section_key):
+        summary = AccountingPermissionService.get_permission_summary(workspace_id, user)
+        if not summary:
+            raise PermissionDenied('You are not a member of this workspace.')
+        if not AccountingPermissionService.can_access_workspace_section(summary, section_key):
+            raise PermissionDenied(f'Accounting access does not permit the "{section_key}" workspace section.')
+        return summary
 
     @classmethod
     def assert_owner_or_admin(cls, workspace_id, user):
@@ -533,8 +551,11 @@ class DepartmentService:
 
     @staticmethod
     def list_departments(workspace_id, actor: User):
-        PermissionService.assert_member(workspace_id, actor)
-        return WorkspaceGroup.objects.filter(workspace_id=workspace_id).select_related('owner').prefetch_related('group_members__user')
+        summary = PermissionService.assert_workspace_section(workspace_id, actor, 'departments')
+        queryset = WorkspaceGroup.objects.filter(workspace_id=workspace_id).select_related('owner').prefetch_related('group_members__user')
+        if summary['actions'].get('manage_departments'):
+            return queryset
+        return queryset.filter(pk__in=summary['visible_department_ids'])
 
 
 class GroupService(DepartmentService):

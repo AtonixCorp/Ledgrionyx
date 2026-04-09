@@ -269,6 +269,7 @@ export const organizationsAPI = {
   delete: (id) => api.delete(`/organizations/${id}/`),
   getMyOrganizations: () => api.get('/organizations/my_organizations/'),
   getOverview: (id) => api.get(`/organizations/${id}/overview/`),
+  getPermissionContext: (id) => api.get(`/organizations/${id}/permission_context/`),
 };
 
 // Entities API
@@ -315,6 +316,10 @@ export const workspaceMeetingsAPI = {
   create: (workspaceId, data) => api.post(workspaceApiPath(workspaceId, '/meetings'), data),
   update: (workspaceId, meetingId, data) => api.patch(workspaceApiPath(workspaceId, `/meetings/${meetingId}`), data),
   delete: (workspaceId, meetingId) => api.delete(workspaceApiPath(workspaceId, `/meetings/${meetingId}`)),
+};
+
+export const workspacePermissionsAPI = {
+  getMine: (workspaceId) => api.get(workspaceApiPath(workspaceId, '/permissions/me')),
 };
 
 // Roles API

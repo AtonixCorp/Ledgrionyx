@@ -129,13 +129,13 @@ const Layout = ({ children }) => {
   const settingsNav = [
     { to: '/app/settings/firm',         label: 'Firm Settings' },
     { to: '/app/settings/team',         label: 'Team & Permissions' },
-    { to: '/app/settings/security',     label: 'Security' },
+    { to: '/security-center',           label: 'Security', target: '_blank', rel: 'noreferrer noopener' },
     { to: '/app/settings/subscription', label: 'Subscription' },
   ];
 
   const supportNav = [
-    { to: '/app/support/help',    label: 'Help Center' },
-    { to: '/app/support/tickets', label: 'Support Tickets' },
+    { to: '/support-center',      label: 'Help Center', target: '_blank', rel: 'noreferrer noopener' },
+    { to: '/support-tickets',     label: 'Support Tickets', target: '_blank', rel: 'noreferrer noopener' },
   ];
 
   const firmNav = [
@@ -178,6 +178,8 @@ const Layout = ({ children }) => {
                     <NavLink
                       to={subitem.to}
                       className={({ isActive }) => `nav-link submenu-item${isActive ? ' active' : ''}`}
+                      target={subitem.target}
+                      rel={subitem.rel}
                     >
                       <span className="nav-icon">{subitem.icon}</span>
                       <span className="nav-label">{subitem.label}</span>
@@ -190,13 +192,15 @@ const Layout = ({ children }) => {
         );
       }
 
-      const { to, icon, label } = item;
+      const { to, icon, label, target, rel } = item;
       return (
         <li key={to}>
           <NavLink
             to={to}
             className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
             title={sidebarMinimized ? label : undefined}
+            target={target}
+            rel={rel}
           >
             <span className="nav-icon">{icon}</span>
             {!sidebarMinimized && <span className="nav-label">{label}</span>}
@@ -320,11 +324,14 @@ const Layout = ({ children }) => {
                   <NavLink to="/app/settings/firm" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>
                     Firm Settings
                   </NavLink>
-                  <NavLink to="/app/settings/security" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>
+                  <NavLink to="/security-center" className="profile-dropdown-item" onClick={() => setProfileOpen(false)} target="_blank" rel="noreferrer noopener">
                     Security
                   </NavLink>
-                  <NavLink to="/app/support/help" className="profile-dropdown-item" onClick={() => setProfileOpen(false)}>
+                  <NavLink to="/support-center" className="profile-dropdown-item" onClick={() => setProfileOpen(false)} target="_blank" rel="noreferrer noopener">
                     Help Center
+                  </NavLink>
+                  <NavLink to="/support-tickets" className="profile-dropdown-item" onClick={() => setProfileOpen(false)} target="_blank" rel="noreferrer noopener">
+                    Support Tickets
                   </NavLink>
                   <div className="profile-dropdown-divider" />
                   <button className="profile-dropdown-item profile-dropdown-logout" onClick={handleLogout}>

@@ -126,6 +126,7 @@ from .payroll_presets import (
 )
 from .permissions import PermissionChecker
 from equity.models import EquityReport, WorkspaceEquityProfile
+from workspaces.accounting_permissions import ORG_ROLE_CATEGORY_LEVELS, PERMISSION_CATEGORY_LEVELS, CATEGORY_KEYS, LEVEL_LABELS
 from equity.scenario_services import get_scenario_overview
 from .enterprise_reporting import (
     build_automation_cleanup_impact_report,
@@ -219,6 +220,47 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create organization with current user as owner"""
         serializer.save(owner=self.request.user)
+
+    @action(detail=True, methods=['get'])
+    def permission_context(self, request, pk=None):
+        organization = self.get_object()
+        is_org_owner = organization.owner_id == request.user.id
+        team_member = None
+        if not is_org_owner:
+            team_member = TeamMember.objects.select_related('role').prefetch_related('role__permissions', 'scoped_entities').filter(
+                organization=organization,
+                user=request.user,
+                is_active=True,
+            ).first()
+
+        role_code = ROLE_ORG_OWNER if is_org_owner else getattr(getattr(team_member, 'role', None), 'code', None)
+        role_name = 'Organization Owner' if is_org_owner else getattr(getattr(team_member, 'role', None), 'name', None)
+        permission_codes = list(Permission.objects.values_list('code', flat=True)) if is_org_owner else list(getattr(getattr(team_member, 'role', None), 'permissions', Permission.objects.none()).values_list('code', flat=True))
+
+        levels = {key: 0 for key in CATEGORY_KEYS}
+        for key, value in ORG_ROLE_CATEGORY_LEVELS.get(role_code, {}).items():
+            levels[key] = max(levels[key], value)
+        for permission_code in permission_codes:
+            for key, value in PERMISSION_CATEGORY_LEVELS.get(permission_code, {}).items():
+                levels[key] = max(levels[key], value)
+
+        return Response({
+            'organization_id': organization.id,
+            'role_code': role_code,
+            'role_name': role_name,
+            'permission_codes': sorted(set(permission_codes)),
+            'scoped_entity_ids': list(team_member.scoped_entities.values_list('id', flat=True)) if team_member else [],
+            'categories': {
+                key: {
+                    'level': LEVEL_LABELS[levels[key]],
+                    'read': levels[key] >= 1,
+                    'write': levels[key] >= 2,
+                    'manage': levels[key] >= 3,
+                    'decide': levels[key] >= 4,
+                }
+                for key in CATEGORY_KEYS
+            },
+        })
 
     @action(detail=False, methods=['get'])
     def my_organizations(self, request):

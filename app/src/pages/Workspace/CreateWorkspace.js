@@ -676,8 +676,8 @@ const CreateWorkspace = () => {
       description: 'Every workspace starts with a shared operating layer for members, departments, meetings, permissions, files, and internal coordination.',
     },
     {
-      title: 'Finance and equity routing',
-      description: 'Accounting modules open finance workflows, while equity modules add the dedicated ownership and governance dashboard when enabled.',
+      title: 'ATC Equity Management routing',
+      description: 'When equity modules are enabled, the workspace can launch into ATC Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
     },
   ];
 

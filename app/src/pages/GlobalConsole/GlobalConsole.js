@@ -53,6 +53,10 @@ function buildWorkspaceCards(entities) {
 const PALETTE = ['ws-indigo', 'ws-teal', 'ws-violet', 'ws-rose', 'ws-amber', 'ws-sky'];
 const palette = (idx) => PALETTE[idx % PALETTE.length];
 
+const openStandalonePath = (path) => {
+  window.open(`${process.env.PUBLIC_URL || ''}${path}`, '_blank', 'noopener,noreferrer');
+};
+
 const normalizeCollection = (payload) => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.results)) return payload.results;
@@ -87,9 +91,9 @@ const EMPTY_WORKSPACE_VALUE_CARDS = [
     description: 'Manage projects, teams, files, and tools in one unified environment.',
   },
   {
-    eyebrow: 'Configuration',
-    title: 'Modular & Customizable',
-    description: 'Activate developer, finance, marketing, or business modules as needed.',
+    eyebrow: 'Equity',
+    title: 'Equity Management',
+    description: 'Launch ATC Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
   },
   {
     eyebrow: 'Infrastructure',
@@ -105,11 +109,11 @@ const EMPTY_WORKSPACE_PLATFORM_CAPABILITIES = [
   },
   {
     title: 'Open the right dashboard for the job',
-    description: 'New workspaces can launch into accounting, equity management, or a combined operating setup depending on the package you choose.',
+    description: 'New workspaces can launch into accounting, ATC Equity Management, or a combined operating setup depending on the package you choose.',
   },
   {
     title: 'Scale without rebuilding process',
-    description: 'The platform keeps shared governance, audit history, permissions, and organization visibility consistent as more workspaces are added.',
+    description: 'The platform keeps shared governance, audit history, permissions, and organization visibility consistent across finance workspaces and ATC Equity Management environments.',
   },
 ];
 
@@ -122,12 +126,12 @@ const EMPTY_WORKSPACE_JOURNEY = [
   {
     step: '02',
     title: 'Choose how it should launch',
-    description: 'Select accounting, equity, combined, or standalone so the correct dashboard opens first.',
+    description: 'Select accounting, ATC Equity Management, combined, or standalone so the correct dashboard opens first.',
   },
   {
     step: '03',
     title: 'Activate the operating areas',
-    description: 'Enable the modules that define the collaboration, finance, and ownership workflows for that workspace.',
+    description: 'Enable the modules that define the collaboration, finance, and Equity Management workflows for that workspace.',
   },
   {
     step: '04',
@@ -436,10 +440,10 @@ const GlobalConsole = () => {
                 </div>
               </div>
               <div className="gc-topnav-dd-divider" />
-              <button className="gc-topnav-dd-item" onClick={() => { setProfileOpen(false); navigate('/app/settings/security'); }}>
+              <button className="gc-topnav-dd-item" onClick={() => { setProfileOpen(false); openStandalonePath('/security-center'); }}>
                 Security
               </button>
-              <button className="gc-topnav-dd-item" onClick={() => { setProfileOpen(false); navigate('/app/support/help'); }}>
+              <button className="gc-topnav-dd-item" onClick={() => { setProfileOpen(false); openStandalonePath('/support-center'); }}>
                 Help Center
               </button>
               <div className="gc-topnav-dd-divider" />

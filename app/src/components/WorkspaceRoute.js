@@ -10,32 +10,12 @@ import { useEnterprise } from '../context/EnterpriseContext';
  */
 const WorkspaceRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  const { activeWorkspace, entities } = useEnterprise();
+  const { activeWorkspace, entities, fetchWorkspacePermissionSummary, getWorkspacePermissionSummary } = useEnterprise();
   const location = useLocation();
   const { workspaceId } = useParams();
+  const [permissionLoading, setPermissionLoading] = React.useState(true);
+  const [permissionDenied, setPermissionDenied] = React.useState(false);
 
-  if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        fontFamily: 'var(--font-family)',
-        fontSize: 'var(--font-size-base)',
-        color: 'var(--color-silver-dark)',
-        background: 'var(--color-silver-very-light)',
-      }}>
-        Loading...
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  // Resolve the workspace for this URL
   let resolvedWorkspace = null;
 
   if (workspaceId) {
@@ -67,7 +47,96 @@ const WorkspaceRoute = ({ children }) => {
     })();
   }
 
+  const resolvedWorkspaceId = resolvedWorkspace?.id || workspaceId || null;
+  const permissionSummary = getWorkspacePermissionSummary(resolvedWorkspaceId);
+
+  React.useEffect(() => {
+    let active = true;
+    setPermissionLoading(true);
+    setPermissionDenied(false);
+
+    if (!resolvedWorkspaceId || !isAuthenticated) {
+      setPermissionLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    fetchWorkspacePermissionSummary(resolvedWorkspaceId)
+      .then((summary) => {
+        if (!active) return;
+        const pathParts = location.pathname.split('/').filter(Boolean);
+        const workspaceIndex = pathParts.indexOf('workspace');
+        const equityIndex = pathParts.indexOf('equity');
+
+        if (workspaceIndex >= 0) {
+          const section = pathParts[workspaceIndex + 2] || 'overview';
+          setPermissionDenied(!summary?.workspace_sections?.[section]);
+        } else if (equityIndex >= 0) {
+          const section = pathParts[equityIndex + 2] || 'registry';
+          setPermissionDenied(!summary?.equity_sections?.[section]);
+        } else {
+          setPermissionDenied(false);
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setPermissionDenied(true);
+      })
+      .finally(() => {
+        if (active) {
+          setPermissionLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [fetchWorkspacePermissionSummary, isAuthenticated, location.pathname, resolvedWorkspaceId]);
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        fontFamily: 'var(--font-family)',
+        fontSize: 'var(--font-size-base)',
+        color: 'var(--color-silver-dark)',
+        background: 'var(--color-silver-very-light)',
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
   if (!resolvedWorkspace) {
+    return <Navigate to="/app/console" state={{ from: location }} replace />;
+  }
+
+  if (permissionLoading && !permissionSummary) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        fontFamily: 'var(--font-family)',
+        fontSize: 'var(--font-size-base)',
+        color: 'var(--color-silver-dark)',
+        background: 'var(--color-silver-very-light)',
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (permissionDenied) {
     return <Navigate to="/app/console" state={{ from: location }} replace />;
   }
 

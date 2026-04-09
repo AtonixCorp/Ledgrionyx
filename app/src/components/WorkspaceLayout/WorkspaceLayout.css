@@ -185,6 +185,36 @@
   border-left-color: var(--ws-accent);
 }
 
+.ws-department-sidebar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px 18px;
+}
+
+.ws-department-sidebar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ws-department-sidebar-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ws-department-sidebar-meta {
+  font-size: 10px;
+  color: var(--sb-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .ws-nav-abbr {
   display: flex;
   align-items: center;

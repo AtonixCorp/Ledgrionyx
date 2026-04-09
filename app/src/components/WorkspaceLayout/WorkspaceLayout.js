@@ -14,7 +14,7 @@ import './WorkspaceLayout.css';
 
 const WorkspaceLayout = ({ children }) => {
   const { user, logout } = useAuth();
-  const { activeWorkspace, entities, setActiveWorkspace } = useEnterprise();
+  const { activeWorkspace, entities, setActiveWorkspace, getWorkspacePermissionSummary } = useEnterprise();
   const navigate = useNavigate();
   const { workspaceId } = useParams();
 
@@ -52,6 +52,9 @@ const WorkspaceLayout = ({ children }) => {
   const wsId   = workspaceId || resolvedWs?.id;
   const wsName = resolvedWs?.name || 'Workspace';
   const equityEnabled = hasEquityModule(resolvedWs);
+  const permissionSummary = getWorkspacePermissionSummary(wsId);
+  const sectionAccess = permissionSummary?.workspace_sections || {};
+  const visibleDepartments = permissionSummary?.visible_departments || [];
 
   const [sidebarMinimized, setSidebarMinimized] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -76,28 +79,30 @@ const WorkspaceLayout = ({ children }) => {
 
   // ── Workspace sidebar navigation ──────────────────────────────────────────
   const coreModules = [
-    { to: `${base}/overview`,     label: 'Overview' },
-    { to: `${base}/members`,      label: 'Members' },
-    { to: `${base}/departments`,  label: 'Departments' },
-    { to: `${base}/meetings`,     label: 'Meetings' },
-    { to: `${base}/calendar`,     label: 'Calendar' },
-    { to: `${base}/files`,        label: 'Files' },
+    { key: 'overview', to: `${base}/overview`, label: 'Overview' },
+    { key: 'members', to: `${base}/members`, label: 'Members' },
+    { key: 'departments', to: `${base}/departments`, label: 'Departments' },
+    { key: 'meetings', to: `${base}/meetings`, label: 'Meetings' },
+    { key: 'calendar', to: `${base}/calendar`, label: 'Calendar' },
+    { key: 'files', to: `${base}/files`, label: 'Files' },
   ];
 
   const managementModules = [
-    { to: `${base}/permissions`,  label: 'Permissions' },
-    { to: `${base}/settings`,     label: 'Settings' },
+    { key: 'permissions', to: `${base}/permissions`, label: 'Permissions' },
+    { key: 'settings', to: `${base}/settings`, label: 'Settings' },
   ];
 
   const optionalModules = [
-    { to: `${base}/email`,        label: 'Email' },
-    { to: `${base}/marketing`,    label: 'Marketing' },
+    { key: 'email', to: `${base}/email`, label: 'Email' },
+    { key: 'marketing', to: `${base}/marketing`, label: 'Marketing' },
   ];
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
 
   const renderNavItems = (items) =>
-    items.map(({ to, label }) => (
+    items
+      .filter(({ key }) => !permissionSummary || sectionAccess[key])
+      .map(({ to, label }) => (
       <li key={to}>
         <NavLink
           to={to}
@@ -167,6 +172,20 @@ const WorkspaceLayout = ({ children }) => {
           {renderSection('Management', managementModules)}
           <li className="ws-nav-divider" />
           {renderSection('Optional', optionalModules)}
+          {visibleDepartments.length > 0 && !sidebarMinimized && (
+            <>
+              <li className="ws-nav-divider" />
+              <li className="ws-nav-section-label">Departments</li>
+              <li className="ws-department-sidebar-list">
+                {visibleDepartments.map((department) => (
+                  <div key={department.id} className="ws-department-sidebar-item">
+                    <span className="ws-department-sidebar-name">{department.name}</span>
+                    <span className="ws-department-sidebar-meta">{department.cost_center || 'Scoped access'}</span>
+                  </div>
+                ))}
+              </li>
+            </>
+          )}
         </ul>
       </nav>
 

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from './AuthContext';
+import { workspacePermissionsAPI } from '../services/api';
 
 const EnterpriseContext = createContext();
 
@@ -90,6 +91,8 @@ export const EnterpriseProvider = ({ children }) => {
   const [teamMembers, setTeamMembers] = useState([]);
   const [currentUserRole, setCurrentUserRole] = useState(null);
   const [isRoleResolved, setIsRoleResolved] = useState(false);
+  const [organizationPermissionContext, setOrganizationPermissionContext] = useState(null);
+  const [workspacePermissionSummaries, setWorkspacePermissionSummaries] = useState({});
 
   // Permissions
   const [permissions, setPermissions] = useState([]);
@@ -205,8 +208,10 @@ export const EnterpriseProvider = ({ children }) => {
       return;
     }
 
-    setPermissions(getRolePermissions(currentUserRole));
-  }, [currentUserRole, getRolePermissions]);
+    if (permissions.length === 0) {
+      setPermissions(getRolePermissions(currentUserRole));
+    }
+  }, [currentUserRole, getRolePermissions, permissions.length]);
 
   /**
    * Fetch organizations for current user
@@ -312,7 +317,6 @@ export const EnterpriseProvider = ({ children }) => {
    */
   const fetchTeamMembers = useCallback(async (orgId) => {
     if (!orgId) return;
-    setIsRoleResolved(false);
     try {
       const response = await fetch(apiUrl(`/api/team-members/?organization_id=${orgId}`), {
         headers: buildAuthHeaders(),
@@ -321,25 +325,65 @@ export const EnterpriseProvider = ({ children }) => {
         const data = await response.json();
         const members = Array.isArray(data) ? data : data.results || [];
         setTeamMembers(members);
-
-        // Find current user's role
-        const currentMember = members.find(
-          m => m.user_email === user?.email
-        );
-        setCurrentUserRole(currentMember?.role_code || ROLES.ORG_OWNER);
-        setIsRoleResolved(true);
       } else {
         setTeamMembers([]);
-        setCurrentUserRole(null);
-        setIsRoleResolved(true);
       }
     } catch (err) {
       console.error('Failed to fetch team members:', err);
       setTeamMembers([]);
-      setCurrentUserRole(null);
-      setIsRoleResolved(true);
     }
-  }, [apiUrl, buildAuthHeaders, user, ROLES]);
+  }, [apiUrl, buildAuthHeaders]);
+
+  const fetchPermissionContext = useCallback(async (orgId) => {
+    if (!orgId) return null;
+    setIsRoleResolved(false);
+    try {
+      const response = await fetch(apiUrl(`/api/organizations/${orgId}/permission_context/`), {
+        headers: buildAuthHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch permission context');
+      }
+      const data = await response.json();
+      setOrganizationPermissionContext(data);
+      setCurrentUserRole(data.role_code || null);
+      setPermissions(Array.isArray(data.permission_codes) ? data.permission_codes : []);
+      setIsRoleResolved(true);
+      return data;
+    } catch (err) {
+      console.error('Failed to fetch permission context:', err);
+      setOrganizationPermissionContext(null);
+      setCurrentUserRole(null);
+      setPermissions([]);
+      setIsRoleResolved(true);
+      return null;
+    }
+  }, [apiUrl, buildAuthHeaders]);
+
+  const fetchWorkspacePermissionSummary = useCallback(async (workspaceId) => {
+    if (!workspaceId) return null;
+    const cacheKey = String(workspaceId);
+    if (workspacePermissionSummaries[cacheKey]) {
+      return workspacePermissionSummaries[cacheKey];
+    }
+    try {
+      const response = await workspacePermissionsAPI.getMine(workspaceId);
+      const summary = response.data;
+      setWorkspacePermissionSummaries((current) => ({
+        ...current,
+        [cacheKey]: summary,
+      }));
+      return summary;
+    } catch (err) {
+      console.error('Failed to fetch workspace permission summary:', err);
+      throw err;
+    }
+  }, [workspacePermissionSummaries]);
+
+  const getWorkspacePermissionSummary = useCallback((workspaceId) => {
+    if (!workspaceId) return null;
+    return workspacePermissionSummaries[String(workspaceId)] || null;
+  }, [workspacePermissionSummaries]);
 
   /**
    * Fetch tax compliance data
@@ -518,9 +562,11 @@ export const EnterpriseProvider = ({ children }) => {
     setPermissions([]);
     setTeamMembers([]);
     setIsRoleResolved(false);
+    setOrganizationPermissionContext(null);
 
     organizationPrefetchRef.current.set(cacheKey, now);
 
+    fetchPermissionContext(org.id);
     fetchOrgOverview(org.id);
     fetchEntities(org.id);
     fetchTeamMembers(org.id);
@@ -528,7 +574,7 @@ export const EnterpriseProvider = ({ children }) => {
     fetchComplianceDeadlines(org.id);
     fetchCashflowData(org.id);
     fetchOrganizationAccountingDashboard(org.id).catch(() => null);
-  }, [fetchOrgOverview, fetchEntities, fetchTeamMembers, fetchTaxExposures, fetchComplianceDeadlines, fetchCashflowData, fetchOrganizationAccountingDashboard, ORG_PREFETCH_THROTTLE_MS]);
+  }, [fetchPermissionContext, fetchOrgOverview, fetchEntities, fetchTeamMembers, fetchTaxExposures, fetchComplianceDeadlines, fetchCashflowData, fetchOrganizationAccountingDashboard, ORG_PREFETCH_THROTTLE_MS]);
 
   useEffect(() => {
     if (!currentOrganization?.id || user?.account_type !== 'enterprise') {
@@ -1734,6 +1780,7 @@ export const EnterpriseProvider = ({ children }) => {
     currentUserRole,
     isRoleResolved,
     permissions,
+    organizationPermissionContext,
     roles,
     orgOverview,
     taxExposures,
@@ -1751,6 +1798,7 @@ export const EnterpriseProvider = ({ children }) => {
     fetchOrgOverview,
     fetchEntities,
     fetchTeamMembers,
+    fetchPermissionContext,
     fetchTaxExposures,
     fetchComplianceDeadlines,
     fetchCashflowData,
@@ -1758,6 +1806,8 @@ export const EnterpriseProvider = ({ children }) => {
     fetchRiskExposureDashboard,
     hasPermission,
     hasRole,
+    fetchWorkspacePermissionSummary,
+    getWorkspacePermissionSummary,
     switchOrganization,
     createOrganization,
     updateOrganization,

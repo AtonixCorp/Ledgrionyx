@@ -54,7 +54,7 @@ export const footerLinks = {
       { label: 'Audit Logs', to: '/app/compliance/audit-trail' },
       { label: 'Data Retention', to: '/privacy#data-retention' },
       { label: 'Access Control', to: '/app/settings/team' },
-      { label: 'Security Overview', to: '/app/settings/security' },
+      { label: 'Security Overview', to: '/security-center' },
     ],
   },
   operations: {

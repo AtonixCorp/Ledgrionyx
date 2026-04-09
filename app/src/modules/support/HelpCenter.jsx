@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button, Input } from '../../components/ui';
+import StandaloneModuleShell from '../../components/StandaloneModuleShell';
 
 const FAQ_CATEGORIES = ['Getting Started', 'Accounting', 'Billing', 'Integrations', 'Security', 'Reporting'];
 
@@ -78,12 +79,13 @@ export default function HelpCenter() {
   });
 
   return (
-    <div className="module-page">
-      <PageHeader
-        title="Help Center"
-        subtitle="Find answers, guides, and documentation"
-        actions={<Button variant="primary">Contact Support</Button>}
-      />
+    <StandaloneModuleShell title="Help Center" eyebrow="Support Surface" backLabel="Return to Console">
+      <div className="module-page">
+        <PageHeader
+          title="Help Center"
+          subtitle="Find answers, guides, and documentation"
+          actions={<Button variant="primary">Contact Support</Button>}
+        />
 
       {/* Search */}
       <Card>
@@ -132,7 +134,7 @@ export default function HelpCenter() {
       )}
 
       {/* FAQs */}
-      <Card header={`Frequently Asked Questions ${filtered.length < FAQ_ITEMS.length ? `— ${filtered.length} results` : ''}`}>
+        <Card header={`Frequently Asked Questions ${filtered.length < FAQ_ITEMS.length ? `— ${filtered.length} results` : ''}`}>
         {filtered.length === 0 ? (
           <p style={{ textAlign: 'center', color: 'var(--color-silver-dark)', padding: '32px 0' }}>
             No articles found for "{search}". <Button variant="secondary" size="small" onClick={() => { setSearch(''); setActiveCategory('All'); }}>Clear filters</Button>
@@ -169,7 +171,8 @@ export default function HelpCenter() {
             ))}
           </div>
         )}
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </StandaloneModuleShell>
   );
 }

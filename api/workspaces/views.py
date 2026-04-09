@@ -92,6 +92,7 @@ class WorkspaceDetailView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'overview')
         ws = WorkspaceService.get_workspace(workspace_id, request.user)
         return Response(WorkspaceSerializer(ws).data)
 
@@ -143,6 +144,7 @@ class WorkspaceMemberListView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'members')
         members = MemberService.list_members(workspace_id, request.user)
         return Response(WorkspaceMemberSerializer(members, many=True).data)
 
@@ -188,6 +190,7 @@ class WorkspaceDepartmentListView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'departments')
         departments = DepartmentService.list_departments(workspace_id, request.user)
         return Response(WorkspaceDepartmentSerializer(departments, many=True).data)
 
@@ -253,6 +256,7 @@ class WorkspaceMeetingListView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'meetings')
         meetings = MeetingService.list_meetings(workspace_id, request.user)
         return Response(WorkspaceMeetingSerializer(meetings, many=True).data)
 
@@ -295,6 +299,7 @@ class WorkspaceCalendarEventListView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'calendar')
         start = request.query_params.get('start')
         end   = request.query_params.get('end')
         events = CalendarService.list_events(workspace_id, request.user, start, end)
@@ -339,6 +344,7 @@ class WorkspaceFileListView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'files')
         folder_id = request.query_params.get('folder_id')
         files = FileService.list_files(workspace_id, request.user, folder_id)
         return Response(WorkspaceFileSerializer(files, many=True).data)
@@ -378,6 +384,7 @@ class WorkspaceFolderListView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'files')
         parent_id = request.query_params.get('parent_id')
         folders = FileService.list_folders(workspace_id, request.user, parent_id)
         return Response(WorkspaceFolderSerializer(folders, many=True).data)
@@ -403,7 +410,7 @@ class WorkspaceModuleView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
-        PermissionService.assert_member(workspace_id, request.user)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'permissions')
         from .models import WorkspaceModule
         modules = WorkspaceModule.objects.filter(workspace_id=workspace_id)
         return Response(WorkspaceModuleSerializer(modules, many=True).data)
@@ -426,6 +433,7 @@ class WorkspaceSettingsView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
+        PermissionService.assert_workspace_section(workspace_id, request.user, 'settings')
         settings = SettingsService.get_settings(workspace_id, request.user)
         return Response(settings)
 
@@ -460,11 +468,7 @@ class WorkspaceMyPermissionsView(APIView):
 
     def get(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
-        role = PermissionService.get_role(workspace_id, request.user)
-        if role is None:
+        summary = PermissionService.get_permission_summary(workspace_id, request.user)
+        if summary is None:
             return Response({'detail': 'Not a member of this workspace.'}, status=status.HTTP_403_FORBIDDEN)
-        return Response({
-            'workspace_id': str(workspace_id),
-            'user_id': request.user.pk,
-            'role': role,
-        })
+        return Response(summary)

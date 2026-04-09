@@ -146,17 +146,22 @@ function App() {
 
   // Console module routes — open inside the ATC Capital Console (Layout with sidebar).
   // WorkspaceRoute / WorkspaceLayout is reserved for workspace-scoped routes only.
-  const renderModuleCrudRoutes = (basePath, Component) => [
-    <Route key={`${basePath}-index`}  path={basePath}               element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-list`}   path={`${basePath}/list`}     element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-create`} path={`${basePath}/create`}   element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-edit`}   path={`${basePath}/edit/:id`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-view`}   path={`${basePath}/view/:id`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
+  const renderModuleCrudRoutes = (basePath, Component, requiredPermission) => [
+    <Route key={`${basePath}-index`}  path={basePath}               element={<ProtectedRoute requiredPermission={requiredPermission}><Layout><Component /></Layout></ProtectedRoute>} />,
+    <Route key={`${basePath}-list`}   path={`${basePath}/list`}     element={<ProtectedRoute requiredPermission={requiredPermission}><Layout><Component /></Layout></ProtectedRoute>} />,
+    <Route key={`${basePath}-create`} path={`${basePath}/create`}   element={<ProtectedRoute requiredPermission={requiredPermission}><Layout><Component /></Layout></ProtectedRoute>} />,
+    <Route key={`${basePath}-edit`}   path={`${basePath}/edit/:id`} element={<ProtectedRoute requiredPermission={requiredPermission}><Layout><Component /></Layout></ProtectedRoute>} />,
+    <Route key={`${basePath}-view`}   path={`${basePath}/view/:id`} element={<ProtectedRoute requiredPermission={requiredPermission}><Layout><Component /></Layout></ProtectedRoute>} />,
   ];
 
-  const renderModulePageRoutes = (basePath, Component) => [
-    <Route key={`${basePath}-index`} path={basePath}           element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
-    <Route key={`${basePath}-list`}  path={`${basePath}/list`} element={<ProtectedRoute><Layout><Component /></Layout></ProtectedRoute>} />,
+  const renderModulePageRoutes = (basePath, Component, requiredPermission) => [
+    <Route key={`${basePath}-index`} path={basePath}           element={<ProtectedRoute requiredPermission={requiredPermission}><Layout><Component /></Layout></ProtectedRoute>} />,
+    <Route key={`${basePath}-list`}  path={`${basePath}/list`} element={<ProtectedRoute requiredPermission={requiredPermission}><Layout><Component /></Layout></ProtectedRoute>} />,
+  ];
+
+  const renderStandalonePageRoutes = (basePath, Component, requiredPermission) => [
+    <Route key={`${basePath}-index`} path={basePath}           element={<ProtectedRoute requiredPermission={requiredPermission}><Component /></ProtectedRoute>} />,
+    <Route key={`${basePath}-list`}  path={`${basePath}/list`} element={<ProtectedRoute requiredPermission={requiredPermission}><Component /></ProtectedRoute>} />,
   ];
 
   return (
@@ -191,23 +196,28 @@ function App() {
               {/* Redirect legacy personal routes to enterprise */}
               <Route path="/dashboard" element={<Navigate to="/app/console" replace />} />
 
+              {/* Standalone authenticated surfaces — no dashboard shell */}
+              {renderStandalonePageRoutes('/security-center', AppSecurity, 'manage_org_settings')}
+              {renderStandalonePageRoutes('/support-center', AppHelpCenter, 'view_org_overview')}
+              {renderStandalonePageRoutes('/support-tickets', AppSupportTickets, 'view_org_overview')}
+
               {/* Global Console — no sidebar */}
               <Route path="/app/console" element={<ProtectedRoute><GlobalConsole /></ProtectedRoute>} />
               <Route path="/app/workspaces/create" element={<ProtectedRoute><CreateWorkspace /></ProtectedRoute>} />
 
               {/* Enterprise Routes */}
               <Route path="/app/enterprise/org-overview" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_org_overview">
                   <Layout><EnterpriseOrgOverview /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/entities" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_entities">
                   <Layout><EnterpriseEntities /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/entities/:entityId/dashboard" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_entities">
                   <EntityLayout><EntityDashboard /></EntityLayout>
                 </ProtectedRoute>
               } />
@@ -327,37 +337,37 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/tax-compliance" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_tax_compliance">
                   <Layout><EnterpriseTaxCompliance /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/cashflow" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_cashflow">
                   <Layout><EnterpriseCashflow /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/risk-exposure" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_risk_exposure">
                   <Layout><EnterpriseRiskExposure /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/reports" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_reports">
                   <Layout><EnterpriseReports /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/audit-explorer" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_reports">
                   <Layout><EnterpriseAuditExplorer /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/team" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="view_team">
                   <Layout><EnterpriseTeam /></Layout>
                 </ProtectedRoute>
               } />
               <Route path="/app/enterprise/settings" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredPermission="manage_org_settings">
                   <Layout><EnterpriseSettings /></Layout>
                 </ProtectedRoute>
               } />
@@ -389,81 +399,84 @@ function App() {
 
               {/*  New Module Routes  */}
               {/* Overview */}
-              {renderModulePageRoutes('/app/overview/notifications', AppNotifications)}
-              {renderModuleCrudRoutes('/app/overview/tasks', AppTasks)}
+              {renderModulePageRoutes('/app/overview/notifications', AppNotifications, 'view_org_overview')}
+              {renderModuleCrudRoutes('/app/overview/tasks', AppTasks, 'view_org_overview')}
 
               {/* Accounting */}
-              {renderModuleCrudRoutes('/app/accounting/chart-of-accounts', AppChartOfAccounts)}
-              {renderModulePageRoutes('/app/accounting/general-ledger', AppGeneralLedger)}
-              {renderModuleCrudRoutes('/app/accounting/journal-entries', AppJournalEntries)}
-              {renderModulePageRoutes('/app/accounting/approval-inbox', AppAccountingApprovalInbox)}
-              {renderModulePageRoutes('/app/accounting/intercompany', AppIntercompanyConsole)}
-              {renderModuleCrudRoutes('/app/accounting/reconciliation', AppReconciliation)}
+              {renderModuleCrudRoutes('/app/accounting/chart-of-accounts', AppChartOfAccounts, 'view_entities')}
+              {renderModulePageRoutes('/app/accounting/general-ledger', AppGeneralLedger, 'view_entities')}
+              {renderModuleCrudRoutes('/app/accounting/journal-entries', AppJournalEntries, 'view_entities')}
+              {renderModulePageRoutes('/app/accounting/approval-inbox', AppAccountingApprovalInbox, 'view_entities')}
+              {renderModulePageRoutes('/app/accounting/intercompany', AppIntercompanyConsole, 'view_entities')}
+              {renderModuleCrudRoutes('/app/accounting/reconciliation', AppReconciliation, 'view_entities')}
 
               {/* Sub-Ledgers */}
-              {renderModuleCrudRoutes('/app/subledgers/accounts-receivable', AppAccountsReceivable)}
-              {renderModuleCrudRoutes('/app/subledgers/accounts-payable', AppAccountsPayable)}
-              {renderModuleCrudRoutes('/app/subledgers/cash-bank', AppCashBank)}
-              {renderModuleCrudRoutes('/app/subledgers/fixed-assets', AppFixedAssets)}
-              {renderModuleCrudRoutes('/app/subledgers/inventory', AppInventoryModule)}
-              {renderModuleCrudRoutes('/app/subledgers/payroll', AppPayroll)}
-              {renderModuleCrudRoutes('/app/subledgers/tax', AppTaxSubledger)}
+              {renderModuleCrudRoutes('/app/subledgers/accounts-receivable', AppAccountsReceivable, 'view_entities')}
+              {renderModuleCrudRoutes('/app/subledgers/accounts-payable', AppAccountsPayable, 'view_entities')}
+              {renderModuleCrudRoutes('/app/subledgers/cash-bank', AppCashBank, 'view_cashflow')}
+              {renderModuleCrudRoutes('/app/subledgers/fixed-assets', AppFixedAssets, 'view_entities')}
+              {renderModuleCrudRoutes('/app/subledgers/inventory', AppInventoryModule, 'view_entities')}
+              {renderModuleCrudRoutes('/app/subledgers/payroll', AppPayroll, 'view_entities')}
+              {renderModuleCrudRoutes('/app/subledgers/tax', AppTaxSubledger, 'view_tax_compliance')}
 
               {/* Billing */}
-              {renderModuleCrudRoutes('/app/billing/invoices', AppInvoices)}
-              {renderModuleCrudRoutes('/app/billing/bills', AppBills)}
-              {renderModuleCrudRoutes('/app/billing/customers', AppCustomers)}
-              {renderModuleCrudRoutes('/app/billing/vendors', AppVendors)}
-              {renderModulePageRoutes('/app/billing/payment-scheduling', AppPaymentScheduling)}
-              {renderModulePageRoutes('/app/billing/collections', AppCollections)}
+              {renderModuleCrudRoutes('/app/billing/invoices', AppInvoices, 'view_entities')}
+              {renderModuleCrudRoutes('/app/billing/bills', AppBills, 'view_entities')}
+              {renderModuleCrudRoutes('/app/billing/customers', AppCustomers, 'view_entities')}
+              {renderModuleCrudRoutes('/app/billing/vendors', AppVendors, 'view_entities')}
+              {renderModulePageRoutes('/app/billing/payment-scheduling', AppPaymentScheduling, 'view_entities')}
+              {renderModulePageRoutes('/app/billing/collections', AppCollections, 'view_entities')}
 
               {/* Reporting */}
-              {renderModulePageRoutes('/app/reporting/statements', AppStatements)}
-              {renderModulePageRoutes('/app/reporting/trial-balance', AppTrialBalance)}
-              {renderModulePageRoutes('/app/reporting/analytics', AppAnalytics)}
-              {renderModulePageRoutes('/app/reporting/risk-exposure', AppRiskExposure)}
+              {renderModulePageRoutes('/app/reporting/statements', AppStatements, 'view_reports')}
+              {renderModulePageRoutes('/app/reporting/trial-balance', AppTrialBalance, 'view_reports')}
+              {renderModulePageRoutes('/app/reporting/analytics', AppAnalytics, 'view_reports')}
+              {renderModulePageRoutes('/app/reporting/risk-exposure', AppRiskExposure, 'view_risk_exposure')}
 
               {/* Budgeting */}
-              {renderModulePageRoutes('/app/budgeting/budgets', AppBudgets)}
-              {renderModulePageRoutes('/app/budgeting/forecasts', AppForecasts)}
-              {renderModulePageRoutes('/app/budgeting/variance-analysis', AppVarianceAnalysis)}
+              {renderModulePageRoutes('/app/budgeting/budgets', AppBudgets, 'view_cashflow')}
+              {renderModulePageRoutes('/app/budgeting/forecasts', AppForecasts, 'view_cashflow')}
+              {renderModulePageRoutes('/app/budgeting/variance-analysis', AppVarianceAnalysis, 'view_cashflow')}
 
               {/* Compliance */}
-              {renderModuleCrudRoutes('/app/compliance/tax-center', AppTaxCenter)}
-              {renderModuleCrudRoutes('/app/compliance/audit-trail', AppAuditTrail)}
-              {renderModuleCrudRoutes('/app/compliance/period-close', AppPeriodClose)}
-              {renderModulePageRoutes('/app/compliance/tax-calculator', AppTaxCalculator)}
-              {renderModulePageRoutes('/app/compliance/monitoring', AppTaxMonitoring)}
-              {renderModulePageRoutes('/app/compliance/filing', AppFilingAssistant)}
+              {renderModuleCrudRoutes('/app/compliance/tax-center', AppTaxCenter, 'view_tax_compliance')}
+              {renderModuleCrudRoutes('/app/compliance/audit-trail', AppAuditTrail, 'view_reports')}
+              {renderModuleCrudRoutes('/app/compliance/period-close', AppPeriodClose, 'view_tax_compliance')}
+              {renderModulePageRoutes('/app/compliance/tax-calculator', AppTaxCalculator, 'view_tax_compliance')}
+              {renderModulePageRoutes('/app/compliance/monitoring', AppTaxMonitoring, 'view_tax_compliance')}
+              {renderModulePageRoutes('/app/compliance/filing', AppFilingAssistant, 'view_tax_compliance')}
 
               {/* Documents */}
-              {renderModulePageRoutes('/app/documents/vault', AppDocumentVault)}
-              {renderModulePageRoutes('/app/documents/receipts', AppReceipts)}
+              {renderModulePageRoutes('/app/documents/vault', AppDocumentVault, 'view_entities')}
+              {renderModulePageRoutes('/app/documents/receipts', AppReceipts, 'view_entities')}
 
               {/* Clients */}
-              {renderModulePageRoutes('/app/clients/directory', AppClientDirectory)}
-              {renderModulePageRoutes('/app/clients/portal', AppClientPortal)}
+              {renderModulePageRoutes('/app/clients/directory', AppClientDirectory, 'view_entities')}
+              {renderModulePageRoutes('/app/clients/portal', AppClientPortal, 'view_entities')}
 
               {/* Automation */}
-              {renderModulePageRoutes('/app/automation/rules', AppAutomationRules)}
-              {renderModulePageRoutes('/app/automation/recurring', AppRecurringEntries)}
-              {renderModulePageRoutes('/app/automation/ai-insights', AppAIInsights)}
-              {renderModulePageRoutes('/app/automation/ai-advisor', AppAIAdvisor)}
+              {renderModulePageRoutes('/app/automation/rules', AppAutomationRules, 'view_reports')}
+              {renderModulePageRoutes('/app/automation/recurring', AppRecurringEntries, 'view_entities')}
+              {renderModulePageRoutes('/app/automation/ai-insights', AppAIInsights, 'view_reports')}
+              {renderModulePageRoutes('/app/automation/ai-advisor', AppAIAdvisor, 'view_reports')}
 
               {/* Integrations */}
-              {renderModulePageRoutes('/app/integrations/api-keys', AppAPIKeys)}
-              {renderModulePageRoutes('/app/integrations/list', AppIntegrationsList)}
+              {renderModulePageRoutes('/app/integrations/api-keys', AppAPIKeys, 'manage_org_settings')}
+              {renderModulePageRoutes('/app/integrations/list', AppIntegrationsList, 'manage_org_settings')}
 
               {/* Settings */}
-              {renderModulePageRoutes('/app/settings/firm', AppFirmSettings)}
-              {renderModulePageRoutes('/app/settings/team', AppTeamPermissions)}
-              {renderModulePageRoutes('/app/settings/security', AppSecurity)}
+              {renderModulePageRoutes('/app/settings/firm', AppFirmSettings, 'manage_org_settings')}
+              {renderModulePageRoutes('/app/settings/team', AppTeamPermissions, 'view_team')}
+              <Route path="/app/settings/security" element={<Navigate to="/security-center" replace />} />
+              <Route path="/app/settings/security/list" element={<Navigate to="/security-center" replace />} />
               <Route path="/app/settings/entities" element={<Navigate to="/app/enterprise/entities" replace />} />
-              {renderModulePageRoutes('/app/settings/branding', AppBranding)}
-              {renderModulePageRoutes('/app/settings/subscription', AppSubscription)}
+              {renderModulePageRoutes('/app/settings/branding', AppBranding, 'manage_org_settings')}
+              {renderModulePageRoutes('/app/settings/subscription', AppSubscription, 'manage_billing')}
               {/* Support */}
-              {renderModulePageRoutes('/app/support/help', AppHelpCenter)}
-              {renderModulePageRoutes('/app/support/tickets', AppSupportTickets)}
+              <Route path="/app/support/help" element={<Navigate to="/support-center" replace />} />
+              <Route path="/app/support/help/list" element={<Navigate to="/support-center" replace />} />
+              <Route path="/app/support/tickets" element={<Navigate to="/support-tickets" replace />} />
+              <Route path="/app/support/tickets/list" element={<Navigate to="/support-tickets" replace />} />
 
               {/* ── Workspace Module Routes ──────────────────────────────────────────── */}
               {/* Each workspace route is guarded by WorkspaceRoute and rendered inside   */}

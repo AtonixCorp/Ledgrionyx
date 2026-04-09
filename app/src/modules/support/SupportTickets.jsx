@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button, Input, Table, Modal } from '../../components/ui';
+import StandaloneModuleShell from '../../components/StandaloneModuleShell';
 
 const MOCK_TICKETS = [
   { id: 'TKT-0042', subject: 'Bank reconciliation import fails with CSV format error', category: 'Accounting', priority: 'High', status: 'In Progress', created: '2024-06-12', updated: '2024-06-14' },
@@ -74,12 +75,13 @@ export default function SupportTickets() {
   ];
 
   return (
-    <div className="module-page">
-      <PageHeader
-        title="Support Tickets"
-        subtitle="Track and manage your support requests"
-        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ New Ticket</Button>}
-      />
+    <StandaloneModuleShell title="Support Tickets" eyebrow="Support Surface" backLabel="Return to Console">
+      <div className="module-page">
+        <PageHeader
+          title="Support Tickets"
+          subtitle="Track and manage your support requests"
+          actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ New Ticket</Button>}
+        />
 
       {/* Stats */}
       <div className="stats-row">
@@ -202,6 +204,7 @@ export default function SupportTickets() {
           </div>
         </Modal>
       )}
-    </div>
+      </div>
+    </StandaloneModuleShell>
   );
 }
