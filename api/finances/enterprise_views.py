@@ -969,6 +969,8 @@ class PlatformTaskViewSet(viewsets.ModelViewSet):
         assigned_to = self.request.query_params.get('assignee_id') or self.request.query_params.get('assigned_to')
         domain = self.request.query_params.get('domain')
         task_type = self.request.query_params.get('type') or self.request.query_params.get('task_type')
+        department_name = self.request.query_params.get('department_name') or self.request.query_params.get('department')
+        cost_center = self.request.query_params.get('cost_center')
         origin_type = self.request.query_params.get('origin_type') or self.request.query_params.get('source_object_type')
         origin_id = self.request.query_params.get('origin_id') or self.request.query_params.get('source_object_id')
         search_query = self.request.query_params.get('q')
@@ -987,6 +989,10 @@ class PlatformTaskViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(domain=domain)
         if task_type:
             queryset = queryset.filter(task_type=task_type)
+        if department_name:
+            queryset = queryset.filter(metadata__department_name=department_name)
+        if cost_center:
+            queryset = queryset.filter(metadata__cost_center=cost_center)
         if origin_type:
             queryset = queryset.filter(origin_type=origin_type)
         if origin_id:

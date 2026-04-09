@@ -845,6 +845,9 @@ class PlatformTaskSerializer(serializers.ModelSerializer):
     entity_name = serializers.ReadOnlyField(source='entity.name')
     assigned_to_name = serializers.SerializerMethodField()
     created_by_name = serializers.SerializerMethodField()
+    department_name = serializers.SerializerMethodField()
+    department_owner_id = serializers.SerializerMethodField()
+    cost_center = serializers.SerializerMethodField()
     state = serializers.CharField(source='status', required=False)
     type = serializers.CharField(source='task_type', required=False)
 
@@ -855,6 +858,7 @@ class PlatformTaskSerializer(serializers.ModelSerializer):
             'domain', 'task_type', 'type', 'title', 'description', 'status', 'state', 'priority',
             'assignee_type', 'assignee_id',
             'assigned_to', 'assigned_to_name', 'created_by', 'created_by_name',
+            'department_name', 'department_owner_id', 'cost_center',
             'origin_type', 'origin_id', 'source_object_type', 'source_object_id', 'metadata', 'due_at',
             'started_at', 'completed_at', 'created_at', 'updated_at',
         ]
@@ -865,6 +869,15 @@ class PlatformTaskSerializer(serializers.ModelSerializer):
 
     def get_created_by_name(self, obj):
         return obj.created_by.get_full_name() if obj.created_by else None
+
+    def get_department_name(self, obj):
+        return (obj.metadata or {}).get('department_name', '')
+
+    def get_department_owner_id(self, obj):
+        return (obj.metadata or {}).get('department_owner_id', '')
+
+    def get_cost_center(self, obj):
+        return (obj.metadata or {}).get('cost_center', '')
 
 
 # ============ COA & GL Serializers ============

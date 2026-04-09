@@ -4,6 +4,7 @@ Every service enforces membership + role before mutating data.
 Every write generates a WorkspaceLog entry via LogService.
 Selected workspace activity is mirrored into the shared platform audit stream.
 """
+from django.apps import apps
 from django.db import transaction
 from django.contrib.auth.models import User
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError
@@ -27,42 +28,52 @@ FINANCE_DEPARTMENT_TEMPLATES = [
     {
         'name': 'Controllership',
         'description': 'Owns accounting policy, chart of accounts governance, journal oversight, and close quality.',
+        'cost_center': 'FIN-CTRL-100',
     },
     {
         'name': 'Accounts Payable',
         'description': 'Runs supplier operations, invoice workflows, payment approvals, and outbound obligations.',
+        'cost_center': 'FIN-AP-110',
     },
     {
         'name': 'Accounts Receivable',
         'description': 'Manages customer billing, collections, receivables aging, and cash application.',
+        'cost_center': 'FIN-AR-120',
     },
     {
         'name': 'Treasury',
         'description': 'Handles cash positioning, liquidity planning, banking operations, and payment execution.',
+        'cost_center': 'FIN-TRSY-130',
     },
     {
         'name': 'Payroll',
         'description': 'Coordinates payroll operations, pay runs, banking outputs, and payroll-linked obligations.',
+        'cost_center': 'FIN-PAY-140',
     },
     {
         'name': 'Tax',
         'description': 'Oversees tax calculations, monitoring, filings, deadlines, and cross-jurisdiction compliance.',
+        'cost_center': 'FIN-TAX-150',
     },
     {
         'name': 'FP&A',
         'description': 'Drives budgeting, forecasting, planning cycles, management targets, and variance analysis.',
+        'cost_center': 'FIN-FPA-160',
     },
     {
         'name': 'Financial Reporting',
         'description': 'Produces statements, management packs, analytics, board reporting, and formal financial outputs.',
+        'cost_center': 'FIN-REP-170',
     },
     {
         'name': 'Risk, Audit, and Compliance',
         'description': 'Owns audit readiness, compliance controls, risk visibility, approvals, and close governance.',
+        'cost_center': 'FIN-RISK-180',
     },
     {
         'name': 'Intercompany and Consolidation',
         'description': 'Coordinates intercompany operations, eliminations, consolidation control, and multi-entity reporting.',
+        'cost_center': 'FIN-CONS-190',
     },
 ]
 
@@ -171,12 +182,30 @@ class LogService:
 class WorkspaceService:
 
     @staticmethod
+    def _resolve_linked_entity(linked_entity_id, *, current_workspace_id=None):
+        if linked_entity_id in (None, ''):
+            return None
+        Entity = apps.get_model('finances', 'Entity')
+        try:
+            entity = Entity.objects.select_related('organization').get(pk=linked_entity_id)
+        except Entity.DoesNotExist:
+            raise ValidationError({'linked_entity_id': 'Linked entity not found.'})
+        linked_workspace_qs = Workspace.objects.filter(linked_entity_id=linked_entity_id)
+        if current_workspace_id:
+            linked_workspace_qs = linked_workspace_qs.exclude(pk=current_workspace_id)
+        if linked_workspace_qs.exists():
+            raise ValidationError({'linked_entity_id': 'This entity is already linked to another workspace.'})
+        return entity
+
+    @staticmethod
     def _seed_default_departments(workspace: Workspace):
         WorkspaceGroup.objects.bulk_create([
             WorkspaceGroup(
                 workspace=workspace,
                 name=template['name'],
                 description=template['description'],
+                owner=workspace.owner,
+                cost_center=template['cost_center'],
             )
             for template in FINANCE_DEPARTMENT_TEMPLATES
         ])
@@ -188,9 +217,11 @@ class WorkspaceService:
         name = payload.get('name', '').strip()
         if not name:
             raise ValidationError({'name': 'Workspace name is required.'})
+        linked_entity = WorkspaceService._resolve_linked_entity(payload.get('linked_entity_id'))
 
         ws = Workspace.objects.create(
             owner=user,
+            linked_entity=linked_entity,
             name=name,
             description=payload.get('description', ''),
             tier=payload.get('tier', WorkspaceTier.FREE),
@@ -228,6 +259,12 @@ class WorkspaceService:
             ws = Workspace.objects.get(pk=workspace_id)
         except Workspace.DoesNotExist:
             raise NotFound('Workspace not found.')
+
+        if 'linked_entity_id' in payload:
+            ws.linked_entity = WorkspaceService._resolve_linked_entity(
+                payload.get('linked_entity_id'),
+                current_workspace_id=ws.pk,
+            )
 
         allowed = ('name', 'description')
         for field in allowed:
@@ -334,100 +371,142 @@ class MemberService:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3.3  GroupService
+# 3.3  DepartmentService
 # ─────────────────────────────────────────────────────────────────────────────
 
-class GroupService:
+class DepartmentService:
+
+    @staticmethod
+    def _validate_owner(workspace_id, owner_user_id):
+        if owner_user_id in (None, ''):
+            return None
+        try:
+            membership = WorkspaceMember.objects.select_related('user').get(
+                workspace_id=workspace_id,
+                user_id=owner_user_id,
+            )
+        except WorkspaceMember.DoesNotExist:
+            raise ValidationError({'owner_user_id': 'Department owner must already be a member of this workspace.'})
+        return membership.user
 
     @staticmethod
     @transaction.atomic
-    def create_group(workspace_id, actor: User, payload: dict) -> WorkspaceGroup:
+    def create_department(workspace_id, actor: User, payload: dict) -> WorkspaceGroup:
         PermissionService.assert_owner_or_admin(workspace_id, actor)
         name = payload.get('name', '').strip()
         if not name:
-            raise ValidationError({'name': 'Group name is required.'})
+            raise ValidationError({'name': 'Department name is required.'})
         if WorkspaceGroup.objects.filter(workspace_id=workspace_id, name=name).exists():
-            raise ValidationError({'name': 'A group with this name already exists.'})
-        group = WorkspaceGroup.objects.create(
+            raise ValidationError({'name': 'A department with this name already exists.'})
+        owner = DepartmentService._validate_owner(workspace_id, payload.get('owner_user_id'))
+        department = WorkspaceGroup.objects.create(
             workspace_id=workspace_id,
             name=name,
             description=payload.get('description', ''),
+            owner=owner,
+            cost_center=(payload.get('cost_center') or '').strip(),
         )
-        LogService.log(workspace_id, actor, 'department.created', {'department_id': str(group.pk), 'name': name})
-        return group
+        LogService.log(
+            workspace_id,
+            actor,
+            'department.created',
+            {
+                'department_id': str(department.pk),
+                'name': name,
+                'owner_user_id': str(owner.pk) if owner else None,
+                'cost_center': department.cost_center,
+            },
+        )
+        return department
 
     @staticmethod
     @transaction.atomic
-    def update_group(workspace_id, actor: User, group_id, payload: dict) -> WorkspaceGroup:
+    def update_department(workspace_id, actor: User, department_id, payload: dict) -> WorkspaceGroup:
         PermissionService.assert_owner_or_admin(workspace_id, actor)
         try:
-            group = WorkspaceGroup.objects.get(pk=group_id, workspace_id=workspace_id)
+            department = WorkspaceGroup.objects.get(pk=department_id, workspace_id=workspace_id)
         except WorkspaceGroup.DoesNotExist:
-            raise NotFound('Group not found.')
+            raise NotFound('Department not found.')
 
         updates = {}
         if 'name' in payload:
             name = payload.get('name', '').strip()
             if not name:
-                raise ValidationError({'name': 'Group name is required.'})
-            if WorkspaceGroup.objects.filter(workspace_id=workspace_id, name=name).exclude(pk=group.pk).exists():
-                raise ValidationError({'name': 'A group with this name already exists.'})
-            group.name = name
+                raise ValidationError({'name': 'Department name is required.'})
+            if WorkspaceGroup.objects.filter(workspace_id=workspace_id, name=name).exclude(pk=department.pk).exists():
+                raise ValidationError({'name': 'A department with this name already exists.'})
+            department.name = name
             updates['name'] = name
 
         if 'description' in payload:
-            group.description = payload.get('description', '')
-            updates['description'] = group.description
+            department.description = payload.get('description', '')
+            updates['description'] = department.description
+
+        if 'owner_user_id' in payload:
+            owner = DepartmentService._validate_owner(workspace_id, payload.get('owner_user_id'))
+            department.owner = owner
+            updates['owner_user_id'] = str(owner.pk) if owner else None
+
+        if 'cost_center' in payload:
+            department.cost_center = (payload.get('cost_center') or '').strip()
+            updates['cost_center'] = department.cost_center
 
         if updates:
-            group.save()
-            LogService.log(workspace_id, actor, 'department.updated', {'department_id': str(group.pk), **updates})
-        return group
+            department.save()
+            LogService.log(workspace_id, actor, 'department.updated', {'department_id': str(department.pk), **updates})
+        return department
 
     @staticmethod
     @transaction.atomic
-    def delete_group(workspace_id, actor: User, group_id):
+    def delete_department(workspace_id, actor: User, department_id):
         PermissionService.assert_owner_or_admin(workspace_id, actor)
         try:
-            group = WorkspaceGroup.objects.get(pk=group_id, workspace_id=workspace_id)
+            department = WorkspaceGroup.objects.get(pk=department_id, workspace_id=workspace_id)
         except WorkspaceGroup.DoesNotExist:
-            raise NotFound('Group not found.')
-        group_name = group.name
-        group.delete()
-        LogService.log(workspace_id, actor, 'department.deleted', {'department_id': str(group_id), 'name': group_name})
+            raise NotFound('Department not found.')
+        department_name = department.name
+        department.delete()
+        LogService.log(workspace_id, actor, 'department.deleted', {'department_id': str(department_id), 'name': department_name})
 
     @staticmethod
     @transaction.atomic
-    def add_member(workspace_id, actor: User, group_id, user: User) -> WorkspaceGroupMember:
+    def add_member(workspace_id, actor: User, department_id, user: User) -> WorkspaceGroupMember:
         PermissionService.assert_owner_or_admin(workspace_id, actor)
         try:
-            group = WorkspaceGroup.objects.get(pk=group_id, workspace_id=workspace_id)
+            department = WorkspaceGroup.objects.get(pk=department_id, workspace_id=workspace_id)
         except WorkspaceGroup.DoesNotExist:
-            raise NotFound('Group not found.')
+            raise NotFound('Department not found.')
         # User must be a workspace member
         if not WorkspaceMember.objects.filter(workspace_id=workspace_id, user=user).exists():
             raise ValidationError({'user': 'User is not a member of this workspace.'})
-        gm, created = WorkspaceGroupMember.objects.get_or_create(group=group, user=user)
+        gm, created = WorkspaceGroupMember.objects.get_or_create(group=department, user=user)
         if not created:
-            raise ValidationError({'user': 'User is already in this group.'})
-        LogService.log(workspace_id, actor, 'department.member_added', {'department_id': str(group.pk), 'user_id': str(user.pk)})
+            raise ValidationError({'user': 'User is already in this department.'})
+        LogService.log(workspace_id, actor, 'department.member_added', {'department_id': str(department.pk), 'user_id': str(user.pk)})
         return gm
 
     @staticmethod
     @transaction.atomic
-    def remove_member(workspace_id, actor: User, group_id, user: User):
+    def remove_member(workspace_id, actor: User, department_id, user: User):
         PermissionService.assert_owner_or_admin(workspace_id, actor)
         deleted, _ = WorkspaceGroupMember.objects.filter(
-            group__pk=group_id, group__workspace_id=workspace_id, user=user
+            group__pk=department_id, group__workspace_id=workspace_id, user=user
         ).delete()
         if not deleted:
-            raise NotFound('Group member not found.')
-        LogService.log(workspace_id, actor, 'department.member_removed', {'department_id': str(group_id), 'user_id': str(user.pk)})
+            raise NotFound('Department member not found.')
+        LogService.log(workspace_id, actor, 'department.member_removed', {'department_id': str(department_id), 'user_id': str(user.pk)})
 
     @staticmethod
-    def list_groups(workspace_id, actor: User):
+    def list_departments(workspace_id, actor: User):
         PermissionService.assert_member(workspace_id, actor)
-        return WorkspaceGroup.objects.filter(workspace_id=workspace_id).prefetch_related('group_members__user')
+        return WorkspaceGroup.objects.filter(workspace_id=workspace_id).select_related('owner').prefetch_related('group_members__user')
+
+
+class GroupService(DepartmentService):
+    create_group = DepartmentService.create_department
+    update_group = DepartmentService.update_department
+    delete_group = DepartmentService.delete_department
+    list_groups = DepartmentService.list_departments
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -14,6 +14,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from decimal import Decimal
 from .enterprise_reporting import _next_run_at
+from .platform_tasks import create_task as create_platform_task_record
 from .models import (
     APIKey,
     AuditLog,
@@ -81,8 +82,8 @@ from .models import (
     AccountingApprovalMatrix,
     AccountingApprovalDelegation,
 )
-from workspaces.models import Workspace
-from workspaces.services import LogService
+from workspaces.models import Workspace, WorkspaceGroup, WorkspaceMember
+from workspaces.services import LogService, WorkspaceService
 
 
 class ExpenseModelTest(TestCase):
@@ -2119,6 +2120,7 @@ class EnterpriseReportingDashboardAPITests(TestCase):
 class PlatformFoundationAPITests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user(username='platform-owner', email='platform-owner@example.com', password='pass')
+        self.department_owner = User.objects.create_user(username='department-owner', email='department-owner@example.com', password='pass')
         self.organization = Organization.objects.create(
             owner=self.owner,
             name='Platform Org',
@@ -2135,6 +2137,11 @@ class PlatformFoundationAPITests(TestCase):
             local_currency='USD',
             workspace_mode='combined',
         )
+        self.workspace = WorkspaceService.create_workspace(self.owner, {'name': 'Platform Workspace'})
+        WorkspaceMember.objects.create(workspace=self.workspace, user=self.department_owner, role='admin')
+        self.controllership = WorkspaceGroup.objects.get(workspace=self.workspace, name='Controllership')
+        self.controllership.owner = self.department_owner
+        self.controllership.save(update_fields=['owner'])
         self.client = APIClient()
         self.client.force_authenticate(user=self.owner)
 
@@ -2245,12 +2252,13 @@ class PlatformFoundationAPITests(TestCase):
             {
                 'organization': self.organization.id,
                 'entity': self.entity.id,
+                'workspace_id': str(self.workspace.id),
                 'type': 'journal_entry_approval',
                 'title': 'Approve journal 1001',
                 'description': 'Review manual journal above threshold.',
                 'state': 'open',
-                'assignee_type': 'user',
-                'assignee_id': str(self.owner.id),
+                'assignee_type': 'role',
+                'assignee_id': '',
                 'origin_type': 'journal_entry',
                 'origin_id': '1001',
                 'priority': 'high',
@@ -2263,6 +2271,9 @@ class PlatformFoundationAPITests(TestCase):
         self.assertEqual(create_response.data['state'], 'open')
         self.assertEqual(create_response.data['type'], 'journal_entry_approval')
         self.assertEqual(create_response.data['origin_type'], 'journal_entry')
+        self.assertEqual(create_response.data['department_name'], 'Controllership')
+        self.assertEqual(create_response.data['cost_center'], 'FIN-CTRL-100')
+        self.assertEqual(create_response.data['assignee_id'], str(self.department_owner.id))
 
         start_response = self.client.post(f'/api/platform-tasks/{task_id}/start/', format='json')
         self.assertEqual(start_response.status_code, 200)
@@ -2272,10 +2283,57 @@ class PlatformFoundationAPITests(TestCase):
         self.assertEqual(complete_response.status_code, 200)
         self.assertEqual(complete_response.data['state'], 'completed')
 
-        filtered_response = self.client.get('/api/platform-tasks/', {'assignee_id': self.owner.id, 'state': 'completed'})
+        filtered_response = self.client.get(
+            '/api/platform-tasks/',
+            {
+                'assignee_id': self.department_owner.id,
+                'state': 'completed',
+                'department_name': 'Controllership',
+                'cost_center': 'FIN-CTRL-100',
+            },
+        )
         self.assertEqual(filtered_response.status_code, 200)
         rows = filtered_response.data.get('results', filtered_response.data)
         self.assertEqual(len(rows), 1)
+
+    def test_department_routing_tags_finance_sync_tasks_without_workspace_context(self):
+        task = create_platform_task_record(
+            {
+                'organization': self.organization,
+                'entity': self.entity,
+                'type': 'document_request',
+                'title': 'Review compliance package',
+                'description': 'Document collection review',
+                'origin_type': 'document_request',
+                'origin_id': 'doc-100',
+                'created_by': self.owner,
+            },
+            actor=self.owner,
+        )
+        self.assertEqual(task.metadata.get('department_name'), 'Risk, Audit, and Compliance')
+        self.assertEqual(task.metadata.get('cost_center'), 'FIN-RISK-180')
+
+    def test_entity_linked_workspace_routes_task_to_department_owner(self):
+        self.workspace.linked_entity = self.entity
+        self.workspace.save(update_fields=['linked_entity'])
+
+        task = create_platform_task_record(
+            {
+                'organization': self.organization,
+                'entity': self.entity,
+                'type': 'journal_entry_approval',
+                'title': 'Review entity-linked journal',
+                'description': 'Should resolve through linked workspace.',
+                'origin_type': 'journal_entry',
+                'origin_id': 'journal-linked-1',
+                'created_by': self.owner,
+            },
+            actor=self.owner,
+        )
+
+        self.assertEqual(str(task.workspace_id), str(self.workspace.id))
+        self.assertEqual(task.assignee_id, str(self.department_owner.id))
+        self.assertEqual(task.metadata.get('department_name'), 'Controllership')
 
 
 class PayrollEngineAPITests(TestCase):

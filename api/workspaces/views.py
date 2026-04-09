@@ -18,16 +18,16 @@ from rest_framework.exceptions import NotFound
 from .models import Workspace, WorkspaceLog
 from .serializers import (
     CalendarEventCreateSerializer, CalendarEventUpdateSerializer,
+    DepartmentCreateSerializer, DepartmentMemberSerializer, DepartmentUpdateSerializer,
     FileUploadSerializer, FolderCreateSerializer,
-    GroupCreateSerializer, GroupMemberSerializer, GroupUpdateSerializer,
     MeetingCreateSerializer, MeetingUpdateSerializer,
     MemberAddSerializer, MemberRoleSerializer,
     ModulesUpdateSerializer,
     TierUpdateSerializer, StatusUpdateSerializer,
     WorkspaceCalendarEventSerializer,
     WorkspaceCreateSerializer, WorkspaceUpdateSerializer,
+    WorkspaceDepartmentSerializer,
     WorkspaceFileSerializer, WorkspaceFolderSerializer,
-    WorkspaceGroupSerializer,
     WorkspaceLogSerializer,
     WorkspaceMeetingSerializer,
     WorkspaceMemberSerializer,
@@ -35,7 +35,7 @@ from .serializers import (
     WorkspaceSerializer,
 )
 from .services import (
-    CalendarService, FileService, GroupService,
+    CalendarService, DepartmentService, FileService,
     LogService, MeetingService, MemberService,
     PermissionService, SettingsService, WorkspaceService,
 )
@@ -171,31 +171,31 @@ class WorkspaceMemberDetailView(APIView):
 # POST /workspaces/{id}/groups   — create
 # ─────────────────────────────────────────────────────────────────────────────
 
-class WorkspaceGroupListView(APIView):
+class WorkspaceDepartmentListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, workspace_id):
-        groups = GroupService.list_groups(workspace_id, request.user)
-        return Response(WorkspaceGroupSerializer(groups, many=True).data)
+        departments = DepartmentService.list_departments(workspace_id, request.user)
+        return Response(WorkspaceDepartmentSerializer(departments, many=True).data)
 
     def post(self, request, workspace_id):
-        ser = GroupCreateSerializer(data=request.data)
+        ser = DepartmentCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        group = GroupService.create_group(workspace_id, request.user, ser.validated_data)
-        return Response(WorkspaceGroupSerializer(group).data, status=status.HTTP_201_CREATED)
+        department = DepartmentService.create_department(workspace_id, request.user, ser.validated_data)
+        return Response(WorkspaceDepartmentSerializer(department).data, status=status.HTTP_201_CREATED)
 
 
-class WorkspaceGroupDetailView(APIView):
+class WorkspaceDepartmentDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, workspace_id, group_id):
-        ser = GroupUpdateSerializer(data=request.data)
+        ser = DepartmentUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        group = GroupService.update_group(workspace_id, request.user, group_id, ser.validated_data)
-        return Response(WorkspaceGroupSerializer(group).data)
+        department = DepartmentService.update_department(workspace_id, request.user, group_id, ser.validated_data)
+        return Response(WorkspaceDepartmentSerializer(department).data)
 
     def delete(self, request, workspace_id, group_id):
-        GroupService.delete_group(workspace_id, request.user, group_id)
+        DepartmentService.delete_department(workspace_id, request.user, group_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -204,20 +204,25 @@ class WorkspaceGroupDetailView(APIView):
 # DELETE /workspaces/{id}/groups/{group_id}/members/{uid}— remove member
 # ─────────────────────────────────────────────────────────────────────────────
 
-class WorkspaceGroupMemberView(APIView):
+class WorkspaceDepartmentMemberView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, workspace_id, group_id):
-        ser = GroupMemberSerializer(data=request.data)
+        ser = DepartmentMemberSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         user = _get_user_or_404(ser.validated_data['user_id'])
-        gm = GroupService.add_member(workspace_id, request.user, group_id, user)
+        gm = DepartmentService.add_member(workspace_id, request.user, group_id, user)
         return Response({'id': str(gm.pk), 'user_id': user.pk}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, workspace_id, group_id, user_id):
         target = _get_user_or_404(user_id)
-        GroupService.remove_member(workspace_id, request.user, group_id, target)
+        DepartmentService.remove_member(workspace_id, request.user, group_id, target)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+WorkspaceGroupListView = WorkspaceDepartmentListView
+WorkspaceGroupDetailView = WorkspaceDepartmentDetailView
+WorkspaceGroupMemberView = WorkspaceDepartmentMemberView
 
 
 # ─────────────────────────────────────────────────────────────────────────────

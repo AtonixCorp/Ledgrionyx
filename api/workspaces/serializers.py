@@ -30,16 +30,19 @@ class UserBriefSerializer(serializers.ModelSerializer):
 
 class WorkspaceSerializer(serializers.ModelSerializer):
     owner = UserBriefSerializer(read_only=True)
+    linked_entity_id = serializers.IntegerField(read_only=True)
+    linked_entity_name = serializers.ReadOnlyField(source='linked_entity.name')
 
     class Meta:
         model  = Workspace
-        fields = ('id', 'owner', 'name', 'description', 'tier', 'status', 'created_at', 'updated_at')
+        fields = ('id', 'owner', 'name', 'description', 'tier', 'status', 'linked_entity_id', 'linked_entity_name', 'created_at', 'updated_at')
         read_only_fields = ('id', 'owner', 'created_at', 'updated_at')
 
 
 class WorkspaceCreateSerializer(serializers.Serializer):
     name        = serializers.CharField(max_length=255)
     description = serializers.CharField(allow_blank=True, required=False, default='')
+    linked_entity_id = serializers.IntegerField(required=False, allow_null=True)
     tier        = serializers.ChoiceField(
         choices=['free', 'pro', 'enterprise'],
         required=False,
@@ -50,6 +53,7 @@ class WorkspaceCreateSerializer(serializers.Serializer):
 class WorkspaceUpdateSerializer(serializers.Serializer):
     name        = serializers.CharField(max_length=255, required=False)
     description = serializers.CharField(allow_blank=True, required=False)
+    linked_entity_id = serializers.IntegerField(required=False, allow_null=True)
 
 
 class TierUpdateSerializer(serializers.Serializer):
@@ -83,10 +87,10 @@ class MemberRoleSerializer(serializers.Serializer):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Groups
+# Departments
 # ─────────────────────────────────────────────────────────────────────────────
 
-class WorkspaceGroupMemberSerializer(serializers.ModelSerializer):
+class WorkspaceDepartmentMemberSerializer(serializers.ModelSerializer):
     user = UserBriefSerializer(read_only=True)
 
     class Meta:
@@ -94,27 +98,39 @@ class WorkspaceGroupMemberSerializer(serializers.ModelSerializer):
         fields = ('id', 'user')
 
 
-class WorkspaceGroupSerializer(serializers.ModelSerializer):
-    members = WorkspaceGroupMemberSerializer(source='group_members', many=True, read_only=True)
+class WorkspaceDepartmentSerializer(serializers.ModelSerializer):
+    members = WorkspaceDepartmentMemberSerializer(source='group_members', many=True, read_only=True)
+    owner = UserBriefSerializer(read_only=True)
 
     class Meta:
         model  = WorkspaceGroup
-        fields = ('id', 'name', 'description', 'created_at', 'members')
+        fields = ('id', 'name', 'description', 'owner', 'cost_center', 'created_at', 'members')
         read_only_fields = ('id', 'created_at')
 
 
-class GroupCreateSerializer(serializers.Serializer):
+class DepartmentCreateSerializer(serializers.Serializer):
     name        = serializers.CharField(max_length=255)
     description = serializers.CharField(allow_blank=True, required=False, default='')
+    owner_user_id = serializers.IntegerField(required=False, allow_null=True)
+    cost_center = serializers.CharField(max_length=64, required=False, allow_blank=True, default='')
 
 
-class GroupUpdateSerializer(serializers.Serializer):
+class DepartmentUpdateSerializer(serializers.Serializer):
     name        = serializers.CharField(max_length=255, required=False)
     description = serializers.CharField(allow_blank=True, required=False)
+    owner_user_id = serializers.IntegerField(required=False, allow_null=True)
+    cost_center = serializers.CharField(max_length=64, required=False, allow_blank=True)
 
 
-class GroupMemberSerializer(serializers.Serializer):
+class DepartmentMemberSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
+
+
+WorkspaceGroupMemberSerializer = WorkspaceDepartmentMemberSerializer
+WorkspaceGroupSerializer = WorkspaceDepartmentSerializer
+GroupCreateSerializer = DepartmentCreateSerializer
+GroupUpdateSerializer = DepartmentUpdateSerializer
+GroupMemberSerializer = DepartmentMemberSerializer
 
 
 # ─────────────────────────────────────────────────────────────────────────────

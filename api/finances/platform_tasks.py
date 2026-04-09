@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from .department_routing import apply_department_routing
 from .models import PlatformTask
 from .platform_foundation import log_platform_audit_event
 
@@ -23,34 +24,35 @@ def _resolve_assignee(assignee_type, assignee_id):
 
 
 def _canonical_task_values(payload, *, actor=None):
-    state = payload.get('state', payload.get('status', 'open'))
-    task_type = payload.get('type', payload.get('task_type', 'general'))
-    assignee_type = payload.get('assignee_type', 'user')
-    assignee_id = str(payload.get('assignee_id', payload.get('assigned_to', '') or ''))
-    origin_type = payload.get('origin_type', payload.get('source_object_type', ''))
-    origin_id = str(payload.get('origin_id', payload.get('source_object_id', '') or ''))
-    assigned_to = payload.get('assigned_to') if isinstance(payload.get('assigned_to'), User) else _resolve_assignee(assignee_type, assignee_id)
+    routed_payload = apply_department_routing(payload)
+    state = routed_payload.get('state', routed_payload.get('status', 'open'))
+    task_type = routed_payload.get('type', routed_payload.get('task_type', 'general'))
+    assignee_type = routed_payload.get('assignee_type', 'user')
+    assignee_id = str(routed_payload.get('assignee_id', routed_payload.get('assigned_to', '') or ''))
+    origin_type = routed_payload.get('origin_type', routed_payload.get('source_object_type', ''))
+    origin_id = str(routed_payload.get('origin_id', routed_payload.get('source_object_id', '') or ''))
+    assigned_to = routed_payload.get('assigned_to') if isinstance(routed_payload.get('assigned_to'), User) else _resolve_assignee(assignee_type, assignee_id)
 
     return {
-        'domain': payload.get('domain', 'platform'),
+        'domain': routed_payload.get('domain', 'platform'),
         'task_type': task_type,
-        'title': payload.get('title', '').strip(),
-        'description': payload.get('description', ''),
+        'title': routed_payload.get('title', '').strip(),
+        'description': routed_payload.get('description', ''),
         'status': state,
-        'priority': payload.get('priority', 'normal'),
+        'priority': routed_payload.get('priority', 'normal'),
         'assignee_type': assignee_type,
         'assignee_id': assignee_id,
         'assigned_to': assigned_to,
         'origin_type': origin_type,
         'origin_id': origin_id,
-        'source_object_type': payload.get('source_object_type', origin_type),
-        'source_object_id': str(payload.get('source_object_id', origin_id) or ''),
-        'metadata': payload.get('metadata', {}),
-        'due_at': payload.get('due_at'),
-        'organization': payload.get('organization'),
-        'entity': payload.get('entity'),
-        'workspace_id': payload.get('workspace_id'),
-        'created_by': payload.get('created_by', actor),
+        'source_object_type': routed_payload.get('source_object_type', origin_type),
+        'source_object_id': str(routed_payload.get('source_object_id', origin_id) or ''),
+        'metadata': routed_payload.get('metadata', {}),
+        'due_at': routed_payload.get('due_at'),
+        'organization': routed_payload.get('organization'),
+        'entity': routed_payload.get('entity'),
+        'workspace_id': routed_payload.get('workspace_id'),
+        'created_by': routed_payload.get('created_by', actor),
     }
 
 
@@ -80,9 +82,9 @@ def create_task(payload, *, actor=None):
         subject_id=str(task.id),
         resource_name=task.title,
         summary=f'Created platform task: {task.title}',
-        diff={'after': {'state': task.status, 'assignee_id': task.assignee_id}},
+        diff={'after': {'state': task.status, 'assignee_id': task.assignee_id, 'department_name': task.metadata.get('department_name'), 'cost_center': task.metadata.get('cost_center')}},
         context={'source_app': 'api'},
-        metadata={'priority': task.priority, 'origin_type': task.origin_type, 'origin_id': task.origin_id},
+        metadata={'priority': task.priority, 'origin_type': task.origin_type, 'origin_id': task.origin_id, 'department_name': task.metadata.get('department_name'), 'cost_center': task.metadata.get('cost_center')},
     )
     return task
 
@@ -150,7 +152,7 @@ def update_task(task, payload, *, actor=None):
         summary=f'Updated platform task: {task.title}',
         diff={'before': before, 'after': after},
         context={'source_app': 'api'},
-        metadata={'origin_type': task.origin_type, 'origin_id': task.origin_id},
+        metadata={'origin_type': task.origin_type, 'origin_id': task.origin_id, 'department_name': task.metadata.get('department_name'), 'cost_center': task.metadata.get('cost_center')},
     )
     return task
 

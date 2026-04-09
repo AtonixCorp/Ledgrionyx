@@ -1,6 +1,6 @@
 """
-Workspace models — fully isolated from all other systems.
-Every table is scoped by workspace_id. No cross-system FKs.
+Workspace models.
+Workspace tables are workspace-scoped, and the workspace root can optionally link to a finance entity.
 """
 import uuid
 from django.db import models
@@ -51,6 +51,7 @@ class CalendarEventType(models.TextChoices):
 class Workspace(models.Model):
     id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_workspaces')
+    linked_entity = models.OneToOneField('finances.Entity', on_delete=models.SET_NULL, null=True, blank=True, related_name='linked_workspace')
     name        = models.CharField(max_length=255)
     description = models.TextField(blank=True, default='')
     tier        = models.CharField(max_length=20, choices=WorkspaceTier.choices, default=WorkspaceTier.FREE)
@@ -93,6 +94,8 @@ class WorkspaceGroup(models.Model):
     workspace   = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='groups')
     name        = models.CharField(max_length=255)
     description = models.TextField(blank=True, default='')
+    owner       = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='workspace_department_ownerships')
+    cost_center = models.CharField(max_length=64, blank=True, default='')
     created_at  = models.DateTimeField(auto_now_add=True)
 
     class Meta:

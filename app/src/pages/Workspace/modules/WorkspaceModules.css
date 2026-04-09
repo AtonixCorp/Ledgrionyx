@@ -151,9 +151,24 @@
   color: #4b5563;
 }
 
+.wsm-department-meta {
+  font-size: 12px;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
 .wsm-department-modules {
   font-size: 12px;
   color: #6b7280;
+}
+
+.wsm-department-detail-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: #374151;
 }
 
 .wsm-empty {

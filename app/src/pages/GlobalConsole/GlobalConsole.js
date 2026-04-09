@@ -97,6 +97,8 @@ const GlobalConsole = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [profileOpen, setProfileOpen] = useState(false);
   const [taskFilter, setTaskFilter] = useState('open');
+  const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [costCenterFilter, setCostCenterFilter] = useState('all');
   const [tasks, setTasks] = useState([]);
   const [auditEvents, setAuditEvents] = useState([]);
   const [taskActionPendingId, setTaskActionPendingId] = useState(null);
@@ -122,7 +124,12 @@ const GlobalConsole = () => {
     const loadPlatformData = async () => {
       try {
         const [taskResponse, auditResponse] = await Promise.all([
-          platformTasksAPI.getAll({ assignee_id: user?.id, state: taskFilter === 'all' ? undefined : taskFilter }),
+          platformTasksAPI.getAll({
+            assignee_id: user?.id,
+            state: taskFilter === 'all' ? undefined : taskFilter,
+            department_name: departmentFilter === 'all' ? undefined : departmentFilter,
+            cost_center: costCenterFilter === 'all' ? undefined : costCenterFilter,
+          }),
           platformAuditEventsAPI.getAll({ actor_id: user?.id }),
         ]);
         if (!active) return;
@@ -142,7 +149,7 @@ const GlobalConsole = () => {
     return () => {
       active = false;
     };
-  }, [taskFilter, user?.id]);
+  }, [costCenterFilter, departmentFilter, taskFilter, user?.id]);
 
   // Filtered workspaces
   const workspaceCards = buildWorkspaceCards(entities);
@@ -201,7 +208,12 @@ const GlobalConsole = () => {
       }
 
       const [taskResponse, auditResponse] = await Promise.all([
-        platformTasksAPI.getAll({ assignee_id: user?.id, state: taskFilter === 'all' ? undefined : taskFilter }),
+        platformTasksAPI.getAll({
+          assignee_id: user?.id,
+          state: taskFilter === 'all' ? undefined : taskFilter,
+          department_name: departmentFilter === 'all' ? undefined : departmentFilter,
+          cost_center: costCenterFilter === 'all' ? undefined : costCenterFilter,
+        }),
         platformAuditEventsAPI.getAll({ actor_id: user?.id }),
       ]);
       setTasks(normalizeCollection(taskResponse.data).slice(0, 8));
@@ -213,6 +225,8 @@ const GlobalConsole = () => {
 
   const firstName = (user?.name || user?.email || 'User').split(' ')[0];
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
+  const departmentOptions = Array.from(new Set(tasks.map((task) => task.department_name).filter(Boolean))).sort();
+  const costCenterOptions = Array.from(new Set(tasks.map((task) => task.cost_center).filter(Boolean))).sort();
 
   const handleLogout = () => {
     logout();
@@ -452,6 +466,20 @@ const GlobalConsole = () => {
                 </button>
               ))}
             </div>
+            <div className="gc-task-filter-row">
+              <select className="gc-task-select" value={departmentFilter} onChange={(event) => { setDepartmentFilter(event.target.value); setCostCenterFilter('all'); }}>
+                <option value="all">All Departments</option>
+                {departmentOptions.map((departmentName) => (
+                  <option key={departmentName} value={departmentName}>{departmentName}</option>
+                ))}
+              </select>
+              <select className="gc-task-select" value={costCenterFilter} onChange={(event) => setCostCenterFilter(event.target.value)}>
+                <option value="all">All Cost Centers</option>
+                {costCenterOptions.map((costCenter) => (
+                  <option key={costCenter} value={costCenter}>{costCenter}</option>
+                ))}
+              </select>
+            </div>
             {tasks.length === 0 ? (
               <div className="gc-task-empty">
                 <span>No pending tasks</span>
@@ -464,6 +492,12 @@ const GlobalConsole = () => {
                     <div className="gc-task-body">
                       <p className="gc-task-title">{t.title}</p>
                       <span className="gc-task-type">{(t.type || t.task_type || 'task').replaceAll('_', ' ')}</span>
+                      {(t.department_name || t.cost_center) && (
+                        <div className="gc-task-meta-row">
+                          {t.department_name && <span className="gc-task-meta-chip">{t.department_name}</span>}
+                          {t.cost_center && <span className="gc-task-meta-chip gc-task-meta-chip-muted">{t.cost_center}</span>}
+                        </div>
+                      )}
                     </div>
                     <span className="gc-task-due">{t.due_at ? formatRelativeTime(t.due_at) : (t.state || t.status || 'open').replaceAll('_', ' ')}</span>
                     <div className="gc-task-actions">

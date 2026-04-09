@@ -2,6 +2,7 @@ from datetime import datetime, time
 
 from django.utils import timezone
 
+from .department_routing import apply_department_routing
 from .models import PlatformAuditEvent, PlatformTask
 
 
@@ -102,6 +103,7 @@ def sync_task_request_to_platform_task(task_request):
         'started_at': task_request.started_at,
         'completed_at': task_request.completed_at,
     }
+    defaults = apply_department_routing(defaults)
     platform_task, _ = PlatformTask.objects.update_or_create(
         domain='finance',
         source_object_type='TaskRequest',
@@ -134,26 +136,27 @@ def log_workspace_activity_as_platform_event(*, workspace_id, actor, action, met
 
 
 def create_platform_task(*, domain='platform', task_type, title, created_by, organization=None, entity=None, workspace_id=None, assigned_to=None, description='', priority='normal', due_at=None, metadata=None, source_object_type='', source_object_id=''):
-    return PlatformTask.objects.create(
-        organization=organization,
-        entity=entity,
-        workspace_id=workspace_id,
-        domain=domain,
-        task_type=task_type,
-        title=title,
-        description=description,
-        priority=priority,
-        due_at=due_at,
-        assignee_type='user' if assigned_to else 'user',
-        assignee_id=str(getattr(assigned_to, 'id', '') or ''),
-        assigned_to=assigned_to,
-        created_by=created_by,
-        origin_type=source_object_type,
-        origin_id=str(source_object_id or ''),
-        metadata=metadata or {},
-        source_object_type=source_object_type,
-        source_object_id=str(source_object_id or ''),
-    )
+    values = apply_department_routing({
+        'organization': organization,
+        'entity': entity,
+        'workspace_id': workspace_id,
+        'domain': domain,
+        'task_type': task_type,
+        'title': title,
+        'description': description,
+        'priority': priority,
+        'due_at': due_at,
+        'assignee_type': 'user' if assigned_to else 'user',
+        'assignee_id': str(getattr(assigned_to, 'id', '') or ''),
+        'assigned_to': assigned_to,
+        'created_by': created_by,
+        'origin_type': source_object_type,
+        'origin_id': str(source_object_id or ''),
+        'metadata': metadata or {},
+        'source_object_type': source_object_type,
+        'source_object_id': str(source_object_id or ''),
+    })
+    return PlatformTask.objects.create(**values)
 
 
 def cancel_platform_tasks_for_origin(*, origin_type, origin_id):
@@ -204,6 +207,7 @@ def sync_compliance_deadline_to_platform_task(deadline):
             'status': deadline.status,
         },
     }
+    defaults = apply_department_routing(defaults)
     task, _ = PlatformTask.objects.update_or_create(
         domain='compliance',
         source_object_type='ComplianceDeadline',
@@ -244,6 +248,7 @@ def sync_accounting_approval_to_platform_task(record):
             'approval_status': record.status,
         },
     }
+    defaults = apply_department_routing(defaults)
     task, _ = PlatformTask.objects.update_or_create(
         domain='approval',
         source_object_type='AccountingApprovalRecord',
@@ -285,6 +290,7 @@ def sync_journal_entry_approval_task(entry):
             'amount_total': str(entry.amount_total or '0'),
         },
     }
+    defaults = apply_department_routing(defaults)
     task, _ = PlatformTask.objects.update_or_create(
         domain='approval',
         source_object_type='JournalEntry',
@@ -325,6 +331,7 @@ def sync_document_request_to_platform_task(document_request):
             'status': document_request.status,
         },
     }
+    defaults = apply_department_routing(defaults)
     task, _ = PlatformTask.objects.update_or_create(
         domain='document',
         source_object_type='DocumentRequest',
@@ -365,6 +372,7 @@ def sync_equity_scenario_approval_task(approval):
             'reporting_period': approval.reporting_period,
         },
     }
+    defaults = apply_department_routing(defaults)
     task, _ = PlatformTask.objects.update_or_create(
         domain='equity',
         source_object_type='EquityScenarioApproval',

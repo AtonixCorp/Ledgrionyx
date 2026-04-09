@@ -9,51 +9,61 @@ const FINANCE_DEPARTMENT_TEMPLATES = [
     name: 'Controllership',
     description: 'Owns accounting policy, chart of accounts governance, journal oversight, and close quality.',
     modules: 'Accounting, General Ledger, Close',
+    costCenter: 'FIN-CTRL-100',
   },
   {
     name: 'Accounts Payable',
     description: 'Runs supplier operations, invoice workflows, payment approvals, and outbound obligations.',
     modules: 'Bills, Vendors, Payment Scheduling, AP',
+    costCenter: 'FIN-AP-110',
   },
   {
     name: 'Accounts Receivable',
     description: 'Manages customer billing, collections, receivables aging, and cash application.',
     modules: 'Invoices, Customers, Collections, AR',
+    costCenter: 'FIN-AR-120',
   },
   {
     name: 'Treasury',
     description: 'Handles cash positioning, liquidity planning, banking operations, and payment execution.',
     modules: 'Cash Bank, Treasury, Cashflow',
+    costCenter: 'FIN-TRSY-130',
   },
   {
     name: 'Payroll',
     description: 'Coordinates payroll operations, pay runs, banking outputs, and payroll-linked obligations.',
     modules: 'Payroll',
+    costCenter: 'FIN-PAY-140',
   },
   {
     name: 'Tax',
     description: 'Oversees tax calculations, monitoring, filings, deadlines, and cross-jurisdiction compliance.',
     modules: 'Tax Center, Tax Monitoring, Filing Assistant',
+    costCenter: 'FIN-TAX-150',
   },
   {
     name: 'FP&A',
     description: 'Drives budgeting, forecasting, planning cycles, management targets, and variance analysis.',
     modules: 'Budgets, Forecasts, Variance Analysis',
+    costCenter: 'FIN-FPA-160',
   },
   {
     name: 'Financial Reporting',
     description: 'Produces statements, management packs, analytics, board reporting, and formal financial outputs.',
     modules: 'Statements, Trial Balance, Analytics',
+    costCenter: 'FIN-REP-170',
   },
   {
     name: 'Risk, Audit, and Compliance',
     description: 'Owns audit readiness, compliance controls, risk visibility, approvals, and close governance.',
     modules: 'Audit Trail, Period Close, Risk Exposure',
+    costCenter: 'FIN-RISK-180',
   },
   {
     name: 'Intercompany and Consolidation',
     description: 'Coordinates intercompany operations, eliminations, consolidation control, and multi-entity reporting.',
     modules: 'Intercompany, Consolidation',
+    costCenter: 'FIN-CONS-190',
   },
 ];
 
@@ -77,7 +87,7 @@ const WorkspaceDepartments = () => {
   const [editingDepartment, setEditingDepartment] = useState(null);
   const [saving, setSaving] = useState(false);
   const [actionKey, setActionKey] = useState('');
-  const [createForm, setCreateForm] = useState({ name: '', description: '' });
+  const [createForm, setCreateForm] = useState({ name: '', description: '', owner_user_id: '', cost_center: '' });
   const [selectedUserId, setSelectedUserId] = useState('');
   const seedingAttemptedRef = useRef(false);
 
@@ -122,6 +132,8 @@ const WorkspaceDepartments = () => {
             workspaceDepartmentsAPI.create(workspaceId, {
               name: department.name,
               description: department.description,
+              owner_user_id: currentMembership?.user?.id || user?.id,
+              cost_center: department.costCenter,
             })
           )
         );
@@ -133,7 +145,7 @@ const WorkspaceDepartments = () => {
     };
 
     seedDepartments();
-  }, [canManageDepartments, departments.length, loadWorkspaceData, loading, workspaceId]);
+  }, [canManageDepartments, currentMembership?.user?.id, departments.length, loadWorkspaceData, loading, user?.id, workspaceId]);
 
   const filteredDepartments = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -168,7 +180,7 @@ const WorkspaceDepartments = () => {
   }, [activeDepartment, members]);
 
   const resetCreateForm = () => {
-    setCreateForm({ name: '', description: '' });
+    setCreateForm({ name: '', description: '', owner_user_id: '', cost_center: '' });
     setShowCreate(false);
     setEditingDepartment(null);
   };
@@ -186,6 +198,8 @@ const WorkspaceDepartments = () => {
         const response = await workspaceDepartmentsAPI.update(workspaceId, editingDepartment.id, {
           name: createForm.name.trim(),
           description: createForm.description.trim(),
+          owner_user_id: createForm.owner_user_id ? Number(createForm.owner_user_id) : null,
+          cost_center: createForm.cost_center.trim(),
         });
         setDepartments((current) => current.map((department) => (department.id === editingDepartment.id ? response.data : department)));
         if (activeDepartment?.id === editingDepartment.id) {
@@ -196,6 +210,8 @@ const WorkspaceDepartments = () => {
         const response = await workspaceDepartmentsAPI.create(workspaceId, {
           name: createForm.name.trim(),
           description: createForm.description.trim(),
+          owner_user_id: createForm.owner_user_id ? Number(createForm.owner_user_id) : null,
+          cost_center: createForm.cost_center.trim(),
         });
         setDepartments((current) => [...current, response.data]);
         setNotice('Department created successfully.');
@@ -210,7 +226,12 @@ const WorkspaceDepartments = () => {
 
   const handleEditDepartment = (department) => {
     setEditingDepartment(department);
-    setCreateForm({ name: department.name || '', description: department.description || '' });
+    setCreateForm({
+      name: department.name || '',
+      description: department.description || '',
+      owner_user_id: department.owner?.id ? String(department.owner.id) : '',
+      cost_center: department.cost_center || '',
+    });
     setShowCreate(true);
     setError('');
     setNotice('');
@@ -299,6 +320,8 @@ const WorkspaceDepartments = () => {
         ...template,
         actualDepartment,
         memberCount: actualDepartment?.members?.length || 0,
+        ownerName: getUserDisplayName(actualDepartment?.owner),
+        costCenter: actualDepartment?.cost_center || template.costCenter,
       };
     });
   }, [departments]);
@@ -346,6 +369,8 @@ const WorkspaceDepartments = () => {
                 <span>{department.memberCount} member{department.memberCount === 1 ? '' : 's'}</span>
               </div>
               <p>{department.description}</p>
+              <div className="wsm-department-meta">Owner: {department.ownerName}</div>
+              <div className="wsm-department-meta">Cost Center: {department.costCenter}</div>
               <div className="wsm-department-modules">{department.modules}</div>
             </button>
           ))}
@@ -368,6 +393,8 @@ const WorkspaceDepartments = () => {
             <tr>
               <th>Department</th>
               <th>Description</th>
+              <th>Owner</th>
+              <th>Cost Center</th>
               <th>Members</th>
               <th>Created</th>
               <th>Actions</th>
@@ -376,11 +403,11 @@ const WorkspaceDepartments = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5}><div className="wsm-empty">Loading departments…</div></td>
+                <td colSpan={7}><div className="wsm-empty">Loading departments…</div></td>
               </tr>
             ) : filteredDepartments.length === 0 ? (
               <tr>
-                <td colSpan={5}><div className="wsm-empty">No departments found. Create one to organize finance ownership and members.</div></td>
+                <td colSpan={7}><div className="wsm-empty">No departments found. Create one to organize finance ownership and members.</div></td>
               </tr>
             ) : (
               filteredDepartments.map((department) => (
@@ -389,6 +416,8 @@ const WorkspaceDepartments = () => {
                     <div className="wsm-group-name">{department.name}</div>
                   </td>
                   <td>{department.description || '—'}</td>
+                  <td>{getUserDisplayName(department.owner)}</td>
+                  <td>{department.cost_center || '—'}</td>
                   <td>
                     <div className="wsm-group-pill-row">
                       {(department.members || []).length === 0 ? (
@@ -453,6 +482,28 @@ const WorkspaceDepartments = () => {
                   placeholder="Owns supplier operations, invoice workflows, and payment approvals."
                 />
               </div>
+              <div className="wsm-form-group">
+                <label className="wsm-label">Department Owner</label>
+                <select
+                  className="wsm-select"
+                  value={createForm.owner_user_id}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, owner_user_id: event.target.value }))}
+                >
+                  <option value="">No owner assigned</option>
+                  {members.map((member) => (
+                    <option key={member.id} value={member.user?.id}>{getUserDisplayName(member.user)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="wsm-form-group">
+                <label className="wsm-label">Cost Center</label>
+                <input
+                  className="wsm-input"
+                  value={createForm.cost_center}
+                  onChange={(event) => setCreateForm((current) => ({ ...current, cost_center: event.target.value }))}
+                  placeholder="FIN-AP-110"
+                />
+              </div>
               <div className="wsm-modal-actions">
                 <button className="wsm-btn-primary" onClick={handleSaveDepartment} disabled={saving}>{saving ? 'Saving…' : editingDepartment ? 'Save Changes' : 'Create Department'}</button>
                 <button className="wsm-btn-secondary" onClick={resetCreateForm} disabled={saving}>Cancel</button>
@@ -467,6 +518,10 @@ const WorkspaceDepartments = () => {
           <div className="wsm-modal-card wsm-modal-card-wide" onClick={(event) => event.stopPropagation()}>
             <h2 className="wsm-modal-title">{activeDepartment.name}</h2>
             <p className="wsm-modal-sub">{activeDepartment.description || 'Manage the members assigned to this workspace department.'}</p>
+            <div className="wsm-department-detail-row">
+              <span><strong>Owner:</strong> {getUserDisplayName(activeDepartment.owner)}</span>
+              <span><strong>Cost Center:</strong> {activeDepartment.cost_center || '—'}</span>
+            </div>
 
             {canManageDepartments && (
               <div className="wsm-group-manage-bar">
