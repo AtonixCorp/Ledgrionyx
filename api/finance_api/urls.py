@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/', include('equity.urls')),
     path('api/auth/', include('finances.auth_urls')),
     path('api/v1/', include('workspaces.urls')),
+    path('api/v1/', include('intelligence.urls')),
     path('', landing_page, name='landing_page'),
 ]
 

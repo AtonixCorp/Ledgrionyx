@@ -5,7 +5,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: atonix-api
+    container_name: ledgrionyx-api
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
@@ -34,7 +34,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: atonix-banking-sync
+    container_name: ledgrionyx-banking-sync
     command: >
       /bin/sh -c "while true; do
       python manage.py sync_banking_integrations;
@@ -57,7 +57,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: atonix-approval-digest
+    container_name: ledgrionyx-approval-digest
     command: >
       /bin/sh -c "while true; do
       python manage.py send_approval_notification_digest --hours ${APPROVAL_DIGEST_LOOKBACK_HOURS:-24};
@@ -81,7 +81,7 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
-    container_name: atonix-app
+    container_name: ledgrionyx-app
     command: npm start
     ports:
       - "3000:3000"
@@ -96,11 +96,11 @@ services:
 
   db:
     image: dhi.io/postgres:14-alpine3.22
-    container_name: atonix-db
+    container_name: ledgrionyx-db
     environment:
-      - POSTGRES_DB=atonix
-      - POSTGRES_USER=atonix
-      - POSTGRES_PASSWORD=atonixpassword
+      - POSTGRES_DB=ledgrionyx
+      - POSTGRES_USER=ledgrionyx
+      - POSTGRES_PASSWORD=ledgrionyxpassword
     ports:
       - "5433:5432"
     volumes:

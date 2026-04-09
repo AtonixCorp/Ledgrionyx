@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'finances',
     'workspaces',
     'equity',
+    'intelligence',
 ]
 
 MIDDLEWARE = [
@@ -184,6 +185,13 @@ EMAIL_BRAND_FOOTER = os.getenv(
 )
 EMAIL_SUPPORT_EMAIL = os.getenv('EMAIL_SUPPORT_EMAIL', 'support@ledgrionyx.local')
 EMAIL_SUPPORT_URL = os.getenv('EMAIL_SUPPORT_URL', FRONTEND_BASE_URL)
+
+AI_ENABLE_EXTERNAL_MODELS = env_bool('AI_ENABLE_EXTERNAL_MODELS', False)
+ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+ANTHROPIC_API_BASE_URL = os.getenv('ANTHROPIC_API_BASE_URL', 'https://api.anthropic.com')
+CLAUDE_OPUS_MODEL = os.getenv('CLAUDE_OPUS_MODEL', 'claude-opus-4-1')
+CLAUDE_SONNET_MODEL = os.getenv('CLAUDE_SONNET_MODEL', 'claude-sonnet-4-0')
+AI_DEFAULT_MAX_TOKENS = int(os.getenv('AI_DEFAULT_MAX_TOKENS', '2000'))
 
 LOGGING = {
     'version': 1,
