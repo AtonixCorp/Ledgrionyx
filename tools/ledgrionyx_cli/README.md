@@ -11,7 +11,7 @@ Install with repo bootstrap:
 Or install locally without the full app bootstrap:
 
 ```bash
-cd tools/atc_cli
+cd tools/ledgrionyx_cli
 /home/atonixdev/ledgrionyx/api/.venv/bin/python -m pip install -e .
 ```
 

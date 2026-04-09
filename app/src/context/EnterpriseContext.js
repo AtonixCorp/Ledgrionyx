@@ -76,7 +76,7 @@ export const EnterpriseProvider = ({ children }) => {
   // Active Workspace (the entity/company currently being worked on)
   const [activeWorkspace, setActiveWorkspaceState] = useState(() => {
     try {
-      const saved = localStorage.getItem('atc_active_workspace');
+      const saved = localStorage.getItem('ledgrionyx_active_workspace');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -650,10 +650,10 @@ export const EnterpriseProvider = ({ children }) => {
     setActiveWorkspaceState(workspace);
     if (workspace) {
       try {
-        localStorage.setItem('atc_active_workspace', JSON.stringify(workspace));
+        localStorage.setItem('ledgrionyx_active_workspace', JSON.stringify(workspace));
       } catch { /* storage quota */ }
     } else {
-      localStorage.removeItem('atc_active_workspace');
+      localStorage.removeItem('ledgrionyx_active_workspace');
     }
   }, []);
 

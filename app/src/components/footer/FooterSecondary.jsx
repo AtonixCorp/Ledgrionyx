@@ -1,5 +1,5 @@
 import React from 'react';
-import ATCLogo from '../branding/ATCLogo';
+import LedgrionyxLogo from '../branding/LedgrionyxLogo';
 import SocialIcons from './SocialIcons';
 import ComplianceBadges from './ComplianceBadges';
 
@@ -8,7 +8,7 @@ function FooterSecondary() {
     <div className="footer-secondary">
       <div className="footer-shell footer-secondary__inner">
         <div className="footer-secondary__identity">
-          <ATCLogo variant="white" withText size="small" />
+          <LedgrionyxLogo variant="white" withText size="small" />
           <p className="footer-secondary__copyright">© Ledgrionyx. All rights reserved.</p>
         </div>
 

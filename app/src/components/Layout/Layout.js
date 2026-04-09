@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import ATCLogo from '../branding/ATCLogo';
+import LedgrionyxLogo from '../branding/LedgrionyxLogo';
 import './Layout.css';
 
 const Layout = ({ children }) => {
@@ -232,7 +232,7 @@ const Layout = ({ children }) => {
         {/* Brand Header */}
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <ATCLogo variant="white" size="small" withText={!sidebarMinimized} text="Ledgrionyx Console" />
+            <LedgrionyxLogo variant="white" size="small" withText={!sidebarMinimized} text="Ledgrionyx Console" />
           </div>
           {!sidebarMinimized && (
             <NavLink to="/app/console" className="sidebar-console-link" title="All Workspaces">

@@ -30,7 +30,7 @@ const WorkspaceRoute = ({ children }) => {
     // 3. Fall back to localStorage snapshot
     if (!resolvedWorkspace) {
       try {
-        const saved = localStorage.getItem('atc_active_workspace');
+        const saved = localStorage.getItem('ledgrionyx_active_workspace');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (String(parsed.id) === String(workspaceId)) resolvedWorkspace = parsed;
@@ -41,7 +41,7 @@ const WorkspaceRoute = ({ children }) => {
     // No workspaceId in URL — accept whatever is active
     resolvedWorkspace = activeWorkspace || (() => {
       try {
-        const saved = localStorage.getItem('atc_active_workspace');
+        const saved = localStorage.getItem('ledgrionyx_active_workspace');
         return saved ? JSON.parse(saved) : null;
       } catch { return null; }
     })();

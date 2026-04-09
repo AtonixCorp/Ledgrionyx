@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ledgrionyx = "atc_cli.main:main"
+ledgrionyx = "ledgrionyx_cli.main:main"
 
 [tool.setuptools.packages.find]
-include = ["atc_cli*"]
+include = ["ledgrionyx_cli*"]

@@ -32,7 +32,7 @@ def normalize_host(raw_host):
     return candidate.rstrip('/')
 
 
-class ATCClient:
+class LedgrionyxClient:
     def __init__(self, host=None):
         self.host = normalize_host(host)
         self.user_agent = f'Ledgrionyx-CLI/{__version__}'

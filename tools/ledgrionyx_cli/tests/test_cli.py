@@ -6,30 +6,30 @@ import unittest
 from contextlib import redirect_stdout, redirect_stderr
 from unittest.mock import patch
 
-from atc_cli.api import ATCClient, expires_at_from_now
-from atc_cli.errors import CLIError
-from atc_cli.main import main
-from atc_cli.storage import upsert_profile
+from ledgrionyx_cli.api import LedgrionyxClient, expires_at_from_now
+from ledgrionyx_cli.errors import CLIError
+from ledgrionyx_cli.main import main
+from ledgrionyx_cli.storage import upsert_profile
 
 
 class CLITestCase(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
-        os.environ['ATC_CLI_CONFIG_DIR'] = self.temp_dir.name
-        os.environ['ATC_CLI_DISABLE_KEYRING'] = '1'
+        os.environ['LEDGRIONYX_CLI_CONFIG_DIR'] = self.temp_dir.name
+        os.environ['LEDGRIONYX_CLI_DISABLE_KEYRING'] = '1'
 
     def tearDown(self):
-        os.environ.pop('ATC_CLI_CONFIG_DIR', None)
-        os.environ.pop('ATC_CLI_DISABLE_KEYRING', None)
+        os.environ.pop('LEDGRIONYX_CLI_CONFIG_DIR', None)
+        os.environ.pop('LEDGRIONYX_CLI_DISABLE_KEYRING', None)
         self.temp_dir.cleanup()
 
     def test_login_stores_encrypted_profile(self):
-        with patch.object(ATCClient, 'cli_login', return_value={
+        with patch.object(LedgrionyxClient, 'cli_login', return_value={
             'access_token': 'access-token-123',
             'expires_in': 3600,
             'organization_id': 'org_123',
             'user': {'id': 'user_1', 'email': 'dev@example.com', 'role': 'developer'},
-        }), patch.object(ATCClient, 'me', return_value={
+        }), patch.object(LedgrionyxClient, 'me', return_value={
             'organization': {'id': 'org_123', 'name': 'Ledgrionyx Demo LLC'},
             'user': {'id': 'user_1', 'email': 'dev@example.com', 'role': 'developer'},
             'session': {'expires_at': expires_at_from_now(3600)},
@@ -48,7 +48,7 @@ class CLITestCase(unittest.TestCase):
         self.assertIn('Successfully logged in to Ledgrionyx', stdout.getvalue())
 
     def test_request_with_session_refreshes_expired_token(self):
-        client = ATCClient('https://api.example.com')
+        client = LedgrionyxClient('https://api.example.com')
         session = {
             'profile': 'default',
             'host': 'https://api.example.com',
@@ -106,7 +106,7 @@ class CLITestCase(unittest.TestCase):
         )
 
         stdout = io.StringIO()
-        with patch.object(ATCClient, 'request_with_session', return_value=[{'id': 'acc_1', 'name': 'Cash'}]):
+        with patch.object(LedgrionyxClient, 'request_with_session', return_value=[{'id': 'acc_1', 'name': 'Cash'}]):
             with redirect_stdout(stdout):
                 exit_code = main(['accounts', 'list', '--profile', 'prod'])
 
@@ -130,7 +130,7 @@ class CLITestCase(unittest.TestCase):
         )
 
         stdout = io.StringIO()
-        with patch.object(ATCClient, 'request_with_session', return_value={'ok': True}) as mocked_request:
+        with patch.object(LedgrionyxClient, 'request_with_session', return_value={'ok': True}) as mocked_request:
             with redirect_stdout(stdout):
                 exit_code = main([
                     'reports',

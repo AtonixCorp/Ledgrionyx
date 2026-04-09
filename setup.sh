@@ -50,7 +50,7 @@ fi
 echo "Installing Python dependencies..."
 "$VENV_PYTHON" -m pip install -r requirements.txt
 echo "Installing Ledgrionyx CLI..."
-"$VENV_PYTHON" -m pip install -e ../tools/atc_cli
+"$VENV_PYTHON" -m pip install -e ../tools/ledgrionyx_cli
 
 # Run migrations
 echo "Running database migrations..."

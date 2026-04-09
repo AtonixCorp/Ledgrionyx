@@ -18,19 +18,19 @@ CONFIG_FILENAME = 'config.json'
 
 
 def config_dir():
-    override = os.getenv('ATC_CLI_CONFIG_DIR')
+    override = os.getenv('LEDGRIONYX_CLI_CONFIG_DIR')
     if override:
         return Path(override).expanduser()
 
     system_name = platform.system()
     if system_name == 'Darwin':
-        return Path.home() / 'Library' / 'Application Support' / 'atc'
+        return Path.home() / 'Library' / 'Application Support' / 'ledgrionyx'
     if system_name == 'Windows':
         appdata = os.getenv('APPDATA')
         if appdata:
-            return Path(appdata) / 'atc'
-        return Path.home() / 'AppData' / 'Roaming' / 'atc'
-    return Path.home() / '.config' / 'atc'
+            return Path(appdata) / 'ledgrionyx'
+        return Path.home() / 'AppData' / 'Roaming' / 'ledgrionyx'
+    return Path.home() / '.config' / 'ledgrionyx'
 
 
 def config_path():
@@ -73,7 +73,7 @@ def save_config(config):
 
 
 def _keyring_disabled():
-    return os.getenv('ATC_CLI_DISABLE_KEYRING') == '1'
+    return os.getenv('LEDGRIONYX_CLI_DISABLE_KEYRING') == '1'
 
 
 def _keyring_entry_name(profile_name):

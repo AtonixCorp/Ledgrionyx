@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import ATCLogo from '../../components/branding/ATCLogo';
+import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -38,7 +38,7 @@ const Login = () => {
       <div className="auth-container">
         <div className="auth-header">
           <Link to="/" className="auth-logo-link">
-            <ATCLogo size="medium" withText />
+            <LedgrionyxLogo size="medium" withText />
           </Link>
         </div>
 

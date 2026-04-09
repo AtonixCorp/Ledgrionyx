@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import ATCLogo from '../branding/ATCLogo';
+import LedgrionyxLogo from '../branding/LedgrionyxLogo';
 import { hasEquityModule } from '../../utils/workspaceModules';
 import './WorkspaceLayout.css';
 
@@ -33,7 +33,7 @@ const WorkspaceLayout = ({ children }) => {
     if (fromList) return fromList;
     // Fall back to localStorage snapshot
     try {
-      const saved = localStorage.getItem('atc_active_workspace');
+      const saved = localStorage.getItem('ledgrionyx_active_workspace');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (String(parsed.id) === String(workspaceId)) return parsed;
@@ -134,7 +134,7 @@ const WorkspaceLayout = ({ children }) => {
         <div className="ws-sidebar-header">
           {!sidebarMinimized && (
             <div className="ws-sidebar-brand">
-              <ATCLogo variant="white" size="small" withText={false} />
+              <LedgrionyxLogo variant="white" size="small" withText={false} />
               <div className="ws-sidebar-brand-text">
                 <span className="ws-sidebar-title">{wsName}</span>
                 <span className="ws-sidebar-sub">Workspace</span>
@@ -143,7 +143,7 @@ const WorkspaceLayout = ({ children }) => {
           )}
           {sidebarMinimized && (
             <div className="ws-sidebar-brand-min">
-              <ATCLogo variant="white" size="small" withText={false} />
+              <LedgrionyxLogo variant="white" size="small" withText={false} />
             </div>
           )}
           <button

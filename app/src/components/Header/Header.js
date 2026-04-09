@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useLanguage, LANGUAGE_LIST } from '../../context/LanguageContext';
-import ATCLogo from '../branding/ATCLogo';
+import LedgrionyxLogo from '../branding/LedgrionyxLogo';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
 import './Header.css';
 
@@ -93,7 +93,7 @@ const Header = () => {
 
           {/* Logo */}
           <Link to="/" className="atc-logo-link" aria-label="Ledgrionyx Home">
-            <ATCLogo size="medium" withText />
+            <LedgrionyxLogo size="medium" withText />
           </Link>
 
           {/* Navigation */}

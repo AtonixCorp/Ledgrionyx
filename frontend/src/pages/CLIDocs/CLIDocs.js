@@ -65,7 +65,7 @@ const CLIDocs = () => {
             <p>Bootstrap the backend environment and install the CLI into the backend virtual environment.</p>
             <pre>{`./setup.sh`}</pre>
             <p>Or install the package directly in editable mode:</p>
-            <pre>{`cd tools/atc_cli\n/home/atonixdev/ledgrionyx/api/.venv/bin/python -m pip install -e .`}</pre>
+            <pre>{`cd tools/ledgrionyx_cli\n/home/atonixdev/ledgrionyx/api/.venv/bin/python -m pip install -e .`}</pre>
           </article>
 
           <article className="cli-docs-card">

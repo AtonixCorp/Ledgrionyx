@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import ATCLogo from '../../components/branding/ATCLogo';
+import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
 import {
   ACCOUNTING_MODULE_KEYS,
@@ -686,7 +686,7 @@ const CreateWorkspace = () => {
       {/* Top Navbar */}
       <header className="cw-topnav">
         <div className="cw-topnav-brand">
-          <ATCLogo variant="dark" size="small" withText text="Ledgrionyx" />
+          <LedgrionyxLogo variant="dark" size="small" withText text="Ledgrionyx" />
         </div>
         <button className="cw-topnav-back" onClick={() => navigate('/app/console')}>
           ← All Workspaces

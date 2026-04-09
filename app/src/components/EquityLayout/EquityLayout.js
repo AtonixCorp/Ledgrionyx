@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import ATCLogo from '../branding/ATCLogo';
+import LedgrionyxLogo from '../branding/LedgrionyxLogo';
 import { getWorkspaceLandingPath } from '../../utils/workspaceModules';
 import './EquityLayout.css';
 
@@ -23,7 +23,7 @@ const EquityLayout = ({ children }) => {
     const fromList = (entities || []).find((entity) => String(entity.id) === String(workspaceId));
     if (fromList) return fromList;
     try {
-      const saved = localStorage.getItem('atc_active_workspace');
+      const saved = localStorage.getItem('ledgrionyx_active_workspace');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (String(parsed.id) === String(workspaceId)) return parsed;
@@ -78,7 +78,7 @@ const EquityLayout = ({ children }) => {
       <nav className={`eq-sidebar${sidebarMinimized ? ' minimized' : ''}`} aria-label="Equity navigation">
         <div className="eq-sidebar-header">
           <div className="eq-brand-block">
-            <ATCLogo variant="white" size="small" withText={false} />
+            <LedgrionyxLogo variant="white" size="small" withText={false} />
             {!sidebarMinimized && (
               <div>
                 <div className="eq-brand-title">Ledgrionyx Equity</div>

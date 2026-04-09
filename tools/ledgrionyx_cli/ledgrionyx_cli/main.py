@@ -3,7 +3,7 @@ import json
 import sys
 from urllib.parse import urlencode
 
-from .api import ATCClient, DEFAULT_HOST, expires_at_from_now
+from .api import DEFAULT_HOST, LedgrionyxClient, expires_at_from_now
 from .errors import CLIError, format_cli_error
 from .storage import get_profile, list_profiles, remove_profile, set_current_profile, upsert_profile
 
@@ -31,7 +31,7 @@ def _print_json(data):
 
 def _authenticated_client_session(profile_name=None):
     session = get_profile(profile_name)
-    client = ATCClient(session['host'])
+    client = LedgrionyxClient(session['host'])
     return client, session
 
 
@@ -53,7 +53,7 @@ def command_login(args):
         raise CLIError('Missing required flags. Use --api-key and --org.', 'INVALID_INPUT')
 
     profile_name = (args.profile or 'default').strip() or 'default'
-    client = ATCClient(args.host or DEFAULT_HOST)
+    client = LedgrionyxClient(args.host or DEFAULT_HOST)
     login_response = client.cli_login(api_key, organization_id)
 
     session = {
@@ -95,7 +95,7 @@ def command_use(args):
 
 def command_whoami(args):
     session = get_profile(args.profile)
-    client = ATCClient(session['host'])
+    client = LedgrionyxClient(session['host'])
     me_response = client.request_with_session('GET', '/auth/me', session)
     session['organization_name'] = (me_response.get('organization') or {}).get('name')
     session['user'] = me_response.get('user') or session.get('user') or {}

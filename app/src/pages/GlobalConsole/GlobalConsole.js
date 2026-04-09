@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import ATCLogo from '../../components/branding/ATCLogo';
+import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
 import { platformAuditEventsAPI, platformTasksAPI } from '../../services/api';
 import { getWorkspaceLandingPath, WORKSPACE_MODE_LABELS } from '../../utils/workspaceModules';
 import './GlobalConsole.css';
@@ -153,9 +153,9 @@ const emitAnalyticsEvent = (eventName, payload = {}) => {
     window.dataLayer.push(eventPayload);
   }
 
-  window.__ATC_ANALYTICS_QUEUE__ = window.__ATC_ANALYTICS_QUEUE__ || [];
-  window.__ATC_ANALYTICS_QUEUE__.push(eventPayload);
-  window.dispatchEvent(new CustomEvent('atc:analytics', { detail: eventPayload }));
+  window.__LEDGRIONYX_ANALYTICS_QUEUE__ = window.__LEDGRIONYX_ANALYTICS_QUEUE__ || [];
+  window.__LEDGRIONYX_ANALYTICS_QUEUE__.push(eventPayload);
+  window.dispatchEvent(new CustomEvent('ledgrionyx:analytics', { detail: eventPayload }));
 };
 
 const EmptyWorkspaceIllustration = () => (
@@ -411,7 +411,7 @@ const GlobalConsole = () => {
       <header className="gc-topnav">
         <div className="gc-topnav-left">
           <div className="gc-topnav-brand">
-            <ATCLogo variant="dark" size="small" withText text="Ledgrionyx" />
+            <LedgrionyxLogo variant="dark" size="small" withText text="Ledgrionyx" />
           </div>
           <div className="gc-topnav-org-block">
             <span className="gc-topnav-org-label">Organization</span>
