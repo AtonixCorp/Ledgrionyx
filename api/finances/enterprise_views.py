@@ -228,6 +228,26 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
+    def workspaces(self, request, pk=None):
+        """Return the current user's accessible workspaces for an organization."""
+        organization = self.get_object()
+        from workspaces.models import Workspace
+        from workspaces.serializers import WorkspaceSerializer
+
+        queryset = (
+            Workspace.objects.filter(linked_entity__organization=organization)
+            .filter(members__user=request.user)
+            .exclude(status='deleted')
+            .select_related('linked_entity', 'owner')
+            .distinct()
+        )
+        serializer = WorkspaceSerializer(queryset, many=True)
+        return Response({
+            'count': len(serializer.data),
+            'results': serializer.data,
+        })
+
+    @action(detail=True, methods=['get'])
     def overview(self, request, pk=None):
         """Get organization overview/dashboard data"""
         organization = self.get_object()

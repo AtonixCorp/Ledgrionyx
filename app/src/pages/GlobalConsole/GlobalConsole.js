@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
@@ -80,10 +80,125 @@ const auditSeverity = (event) => {
   return 'medium';
 };
 
+const EMPTY_WORKSPACE_VALUE_CARDS = [
+  {
+    eyebrow: 'Operations',
+    title: 'Operational Hub',
+    description: 'Manage projects, teams, files, and tools in one unified environment.',
+  },
+  {
+    eyebrow: 'Configuration',
+    title: 'Modular & Customizable',
+    description: 'Activate developer, finance, marketing, or business modules as needed.',
+  },
+  {
+    eyebrow: 'Infrastructure',
+    title: 'Secure & Scalable',
+    description: 'Enterprise-grade infrastructure with global compliance and multi-region support.',
+  },
+];
+
+const EMPTY_WORKSPACE_PLATFORM_CAPABILITIES = [
+  {
+    title: 'Run the organization from one operating layer',
+    description: 'Each workspace gives one entity a structured home for people, approvals, documents, tasks, and operating data.',
+  },
+  {
+    title: 'Open the right dashboard for the job',
+    description: 'New workspaces can launch into accounting, equity management, or a combined operating setup depending on the package you choose.',
+  },
+  {
+    title: 'Scale without rebuilding process',
+    description: 'The platform keeps shared governance, audit history, permissions, and organization visibility consistent as more workspaces are added.',
+  },
+];
+
+const EMPTY_WORKSPACE_JOURNEY = [
+  {
+    step: '01',
+    title: 'Name the workspace',
+    description: 'Create one workspace for one company, entity, or operating environment.',
+  },
+  {
+    step: '02',
+    title: 'Choose how it should launch',
+    description: 'Select accounting, equity, combined, or standalone so the correct dashboard opens first.',
+  },
+  {
+    step: '03',
+    title: 'Activate the operating areas',
+    description: 'Enable the modules that define the collaboration, finance, and ownership workflows for that workspace.',
+  },
+  {
+    step: '04',
+    title: 'Enter the workspace dashboard',
+    description: 'After creation, you are redirected into the new workspace with the selected launch path already configured.',
+  },
+];
+
+const emitAnalyticsEvent = (eventName, payload = {}) => {
+  if (typeof window === 'undefined') return;
+
+  const eventPayload = {
+    event: eventName,
+    timestamp: new Date().toISOString(),
+    ...payload,
+  };
+
+  if (Array.isArray(window.dataLayer)) {
+    window.dataLayer.push(eventPayload);
+  }
+
+  window.__ATC_ANALYTICS_QUEUE__ = window.__ATC_ANALYTICS_QUEUE__ || [];
+  window.__ATC_ANALYTICS_QUEUE__.push(eventPayload);
+  window.dispatchEvent(new CustomEvent('atc:analytics', { detail: eventPayload }));
+};
+
+const EmptyWorkspaceIllustration = () => (
+  <div className="gc-empty-illustration" aria-hidden="true">
+    <div className="gc-empty-illustration-frame">
+      <div className="gc-empty-illustration-dot" />
+      <div className="gc-empty-illustration-line gc-empty-illustration-line-short" />
+      <div className="gc-empty-illustration-grid">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
+  </div>
+);
+
+const EmptyWorkspaceValueCard = ({ eyebrow, title, description }) => (
+  <article className="gc-empty-value-card">
+    <span className="gc-empty-value-eyebrow">{eyebrow}</span>
+    <h3>{title}</h3>
+    <p>{description}</p>
+  </article>
+);
+
+const EmptyWorkspaceCapabilityCard = ({ title, description }) => (
+  <article className="gc-empty-capability-card">
+    <h3>{title}</h3>
+    <p>{description}</p>
+  </article>
+);
+
+const EmptyWorkspaceJourneyStep = ({ step, title, description }) => (
+  <article className="gc-empty-journey-step">
+    <span className="gc-empty-journey-step-number">{step}</span>
+    <div>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </div>
+  </article>
+);
+
 const GlobalConsole = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const {
+    currentOrganization,
     entities,
     activeWorkspace,
     setActiveWorkspace,
@@ -103,6 +218,8 @@ const GlobalConsole = () => {
   const [auditEvents, setAuditEvents] = useState([]);
   const [taskActionPendingId, setTaskActionPendingId] = useState(null);
   const profileRef = useRef(null);
+  const onboardingEnteredAtRef = useRef(null);
+  const onboardingCtaClickedRef = useRef(false);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -153,6 +270,8 @@ const GlobalConsole = () => {
 
   // Filtered workspaces
   const workspaceCards = buildWorkspaceCards(entities);
+  const workspaceCount = workspaceCards.length;
+  const showWorkspaceOnboarding = !loading && workspaceCount === 0;
   const filtered = workspaceCards.filter((w) => {
     const matchSearch = !search || w.name.toLowerCase().includes(search.toLowerCase()) || w.country.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === 'all' || w.status === filterStatus;
@@ -228,6 +347,54 @@ const GlobalConsole = () => {
   const departmentOptions = Array.from(new Set(tasks.map((task) => task.department_name).filter(Boolean))).sort();
   const costCenterOptions = Array.from(new Set(tasks.map((task) => task.cost_center).filter(Boolean))).sort();
 
+  const trackWorkspaceLandingEvent = useCallback((eventName, payload = {}) => {
+    emitAnalyticsEvent(eventName, {
+      organizationId: currentOrganization?.id || null,
+      organizationName: currentOrganization?.name || null,
+      userId: user?.id || null,
+      workspaceCount,
+      ...payload,
+    });
+  }, [currentOrganization?.id, currentOrganization?.name, user?.id, workspaceCount]);
+
+  useEffect(() => {
+    if (!showWorkspaceOnboarding) {
+      onboardingEnteredAtRef.current = null;
+      onboardingCtaClickedRef.current = false;
+      return undefined;
+    }
+
+    onboardingEnteredAtRef.current = Date.now();
+    onboardingCtaClickedRef.current = false;
+    trackWorkspaceLandingEvent('workspace_empty_state_load');
+
+    return () => {
+      if (!onboardingEnteredAtRef.current) return;
+      const elapsedSeconds = Math.max(1, Math.round((Date.now() - onboardingEnteredAtRef.current) / 1000));
+      trackWorkspaceLandingEvent('workspace_empty_state_time_on_page', { elapsedSeconds });
+      if (!onboardingCtaClickedRef.current) {
+        trackWorkspaceLandingEvent('workspace_empty_state_dropoff', { elapsedSeconds });
+      }
+    };
+  }, [showWorkspaceOnboarding, trackWorkspaceLandingEvent]);
+
+  const handleCreateWorkspace = useCallback((source = 'console') => {
+    if (source === 'empty_state') {
+      onboardingCtaClickedRef.current = true;
+    }
+    trackWorkspaceLandingEvent('workspace_create_cta_click', { source });
+    navigate('/app/workspaces/create');
+  }, [navigate, trackWorkspaceLandingEvent]);
+
+  const handleNotificationsClick = useCallback(() => {
+    trackWorkspaceLandingEvent('workspace_landing_notifications_click', { notificationCount: notifs.length });
+    if (showWorkspaceOnboarding) return;
+    const target = document.querySelector('.gc-notif-section');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [notifs.length, showWorkspaceOnboarding, trackWorkspaceLandingEvent]);
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -238,10 +405,20 @@ const GlobalConsole = () => {
 
       {/* ── TOP NAVBAR ──────────────────────────────────────────────── */}
       <header className="gc-topnav">
-        <div className="gc-topnav-brand">
-          <ATCLogo variant="dark" size="small" withText text="ATC Capital" />
+        <div className="gc-topnav-left">
+          <div className="gc-topnav-brand">
+            <ATCLogo variant="dark" size="small" withText text="ATC Capital" />
+          </div>
+          <div className="gc-topnav-org-block">
+            <span className="gc-topnav-org-label">Organization</span>
+            <strong className="gc-topnav-org-name">{currentOrganization?.name || 'ATC Capital Organization'}</strong>
+          </div>
         </div>
         <div className="gc-topnav-right" ref={profileRef}>
+          <button className="gc-topnav-notifications" onClick={handleNotificationsClick} aria-label="Notifications">
+            <span className="gc-topnav-notifications-label">Notifications</span>
+            <span className="gc-topnav-notifications-count">{notifs.length}</span>
+          </button>
           <button
             className="gc-topnav-avatar"
             onClick={() => setProfileOpen((o) => !o)}
@@ -277,6 +454,78 @@ const GlobalConsole = () => {
       <div className="gc-body">
         <div className="global-console">
 
+      {showWorkspaceOnboarding ? (
+        <div className="gc-empty-workspace-shell">
+          <section className="gc-empty-workspace-hero">
+            <span className="gc-empty-workspace-kicker">Workspace Setup</span>
+            <h1>Welcome to your Organization Dashboard</h1>
+            <p>Create your first workspace to begin managing your operations.</p>
+            <button className="gc-empty-workspace-cta" onClick={() => handleCreateWorkspace('empty_state')}>
+              Create Workspace
+            </button>
+          </section>
+
+          <section className="gc-empty-workspace-panel">
+            <EmptyWorkspaceIllustration />
+            <div className="gc-empty-workspace-copy">
+              <h2>You don’t have any workspaces yet.</h2>
+              <p>Create one to get started.</p>
+            </div>
+          </section>
+
+          <section className="gc-empty-workspace-values" aria-label="Workspace value proposition">
+            {EMPTY_WORKSPACE_VALUE_CARDS.map((card) => (
+              <EmptyWorkspaceValueCard
+                key={card.title}
+                eyebrow={card.eyebrow}
+                title={card.title}
+                description={card.description}
+              />
+            ))}
+          </section>
+
+          <section className="gc-empty-platform-section" aria-label="How the platform works">
+            <div className="gc-empty-section-head">
+              <span className="gc-empty-section-kicker">Platform Overview</span>
+              <h2>Understand what a workspace unlocks before you create one</h2>
+              <p>
+                ATC Capital is organized around workspaces. Each workspace becomes the operational home for one entity and opens the right dashboard structure for the way that entity is managed.
+              </p>
+            </div>
+            <div className="gc-empty-capability-grid">
+              {EMPTY_WORKSPACE_PLATFORM_CAPABILITIES.map((item) => (
+                <EmptyWorkspaceCapabilityCard
+                  key={item.title}
+                  title={item.title}
+                  description={item.description}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="gc-empty-platform-section" aria-label="Workspace creation journey">
+            <div className="gc-empty-section-head">
+              <span className="gc-empty-section-kicker">Creation Journey</span>
+              <h2>How the platform walks you into your first dashboard</h2>
+              <p>
+                The creation flow sets the workspace identity, package, modules, and launch target so the first dashboard already matches the operating model you selected.
+              </p>
+            </div>
+            <div className="gc-empty-journey-grid">
+              {EMPTY_WORKSPACE_JOURNEY.map((item) => (
+                <EmptyWorkspaceJourneyStep
+                  key={item.step}
+                  step={item.step}
+                  title={item.title}
+                  description={item.description}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
+      ) : (
+        <>
+
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="gc-hero">
         <div className="gc-hero-copy">
@@ -305,7 +554,7 @@ const GlobalConsole = () => {
 
       {/* ── QUICK ACTIONS ────────────────────────────────────────────────── */}
       <section className="gc-quick-actions">
-        <button className="gc-action-btn gc-action-primary" onClick={() => navigate('/app/workspaces/create')}>
+        <button className="gc-action-btn gc-action-primary" onClick={() => handleCreateWorkspace('quick_actions')}>
           <span className="gc-action-icon">+</span>
           Create Workspace
         </button>
@@ -361,9 +610,9 @@ const GlobalConsole = () => {
           {!loading && filtered.length === 0 && (
             <div className="gc-empty-state">
               <div className="gc-empty-icon"></div>
-              <h3>No workspaces yet</h3>
-              <p>Create your first workspace to start managing a company's finances.</p>
-              <button className="gc-action-btn gc-action-primary" onClick={() => navigate('/app/workspaces/create')}>
+              <h3>No workspaces match these filters</h3>
+              <p>Adjust your filters or create another workspace.</p>
+              <button className="gc-action-btn gc-action-primary" onClick={() => handleCreateWorkspace('workspace_grid_empty')}>
                 Create Workspace
               </button>
             </div>
@@ -558,6 +807,8 @@ const GlobalConsole = () => {
         </aside>
 
       </div>{/* /.gc-main-grid */}
+      </>
+      )}
       </div>{/* /.global-console */}
       </div>{/* /.gc-body */}
     </div>

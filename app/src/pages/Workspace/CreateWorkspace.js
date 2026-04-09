@@ -655,6 +655,32 @@ const CreateWorkspace = () => {
     );
   };
 
+  const selectedPackage = WORKSPACE_PACKAGE_OPTIONS.find((option) => option.id === form.workspaceMode) || null;
+  const accountingCount = form.enabledModules.filter((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey)).length;
+  const equityCount = form.enabledModules.filter((moduleKey) => EQUITY_MODULE_KEYS.includes(moduleKey)).length;
+  const launchDestination = ['equity', 'standalone'].includes(form.workspaceMode)
+    && equityCount > 0
+    && accountingCount === 0
+    ? 'ATC Equity Management'
+    : 'Standard Workspace Overview';
+
+  const dashboardGuide = [
+    {
+      title: 'Primary landing dashboard',
+      description: selectedPackage
+        ? `${launchDestination} opens first based on the package and module mix you selected.`
+        : 'Choose a workspace package to preview the dashboard that opens first after launch.',
+    },
+    {
+      title: 'Operations and team workspace',
+      description: 'Every workspace starts with a shared operating layer for members, departments, meetings, permissions, files, and internal coordination.',
+    },
+    {
+      title: 'Finance and equity routing',
+      description: 'Accounting modules open finance workflows, while equity modules add the dedicated ownership and governance dashboard when enabled.',
+    },
+  ];
+
   return (
     <div className="cw-page">
       {/* Top Navbar */}
@@ -771,6 +797,26 @@ const CreateWorkspace = () => {
             </div>
           </li>
         </ul>
+
+        <div className="cw-sidebar-panel">
+          <h3>Dashboard Journey</h3>
+          <div className="cw-dashboard-guide">
+            {dashboardGuide.map((item) => (
+              <article key={item.title} className="cw-dashboard-guide-card">
+                <strong>{item.title}</strong>
+                <p>{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="cw-sidebar-panel cw-sidebar-panel-accent">
+          <h3>Current launch preview</h3>
+          <div className="cw-sidebar-preview-row"><span>Package</span><strong>{selectedPackage?.title || 'Not selected yet'}</strong></div>
+          <div className="cw-sidebar-preview-row"><span>Accounting modules</span><strong>{accountingCount}</strong></div>
+          <div className="cw-sidebar-preview-row"><span>Equity modules</span><strong>{equityCount}</strong></div>
+          <div className="cw-sidebar-preview-row"><span>First dashboard</span><strong>{selectedPackage ? launchDestination : 'Choose package first'}</strong></div>
+        </div>
       </aside>
     </div>{/* /.create-workspace */}
     </div>

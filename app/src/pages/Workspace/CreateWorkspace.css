@@ -610,6 +610,70 @@
   margin: 0;
 }
 
+.cw-sidebar-panel {
+  background: var(--cw-surface);
+  border: 1px solid var(--cw-line);
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 18px;
+}
+
+.cw-sidebar-panel-accent {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.cw-dashboard-guide {
+  display: grid;
+  gap: 12px;
+}
+
+.cw-dashboard-guide-card {
+  border: 1px solid var(--cw-line);
+  border-radius: 10px;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.cw-dashboard-guide-card strong {
+  color: var(--cw-ink);
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cw-dashboard-guide-card p {
+  color: var(--cw-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cw-sidebar-preview-row {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.cw-sidebar-preview-row span {
+  color: var(--cw-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cw-sidebar-preview-row strong {
+  color: var(--cw-ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
 /* ─── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 1020px) {
   .cw-sidebar { display: none; }
