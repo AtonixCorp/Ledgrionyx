@@ -5,7 +5,7 @@ export const footerLinks = {
   company: {
     title: 'Company',
     links: [
-      { label: 'About ATC Capital', to: '/about' },
+      { label: 'About Ledgrionyx', to: '/about' },
       { label: 'Leadership', to: '/about#leadership' },
       { label: 'Careers', to: '/about#careers' },
       { label: 'Press & Media', to: '/contact#media' },

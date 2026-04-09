@@ -6,16 +6,16 @@ const FONT_OPTIONS = ['Inter', 'Roboto', 'Poppins', 'Lato', 'Montserrat', 'Open 
 export default function Branding() {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
-    firmName: 'ATC Capital',
+    firmName: 'Ledgrionyx',
     tagline: 'Institutional-Grade Financial Intelligence',
     primaryColor: '#00B5E2',
     secondaryColor: '#0B0C10',
     accentColor: '#10B981',
     font: 'Inter',
     logoText: 'ATC',
-    supportEmail: 'support@atccapital.com',
-    website: 'https://atccapital.com',
-    footerText: '© 2026 ATC Capital. All rights reserved.',
+    supportEmail: 'support@ledgrionyx.com',
+    website: 'https://ledgrionyx.com',
+    footerText: '© 2026 Ledgrionyx. All rights reserved.',
     showPoweredBy: false,
   });
 
@@ -151,7 +151,7 @@ export default function Branding() {
                   onChange={e => set('showPoweredBy', e.target.checked)}
                   style={{ width: 16, height: 16 }}
                 />
-                Show "Powered by ATC Capital" in client-facing views
+                Show "Powered by Ledgrionyx" in client-facing views
               </label>
             </div>
           </div>

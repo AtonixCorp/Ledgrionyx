@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: atc-capital/app:latest
+          image: ledgrionyx/app:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

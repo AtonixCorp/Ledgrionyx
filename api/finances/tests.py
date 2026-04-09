@@ -170,7 +170,7 @@ class DeveloperPortalViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         content = response.content.decode('utf-8')
-        self.assertIn('ATC Capital APIs', content)
+        self.assertIn('Ledgrionyx APIs', content)
         self.assertIn('Request API key', content)
         self.assertIn('Search APIs', content)
 
@@ -274,7 +274,7 @@ class DeveloperPortalViewTests(TestCase):
             {
                 'first_name': 'Ato',
                 'last_name': 'Developer',
-                'email': 'developer@atc-capital.test',
+                'email': 'developer@ledgrionyx.test',
                 'organization': 'ATC Developer Lab',
                 'intended_use': 'Build a portfolio sync integration.',
             },
@@ -283,16 +283,16 @@ class DeveloperPortalViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data['developer']['email'], 'developer@atc-capital.test')
+        self.assertEqual(response.data['developer']['email'], 'developer@ledgrionyx.test')
         self.assertIn('.', response.data['api_key']['api_key'])
         self.assertEqual(response.data['api_key']['environment'], 'sandbox')
         self.assertEqual(response.data['api_key']['rate_limit_profile']['name'], 'STANDARD')
 
-        user = User.objects.get(email='developer@atc-capital.test')
+        user = User.objects.get(email='developer@ledgrionyx.test')
         self.assertTrue(UserProfile.objects.filter(user=user).exists())
 
         organization = Organization.objects.get(owner=user, name='ATC Developer Lab')
-        request_record = DeveloperPortalKeyRequest.objects.get(email='developer@atc-capital.test')
+        request_record = DeveloperPortalKeyRequest.objects.get(email='developer@ledgrionyx.test')
         application = OAuthApplication.objects.get(pk=request_record.application_id)
 
         self.assertEqual(request_record.status, 'generated')
@@ -1189,8 +1189,8 @@ class CoreFinancialAPIV1Tests(TestCase):
 
 @override_settings(
     EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
-    DEFAULT_FROM_EMAIL='no-reply@atccapital.test',
-    APPROVAL_NOTIFICATION_BASE_URL='https://console.atc-capital.test',
+    DEFAULT_FROM_EMAIL='no-reply@ledgrionyx.test',
+    APPROVAL_NOTIFICATION_BASE_URL='https://console.ledgrionyx.test',
 )
 class AccountingApprovalWorkflowAPITests(TestCase):
     def setUp(self):

@@ -11,7 +11,7 @@ import {
 import './CreateWorkspace.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ATC Capital — Create Workspace
+   Ledgrionyx — Create Workspace
    Form to create a new company workspace (entity).
    On success: activates the new workspace and redirects to overview.
 ───────────────────────────────────────────────────────────────────────────── */
@@ -396,7 +396,7 @@ const CreateWorkspace = () => {
           onChange={(e) => update('name', e.target.value)}
           autoFocus
         />
-        <span className="cw-hint">This will be displayed as the workspace name throughout ATC Capital.</span>
+        <span className="cw-hint">This will be displayed as the workspace name throughout Ledgrionyx.</span>
       </div>
       <div className="cw-field">
         <label className="cw-label">Registration Number <span className="cw-optional">(optional)</span></label>
@@ -531,7 +531,7 @@ const CreateWorkspace = () => {
             <div className="cw-review-row"><span>Fiscal Year End</span><strong>{FISCAL_YEAR_ENDS.find(f => f.value === form.fiscalYearEnd)?.label}</strong></div>
           </div>
           <div className="cw-review-note">
-            ATC Capital will automatically set up your chart of accounts and default tax profile based on the country and business type selected.
+            Ledgrionyx will automatically set up your chart of accounts and default tax profile based on the country and business type selected.
           </div>
         </div>
       </div>
@@ -547,7 +547,7 @@ const CreateWorkspace = () => {
     const launchDestination = ['equity', 'standalone'].includes(form.workspaceMode)
       && equityCount > 0
       && accountingCount === 0
-      ? 'ATC Equity Management'
+      ? 'Ledgrionyx Equity Management'
       : 'Standard Workspace Overview';
 
     return (
@@ -606,7 +606,7 @@ const CreateWorkspace = () => {
               <div className="cw-module-section-head">
                 <div>
                   <h4>Equity Management Modules</h4>
-                  <p>Dedicated ATC Equity navigation and ownership workflows.</p>
+                  <p>Dedicated Ledgrionyx Equity navigation and ownership workflows.</p>
                 </div>
                 <span className="cw-module-count">{equityCount} selected</span>
               </div>
@@ -661,7 +661,7 @@ const CreateWorkspace = () => {
   const launchDestination = ['equity', 'standalone'].includes(form.workspaceMode)
     && equityCount > 0
     && accountingCount === 0
-    ? 'ATC Equity Management'
+    ? 'Ledgrionyx Equity Management'
     : 'Standard Workspace Overview';
 
   const dashboardGuide = [
@@ -676,8 +676,8 @@ const CreateWorkspace = () => {
       description: 'Every workspace starts with a shared operating layer for members, departments, meetings, permissions, files, and internal coordination.',
     },
     {
-      title: 'ATC Equity Management routing',
-      description: 'When equity modules are enabled, the workspace can launch into ATC Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
+      title: 'Ledgrionyx Equity Management routing',
+      description: 'When equity modules are enabled, the workspace can launch into Ledgrionyx Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
     },
   ];
 
@@ -686,7 +686,7 @@ const CreateWorkspace = () => {
       {/* Top Navbar */}
       <header className="cw-topnav">
         <div className="cw-topnav-brand">
-          <ATCLogo variant="dark" size="small" withText text="ATC Capital" />
+          <ATCLogo variant="dark" size="small" withText text="Ledgrionyx" />
         </div>
         <button className="cw-topnav-back" onClick={() => navigate('/app/console')}>
           ← All Workspaces
@@ -793,7 +793,7 @@ const CreateWorkspace = () => {
           <li>
             <div>
               <strong>Dedicated Equity Sidebar</strong>
-              <p>If you enable equity management, the workspace gets a separate ATC Equity Management navigation with registry, cap table, valuation, transactions, and governance flows.</p>
+              <p>If you enable equity management, the workspace gets a separate Ledgrionyx Equity Management navigation with registry, cap table, valuation, transactions, and governance flows.</p>
             </div>
           </li>
         </ul>

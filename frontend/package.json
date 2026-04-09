@@ -1,7 +1,7 @@
 {
-  "name": "atc-capital",
+  "name": "ledgrionyx",
   "version": "1.0.0",
-  "homepage": "https://atonixcorp.github.io/atccapital",
+  "homepage": "https://atonixcorp.github.io/ledgrionyx",
   "private": true,
   "proxy": "http://localhost:8000",
   "engines": {

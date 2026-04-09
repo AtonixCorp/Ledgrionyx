@@ -1,5 +1,5 @@
 // =============================================================================
-// ATC Capital – Infrastructure Validate Pipeline
+// Ledgrionyx – Infrastructure Validate Pipeline
 // Trigger: Gerrit patchset-created on infra/openstack-atc
 //
 // Runs lint, security checks, and terraform plan. Posts Verified vote

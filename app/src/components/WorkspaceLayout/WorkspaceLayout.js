@@ -8,7 +8,7 @@ import './WorkspaceLayout.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    WorkspaceLayout — full sidebar layout for workspace-scoped module pages.
-   Completely isolated from the ATC Capital Console — no console data, no
+   Completely isolated from the Ledgrionyx Console — no console data, no
    console nav, no console permissions cross this boundary.
 ───────────────────────────────────────────────────────────────────────────── */
 

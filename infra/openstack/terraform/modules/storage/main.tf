@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
-# ATC Capital – OpenStack Storage Module
-# Provisions Cinder volumes for a named ATC Capital service.
+# Ledgrionyx – OpenStack Storage Module
+# Provisions Cinder volumes for a named Ledgrionyx service.
 # Naming convention: atc-<env>-<service>-data-<zero-padded-index>
 # Volume snapshots are managed via a separate scheduled Jenkins job.
 # -----------------------------------------------------------------------------
@@ -22,10 +22,10 @@ resource "openstack_blockstorage_volume_v3" "data" {
   name        = format("atc-%s-%s-data-%02d", var.env, var.service, count.index + 1)
   size        = var.volume_size_gb
   volume_type = var.volume_type
-  description = "ATC Capital ${var.service} data volume – ${var.env}"
+  description = "Ledgrionyx ${var.service} data volume – ${var.env}"
 
   metadata = {
-    system    = "atc-capital"
+    system    = "ledgrionyx"
     env       = var.env
     service   = var.service
     change_id = var.change_id

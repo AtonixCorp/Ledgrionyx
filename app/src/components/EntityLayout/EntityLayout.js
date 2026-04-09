@@ -158,10 +158,10 @@ const EntityLayout = ({ children }) => {
           <button
             onClick={() => navigate('/app/enterprise/entities')}
             className="entity-back-btn"
-            title="Back to ATC Capital"
+            title="Back to Ledgrionyx"
           >
             <span className="entity-back-arrow">←</span>
-            {!sidebarMinimized && <span className="entity-back-label">ATC Capital</span>}
+            {!sidebarMinimized && <span className="entity-back-label">Ledgrionyx</span>}
           </button>
         </div>
 

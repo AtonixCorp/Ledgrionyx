@@ -1,6 +1,6 @@
 ---
 # roles/atc-api/tasks/main.yml
-# Deploys the ATC Capital API container on each api-group host.
+# Deploys the Ledgrionyx API container on each api-group host.
 
 - name: Create service data directory
   ansible.builtin.file:
@@ -39,7 +39,7 @@
       - "{{ atc_data_dir }}:/app/data:rw"
     log_driver: journald
     labels:
-      system: "atc-capital"
+      system: "ledgrionyx"
       env: "{{ env }}"
       service: "{{ atc_service }}"
       change_id: "{{ gerrit_change_id | default('manual') }}"

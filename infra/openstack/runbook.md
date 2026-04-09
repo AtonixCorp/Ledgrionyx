@@ -1,4 +1,4 @@
-# ATC Capital Infrastructure Runbook
+# Ledgrionyx Infrastructure Runbook
 
 **Audience:** Platform/infra leads and DevOps engineers  
 **Scope:** OpenStack infrastructure managed via Gerrit + Jenkins  
@@ -10,9 +10,9 @@
 
 | Role                     | Responsibilities                                                    |
 |--------------------------|---------------------------------------------------------------------|
-| Founder / ATC Capital Owner | Defines non-negotiable standards; approves PROD governance changes |
+| Founder / Ledgrionyx Owner | Defines non-negotiable standards; approves PROD governance changes |
 | Platform / Infra Lead    | Owns `infra/openstack-atc`; approves STAGE + PROD infra changes    |
-| Application Leads        | Own `apps/atc-capital-core`; approve STAGE + PROD app changes      |
+| Application Leads        | Own `apps/ledgrionyx-core`; approve STAGE + PROD app changes      |
 | DevOps / CI Engineers    | Own Jenkins and Gerrit integration; maintain pipeline library       |
 | Developers               | Raise Gerrit changes; ensure tests and plans pass                  |
 
@@ -36,7 +36,7 @@
 
 ## 3. Standard change flow – application deployment
 
-1. Developer pushes a code change to `apps/atc-capital-core` as a Gerrit changeset.
+1. Developer pushes a code change to `apps/ledgrionyx-core` as a Gerrit changeset.
 2. Jenkins runs `Jenkinsfile.app-build`: unit tests → static analysis → bandit → build → push image.
 3. Verified vote posted to Gerrit; peers review code.
 4. Change merged → Jenkins `Jenkinsfile.app-deploy` deploys image to DEV automatically.
@@ -84,7 +84,7 @@ In a true emergency (e.g., runaway process, security incident):
 
 ---
 
-## 7. How to add a new ATC Capital service
+## 7. How to add a new Ledgrionyx service
 
 1. In `infra/openstack/terraform/envs/<env>/main.tf`, add a `module "new-service"` block
    using `../../modules/compute` and `../../modules/storage`.
@@ -97,11 +97,11 @@ In a true emergency (e.g., runaway process, security incident):
 
 ## 8. Tagging verification
 
-To verify that all resources in a given environment carry correct ATC Capital tags:
+To verify that all resources in a given environment carry correct Ledgrionyx tags:
 
 ```bash
 # Using OpenStack CLI
-openstack server list --tags system=atc-capital --format json | jq '.[].Name'
+openstack server list --tags system=ledgrionyx --format json | jq '.[].Name'
 
 # Check a specific resource for change_id
 openstack server show atc-prod-ledger-01 -f json | jq '.properties'
@@ -139,6 +139,6 @@ Rotation procedure:
 |-------|---------------------------------------------------|--------|
 | 1     | Gerrit + Jenkins setup; DEV infra + bastion       | Foundation |
 | 2     | TEST, STAGE, PROD environments; full network + SGs | Environment modeling |
-| 3     | App build + deploy pipelines for ATC Capital services | App pipelines |
+| 3     | App build + deploy pipelines for Ledgrionyx services | App pipelines |
 | 4     | Gerrit rule enforcement; lock down OS + Jenkins access | Governance hardening |
 | 5     | Policy checks, cost dashboards, pipeline observability | Continuous improvement |

@@ -13,7 +13,7 @@ except ImportError:  # pragma: no cover
 from .errors import CLIError
 
 
-SERVICE_NAME = 'ATC Capital CLI'
+SERVICE_NAME = 'Ledgrionyx CLI'
 CONFIG_FILENAME = 'config.json'
 
 

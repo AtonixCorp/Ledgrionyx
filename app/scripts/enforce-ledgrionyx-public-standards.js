@@ -179,12 +179,12 @@ if (writeBaseline) {
       2,
     ) + '\n',
   );
-  console.log(`Wrote ATC public standards baseline with ${sortedFindings.length} findings.`);
+  console.log(`Wrote Ledgrionyx public standards baseline with ${sortedFindings.length} findings.`);
   process.exit(0);
 }
 
 if (!fs.existsSync(baselinePath)) {
-  console.error('ATC public standards baseline is missing. Run npm run standards:baseline first.');
+  console.error('Ledgrionyx public standards baseline is missing. Run npm run standards:baseline first.');
   process.exit(1);
 }
 
@@ -193,11 +193,11 @@ const baselineKeys = new Set((baseline.findings || []).map((finding) => finding.
 const newFindings = sortedFindings.filter((finding) => !baselineKeys.has(finding.key));
 
 if (newFindings.length === 0) {
-  console.log(`ATC public standards check passed. Baseline findings tracked: ${baselineKeys.size}.`);
+  console.log(`Ledgrionyx public standards check passed. Baseline findings tracked: ${baselineKeys.size}.`);
   process.exit(0);
 }
 
-console.error(`ATC public standards check failed with ${newFindings.length} new finding(s):`);
+console.error(`Ledgrionyx public standards check failed with ${newFindings.length} new finding(s):`);
 for (const finding of newFindings) {
   console.error(`- ${finding.file}:${finding.line} [${finding.rule}] ${finding.snippet}`);
 }

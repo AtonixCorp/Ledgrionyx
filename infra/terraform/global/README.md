@@ -1,4 +1,4 @@
-# ATC Capital Terraform Global Conventions
+# Ledgrionyx Terraform Global Conventions
 
 This directory defines the shared conventions for the Terraform stack.
 

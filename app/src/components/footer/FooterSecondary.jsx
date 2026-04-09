@@ -9,7 +9,7 @@ function FooterSecondary() {
       <div className="footer-shell footer-secondary__inner">
         <div className="footer-secondary__identity">
           <ATCLogo variant="white" withText size="small" />
-          <p className="footer-secondary__copyright">© ATC Capital. All rights reserved.</p>
+          <p className="footer-secondary__copyright">© Ledgrionyx. All rights reserved.</p>
         </div>
 
         <div className="footer-secondary__meta">

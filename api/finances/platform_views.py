@@ -41,7 +41,7 @@ def health_check(request):
     return Response(
         {
             'status': 'ok' if database_status == 'ok' else 'degraded',
-            'service': 'atc-capital-backend',
+            'service': 'ledgrionyx-backend',
             'environment': settings.DEPLOYMENT_ENVIRONMENT,
             'version': settings.APP_VERSION,
             'timestamp': timezone.now().isoformat(),

@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
-# ATC Capital – OpenStack Network Module
+# Ledgrionyx – OpenStack Network Module
 # Provisions: network, subnets (main + backend), router, and floating-IP pool
-# Every resource is tagged per the ATC Capital traceability standard.
+# Every resource is tagged per the Ledgrionyx traceability standard.
 # -----------------------------------------------------------------------------
 
 terraform {
@@ -70,7 +70,7 @@ resource "openstack_networking_router_interface_v2" "backend" {
 
 locals {
   tags = [
-    "system=atc-capital",
+    "system=ledgrionyx",
     "env=${var.env}",
     "service=shared",
     "change_id=${var.change_id}",

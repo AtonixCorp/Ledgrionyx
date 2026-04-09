@@ -1,4 +1,4 @@
-# ATC Capital App
+# Ledgrionyx App
 
 A modern React-based personal finance management application with expense tracking, budgeting, income management, and analytics.
 

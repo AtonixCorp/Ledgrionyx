@@ -4,7 +4,7 @@ variable "aws_region" {
 
 variable "name_prefix" {
 	type    = string
-	default = "atc-capital-staging"
+	default = "ledgrionyx-staging"
 }
 
 variable "availability_zones" {
@@ -53,7 +53,7 @@ variable "node_max_size" {
 
 variable "db_name" {
 	type    = string
-	default = "atccapital"
+	default = "ledgrionyx"
 }
 
 variable "db_username" {

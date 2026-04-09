@@ -1,5 +1,5 @@
 // =============================================================================
-// ATC Capital – Infrastructure Promotion Pipeline
+// Ledgrionyx – Infrastructure Promotion Pipeline
 // Trigger: Manual dispatch (or Gerrit Ready-For-Test / Ready-For-Prod label)
 //
 // Promotes already-merged infrastructure from one environment to the next.
@@ -63,7 +63,7 @@ pipeline {
                     $class: 'GitSCM',
                     branches: [[name: params.SOURCE_COMMIT]],
                     userRemoteConfigs: [[
-                        url: 'ssh://gerrit.atccapital.internal:29418/infra/openstack-atc',
+                        url: 'ssh://gerrit.ledgrionyx.internal:29418/infra/openstack-atc',
                         credentialsId: 'gerrit-ssh-key'
                     ]]
                 ])
@@ -134,7 +134,7 @@ Plan summary:
 ${plan.readLines().findAll { it =~ /Plan:|No changes/ }.join('\n')}
 
 Approve to proceed. This action is logged and irreversible without a rollback change.""",
-                        submitter: 'ATC Capital Owners,Infra Leads',
+                        submitter: 'Ledgrionyx Owners,Infra Leads',
                         parameters: [
                             string(name: 'JUSTIFICATION', description: 'Brief justification for this production apply.')
                         ]

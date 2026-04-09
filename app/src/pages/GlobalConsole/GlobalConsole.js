@@ -8,7 +8,7 @@ import { getWorkspaceLandingPath, WORKSPACE_MODE_LABELS } from '../../utils/work
 import './GlobalConsole.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ATC Capital — Global Console
+   Ledgrionyx — Global Console
    The cross-company control center a user sees immediately after login.
    Shows: My Workspaces · Global Notifications · Global Tasks · Quick Actions
 ───────────────────────────────────────────────────────────────────────────── */
@@ -93,7 +93,7 @@ const EMPTY_WORKSPACE_VALUE_CARDS = [
   {
     eyebrow: 'Equity',
     title: 'Equity Management',
-    description: 'Launch ATC Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
+    description: 'Launch Ledgrionyx Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
   },
   {
     eyebrow: 'Infrastructure',
@@ -109,11 +109,11 @@ const EMPTY_WORKSPACE_PLATFORM_CAPABILITIES = [
   },
   {
     title: 'Open the right dashboard for the job',
-    description: 'New workspaces can launch into accounting, ATC Equity Management, or a combined operating setup depending on the package you choose.',
+    description: 'New workspaces can launch into accounting, Ledgrionyx Equity Management, or a combined operating setup depending on the package you choose.',
   },
   {
     title: 'Scale without rebuilding process',
-    description: 'The platform keeps shared governance, audit history, permissions, and organization visibility consistent across finance workspaces and ATC Equity Management environments.',
+    description: 'The platform keeps shared governance, audit history, permissions, and organization visibility consistent across finance workspaces and Ledgrionyx Equity Management environments.',
   },
 ];
 
@@ -126,7 +126,7 @@ const EMPTY_WORKSPACE_JOURNEY = [
   {
     step: '02',
     title: 'Choose how it should launch',
-    description: 'Select accounting, ATC Equity Management, combined, or standalone so the correct dashboard opens first.',
+    description: 'Select accounting, Ledgrionyx Equity Management, combined, or standalone so the correct dashboard opens first.',
   },
   {
     step: '03',
@@ -411,11 +411,11 @@ const GlobalConsole = () => {
       <header className="gc-topnav">
         <div className="gc-topnav-left">
           <div className="gc-topnav-brand">
-            <ATCLogo variant="dark" size="small" withText text="ATC Capital" />
+            <ATCLogo variant="dark" size="small" withText text="Ledgrionyx" />
           </div>
           <div className="gc-topnav-org-block">
             <span className="gc-topnav-org-label">Organization</span>
-            <strong className="gc-topnav-org-name">{currentOrganization?.name || 'ATC Capital Organization'}</strong>
+            <strong className="gc-topnav-org-name">{currentOrganization?.name || 'Ledgrionyx Organization'}</strong>
           </div>
         </div>
         <div className="gc-topnav-right" ref={profileRef}>
@@ -493,7 +493,7 @@ const GlobalConsole = () => {
               <span className="gc-empty-section-kicker">Platform Overview</span>
               <h2>Understand what a workspace unlocks before you create one</h2>
               <p>
-                ATC Capital is organized around workspaces. Each workspace becomes the operational home for one entity and opens the right dashboard structure for the way that entity is managed.
+                Ledgrionyx is organized around workspaces. Each workspace becomes the operational home for one entity and opens the right dashboard structure for the way that entity is managed.
               </p>
             </div>
             <div className="gc-empty-capability-grid">
@@ -533,12 +533,12 @@ const GlobalConsole = () => {
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section className="gc-hero">
         <div className="gc-hero-copy">
-          <span className="gc-kicker">ATC Capital — Global Console</span>
+          <span className="gc-kicker">Ledgrionyx — Global Console</span>
           <h1 className="gc-title">Good morning, {firstName}</h1>
           <p className="gc-subtitle">
             Select a workspace to continue, or manage your organization from here.
           </p>
-          <span className="gc-platform-badge">ATC Capital Console</span>
+          <span className="gc-platform-badge">Ledgrionyx Console</span>
         </div>
         <div className="gc-hero-stats">
           <div className="gc-hero-stat">

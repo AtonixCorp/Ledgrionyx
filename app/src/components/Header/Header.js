@@ -31,7 +31,7 @@ const Header = () => {
         <div className="atc-utility-inner">
 
           {/* Left — Brand identifier */}
-          <span className="atc-utility-brand">ATC Capital Global Platform</span>
+          <span className="atc-utility-brand">Ledgrionyx Global Platform</span>
 
           {/* Center — Country selector */}
           <div className="atc-utility-center">
@@ -92,7 +92,7 @@ const Header = () => {
         <div className="atc-primary-inner">
 
           {/* Logo */}
-          <Link to="/" className="atc-logo-link" aria-label="ATC Capital Home">
+          <Link to="/" className="atc-logo-link" aria-label="Ledgrionyx Home">
             <ATCLogo size="medium" withText />
           </Link>
 

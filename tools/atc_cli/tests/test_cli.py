@@ -30,7 +30,7 @@ class CLITestCase(unittest.TestCase):
             'organization_id': 'org_123',
             'user': {'id': 'user_1', 'email': 'dev@example.com', 'role': 'developer'},
         }), patch.object(ATCClient, 'me', return_value={
-            'organization': {'id': 'org_123', 'name': 'ATC Demo LLC'},
+            'organization': {'id': 'org_123', 'name': 'Ledgrionyx Demo LLC'},
             'user': {'id': 'user_1', 'email': 'dev@example.com', 'role': 'developer'},
             'session': {'expires_at': expires_at_from_now(3600)},
         }):
@@ -45,7 +45,7 @@ class CLITestCase(unittest.TestCase):
         stored = config['profiles']['prod']
         self.assertNotIn('access-token-123', json.dumps(stored))
         self.assertNotIn('cli_123.secret_456', json.dumps(stored))
-        self.assertIn('Successfully logged in to ATC Capital', stdout.getvalue())
+        self.assertIn('Successfully logged in to Ledgrionyx', stdout.getvalue())
 
     def test_request_with_session_refreshes_expired_token(self):
         client = ATCClient('https://api.example.com')
@@ -96,7 +96,7 @@ class CLITestCase(unittest.TestCase):
             {
                 'host': 'https://api.example.com',
                 'organization_id': 'org_123',
-                'organization_name': 'ATC Demo LLC',
+                'organization_name': 'Ledgrionyx Demo LLC',
                 'access_token': 'access-token-123',
                 'api_key': 'cli_123.secret_456',
                 'expires_at': expires_at_from_now(3600),
@@ -120,7 +120,7 @@ class CLITestCase(unittest.TestCase):
             {
                 'host': 'https://api.example.com',
                 'organization_id': 'org_123',
-                'organization_name': 'ATC Demo LLC',
+                'organization_name': 'Ledgrionyx Demo LLC',
                 'access_token': 'access-token-123',
                 'api_key': 'cli_123.secret_456',
                 'expires_at': expires_at_from_now(3600),

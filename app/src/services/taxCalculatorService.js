@@ -1,4 +1,4 @@
-// Tax Calculator Service for ATC Capital
+// Tax Calculator Service for Ledgrionyx
 // Comprehensive global tax rates database with AI-powered validation
 // Specification-compliant with modular, future-proof architecture
 

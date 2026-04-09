@@ -1,9 +1,9 @@
-# ATC Capital – OpenStack Infrastructure
+# Ledgrionyx – OpenStack Infrastructure
 
 This directory contains all Infrastructure as Code (IaC) and pipeline definitions
-for operating ATC Capital on OpenStack using Gerrit change control and Jenkins pipelines.
+for operating Ledgrionyx on OpenStack using Gerrit change control and Jenkins pipelines.
 
-**No manual changes are permitted in any ATC Capital environment beyond temporary DEV experiments.**
+**No manual changes are permitted in any Ledgrionyx environment beyond temporary DEV experiments.**
 
 ---
 
@@ -35,7 +35,7 @@ infra/openstack/
 infra/gerrit/
 ├── projects/
 │   ├── infra-openstack-atc.config  Access rules for infra/openstack-atc
-│   ├── apps-atc-capital-core.config Access rules for apps/atc-capital-core
+│   ├── apps-ledgrionyx-core.config Access rules for apps/ledgrionyx-core
 │   └── ci-jenkins-pipelines.config Access rules for ci/jenkins-pipelines
 ├── groups                          Gerrit group UUID registry
 └── setup-instructions.md           Step-by-step Gerrit bootstrap guide
@@ -77,7 +77,7 @@ Engineer → Gerrit change → Jenkins validate (lint + plan) → peer review
 Every resource created by Terraform carries these tags:
 
 ```
-system=atc-capital
+system=ledgrionyx
 env=<dev|test|stage|prod>
 service=<ledger|accounts|risk|reporting|shared>
 change_id=<GerritChangeID>

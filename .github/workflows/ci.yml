@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check ATC public standards
+      - name: Check Ledgrionyx public standards
         run: npm run standards:check
 
       - name: Build app

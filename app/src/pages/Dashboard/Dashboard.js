@@ -124,7 +124,7 @@ const Dashboard = () => {
         <div className="dashboard-hero-card">
           <div className="dashboard-header">
             <div className="dashboard-title-block">
-              <span className="dashboard-kicker">ATC Overview</span>
+              <span className="dashboard-kicker">Ledgrionyx Overview</span>
               <h1 className="page-title">{t('dashboard.title')}</h1>
               <p className="dashboard-subtitle">
                 Monitor cash movement, spending pressure, and budget momentum from one command surface.

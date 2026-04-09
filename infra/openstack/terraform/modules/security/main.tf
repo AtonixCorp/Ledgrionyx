@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# ATC Capital – OpenStack Security Module
+# Ledgrionyx – OpenStack Security Module
 # Provisions security groups for API, DB, bastion, and monitoring tiers.
 # Default posture: deny-all; only explicitly required ports are opened.
 # -----------------------------------------------------------------------------
@@ -17,7 +17,7 @@ terraform {
 
 resource "openstack_networking_secgroup_v2" "api" {
   name        = "atc-${var.env}-sg-api"
-  description = "ATC Capital API tier – HTTPS ingress only"
+  description = "Ledgrionyx API tier – HTTPS ingress only"
   tags        = local.tags
 }
 
@@ -58,7 +58,7 @@ resource "openstack_networking_secgroup_rule_v2" "api_app_port" {
 
 resource "openstack_networking_secgroup_v2" "db" {
   name        = "atc-${var.env}-sg-db"
-  description = "ATC Capital database tier – backend subnet ingress only"
+  description = "Ledgrionyx database tier – backend subnet ingress only"
   tags        = local.tags
 }
 
@@ -76,7 +76,7 @@ resource "openstack_networking_secgroup_rule_v2" "db_postgres" {
 
 resource "openstack_networking_secgroup_v2" "bastion" {
   name        = "atc-${var.env}-sg-bastion"
-  description = "ATC Capital bastion host – SSH from trusted CIDRs only"
+  description = "Ledgrionyx bastion host – SSH from trusted CIDRs only"
   tags        = local.tags
 }
 
@@ -96,7 +96,7 @@ resource "openstack_networking_secgroup_rule_v2" "bastion_ssh" {
 
 resource "openstack_networking_secgroup_v2" "monitoring" {
   name        = "atc-${var.env}-sg-monitoring"
-  description = "ATC Capital monitoring – Prometheus scrape from backend subnet"
+  description = "Ledgrionyx monitoring – Prometheus scrape from backend subnet"
   tags        = local.tags
 }
 
@@ -114,7 +114,7 @@ resource "openstack_networking_secgroup_rule_v2" "monitoring_prometheus" {
 
 locals {
   tags = [
-    "system=atc-capital",
+    "system=ledgrionyx",
     "env=${var.env}",
     "service=shared",
     "change_id=${var.change_id}",

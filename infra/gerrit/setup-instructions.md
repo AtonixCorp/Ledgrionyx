@@ -1,4 +1,4 @@
-# Gerrit Setup Instructions for ATC Capital
+# Gerrit Setup Instructions for Ledgrionyx
 
 ## Projects to create
 
@@ -9,17 +9,17 @@ Run the following `ssh` commands against your Gerrit instance (or use the Admin 
 GERRIT="ssh -p $GERRIT_PORT $GERRIT_HOST gerrit"
 
 $GERRIT create-project infra/openstack-atc \
-  --description "ATC Capital OpenStack Infrastructure as Code" \
+  --description "Ledgrionyx OpenStack Infrastructure as Code" \
   --submit-type MERGE_IF_NECESSARY \
   --require-change-id
 
-$GERRIT create-project apps/atc-capital-core \
-  --description "ATC Capital Core Application Services" \
+$GERRIT create-project apps/ledgrionyx-core \
+  --description "Ledgrionyx Core Application Services" \
   --submit-type MERGE_IF_NECESSARY \
   --require-change-id
 
 $GERRIT create-project ci/jenkins-pipelines \
-  --description "ATC Capital Jenkins Shared Pipeline Libraries and Jenkinsfiles" \
+  --description "Ledgrionyx Jenkins Shared Pipeline Libraries and Jenkinsfiles" \
   --submit-type MERGE_IF_NECESSARY \
   --require-change-id
 ```
@@ -28,7 +28,7 @@ $GERRIT create-project ci/jenkins-pipelines \
 
 | Group name                | Purpose                                                        |
 |---------------------------|----------------------------------------------------------------|
-| ATC Capital Owners        | Founder and designated owners; approve STAGE/PROD deployments |
+| Ledgrionyx Owners        | Founder and designated owners; approve STAGE/PROD deployments |
 | Infra Leads               | Senior infra engineers; approve STAGE/PROD infra changes       |
 | Infra Engineers           | All infrastructure engineers                                   |
 | App Leads                 | Senior application engineers; approve STAGE/PROD app changes   |
@@ -52,11 +52,11 @@ git fetch origin refs/meta/config:refs/meta/config
 git checkout refs/meta/config
 cp /path/to/infra-openstack-atc.config project.config
 git add project.config
-git commit -m "Apply ATC Capital governance config"
+git commit -m "Apply Ledgrionyx governance config"
 git push origin HEAD:refs/meta/config
 ```
 
-Repeat for `apps/atc-capital-core` and `ci/jenkins-pipelines`.
+Repeat for `apps/ledgrionyx-core` and `ci/jenkins-pipelines`.
 
 ## Labels
 

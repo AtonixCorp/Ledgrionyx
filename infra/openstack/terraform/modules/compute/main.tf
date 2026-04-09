@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
-# ATC Capital – OpenStack Compute Module
-# Provisions Nova instances for a named ATC Capital service.
+# Ledgrionyx – OpenStack Compute Module
+# Provisions Nova instances for a named Ledgrionyx service.
 # Naming convention: atc-<env>-<service>-<zero-padded-index>
-# Every instance carries the full ATC Capital traceability tag set.
+# Every instance carries the full Ledgrionyx traceability tag set.
 # -----------------------------------------------------------------------------
 
 terraform {
@@ -39,9 +39,9 @@ resource "openstack_compute_instance_v2" "service" {
 
   user_data = var.user_data
 
-  # ATC Capital mandatory metadata tags
+  # Ledgrionyx mandatory metadata tags
   metadata = {
-    system    = "atc-capital"
+    system    = "ledgrionyx"
     env       = var.env
     service   = var.service
     change_id = var.change_id

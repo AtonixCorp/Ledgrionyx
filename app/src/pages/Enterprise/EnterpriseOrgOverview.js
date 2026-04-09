@@ -192,7 +192,7 @@ const EnterpriseOrgOverview = () => {
       <div className="ed-header org-dashboard-header">
         <div className="org-dashboard-title-block">
           <h1 className="ed-entity-name">{currentOrganization.name}</h1>
-          <p className="org-dashboard-subtitle">ATC Capital dashboard with consolidated branch performance, compliance posture, and financial positions.</p>
+          <p className="org-dashboard-subtitle">Ledgrionyx dashboard with consolidated branch performance, compliance posture, and financial positions.</p>
           <div className="ed-meta-row">
             <span className="ed-meta-item">{active_entities} active entities</span>
             <span className="ed-meta-sep">·</span>

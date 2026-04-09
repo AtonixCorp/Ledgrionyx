@@ -10,7 +10,7 @@ variable "env" {
 
 variable "service" {
   type        = string
-  description = "ATC Capital service name the volumes belong to."
+  description = "Ledgrionyx service name the volumes belong to."
 }
 
 variable "volume_count" {

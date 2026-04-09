@@ -1,13 +1,13 @@
 ---
 # roles/atc-common/defaults/main.yml
-# Baseline defaults for all ATC Capital hosts.
+# Baseline defaults for all Ledgrionyx hosts.
 
 atc_timezone: UTC
 atc_ntp_servers:
   - 0.pool.ntp.org
   - 1.pool.ntp.org
 
-atc_log_dir: /var/log/atc-capital
+atc_log_dir: /var/log/ledgrionyx
 atc_app_user: atc
 atc_app_group: atc
 

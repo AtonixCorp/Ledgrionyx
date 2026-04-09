@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: atc-capital
+  name: ledgrionyx
 spec:
   rules:
-    - host: app.staging.atc-capital.com
+    - host: app.staging.ledgrionyx.com

@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
-# ATC Capital – STAGE environment root
+# Ledgrionyx – STAGE environment root
 # OpenStack Project: atc-stage
 # Pre-production; used for release validation and regulatory checks.
-# Changes require: infra lead + ATC Capital owner approval in Gerrit.
+# Changes require: infra lead + Ledgrionyx owner approval in Gerrit.
 # -----------------------------------------------------------------------------
 
 provider "openstack" {

@@ -4,7 +4,7 @@ const LanguageContext = createContext();
 
 const MESSAGES = {
   en: {
-    appName: 'ATC Capital',
+    appName: 'Ledgrionyx',
     languageName: 'English',
     nav: {
       home: 'Home',
@@ -85,7 +85,7 @@ const MESSAGES = {
     },
   },
   fr: {
-    appName: 'ATC Capital',
+    appName: 'Ledgrionyx',
     languageName: 'Français',
     nav: {
       home: 'Accueil',
@@ -166,7 +166,7 @@ const MESSAGES = {
     },
   },
   es: {
-    appName: 'ATC Capital',
+    appName: 'Ledgrionyx',
     languageName: 'Español',
     nav: {
       home: 'Inicio',
@@ -247,7 +247,7 @@ const MESSAGES = {
     },
   },
   de: {
-    appName: 'ATC Capital',
+    appName: 'Ledgrionyx',
     languageName: 'Deutsch',
     nav: {
       home: 'Startseite',
@@ -328,7 +328,7 @@ const MESSAGES = {
     },
   },
   pt: {
-    appName: 'ATC Capital',
+    appName: 'Ledgrionyx',
     languageName: 'Português',
     nav: {
       home: 'Início',
@@ -409,7 +409,7 @@ const MESSAGES = {
     },
   },
   zh: {
-    appName: 'ATC Capital',
+    appName: 'Ledgrionyx',
     languageName: '',
     nav: {
       home: '',
@@ -490,7 +490,7 @@ const MESSAGES = {
     },
   },
   ar: {
-    appName: 'ATC Capital',
+    appName: 'Ledgrionyx',
     languageName: 'العربية',
     nav: {
       home: 'الرئيسية',

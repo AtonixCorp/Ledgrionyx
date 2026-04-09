@@ -39,7 +39,7 @@ const socialLinks = [
   },
   {
     label: 'YouTube',
-    href: 'https://www.youtube.com/@atccapital',
+    href: 'https://www.youtube.com/@ledgrionyx',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M21.58 7.19C21.34 6.29 20.64 5.58 19.73 5.34C18.1 4.91 12 4.91 12 4.91C12 4.91 5.9 4.91 4.27 5.34C3.36 5.58 2.66 6.29 2.42 7.19C2 8.83 2 12.25 2 12.25C2 12.25 2 15.67 2.42 17.31C2.66 18.21 3.36 18.92 4.27 19.16C5.9 19.59 12 19.59 12 19.59C12 19.59 18.1 19.59 19.73 19.16C20.64 18.92 21.34 18.21 21.58 17.31C22 15.67 22 12.25 22 12.25C22 12.25 22 8.83 21.58 7.19ZM10.05 15.4V9.1L15.5 12.25L10.05 15.4Z" fill="currentColor" />
@@ -48,7 +48,7 @@ const socialLinks = [
   },
   {
     label: 'GitHub',
-    href: 'https://github.com/AtonixCorp/atccapital',
+    href: 'https://github.com/AtonixCorp/ledgrionyx',
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 2C6.48 2 2 6.58 2 12.23C2 16.75 4.87 20.59 8.84 21.94C9.34 22.04 9.52 21.72 9.52 21.45C9.52 21.2 9.51 20.39 9.5 19.32C6.73 19.94 6.14 17.95 6.14 17.95C5.68 16.75 5.03 16.43 5.03 16.43C4.12 15.79 5.1 15.8 5.1 15.8C6.1 15.87 6.63 16.86 6.63 16.86C7.52 18.43 8.97 17.98 9.54 17.72C9.63 17.05 9.89 16.59 10.17 16.33C7.96 16.07 5.63 15.19 5.63 11.28C5.63 10.17 6.02 9.26 6.66 8.55C6.56 8.29 6.21 7.24 6.76 5.82C6.76 5.82 7.6 5.55 9.51 6.88C10.31 6.65 11.17 6.53 12 6.53C12.83 6.53 13.69 6.65 14.49 6.88C16.4 5.55 17.24 5.82 17.24 5.82C17.79 7.24 17.44 8.29 17.34 8.55C17.98 9.26 18.37 10.17 18.37 11.28C18.37 15.2 16.03 16.07 13.81 16.33C14.17 16.65 14.49 17.28 14.49 18.24C14.49 19.62 14.48 21.06 14.48 21.45C14.48 21.72 14.66 22.05 15.17 21.94C19.13 20.59 22 16.75 22 12.23C22 6.58 17.52 2 12 2Z" fill="currentColor" />
@@ -59,7 +59,7 @@ const socialLinks = [
 
 function SocialIcons() {
   return (
-    <div className="footer-social" aria-label="ATC Capital social channels">
+    <div className="footer-social" aria-label="Ledgrionyx social channels">
       {socialLinks.map((item) => (
         <a
           key={item.label}

@@ -1,6 +1,6 @@
 ---
 # roles/atc-common/tasks/main.yml
-# Baseline hardening and tooling applied to every ATC Capital host.
+# Baseline hardening and tooling applied to every Ledgrionyx host.
 
 - name: Set timezone to UTC
   community.general.timezone:
@@ -13,16 +13,16 @@
     update_cache: true
     cache_valid_time: 3600
 
-- name: Create ATC Capital app user
+- name: Create Ledgrionyx app user
   ansible.builtin.user:
     name: "{{ atc_app_user }}"
     group: "{{ atc_app_group }}"
     system: true
     shell: /bin/false
-    home: /opt/atc-capital
+    home: /opt/ledgrionyx
     create_home: true
 
-- name: Create ATC Capital log directory
+- name: Create Ledgrionyx log directory
   ansible.builtin.file:
     path: "{{ atc_log_dir }}"
     state: directory

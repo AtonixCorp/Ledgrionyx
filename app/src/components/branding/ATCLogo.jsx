@@ -9,10 +9,10 @@ const SIZE_MAP = {
 };
 
 
-function ATCLogo({ variant = 'full', withText = true, size = 'medium', text = 'ATC Capital', className = '' }) {
+function ATCLogo({ variant = 'full', withText = true, size = 'medium', text = 'Ledgrionyx', className = '' }) {
   const dimension = SIZE_MAP[size] || SIZE_MAP.medium;
   const classes = ['atc-logo-lockup', `atc-logo--${variant}`, `atc-logo--${size}`, className].filter(Boolean).join(' ');
-  const secondaryText = text === 'ATC Capital' ? '' : text.replace('ATC Capital', '').trim();
+  const secondaryText = text === 'Ledgrionyx' ? '' : text.replace('Ledgrionyx', '').trim();
 
   return (
     <span className={classes}>
@@ -32,7 +32,7 @@ function ATCLogo({ variant = 'full', withText = true, size = 'medium', text = 'A
       </svg>
       {withText ? (
         <span className="atc-logo-wordmark">
-          <span className="atc-logo-wordmark__primary">ATC Capital</span>
+          <span className="atc-logo-wordmark__primary">Ledgrionyx</span>
           {secondaryText ? <span className="atc-logo-wordmark__secondary">{secondaryText}</span> : null}
         </span>
       ) : null}

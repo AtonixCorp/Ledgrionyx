@@ -1,12 +1,12 @@
 # -----------------------------------------------------------------------------
-# ATC Capital – PROD environment root
+# Ledgrionyx – PROD environment root
 # OpenStack Project: atc-prod
 #
 # NON-NEGOTIABLES:
 #   - No manual changes in the OpenStack UI.
 #   - Only Jenkins with a Gerrit-approved change may apply this root.
 #   - All applies require explicit manual gate approval in the Jenkins pipeline.
-#   - Every resource carries full ATC Capital traceability tags.
+#   - Every resource carries full Ledgrionyx traceability tags.
 # -----------------------------------------------------------------------------
 
 provider "openstack" {

@@ -1,6 +1,6 @@
 terraform {
   backend "swift" {
-    auth_url    = "https://openstack.atccapital.internal:5000/v3"
+    auth_url    = "https://openstack.ledgrionyx.internal:5000/v3"
     container   = "atc-terraform-state"
     state_name  = "prod/terraform.tfstate"
     region_name = "RegionOne"

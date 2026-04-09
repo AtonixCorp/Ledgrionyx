@@ -1,5 +1,5 @@
 """
-ATC Capital API v1 – Authentication helpers
+Ledgrionyx API v1 – Authentication helpers
 ============================================
 Supports two credential flows:
 
@@ -166,4 +166,4 @@ class APIKeyAuthentication(BaseAuthentication):
         return (user, api_key)
 
     def authenticate_header(self, request):
-        return 'Bearer realm="ATC Capital API v1"'
+        return 'Bearer realm="Ledgrionyx API v1"'

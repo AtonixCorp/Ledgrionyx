@@ -4,7 +4,7 @@ output "instance_ids" {
 }
 
 output "instance_names" {
-  description = "Canonical ATC Capital instance names (atc-<env>-<service>-<n>)."
+  description = "Canonical Ledgrionyx instance names (atc-<env>-<service>-<n>)."
   value       = openstack_compute_instance_v2.service[*].name
 }
 

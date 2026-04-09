@@ -3,13 +3,13 @@ import { PageHeader, Card, Button, Input } from '../../components/ui';
 
 export default function FirmSettings() {
   const [form, setForm] = useState({
-    firmName: 'ATC Capital LLC',
-    legalName: 'ATC Capital Management LLC',
+    firmName: 'Ledgrionyx LLC',
+    legalName: 'Ledgrionyx Management LLC',
     taxId: '88-1234567',
     address: '350 Fifth Avenue, Suite 4200, New York, NY 10118',
     phone: '+1 (212) 555-0100',
-    email: 'admin@atccapital.com',
-    website: 'https://atccapital.com',
+    email: 'admin@ledgrionyx.com',
+    website: 'https://ledgrionyx.com',
     fiscalYearEnd: '12',
     currency: 'USD',
     timezone: 'America/New_York',

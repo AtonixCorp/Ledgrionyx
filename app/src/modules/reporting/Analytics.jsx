@@ -188,8 +188,8 @@ export default function Analytics() {
             <label className="input-label">Entity</label>
             <select className="filter-select" style={{ width: '100%', height: 40 }} value={form.entity} onChange={set('entity')}>
               <option value="all">All Entities</option>
-              <option value="1">ATC Capital US</option>
-              <option value="2">ATC Capital UK</option>
+              <option value="1">Ledgrionyx US</option>
+              <option value="2">Ledgrionyx UK</option>
             </select>
           </div>
         </div>

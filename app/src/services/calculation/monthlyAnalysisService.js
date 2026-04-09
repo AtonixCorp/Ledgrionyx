@@ -1,5 +1,5 @@
 /**
- * ATC Capital - Monthly Financial Tracking & Analysis Service
+ * Ledgrionyx - Monthly Financial Tracking & Analysis Service
  *
  * Provides automatic monthly aggregation, analysis, and insights
  * Integrates with the unified calculation engine

@@ -81,7 +81,7 @@ const EquityLayout = ({ children }) => {
             <ATCLogo variant="white" size="small" withText={false} />
             {!sidebarMinimized && (
               <div>
-                <div className="eq-brand-title">ATC Equity</div>
+                <div className="eq-brand-title">Ledgrionyx Equity</div>
                 <div className="eq-brand-sub">{resolvedWorkspace?.name || 'Workspace'}</div>
               </div>
             )}
@@ -124,7 +124,7 @@ const EquityLayout = ({ children }) => {
       <div className="eq-main-shell">
         <header className="eq-topbar">
           <div>
-            <div className="eq-topbar-kicker">ATC Equity Management</div>
+            <div className="eq-topbar-kicker">Ledgrionyx Equity Management</div>
             <h1 className="eq-topbar-title">{resolvedWorkspace?.name || 'Equity Workspace'}</h1>
           </div>
           <div className="eq-topbar-right" ref={profileRef}>

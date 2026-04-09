@@ -232,7 +232,7 @@ const Layout = ({ children }) => {
         {/* Brand Header */}
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <ATCLogo variant="white" size="small" withText={!sidebarMinimized} text="ATC Capital Console" />
+            <ATCLogo variant="white" size="small" withText={!sidebarMinimized} text="Ledgrionyx Console" />
           </div>
           {!sidebarMinimized && (
             <NavLink to="/app/console" className="sidebar-console-link" title="All Workspaces">
@@ -299,7 +299,7 @@ const Layout = ({ children }) => {
         {/* Top Bar */}
         <header className="topbar">
           <div className="topbar-left">
-            <h2 className="topbar-title">ATC Capital Console</h2>
+            <h2 className="topbar-title">Ledgrionyx Console</h2>
           </div>
           <div className="topbar-right">
             <div className="profile-menu" ref={profileRef}>

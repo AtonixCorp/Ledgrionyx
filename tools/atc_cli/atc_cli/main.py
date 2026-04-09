@@ -19,7 +19,7 @@ def _read_api_key(args):
 def _print_identity(me_response, profile_name):
     organization = me_response.get('organization') or {}
     user = me_response.get('user') or {}
-    print('Successfully logged in to ATC Capital')
+    print('Successfully logged in to Ledgrionyx')
     print(f"Organization: {organization.get('name', 'Unknown')} ({organization.get('id', 'unknown')})")
     print(f"User: {user.get('email', 'unknown')}")
     print(f"Profile: {profile_name}")
@@ -83,7 +83,7 @@ def command_login(args):
 
 def command_logout(args):
     remove_profile(args.profile or None)
-    print('Local ATC CLI session removed.')
+    print('Local Ledgrionyx CLI session removed.')
     return 0
 
 
@@ -108,7 +108,7 @@ def command_whoami(args):
 def command_profiles(_args):
     profiles = list_profiles()
     if not profiles:
-        print('No saved ATC CLI profiles.')
+        print('No saved Ledgrionyx CLI profiles.')
         return 0
     for profile in profiles:
         marker = '*' if profile['is_current'] else '-'
@@ -179,7 +179,7 @@ def command_report_cash_flow(args):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(prog='atc', description='ATC Capital CLI')
+    parser = argparse.ArgumentParser(prog='ledgrionyx', description='Ledgrionyx CLI')
     subparsers = parser.add_subparsers(dest='command', required=True)
 
     login_parser = subparsers.add_parser('login', help='Authenticate with an API key')

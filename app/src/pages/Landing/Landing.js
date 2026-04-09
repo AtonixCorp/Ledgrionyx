@@ -20,7 +20,7 @@ const Landing = () => {
               Accounting Built for<br />Global Confidence
             </h1>
             <p className="atc-hero-sub">
-              ATC Capital delivers secure accounts, global transfers, and
+              Ledgrionyx delivers secure accounts, global transfers, and
               institution-grade financial tools designed for individuals
               and businesses worldwide.
             </p>
@@ -109,7 +109,7 @@ const Landing = () => {
               <span key={item} className="problem-item">{item}</span>
             ))}
           </div>
-          <p className="problem-resolve">ATC Capital eliminates every one of these — permanently.</p>
+          <p className="problem-resolve">Ledgrionyx eliminates every one of these — permanently.</p>
         </div>
       </section>
 
@@ -119,7 +119,7 @@ const Landing = () => {
             <p className="landing-deployment-promo__eyebrow">Platform Delivery</p>
             <h2 className="landing-deployment-promo__title">Deployment is now part of the app experience.</h2>
             <p className="landing-deployment-promo__text">
-              Review how ATC Capital moves from GitHub validation to Docker images, Kubernetes promotion,
+              Review how Ledgrionyx moves from GitHub validation to Docker images, Kubernetes promotion,
               health verification, and infrastructure controls through a public deployment page built directly
               into the app.
             </p>
@@ -286,7 +286,7 @@ const Landing = () => {
               </div>
             ))}
           </div>
-          <div className="vision-closing">ATC Capital replaces dozens of disconnected tools with a single, unified Financial Operating System.
+          <div className="vision-closing">Ledgrionyx replaces dozens of disconnected tools with a single, unified Financial Operating System.
           </div>
         </div>
       </section>
@@ -306,7 +306,7 @@ const Landing = () => {
         </div>
         <div className="brand-promise-block">
           <blockquote>
-            "ATC Capital gives accounting firms the power, speed, and intelligence they need to
+            "Ledgrionyx gives accounting firms the power, speed, and intelligence they need to
             operate at the highest level."
           </blockquote>
         </div>
@@ -317,8 +317,8 @@ const Landing = () => {
         <div className="roadmap-container">
           <div className="section-header">
             <p className="section-eyebrow">Long-Term Vision</p>
-            <h2 className="section-title">The Future of ATC Capital</h2>
-            <p className="section-subtitle">ATC Capital is not just a platform — it is a movement. A transformation. A new standard.
+            <h2 className="section-title">The Future of Ledgrionyx</h2>
+            <p className="section-subtitle">Ledgrionyx is not just a platform — it is a movement. A transformation. A new standard.
             </p>
           </div>
           <div className="roadmap-grid">
@@ -345,7 +345,7 @@ const Landing = () => {
         <div className="cta-content">
           <p className="cta-eyebrow">The Future of Financial Operations</p>
           <h2>Built for Firms That Refuse to Fall Behind.</h2>
-          <p>ATC Capital is built for firms that demand excellence, businesses that want clarity,
+          <p>Ledgrionyx is built for firms that demand excellence, businesses that want clarity,
             and institutions that require precision. Your entire financial world — unified.
           </p>
           <div className="cta-buttons">

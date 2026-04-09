@@ -1,4 +1,4 @@
-# ATC Capital Jenkins Pipeline Library
+# Ledgrionyx Jenkins Pipeline Library
 
 ## Repository layout
 
@@ -7,7 +7,7 @@ ci/jenkins-pipelines/
 ├── Jenkinsfile.infra-validate   # Triggered by Gerrit patchset-created (infra/openstack-atc)
 ├── Jenkinsfile.infra-apply      # Triggered by Gerrit change-merged → applies to DEV
 ├── Jenkinsfile.infra-promote    # Manual dispatch → promotes infra to TEST / STAGE / PROD
-├── Jenkinsfile.app-build        # Triggered by Gerrit patchset-created (apps/atc-capital-core)
+├── Jenkinsfile.app-build        # Triggered by Gerrit patchset-created (apps/ledgrionyx-core)
 ├── Jenkinsfile.app-deploy       # Manual dispatch or change-merged → deploys app to any env
 ├── vars/
 │   ├── gerrit.groovy            # Shared: post Verified votes and comments to Gerrit
@@ -68,7 +68,7 @@ In each Jenkins job's configuration:
 
 **App build** (`Jenkinsfile.app-build`):
 - Trigger: Patchset Created
-- Gerrit project: `apps/atc-capital-core`
+- Gerrit project: `apps/ledgrionyx-core`
 - Branch: `**`
 
 **App deploy / Infra promote**: Manual dispatch (parametrized build). Optionally also triggered by specific Gerrit labels such as `Ready-For-Test +1`.

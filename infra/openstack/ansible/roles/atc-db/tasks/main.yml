@@ -13,7 +13,7 @@
 - name: Template Postgres env file from Vault secrets
   ansible.builtin.template:
     src: postgres.env.j2
-    dest: /opt/atc-capital/postgres.env
+    dest: /opt/ledgrionyx/postgres.env
     owner: "{{ atc_app_user }}"
     group: "{{ atc_app_group }}"
     mode: '0600'
@@ -26,14 +26,14 @@
     image: "{{ atc_db_image }}"
     state: started
     restart_policy: "{{ atc_db_container_restart_policy }}"
-    env_file: /opt/atc-capital/postgres.env
+    env_file: /opt/ledgrionyx/postgres.env
     ports:
       - "127.0.0.1:{{ atc_db_port }}:5432"   # Bind to loopback only; SG controls external access
     volumes:
       - "{{ atc_db_data_dir }}:/var/lib/postgresql/data:rw"
     log_driver: journald
     labels:
-      system: "atc-capital"
+      system: "ledgrionyx"
       env: "{{ env }}"
       service: "db"
       change_id: "{{ gerrit_change_id | default('manual') }}"

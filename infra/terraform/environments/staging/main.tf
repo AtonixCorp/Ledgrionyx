@@ -4,7 +4,7 @@ provider "aws" {
 
 locals {
   common_tags = {
-    Application = "ATC Capital"
+    Application = "Ledgrionyx"
     Environment = "staging"
     ManagedBy   = "Terraform"
   }
