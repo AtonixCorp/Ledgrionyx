@@ -13,8 +13,6 @@ const Landing = () => {
       {/* ── HERO SECTION ─────────────────────────────────────────── */}
       <section className="atc-hero" aria-label="Hero">
         <div className="atc-hero-inner">
-
-          {/* Left — Text content */}
           <div className="atc-hero-text">
             <h1 className="atc-hero-headline">
               Accounting Built for<br />Global Confidence
@@ -25,18 +23,17 @@ const Landing = () => {
               and businesses worldwide.
             </p>
             <div className="atc-hero-actions">
-              <Link to="/register" className="atc-hero-btn-primary">
+              <Link to="/register" className="btn btn-primary btn-large">
                 Open Your Account
               </Link>
-              <Link to="/features" className="atc-hero-btn-secondary">
+              <Link to="/features" className="btn btn-outline btn-large">
                 Explore Products
               </Link>
             </div>
           </div>
 
-          {/* Right — Institutional product card */}
           <div className="atc-hero-card-wrap">
-            <div className="atc-product-card" role="presentation">
+            <div className="card atc-product-card" role="presentation">
               <div className="atc-card-header">
                 <span className="atc-card-label">Account Overview</span>
                 <span className="atc-card-live">
@@ -70,9 +67,9 @@ const Landing = () => {
               <div className="atc-card-activity">
                 <span className="atc-activity-label">Recent Activity</span>
                 {[
-                  { desc: 'Wire Transfer — HSBC London',     amount: '−$12,000', time: '2m ago',  up: false },
-                  { desc: 'Invoice Settlement — Acme Corp',  amount: '+$45,200', time: '1h ago',  up: true  },
-                  { desc: 'FX Conversion — EUR/USD',         amount: '+$8,340',  time: '3h ago',  up: true  },
+                  { desc: 'Wire Transfer — HSBC London', amount: '−$12,000', time: '2m ago', up: false },
+                  { desc: 'Invoice Settlement — Acme Corp', amount: '+$45,200', time: '1h ago', up: true },
+                  { desc: 'FX Conversion — EUR/USD', amount: '+$8,340', time: '3h ago', up: true },
                 ].slice(0, 2).map((tx, i) => (
                   <div className="atc-activity-row" key={i}>
                     <div>
@@ -125,10 +122,10 @@ const Landing = () => {
             </p>
           </div>
           <div className="landing-deployment-promo__actions">
-            <Link to="/deployment" className="landing-deployment-promo__primary">
+            <Link to="/deployment" className="btn btn-primary btn-large">
               View Deployment Page
             </Link>
-            <Link to="/v1/docs" className="landing-deployment-promo__secondary">
+            <Link to="/v1/docs" className="btn btn-outline btn-large">
               Open API Portal
             </Link>
           </div>
@@ -349,9 +346,9 @@ const Landing = () => {
             and institutions that require precision. Your entire financial world — unified.
           </p>
           <div className="cta-buttons">
-            <Link to="/register" className="btn-primary btn-large">Get Started Today
+            <Link to="/register" className="btn btn-primary btn-large">Get Started Today
             </Link>
-            <Link to="/features" className="btn-outline-white btn-large">Explore the Platform
+            <Link to="/features" className="btn btn-outline btn-large">Explore the Platform
             </Link>
           </div>
         </div>

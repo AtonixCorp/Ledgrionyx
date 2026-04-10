@@ -8,8 +8,8 @@
 /* ── Shared typography foundation ──────────────────────────────────────────── */
 .landing-page {
   font-family: var(--font-family);
-  background: var(--atc-color-surface);
-  color: var(--color-midnight);
+  background: var(--layout-body-bg);
+  color: var(--color-text);
 }
 
 /* =============================================================================
@@ -128,10 +128,6 @@
 .atc-product-card {
   width: 100%;
   max-width: 440px;
-  background: var(--atc-color-surface);
-  border: 1px solid var(--border-color-default);
-  border-radius: var(--atc-radius-panel);
-  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -497,51 +493,6 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.problem-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.problem-item {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding: 0 12px;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  color: rgba(0, 0, 0, 0.82);
-  font-size: var(--font-size-sm);
-}
-
-.problem-resolve {
-  margin: 16px 0 0;
-  color: var(--color-black);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-}
-
-/* =============================================================================
-   DEPLOYMENT PROMO
-   ============================================================================= */
-.landing-deployment-promo {
-  padding: 32px 0 0;
-  background: var(--color-background);
-}
-
-.landing-deployment-promo__inner {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 40px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.9fr);
-  gap: 18px;
-}
-
-.landing-deployment-promo__copy,
-.landing-deployment-promo__actions {
-  border: 1px solid var(--border-color-default);
-  padding: 24px;
-  background:
     linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.08), rgba(var(--color-primary-rgb), 0.02)),
     var(--color-background);
 }
@@ -575,35 +526,6 @@
   display: grid;
   align-content: center;
   gap: 12px;
-}
-
-.landing-deployment-promo__primary,
-.landing-deployment-promo__secondary {
-  min-height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 18px;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  transition: transform var(--transition-base), border-color var(--transition-base), background-color var(--transition-base);
-}
-
-.landing-deployment-promo__primary {
-  background: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  color: var(--color-background);
-}
-
-.landing-deployment-promo__secondary {
-  background: transparent;
-  border: 1px solid rgba(var(--color-text-rgb), 0.16);
-  color: var(--color-text);
-}
-
-.landing-deployment-promo__primary:hover,
-.landing-deployment-promo__secondary:hover {
-  transform: translateY(-1px);
 }
 
 /* =============================================================================
@@ -896,38 +818,7 @@
   flex-wrap: wrap;
 }
 
-.cta-buttons .btn-primary,
-.cta-buttons .btn-outline-white {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border: 1px solid var(--color-primary);
-}
-
-.cta-buttons .btn-primary:hover,
-.cta-buttons .btn-outline-white:hover {
-  background: rgba(var(--color-primary-rgb), 0.92);
-  color: var(--color-white);
-  border-color: rgba(var(--color-primary-rgb), 0.92);
-}
-
-.btn-outline-white {
-  height: 48px;
-  min-width: 200px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-primary);
-  color: var(--color-white);
-  background: var(--color-primary);
-  text-decoration: none;
-  padding: 0 20px;
-}
-
-.btn-outline-white:hover {
-  border-color: rgba(var(--color-primary-rgb), 0.92);
-  color: var(--color-white);
-  background: rgba(var(--color-primary-rgb), 0.92);
-}
+/* CTA buttons now use the global button system directly. */
 
 /* =============================================================================
    RESPONSIVE EXTENSIONS
