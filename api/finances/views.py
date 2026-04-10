@@ -23,6 +23,7 @@ from .serializers import (
 )
 from .tax_regimes import build_regime_rules, build_regime_payload, resolve_regime_code
 from .tax_engine import persist_tax_calculation, log_tax_audit, build_tax_filing
+from .tax_security import build_device_metadata
 from .intercompany_engine import run_consolidation_engine
 from rest_framework.decorators import api_view
 from django.http import JsonResponse, Http404
@@ -811,6 +812,7 @@ class TaxCalculationViewSet(viewsets.ModelViewSet):
             },
             reason='Tax calculation executed through the global tax engine.',
             ip_address=request.META.get('REMOTE_ADDR'),
+            device_metadata=build_device_metadata(request),
         )
 
         return Response(self.get_serializer(obj).data)
@@ -840,6 +842,7 @@ class TaxCalculationViewSet(viewsets.ModelViewSet):
             },
             reason='Tax filing generated from a stored tax calculation.',
             ip_address=request.META.get('REMOTE_ADDR'),
+            device_metadata=build_device_metadata(request),
         )
 
         return Response(TaxFilingSerializer(filing).data, status=201)

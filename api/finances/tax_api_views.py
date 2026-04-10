@@ -23,10 +23,13 @@ from .serializers import (
 from .tax_compliance import build_compliance_alerts, persist_compliance_calendar
 from .tax_engine import build_tax_filing, calculate_liability, log_tax_audit, persist_tax_calculation
 from .tax_regimes import build_regime_rules, resolve_regime_code
+from .tax_security import build_device_metadata, can_manage_global_tax_rules, can_view_partial_tax_audit
+from .tax_throttles import TaxApiBurstThrottle, TaxApiWriteThrottle
 
 
 class TaxRegimeCollectionAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle]
 
     def get(self, request):
         queryset = TaxRegimeRegistry.objects.all().order_by('jurisdiction_code', 'regime_name')
@@ -37,6 +40,8 @@ class TaxRegimeCollectionAPIView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        if not can_manage_global_tax_rules(request.user):
+            return Response({'detail': 'Permission denied.'}, status=drf_status.HTTP_403_FORBIDDEN)
         serializer = TaxRegimeRegistrySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -45,6 +50,7 @@ class TaxRegimeCollectionAPIView(APIView):
 
 class TaxRegimeCountryAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle]
 
     def get(self, request, country: str):
         built = build_regime_rules(country)
@@ -61,6 +67,7 @@ class TaxRegimeCountryAPIView(APIView):
 
 class CompanyTaxProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle, TaxApiWriteThrottle]
 
     def get(self, request, entity_id: int):
         entity = _get_accessible_entity_or_404(request.user, entity_id)
@@ -86,6 +93,7 @@ class CompanyTaxProfileAPIView(APIView):
 
 class TaxCalculateAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle, TaxApiWriteThrottle]
 
     def post(self, request):
         entity = _get_accessible_entity_or_404(request.user, request.data.get('entity') or request.data.get('entity_id'))
@@ -136,6 +144,7 @@ class TaxCalculateAPIView(APIView):
             new_value_json={'tax_calculation_id': str(calculation.id), 'regime_code': calculation.regime_code},
             reason='Tax calculation executed through the public tax API.',
             ip_address=request.META.get('REMOTE_ADDR'),
+            device_metadata=build_device_metadata(request),
         )
 
         return Response(TaxCalculationSerializer(calculation).data, status=drf_status.HTTP_201_CREATED)
@@ -143,6 +152,7 @@ class TaxCalculateAPIView(APIView):
 
 class TaxFilingCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle, TaxApiWriteThrottle]
 
     def post(self, request):
         entity = _get_accessible_entity_or_404(request.user, request.data.get('entity') or request.data.get('entity_id'))
@@ -161,12 +171,14 @@ class TaxFilingCreateAPIView(APIView):
             new_value_json={'tax_filing_id': str(filing.id), 'submission_status': filing.submission_status},
             reason='Tax filing created through the public tax API.',
             ip_address=request.META.get('REMOTE_ADDR'),
+            device_metadata=build_device_metadata(request),
         )
         return Response(TaxFilingSerializer(filing).data, status=drf_status.HTTP_201_CREATED)
 
 
 class TaxFilingSubmitAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle, TaxApiWriteThrottle]
 
     def post(self, request):
         filing = get_object_or_404(TaxFiling, id=request.data.get('filing_id'))
@@ -185,12 +197,14 @@ class TaxFilingSubmitAPIView(APIView):
             new_value_json={'tax_filing_id': str(filing.id), 'submission_status': filing.submission_status},
             reason='Tax filing submitted through the public tax API.',
             ip_address=request.META.get('REMOTE_ADDR'),
+            device_metadata=build_device_metadata(request),
         )
         return Response(TaxFilingSerializer(filing).data)
 
 
 class TaxComplianceCalendarAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle]
 
     def get(self, request):
         entity = _get_accessible_entity_or_404(request.user, request.query_params.get('entity') or request.query_params.get('entity_id'))
@@ -201,6 +215,7 @@ class TaxComplianceCalendarAPIView(APIView):
 
 class TaxComplianceAlertsAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle]
 
     def get(self, request):
         entity = _get_accessible_entity_or_404(request.user, request.query_params.get('entity') or request.query_params.get('entity_id'))
@@ -211,9 +226,12 @@ class TaxComplianceAlertsAPIView(APIView):
 
 class TaxAuditAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [TaxApiBurstThrottle]
 
     def get(self, request):
         entity = _get_accessible_entity_or_404(request.user, request.query_params.get('entity') or request.query_params.get('entity_id'))
-        queryset = _filter_queryset_by_entity_scope(TaxAuditLog.objects.all(), request.user).filter(entity=entity).order_by('-created_at')
+        if not can_view_partial_tax_audit(request.user, entity.organization):
+            return Response({'detail': 'Permission denied.'}, status=drf_status.HTTP_403_FORBIDDEN)
+        queryset = _filter_queryset_by_entity_scope(TaxAuditLog.objects.all(), request.user).filter(entity=entity).order_by('-timestamp')
         serializer = TaxAuditLogSerializer(queryset, many=True)
         return Response(serializer.data)

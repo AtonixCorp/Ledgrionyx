@@ -2,6 +2,7 @@ import hashlib
 import os
 import tempfile
 from datetime import timedelta
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -63,6 +64,7 @@ from .models import (
     Payslip,
     RateLimitProfile,
     Role,
+    ROLE_COMPLIANCE_OFFICER,
     Organization,
     LeaveBalance,
     LeaveRequest,
@@ -72,9 +74,12 @@ from .models import (
     SystemEvent,
     TeamMember,
     TaxCalculation,
+    TaxAuditLog,
     TaxExposure,
     TaxProfile,
     TaxRegimeRegistry,
+    TaxRiskAlert,
+    TaxRuleSetVersion,
     Transaction,
     UserProfile,
     Vendor,
@@ -88,6 +93,8 @@ from .models import (
 from .tax_regimes import build_regime_rules, resolve_regime_code
 from .tax_engine import calculate_liability
 from .tax_compliance import build_compliance_calendar, build_compliance_alerts
+from .tax_security import detect_tax_risks
+from .serializers import EntitySerializer, TaxProfileSerializer, TaxAuditLogSerializer
 from workspaces.models import Workspace, WorkspaceGroup, WorkspaceMember
 from workspaces.services import LogService, WorkspaceService
 
@@ -187,6 +194,158 @@ class TaxProfileModelTest(TestCase):
 
         self.assertEqual(profile.resolved_jurisdiction_code, 'GB')
         self.assertEqual(profile.active_regime_codes, ['corporate_income_tax', 'vat'])
+
+
+class TaxSecurityModelTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='security-user', password='password123')
+        self.organization = Organization.objects.create(name='Security Org', slug='security-org', owner=self.user, primary_country='United States')
+        self.entity = Entity.objects.create(
+            organization=self.organization,
+            name='Security Entity',
+            country='United States',
+            local_currency='USD',
+            entity_type='corporation',
+            registration_number='US-123456789',
+        )
+
+    def test_entity_serializer_masks_registration_number(self):
+        data = EntitySerializer(self.entity).data
+
+        self.assertNotEqual(data['registration_number'], 'US-123456789')
+        self.assertTrue(data['registration_number'].endswith('6789'))
+
+    def test_tax_profile_serializer_masks_registration_numbers(self):
+        profile = TaxProfile.objects.create(
+            entity=self.entity,
+            country='United States',
+            jurisdiction_code='US',
+            registered_regimes=['corporate_income_tax'],
+            tax_rules={'jurisdiction_code': 'US'},
+            registration_numbers={'federal': 'US-123456789'},
+        )
+
+        data = TaxProfileSerializer(profile).data
+
+        self.assertNotEqual(data['registration_numbers']['federal'], 'US-123456789')
+        self.assertTrue(data['registration_numbers']['federal'].endswith('6789'))
+
+    def test_tax_audit_log_hash_chain_is_populated(self):
+        first = TaxAuditLog.objects.create(
+            entity=self.entity,
+            user=self.user,
+            action_type='calculate',
+            old_value_json={'tax_base': '1000.00'},
+            new_value_json={'tax_base': '1100.00'},
+            reason='Initial calculation',
+            country='United States',
+        )
+        second = TaxAuditLog.objects.create(
+            entity=self.entity,
+            user=self.user,
+            action_type='submit',
+            old_value_json={'filing': 'draft'},
+            new_value_json={'filing': 'submitted'},
+            reason='Submission',
+            country='United States',
+        )
+
+        self.assertTrue(first.event_hash)
+        self.assertTrue(second.event_hash)
+        self.assertEqual(second.previous_hash, first.event_hash)
+
+    def test_detect_tax_risks_creates_alert_for_large_tax_base_change(self):
+        alerts = detect_tax_risks(
+            entity=self.entity,
+            action_type='calculate',
+            old_value={'tax_base': '1000.00'},
+            new_value={'tax_base': '2500.00'},
+            source_model='TaxCalculation',
+            source_id='calc-1',
+            persist=True,
+        )
+
+        self.assertTrue(alerts)
+        self.assertTrue(TaxRiskAlert.objects.filter(entity=self.entity, alert_type='manipulated_tax_base').exists())
+
+    def test_rule_set_version_can_be_created(self):
+        registry = TaxRegimeRegistry.objects.create(
+            jurisdiction_code='US',
+            country='United States',
+            regime_code='vat',
+            regime_name='Value Added Tax',
+            tax_type='vat',
+            regime_category='vat',
+            filing_frequency='monthly',
+            filing_form='vat_return',
+            required_forms=['vat_return'],
+            calculation_method='invoice_offset',
+        )
+        version = TaxRuleSetVersion.objects.create(
+            registry=registry,
+            version_number='2026.1',
+            effective_from=timezone.now().date(),
+            change_log=[{'field': 'due_day', 'before': 20, 'after': 25}],
+            approval_status='approved',
+            approved_by=self.user,
+            created_by=self.user,
+        )
+
+        self.assertEqual(version.version_number, '2026.1')
+        self.assertEqual(version.approval_status, 'approved')
+
+    def test_tax_audit_serializer_masks_for_non_privileged_user(self):
+        viewer = User.objects.create_user(username='viewer-user', password='password123')
+        Role.get_or_create_default_roles()
+        viewer_role = Role.objects.get(code='VIEWER')
+        TeamMember.objects.create(organization=self.organization, user=viewer, role=viewer_role, is_active=True)
+
+        audit_log = TaxAuditLog.objects.create(
+            entity=self.entity,
+            user=self.user,
+            action_type='calculate',
+            old_value_json={'tax_id': 'US-111122223'},
+            new_value_json={'tax_id': 'US-999988887'},
+            reason='Masking test',
+            country='United States',
+            device_metadata={'user_agent': 'pytest'},
+        )
+
+        serializer = TaxAuditLogSerializer(audit_log, context={'request': SimpleNamespace(user=viewer)})
+        data = serializer.data
+
+        self.assertEqual(data['device_metadata'], {})
+        self.assertEqual(data['ip_address'], '')
+        self.assertNotEqual(data['new_value_json']['tax_id'], 'US-999988887')
+
+    def test_default_roles_include_compliance_officer(self):
+        roles = Role.get_or_create_default_roles()
+
+        self.assertIn(ROLE_COMPLIANCE_OFFICER, roles)
+
+    def test_global_tax_registry_write_requires_governance_role(self):
+        viewer = User.objects.create_user(username='registry-viewer', password='password123')
+        Role.get_or_create_default_roles()
+        viewer_role = Role.objects.get(code='VIEWER')
+        TeamMember.objects.create(organization=self.organization, user=viewer, role=viewer_role, is_active=True)
+
+        client = APIClient()
+        client.force_authenticate(user=viewer)
+
+        response = client.post(
+            '/api/tax/regimes',
+            {
+                'jurisdiction_code': 'US',
+                'country': 'United States',
+                'regime_code': 'vat',
+                'regime_name': 'Value Added Tax',
+                'tax_type': 'vat',
+                'regime_category': 'vat',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 403)
 
 
 class TaxCalculationModelTest(TestCase):

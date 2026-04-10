@@ -3,7 +3,7 @@ Enterprise-specific viewsets and views
 """
 from rest_framework import status as drf_status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -23,7 +23,7 @@ from workspaces.models import Workspace
 from .models import (
     Organization, Entity, TeamMember, Role, Permission, TaxExposure, ROLE_ORG_OWNER, ROLE_CFO,
     ROLE_FINANCE_ANALYST, ROLE_VIEWER, ROLE_EXTERNAL_ADVISOR,
-    TaxProfile, TaxRegimeRegistry, TaxCalculation, TaxFiling, TaxAuditLog, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask, EntityDepartment,
+    TaxProfile, TaxRegimeRegistry, TaxCalculation, TaxFiling, TaxAuditLog, TaxRuleSetVersion, TaxRiskAlert, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask, EntityDepartment,
     Budget, Scenario, Consolidation,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
@@ -65,7 +65,7 @@ from .serializers import (
     BankAccountSerializer, WalletSerializer, ComplianceDocumentSerializer,
     BookkeepingCategorySerializer, BookkeepingAccountSerializer, TransactionSerializer, BookkeepingAuditLogSerializer,
     RecurringTransactionSerializer, TaskRequestSerializer, PlatformTaskSerializer,
-    TaxRegimeRegistrySerializer, TaxCalculationSerializer, TaxFilingSerializer, TaxAuditLogSerializer,
+    TaxRegimeRegistrySerializer, TaxCalculationSerializer, TaxFilingSerializer, TaxAuditLogSerializer, TaxRuleSetVersionSerializer, TaxRiskAlertSerializer,
     # New serializers
     ChartOfAccountsSerializer, GeneralLedgerSerializer, JournalApprovalMatrixSerializer,
     JournalApprovalDelegationSerializer, JournalEntryApprovalStepSerializer,
@@ -122,6 +122,7 @@ from .intercompany_engine import post_intercompany_transaction
 from .payroll_bank_exports import list_bank_export_options
 from .tax_regimes import build_regime_rules, build_regime_payload, resolve_regime_code
 from .tax_engine import persist_tax_calculation, build_tax_filing, log_tax_audit
+from .tax_security import build_device_metadata, can_manage_global_tax_rules, can_manage_tax_rule_sets, can_view_full_tax_audit, can_view_partial_tax_audit
 from .payroll_presets import (
     get_payroll_country_preset,
     list_payroll_country_presets,
@@ -1641,6 +1642,26 @@ class TaxRegimeRegistryViewSet(viewsets.ModelViewSet):
             qs = qs.filter(is_active=is_active == 'true')
         return qs
 
+    def perform_create(self, serializer):
+        if not can_manage_global_tax_rules(self.request.user):
+            raise PermissionDenied('User does not have permission to manage global tax rules.')
+        serializer.save()
+
+    def perform_update(self, serializer):
+        if not can_manage_global_tax_rules(self.request.user):
+            raise PermissionDenied('User does not have permission to manage global tax rules.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if not can_manage_global_tax_rules(self.request.user):
+            raise PermissionDenied('User does not have permission to manage global tax rules.')
+        super().perform_destroy(instance)
+
+    def perform_destroy(self, instance):
+        if not can_manage_global_tax_rules(self.request.user):
+            raise PermissionDenied('User does not have permission to manage global tax rules.')
+        super().perform_destroy(instance)
+
 
 class TaxCalculationHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TaxCalculationSerializer
@@ -1689,6 +1710,7 @@ class TaxFilingViewSet(viewsets.ModelViewSet):
             },
             reason='Tax filing submitted through the enterprise API.',
             ip_address=request.META.get('REMOTE_ADDR'),
+            device_metadata=build_device_metadata(request),
         )
 
         return Response(TaxFilingSerializer(filing).data)
@@ -1699,11 +1721,82 @@ class TaxAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        qs = _filter_queryset_by_entity_scope(TaxAuditLog.objects.all(), self.request.user)
+        organization_id = self.request.query_params.get('organization_id')
         entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        organization = None
+        if organization_id:
+            organization = get_object_or_404(_accessible_organizations_queryset(self.request.user), id=organization_id)
+        elif entity_id:
+            entity = _get_accessible_entity_or_404(self.request.user, entity_id)
+            organization = entity.organization
+        else:
+            organization = _accessible_organizations_queryset(self.request.user).first()
+
+        if organization is None or not can_view_partial_tax_audit(self.request.user, organization):
+            raise PermissionDenied('User does not have tax audit visibility.')
+        qs = _filter_queryset_by_entity_scope(TaxAuditLog.objects.all(), self.request.user)
         if entity_id:
             qs = qs.filter(entity_id=entity_id)
         return qs
+
+
+class TaxRuleSetVersionViewSet(viewsets.ModelViewSet):
+    serializer_class = TaxRuleSetVersionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        accessible_countries = list(_accessible_entities_queryset(self.request.user).values_list('country', flat=True).distinct())
+        qs = TaxRuleSetVersion.objects.select_related('registry', 'approved_by', 'created_by').all()
+        if accessible_countries:
+            qs = qs.filter(registry__country__in=accessible_countries)
+        registry_id = self.request.query_params.get('registry_id')
+        if registry_id:
+            qs = qs.filter(registry_id=registry_id)
+        status_filter = self.request.query_params.get('approval_status')
+        if status_filter:
+            qs = qs.filter(approval_status=status_filter)
+        return qs
+
+    def perform_create(self, serializer):
+        registry = serializer.validated_data['registry']
+        organization = _accessible_organizations_queryset(self.request.user).filter(entities__country=registry.country).first()
+        if organization is None or not can_manage_tax_rule_sets(self.request.user, organization):
+            raise PermissionDenied('User does not have permission to manage tax rule sets.')
+        serializer.save(created_by=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        organization = _accessible_organizations_queryset(self.request.user).filter(entities__country=instance.registry.country).first()
+        if organization is None or not can_manage_tax_rule_sets(self.request.user, organization):
+            raise PermissionDenied('User does not have permission to manage tax rule sets.')
+        serializer.save()
+
+
+class TaxRiskAlertViewSet(viewsets.ModelViewSet):
+    serializer_class = TaxRiskAlertSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = _filter_queryset_by_entity_scope(TaxRiskAlert.objects.all(), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        status_filter = self.request.query_params.get('resolved')
+        if status_filter == 'true':
+            qs = qs.filter(resolved_at__isnull=False)
+        elif status_filter == 'false':
+            qs = qs.filter(resolved_at__isnull=True)
+        return qs
+
+    @action(detail=True, methods=['post'])
+    def resolve(self, request, pk=None):
+        alert = self.get_object()
+        if not can_view_full_tax_audit(request.user, alert.entity.organization):
+            raise PermissionDenied('User does not have permission to resolve tax risk alerts.')
+        alert.resolved_at = timezone.now()
+        alert.resolved_by = request.user
+        alert.save(update_fields=['resolved_at', 'resolved_by'])
+        return Response(TaxRiskAlertSerializer(alert).data)
 
 
 class ComplianceDeadlineViewSet(viewsets.ModelViewSet):

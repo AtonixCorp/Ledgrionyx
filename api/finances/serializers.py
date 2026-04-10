@@ -6,7 +6,7 @@ from .models import (
     ModelTemplate, FinancialModel, Scenario, SensitivityAnalysis, AIInsight,
     CustomKPI, KPICalculation, Report, Consolidation, ConsolidationEntity,
     IntercompanyTransaction, IntercompanyEliminationEntry,
-    TaxCalculation, TaxFiling, TaxAuditLog, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
+    TaxCalculation, TaxFiling, TaxAuditLog, TaxRuleSetVersion, TaxRiskAlert, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
     EntityDepartment, EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
     LeaveType, LeaveBalance, LeaveRequest, PayrollBankOriginatorProfile, PayrollRun, Payslip, PayslipLineItem,
@@ -42,6 +42,7 @@ from .models import (
     AutomationExecution, AutomationArtifact, FirmMetric, ClientMarketplaceIntegration
 )
 from .banking_security import mask_secret
+from .tax_security import mask_json_payload, mask_tax_identifier, should_mask_tax_audit
 
 
 # ============ User & Auth Serializers ============
@@ -83,15 +84,24 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 class EntitySerializer(serializers.ModelSerializer):
     child_entities = serializers.SerializerMethodField()
+    registration_number_masked = serializers.SerializerMethodField()
 
     class Meta:
         model = Entity
-        fields = ['id', 'name', 'country', 'entity_type', 'status', 'registration_number', 'local_currency', 'main_bank', 'tax_authority_url', 'fiscal_year_end', 'next_filing_date', 'workspace_mode', 'enabled_modules', 'parent_entity', 'child_entities', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'country', 'entity_type', 'status', 'registration_number', 'registration_number_masked', 'local_currency', 'main_bank', 'tax_authority_url', 'fiscal_year_end', 'next_filing_date', 'workspace_mode', 'enabled_modules', 'parent_entity', 'child_entities', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
     def get_child_entities(self, obj):
         children = obj.child_entities.all()
         return EntitySerializer(children, many=True).data
+
+    def get_registration_number_masked(self, obj):
+        return mask_tax_identifier(obj.registration_number)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['registration_number'] = mask_tax_identifier(data.get('registration_number'))
+        return data
 
 
 class EntityDetailSerializer(EntitySerializer):
@@ -200,11 +210,24 @@ class CashflowForecastSerializer(serializers.ModelSerializer):
 
 class TaxProfileSerializer(serializers.ModelSerializer):
     entity_name = serializers.ReadOnlyField(source='entity.name')
+    registration_numbers_masked = serializers.SerializerMethodField()
 
     class Meta:
         model = TaxProfile
-        fields = ['id', 'entity', 'entity_name', 'country', 'jurisdiction_code', 'status', 'effective_from', 'effective_to', 'tax_rules', 'registered_regimes', 'registration_numbers', 'filing_preferences', 'auto_update', 'residency_status', 'compliance_score', 'last_rule_update', 'created_at', 'updated_at']
+        fields = ['id', 'entity', 'entity_name', 'country', 'jurisdiction_code', 'status', 'effective_from', 'effective_to', 'tax_rules', 'registered_regimes', 'registration_numbers', 'registration_numbers_masked', 'filing_preferences', 'auto_update', 'residency_status', 'compliance_score', 'last_rule_update', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+
+    def get_registration_numbers_masked(self, obj):
+        if not isinstance(obj.registration_numbers, dict):
+            return {}
+        return {key: mask_tax_identifier(value) for key, value in obj.registration_numbers.items()}
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        registration_numbers = data.get('registration_numbers')
+        if isinstance(registration_numbers, dict):
+            data['registration_numbers'] = {key: mask_tax_identifier(value) for key, value in registration_numbers.items()}
+        return data
 
 
 class TaxRegimeRegistrySerializer(serializers.ModelSerializer):
@@ -477,8 +500,39 @@ class TaxAuditLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TaxAuditLog
-        fields = ['id', 'entity', 'entity_name', 'user', 'user_name', 'action_type', 'old_value_json', 'new_value_json', 'reason', 'timestamp', 'ip_address']
+        fields = ['id', 'entity', 'entity_name', 'user', 'user_name', 'action_type', 'old_value_json', 'new_value_json', 'reason', 'country', 'device_metadata', 'timestamp', 'ip_address', 'previous_hash', 'event_hash']
         read_only_fields = ['timestamp']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if request and should_mask_tax_audit(request.user, instance.entity.organization):
+            data['old_value_json'] = mask_json_payload(data.get('old_value_json'))
+            data['new_value_json'] = mask_json_payload(data.get('new_value_json'))
+            data['device_metadata'] = {}
+            data['ip_address'] = ''
+        return data
+
+
+class TaxRuleSetVersionSerializer(serializers.ModelSerializer):
+    registry_name = serializers.ReadOnlyField(source='registry.regime_name')
+    approved_by_name = serializers.ReadOnlyField(source='approved_by.get_full_name')
+    created_by_name = serializers.ReadOnlyField(source='created_by.get_full_name')
+
+    class Meta:
+        model = TaxRuleSetVersion
+        fields = ['id', 'registry', 'registry_name', 'version_number', 'effective_from', 'effective_to', 'change_log', 'approval_status', 'approved_by', 'approved_by_name', 'approved_at', 'created_by', 'created_by_name', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class TaxRiskAlertSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+    resolved_by_name = serializers.ReadOnlyField(source='resolved_by.get_full_name')
+
+    class Meta:
+        model = TaxRiskAlert
+        fields = ['id', 'entity', 'entity_name', 'alert_type', 'severity', 'title', 'details', 'source_model', 'source_id', 'detected_at', 'resolved_at', 'resolved_by', 'resolved_by_name']
+        read_only_fields = ['detected_at']
 
 
 # ============ Entity-Specific Serializers ============

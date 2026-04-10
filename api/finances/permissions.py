@@ -5,7 +5,7 @@ from functools import wraps
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from django.http import JsonResponse
-from .models import TeamMember, Organization, Role, ROLE_ORG_OWNER, ROLE_CFO
+from .models import TeamMember, Organization, Role, ROLE_ORG_OWNER, ROLE_CFO, ROLE_COMPLIANCE_OFFICER
 
 
 class PermissionChecker:
@@ -93,6 +93,7 @@ class PermissionChecker:
             role_hierarchy = {
                 ROLE_ORG_OWNER: 5,
                 ROLE_CFO: 4,
+                ROLE_COMPLIANCE_OFFICER: 4,
                 'FINANCE_ANALYST': 3,
                 'VIEWER': 2,
                 'EXTERNAL_ADVISOR': 1,

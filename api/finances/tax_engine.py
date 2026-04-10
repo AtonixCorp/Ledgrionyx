@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from .models import Entity, TaxAuditLog, TaxCalculation, TaxFiling, TaxProfile, TaxRegimeRegistry
 from .tax_regimes import build_regime_payload, build_regime_rules, resolve_regime_code
+from .tax_security import detect_tax_risks
 
 
 def _to_decimal(value: Any) -> Decimal:
@@ -356,21 +357,36 @@ def persist_tax_calculation(entity: Entity, regime_code: str, period_start, peri
 
 def build_tax_filing(entity: Entity, calculation: TaxCalculation, form_type: str | None = None, reference_number: str | None = None, submission_status: str = 'draft') -> TaxFiling:
     filing_output = (calculation.calculation_json or {}).get('filing_output', {})
-    return TaxFiling.objects.create(
+    period_start = calculation.period_start or timezone.now().date()
+    period_end = calculation.period_end or timezone.now().date()
+    filing, created = TaxFiling.objects.update_or_create(
         entity=entity,
         tax_regime_code=calculation.regime_code,
-        period_start=calculation.period_start or timezone.now().date(),
-        period_end=calculation.period_end or timezone.now().date(),
-        form_type=form_type or filing_output.get('form_type') or calculation.regime_code,
-        form_json=filing_output,
-        calculation=calculation,
-        submission_status=submission_status,
-        reference_number=reference_number or '',
+        period_start=period_start,
+        period_end=period_end,
+        defaults={
+            'form_type': form_type or filing_output.get('form_type') or calculation.regime_code,
+            'form_json': filing_output,
+            'calculation': calculation,
+            'submission_status': submission_status,
+            'reference_number': reference_number or '',
+        },
     )
+    if not created:
+        detect_tax_risks(
+            entity=entity,
+            action_type='submit',
+            old_value={'tax_regime_code': filing.tax_regime_code, 'period_start': str(filing.period_start), 'period_end': str(filing.period_end)},
+            new_value={'tax_regime_code': filing.tax_regime_code, 'period_start': str(filing.period_start), 'period_end': str(filing.period_end)},
+            source_model='TaxFiling',
+            source_id=str(filing.id),
+            persist=True,
+        )
+    return filing
 
 
-def log_tax_audit(entity: Entity, action_type: str, user=None, old_value_json=None, new_value_json=None, reason: str = '', ip_address: str | None = None) -> TaxAuditLog:
-    return TaxAuditLog.objects.create(
+def log_tax_audit(entity: Entity, action_type: str, user=None, old_value_json=None, new_value_json=None, reason: str = '', ip_address: str | None = None, device_metadata: dict | None = None, country: str | None = None) -> TaxAuditLog:
+    audit_log = TaxAuditLog.objects.create(
         entity=entity,
         user=user,
         action_type=action_type,
@@ -378,4 +394,17 @@ def log_tax_audit(entity: Entity, action_type: str, user=None, old_value_json=No
         new_value_json=new_value_json or {},
         reason=reason,
         ip_address=ip_address,
+        device_metadata=device_metadata or {},
+        country=country or entity.country,
     )
+    detect_tax_risks(
+        entity=entity,
+        action_type=action_type,
+        old_value=old_value_json or {},
+        new_value=new_value_json or {},
+        source_model='TaxAuditLog',
+        source_id=str(audit_log.id),
+        actor=user,
+        persist=True,
+    )
+    return audit_log

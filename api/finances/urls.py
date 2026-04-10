@@ -12,6 +12,7 @@ from .views import list_countries, get_country
 from .enterprise_views import (
     OrganizationViewSet, EntityViewSet, TeamMemberViewSet,
     TaxExposureViewSet, TaxProfileViewSet, TaxRegimeRegistryViewSet, TaxCalculationHistoryViewSet, TaxFilingViewSet, TaxAuditLogViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
+    TaxRuleSetVersionViewSet, TaxRiskAlertViewSet,
     RoleViewSet, PermissionViewSet, AuditLogViewSet, PlatformAuditEventViewSet,
     EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
     StaffPayrollProfileViewSet, PayrollComponentViewSet, StaffPayrollComponentAssignmentViewSet,
@@ -76,6 +77,8 @@ router.register(r'tax-regime-registry', TaxRegimeRegistryViewSet, basename='tax-
 router.register(r'tax-calculations-history', TaxCalculationHistoryViewSet, basename='tax-calculation-history')
 router.register(r'tax-filings', TaxFilingViewSet, basename='tax-filing')
 router.register(r'tax-audit-logs', TaxAuditLogViewSet, basename='tax-audit-log')
+router.register(r'tax-rule-set-versions', TaxRuleSetVersionViewSet, basename='tax-rule-set-version')
+router.register(r'tax-risk-alerts', TaxRiskAlertViewSet, basename='tax-risk-alert')
 router.register(r'compliance-deadlines', ComplianceDeadlineViewSet, basename='compliance-deadline')
 router.register(r'cashflow-forecasts', CashflowForecastViewSet, basename='cashflow-forecast')
 router.register(r'roles', RoleViewSet, basename='role')

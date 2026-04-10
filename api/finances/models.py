@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
+from django.utils import timezone
 
 # Role constants
 ROLE_ORG_OWNER = 'ORG_OWNER'
@@ -11,6 +12,7 @@ ROLE_CFO = 'CFO'
 ROLE_FINANCE_ANALYST = 'FINANCE_ANALYST'
 ROLE_VIEWER = 'VIEWER'
 ROLE_EXTERNAL_ADVISOR = 'EXTERNAL_ADVISOR'
+ROLE_COMPLIANCE_OFFICER = 'COMPLIANCE_OFFICER'
 
 ROLE_CHOICES = [
     (ROLE_ORG_OWNER, 'Organization Owner'),
@@ -18,6 +20,7 @@ ROLE_CHOICES = [
     (ROLE_FINANCE_ANALYST, 'Finance Analyst'),
     (ROLE_VIEWER, 'Viewer'),
     (ROLE_EXTERNAL_ADVISOR, 'External Advisor'),
+    (ROLE_COMPLIANCE_OFFICER, 'Compliance Officer'),
 ]
 
 # Account type constants
@@ -434,6 +437,11 @@ class Permission(models.Model):
         # Tax & Compliance
         ('view_tax_compliance', 'View Tax Compliance'),
         ('edit_tax_compliance', 'Edit Tax Compliance'),
+        ('manage_tax_regimes', 'Manage Tax Regimes'),
+        ('view_tax_audit_logs', 'View Tax Audit Logs'),
+        ('submit_tax_filings', 'Submit Tax Filings'),
+        ('run_tax_calculations', 'Run Tax Calculations'),
+        ('edit_tax_registrations', 'Edit Tax Registration Numbers'),
         ('export_tax_reports', 'Export Tax Reports'),
         
         # Cashflow & Treasury
@@ -1013,6 +1021,26 @@ class Role(models.Model):
             permissions_dict.get('view_reports'),
         ]
         advisor_role.permissions.set([p for p in advisor_perms if p])
+
+        compliance_role, _ = Role.objects.get_or_create(
+            code=ROLE_COMPLIANCE_OFFICER,
+            defaults={'name': 'Compliance Officer', 'description': 'Governance and audit oversight'}
+        )
+        compliance_perms = [
+            permissions_dict.get('view_org_overview'),
+            permissions_dict.get('view_entities'),
+            permissions_dict.get('view_tax_compliance'),
+            permissions_dict.get('edit_tax_compliance'),
+            permissions_dict.get('manage_tax_regimes'),
+            permissions_dict.get('view_tax_audit_logs'),
+            permissions_dict.get('submit_tax_filings'),
+            permissions_dict.get('run_tax_calculations'),
+            permissions_dict.get('edit_tax_registrations'),
+            permissions_dict.get('export_tax_reports'),
+            permissions_dict.get('view_reports'),
+            permissions_dict.get('generate_reports'),
+        ]
+        compliance_role.permissions.set([p for p in compliance_perms if p])
         
         return {
             ROLE_ORG_OWNER: owner_role,
@@ -1020,6 +1048,7 @@ class Role(models.Model):
             ROLE_FINANCE_ANALYST: analyst_role,
             ROLE_VIEWER: viewer_role,
             ROLE_EXTERNAL_ADVISOR: advisor_role,
+            ROLE_COMPLIANCE_OFFICER: compliance_role,
         }
 
 
@@ -1960,6 +1989,10 @@ class TaxAuditLog(models.Model):
     old_value_json = models.JSONField(default=dict, blank=True)
     new_value_json = models.JSONField(default=dict, blank=True)
     reason = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    device_metadata = models.JSONField(default=dict, blank=True)
+    previous_hash = models.CharField(max_length=64, blank=True)
+    event_hash = models.CharField(max_length=64, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
 
@@ -1969,10 +2002,103 @@ class TaxAuditLog(models.Model):
     def save(self, *args, **kwargs):
         if not self._state.adding:
             raise ValueError('TaxAuditLog entries are immutable.')
+        if not self.country and self.entity_id:
+            self.country = self.entity.country
+        if not self.previous_hash and self.entity_id:
+            previous = TaxAuditLog.objects.filter(entity=self.entity).exclude(pk=self.pk).order_by('-timestamp').first()
+            self.previous_hash = previous.event_hash if previous else ''
+        if not getattr(self, 'timestamp', None):
+            self.timestamp = timezone.now()
+        if not self.event_hash:
+            import hashlib
+            import json
+
+            payload = {
+                'entity_id': str(self.entity_id or ''),
+                'user_id': str(self.user_id or ''),
+                'action_type': self.action_type,
+                'old_value_json': self.old_value_json,
+                'new_value_json': self.new_value_json,
+                'reason': self.reason,
+                'country': self.country,
+                'device_metadata': self.device_metadata,
+                'ip_address': self.ip_address,
+                'previous_hash': self.previous_hash,
+                'timestamp': self.timestamp.isoformat() if self.timestamp else '',
+            }
+            self.event_hash = hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode('utf-8')).hexdigest()
         return super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.action_type} - {self.entity.name} ({self.timestamp})"
+
+
+class TaxRuleSetVersion(models.Model):
+    """Versioned tax rule-set governance record."""
+
+    APPROVAL_STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('in_review', 'In Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('deployed', 'Deployed'),
+        ('expired', 'Expired'),
+    ]
+
+    registry = models.ForeignKey(TaxRegimeRegistry, on_delete=models.CASCADE, related_name='rule_versions')
+    version_number = models.CharField(max_length=40)
+    effective_from = models.DateField()
+    effective_to = models.DateField(null=True, blank=True)
+    change_log = models.JSONField(default=list, blank=True)
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='draft')
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_tax_rule_versions')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_tax_rule_versions')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('registry', 'version_number')
+        ordering = ['-effective_from', '-created_at']
+
+    def __str__(self):
+        return f"{self.registry.regime_code} v{self.version_number}"
+
+
+class TaxRiskAlert(models.Model):
+    """Automated fraud and manipulation alert record."""
+
+    ALERT_TYPE_CHOICES = [
+        ('backdated_filing', 'Backdated Filing'),
+        ('manipulated_tax_base', 'Manipulated Tax Base'),
+        ('duplicate_filing', 'Duplicate Filing'),
+        ('suspicious_rule_change', 'Suspicious Rule Change'),
+        ('unauthorized_access', 'Unauthorized Access'),
+    ]
+
+    SEVERITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ]
+
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='tax_risk_alerts')
+    alert_type = models.CharField(max_length=50, choices=ALERT_TYPE_CHOICES)
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='medium')
+    title = models.CharField(max_length=255)
+    details = models.JSONField(default=dict, blank=True)
+    source_model = models.CharField(max_length=120, blank=True)
+    source_id = models.CharField(max_length=120, blank=True)
+    detected_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='resolved_tax_risk_alerts')
+
+    class Meta:
+        ordering = ['-detected_at']
+
+    def __str__(self):
+        return f"{self.alert_type} - {self.entity.name}"
 
 
 # ============================================================================
