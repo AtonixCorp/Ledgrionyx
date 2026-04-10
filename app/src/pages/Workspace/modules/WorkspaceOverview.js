@@ -451,7 +451,7 @@ const WorkspaceOverview = () => {
       <div className="wsm-stats-row">
         <div className="wsm-stat-card">
           <span className="wsm-stat-label">Status</span>
-          <span className="wsm-stat-value" style={{ textTransform: 'capitalize' }}>{statusCfg.label}</span>
+          <span className="wsm-stat-value wsm-stat-value-caps">{statusCfg.label}</span>
         </div>
         <div className="wsm-stat-card">
           <span className="wsm-stat-label">Country</span>

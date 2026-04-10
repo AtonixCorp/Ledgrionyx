@@ -2,11 +2,11 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
     Expense, Income, Budget, UserProfile, Organization, Entity, Role, Permission,
-    TeamMember, TaxExposure, TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask,
+    TeamMember, TaxExposure, TaxRegimeRegistry, TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask,
     ModelTemplate, FinancialModel, Scenario, SensitivityAnalysis, AIInsight,
     CustomKPI, KPICalculation, Report, Consolidation, ConsolidationEntity,
     IntercompanyTransaction, IntercompanyEliminationEntry,
-    TaxCalculation, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
+    TaxCalculation, TaxFiling, TaxAuditLog, ACCOUNT_TYPE_PERSONAL, ACCOUNT_TYPE_ENTERPRISE,
     EntityDepartment, EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
     LeaveType, LeaveBalance, LeaveRequest, PayrollBankOriginatorProfile, PayrollRun, Payslip, PayslipLineItem,
@@ -203,7 +203,14 @@ class TaxProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TaxProfile
-        fields = ['id', 'entity', 'entity_name', 'country', 'status', 'tax_rules', 'auto_update', 'residency_status', 'compliance_score', 'last_rule_update', 'created_at', 'updated_at']
+        fields = ['id', 'entity', 'entity_name', 'country', 'jurisdiction_code', 'status', 'effective_from', 'effective_to', 'tax_rules', 'registered_regimes', 'registration_numbers', 'filing_preferences', 'auto_update', 'residency_status', 'compliance_score', 'last_rule_update', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class TaxRegimeRegistrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaxRegimeRegistry
+        fields = ['id', 'jurisdiction_code', 'country', 'regime_code', 'regime_name', 'tax_type', 'regime_category', 'filing_frequency', 'filing_form', 'required_forms', 'calculation_method', 'penalty_rules', 'rules_json', 'forms_json', 'penalty_rules_json', 'compliance_rules_json', 'effective_from', 'effective_to', 'rule_set', 'reference_links', 'is_active', 'notes', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
 
@@ -450,8 +457,28 @@ class TaxCalculationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TaxCalculation
-        fields = ['id', 'entity', 'entity_name', 'tax_year', 'calculation_type', 'jurisdiction', 'taxable_income', 'tax_rate', 'deductions', 'credits', 'calculated_tax', 'effective_rate', 'breakdown', 'created_at']
+        fields = ['id', 'entity', 'entity_name', 'tax_year', 'calculation_type', 'jurisdiction', 'regime_code', 'regime_name', 'period_start', 'period_end', 'calculation_json', 'liability_amount', 'status', 'taxable_income', 'tax_rate', 'deductions', 'credits', 'calculated_tax', 'effective_rate', 'breakdown', 'created_at']
         read_only_fields = ['created_at']
+
+
+class TaxFilingSerializer(serializers.ModelSerializer):
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+    calculation_id = serializers.ReadOnlyField(source='calculation.id')
+
+    class Meta:
+        model = TaxFiling
+        fields = ['id', 'entity', 'entity_name', 'tax_regime_code', 'period_start', 'period_end', 'form_type', 'form_json', 'calculation', 'calculation_id', 'submission_status', 'submitted_at', 'reference_number', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class TaxAuditLogSerializer(serializers.ModelSerializer):
+    user_name = serializers.ReadOnlyField(source='user.get_full_name')
+    entity_name = serializers.ReadOnlyField(source='entity.name')
+
+    class Meta:
+        model = TaxAuditLog
+        fields = ['id', 'entity', 'entity_name', 'user', 'user_name', 'action_type', 'old_value_json', 'new_value_json', 'reason', 'timestamp', 'ip_address']
+        read_only_fields = ['timestamp']
 
 
 # ============ Entity-Specific Serializers ============

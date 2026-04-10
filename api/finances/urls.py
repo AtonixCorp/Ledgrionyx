@@ -11,7 +11,7 @@ from .platform_views import health_check, ingest_platform_event, internal_audit_
 from .views import list_countries, get_country
 from .enterprise_views import (
     OrganizationViewSet, EntityViewSet, TeamMemberViewSet,
-    TaxExposureViewSet, TaxProfileViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
+    TaxExposureViewSet, TaxProfileViewSet, TaxRegimeRegistryViewSet, TaxCalculationHistoryViewSet, TaxFilingViewSet, TaxAuditLogViewSet, ComplianceDeadlineViewSet, CashflowForecastViewSet,
     RoleViewSet, PermissionViewSet, AuditLogViewSet, PlatformAuditEventViewSet,
     EntityDepartmentViewSet, EntityRoleViewSet, EntityStaffViewSet,
     StaffPayrollProfileViewSet, PayrollComponentViewSet, StaffPayrollComponentAssignmentViewSet,
@@ -47,6 +47,17 @@ from .enterprise_views import (
     EmbeddedPaymentViewSet, AutomationWorkflowViewSet, AutomationExecutionViewSet, AutomationArtifactViewSet,
     FirmMetricViewSet, ClientMarketplaceIntegrationViewSet
 )
+from .tax_api_views import (
+    CompanyTaxProfileAPIView,
+    TaxAuditAPIView,
+    TaxCalculateAPIView,
+    TaxComplianceAlertsAPIView,
+    TaxComplianceCalendarAPIView,
+    TaxFilingCreateAPIView,
+    TaxFilingSubmitAPIView,
+    TaxRegimeCollectionAPIView,
+    TaxRegimeCountryAPIView,
+)
 
 router = DefaultRouter()
 
@@ -61,6 +72,10 @@ router.register(r'entities', EntityViewSet, basename='entity')
 router.register(r'team-members', TeamMemberViewSet, basename='team-member')
 router.register(r'tax-exposures', TaxExposureViewSet, basename='tax-exposure')
 router.register(r'tax-profiles', TaxProfileViewSet, basename='tax-profile')
+router.register(r'tax-regime-registry', TaxRegimeRegistryViewSet, basename='tax-regime-registry')
+router.register(r'tax-calculations-history', TaxCalculationHistoryViewSet, basename='tax-calculation-history')
+router.register(r'tax-filings', TaxFilingViewSet, basename='tax-filing')
+router.register(r'tax-audit-logs', TaxAuditLogViewSet, basename='tax-audit-log')
 router.register(r'compliance-deadlines', ComplianceDeadlineViewSet, basename='compliance-deadline')
 router.register(r'cashflow-forecasts', CashflowForecastViewSet, basename='cashflow-forecast')
 router.register(r'roles', RoleViewSet, basename='role')
@@ -217,6 +232,16 @@ router.register(r'client-marketplace-integrations', ClientMarketplaceIntegration
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('tax/regimes', TaxRegimeCollectionAPIView.as_view(), name='tax-regime-collection'),
+    path('tax/regimes/<str:country>', TaxRegimeCountryAPIView.as_view(), name='tax-regime-country'),
+    path('companies/<int:entity_id>/tax', CompanyTaxProfileAPIView.as_view(), name='company-tax-profile'),
+    path('tax/calculate', TaxCalculateAPIView.as_view(), name='tax-calculate'),
+    path('tax/filings/create', TaxFilingCreateAPIView.as_view(), name='tax-filing-create'),
+    path('tax/filings/submit', TaxFilingSubmitAPIView.as_view(), name='tax-filing-submit'),
+    path('tax/filings/<int:pk>', TaxFilingViewSet.as_view({'get': 'retrieve'}), name='tax-filing-detail'),
+    path('tax/compliance/calendar', TaxComplianceCalendarAPIView.as_view(), name='tax-compliance-calendar'),
+    path('tax/compliance/alerts', TaxComplianceAlertsAPIView.as_view(), name='tax-compliance-alerts'),
+    path('tax/audit', TaxAuditAPIView.as_view(), name='tax-audit'),
     path('health/', health_check, name='health-check'),
     path('platform/events/', ingest_platform_event, name='platform-event-ingest'),
     path('internal/audit-events', internal_audit_events, name='internal-audit-events'),

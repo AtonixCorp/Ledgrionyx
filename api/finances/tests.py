@@ -71,7 +71,10 @@ from .models import (
     StaffPayrollProfile,
     SystemEvent,
     TeamMember,
+    TaxCalculation,
     TaxExposure,
+    TaxProfile,
+    TaxRegimeRegistry,
     Transaction,
     UserProfile,
     Vendor,
@@ -82,6 +85,9 @@ from .models import (
     AccountingApprovalMatrix,
     AccountingApprovalDelegation,
 )
+from .tax_regimes import build_regime_rules, resolve_regime_code
+from .tax_engine import calculate_liability
+from .tax_compliance import build_compliance_calendar, build_compliance_alerts
 from workspaces.models import Workspace, WorkspaceGroup, WorkspaceMember
 from workspaces.services import LogService, WorkspaceService
 
@@ -118,6 +124,272 @@ class BudgetModelTest(TestCase):
         )
         self.assertEqual(budget.remaining, Decimal("300.00"))
         self.assertEqual(budget.percentage_used, 40.0)
+
+
+class TaxRegimeModelTest(TestCase):
+    def test_worldwide_regime_defaults_are_country_aware(self):
+        defaults = build_regime_rules('United States')
+
+        self.assertEqual(defaults['jurisdiction_code'], 'US')
+        self.assertIn('sales_tax', defaults['regime_codes'])
+        self.assertEqual(defaults['active_regimes'][0]['regime_code'], 'corporate_income_tax')
+
+    def test_manual_regime_code_alias_resolves_to_family(self):
+        defaults = build_regime_rules('United Kingdom', regime_codes=['UK_VAT', 'CT600'])
+
+        self.assertEqual(defaults['jurisdiction_code'], 'GB')
+        self.assertEqual(defaults['regime_codes'], ['vat', 'corporate_income_tax'])
+        self.assertIn('vat_return', defaults['required_forms'])
+        self.assertIn('corporate_return', defaults['required_forms'])
+
+    def test_registry_record_can_be_created(self):
+        regime = TaxRegimeRegistry.objects.create(
+            jurisdiction_code='US',
+            country='United States',
+            regime_code='sales_tax_ca',
+            regime_name='California Sales Tax',
+            tax_type='sales_tax',
+            regime_category='vat',
+            filing_frequency='monthly',
+            filing_form='sales_tax_return',
+            required_forms=['sales_tax_return'],
+            calculation_method='point_of_sale',
+            penalty_rules={'late_filing': 'jurisdiction_defined'},
+            rule_set={'basis': 'sale_transaction'},
+        )
+
+        self.assertEqual(regime.jurisdiction_code, 'US')
+        self.assertTrue(regime.is_active)
+
+
+class TaxProfileModelTest(TestCase):
+    def test_profile_tracks_jurisdiction_and_regimes(self):
+        user = User.objects.create_user(username='tax-user', password='password123')
+        organization = Organization.objects.create(name='Tax Org', slug='tax-org', owner=user, primary_country='United Kingdom')
+        entity = Entity.objects.create(
+            organization=organization,
+            name='Global Entity',
+            country='United Kingdom',
+            local_currency='GBP',
+            entity_type='corporation',
+        )
+
+        profile = TaxProfile.objects.create(
+            entity=entity,
+            country='United Kingdom',
+            jurisdiction_code='GB',
+            effective_from=timezone.now().date(),
+            tax_rules={'jurisdiction_code': 'GB'},
+            registered_regimes=['corporate_income_tax', 'vat'],
+            registration_numbers={'vat': 'GB123456789'},
+            filing_preferences={'primary_frequency': 'quarterly'},
+        )
+
+        self.assertEqual(profile.resolved_jurisdiction_code, 'GB')
+        self.assertEqual(profile.active_regime_codes, ['corporate_income_tax', 'vat'])
+
+
+class TaxCalculationModelTest(TestCase):
+    def test_calculation_can_store_regime_metadata(self):
+        user = User.objects.create_user(username='calc-user', password='password123')
+        organization = Organization.objects.create(name='Calc Org', slug='calc-org', owner=user, primary_country='South Africa')
+        entity = Entity.objects.create(
+            organization=organization,
+            name='Calc Entity',
+            country='South Africa',
+            local_currency='ZAR',
+            entity_type='corporation',
+        )
+
+        calculation = TaxCalculation.objects.create(
+            entity=entity,
+            tax_year=2025,
+            calculation_type='corporate',
+            jurisdiction='South Africa',
+            regime_code='corporate_income_tax',
+            regime_name='Corporate Income Tax',
+            taxable_income=Decimal('1000.00'),
+            tax_rate=Decimal('0.3000'),
+            deductions={'allowance': '100.00'},
+            credits={'credit': '25.00'},
+            calculated_tax=Decimal('245.00'),
+            effective_rate=Decimal('0.2450'),
+            calculation_json={'line_items': {'taxable_base': '1000.00'}},
+            liability_amount=Decimal('245.00'),
+            status='final',
+            breakdown={'regime_code': 'corporate_income_tax'},
+        )
+
+        self.assertEqual(calculation.regime_code, 'corporate_income_tax')
+        self.assertEqual(calculation.regime_name, 'Corporate Income Tax')
+        self.assertEqual(calculation.status, 'final')
+        self.assertEqual(calculation.liability_amount, Decimal('245.00'))
+
+
+class TaxCalculationApiTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='tax-api-user', password='password123')
+        self.organization = Organization.objects.create(
+            name='Tax API Org',
+            slug='tax-api-org',
+            owner=self.user,
+            primary_country='United States',
+        )
+        self.entity = Entity.objects.create(
+            organization=self.organization,
+            name='Tax API Entity',
+            country='United States',
+            local_currency='USD',
+            entity_type='corporation',
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_calculate_uses_worldwide_regime_defaults(self):
+        response = self.client.post(
+            '/api/tax-calculations/calculate/',
+            {
+                'entity_id': self.entity.id,
+                'tax_year': 2025,
+                'calculation_type': 'corporate',
+                'taxable_income': '1000.00',
+                'tax_rate': '30',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['jurisdiction'], 'United States')
+        self.assertEqual(response.data['regime_code'], 'corporate_income_tax')
+        self.assertEqual(response.data['breakdown']['jurisdiction_code'], 'US')
+        self.assertIn('filing_output', response.data['calculation_json'])
+        self.assertEqual(response.data['liability_amount'], '300.00')
+
+    def test_calculate_accepts_manual_regime_alias(self):
+        response = self.client.post(
+            '/api/tax-calculations/calculate/',
+            {
+                'entity_id': self.entity.id,
+                'tax_year': 2025,
+                'calculation_type': 'vat',
+                'tax_regime': 'US_FED_CIT',
+                'taxable_income': '1500.00',
+                'tax_rate': '21',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['regime_code'], 'corporate_income_tax')
+        self.assertEqual(response.data['breakdown']['required_forms'], ['corporate_return'])
+
+    def test_generate_filing_creates_submission_payload(self):
+        calculation = TaxCalculation.objects.create(
+            entity=self.entity,
+            tax_year=2025,
+            calculation_type='corporate',
+            jurisdiction='United States',
+            regime_code='corporate_income_tax',
+            regime_name='Corporate Income Tax',
+            period_start=timezone.now().date().replace(month=1, day=1),
+            period_end=timezone.now().date().replace(month=12, day=31),
+            taxable_income=Decimal('1000.00'),
+            tax_rate=Decimal('0.2100'),
+            deductions={'business_expenses': '0'},
+            credits={},
+            calculated_tax=Decimal('210.00'),
+            effective_rate=Decimal('0.2100'),
+            calculation_json={'filing_output': {'form_type': 'corporate_return'}},
+            liability_amount=Decimal('210.00'),
+            status='final',
+            breakdown={'taxable_base': '1000.00'},
+        )
+
+        response = self.client.post(
+            f'/api/tax-calculations/{calculation.id}/generate_filing/',
+            {
+                'reference_number': 'FILING-2025-001',
+                'submission_status': 'ready',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['form_type'], 'corporate_return')
+        self.assertEqual(response.data['submission_status'], 'ready')
+
+    def test_public_tax_api_routes_generate_compliance_calendar(self):
+        TaxRegimeRegistry.objects.create(
+            jurisdiction_code='US',
+            country='United States',
+            regime_code='vat',
+            regime_name='Value Added Tax',
+            tax_type='vat',
+            regime_category='vat',
+            filing_frequency='monthly',
+            filing_form='vat_return',
+            required_forms=['vat_return'],
+            calculation_method='invoice_offset',
+            compliance_rules_json={'filing_frequency': 'monthly', 'due_day': 25, 'grace_period_days': 5},
+            rules_json={'compliance_rules': {'filing_frequency': 'monthly', 'due_day': 25, 'grace_period_days': 5}},
+            forms_json=['vat_return'],
+        )
+        TaxProfile.objects.create(
+            entity=self.entity,
+            country='United States',
+            jurisdiction_code='US',
+            registered_regimes=['vat'],
+            tax_rules={'regime_codes': ['vat']},
+        )
+
+        response = self.client.get(f'/api/tax/compliance/calendar?entity_id={self.entity.id}&horizon_months=1')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreaterEqual(len(response.data['calendar']), 1)
+        self.assertEqual(response.data['calendar'][0]['regime_code'], 'vat')
+
+    def test_public_tax_api_routes_support_calculation_and_filing_submission(self):
+        calc_response = self.client.post(
+            '/api/tax/calculate',
+            {
+                'entity_id': self.entity.id,
+                'tax_year': 2025,
+                'calculation_type': 'corporate',
+                'tax_regime': 'US_FED_CIT',
+                'taxable_income': '1000.00',
+                'tax_rate': '30',
+            },
+            format='json',
+        )
+
+        self.assertEqual(calc_response.status_code, 201)
+        self.assertEqual(calc_response.data['regime_code'], 'corporate_income_tax')
+
+        filing_response = self.client.post(
+            '/api/tax/filings/create',
+            {
+                'entity_id': self.entity.id,
+                'calculation_id': calc_response.data['id'],
+                'submission_status': 'draft',
+            },
+            format='json',
+        )
+
+        self.assertEqual(filing_response.status_code, 201)
+        self.assertEqual(filing_response.data['submission_status'], 'draft')
+
+        submit_response = self.client.post(
+            '/api/tax/filings/submit',
+            {
+                'filing_id': filing_response.data['id'],
+                'submission_status': 'submitted',
+                'reference_number': 'SUB-001',
+            },
+            format='json',
+        )
+
+        self.assertEqual(submit_response.status_code, 200)
+        self.assertEqual(submit_response.data['submission_status'], 'submitted')
 
 
 class PlatformIntegrationViewTests(TestCase):
@@ -1185,6 +1457,52 @@ class CoreFinancialAPIV1Tests(TestCase):
         )
         self.assertEqual(deliveries_response.status_code, 200)
         self.assertGreaterEqual(len(deliveries_response.data), 2)
+
+
+class EntityViewSetTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='entity-owner',
+            email='entity-owner@example.com',
+            password='strong-pass-123',
+        )
+        self.organization = Organization.objects.create(
+            owner=self.user,
+            name='Ledgrionyx Holdings',
+            slug='ledgrionyx-holdings',
+            primary_country='US',
+            primary_currency='USD',
+        )
+        self.client = APIClient(HTTP_HOST='localhost')
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_entity_accepts_holding_company_type(self):
+        response = self.client.post(
+            '/api/entities/',
+            {
+                'organization_id': self.organization.id,
+                'name': 'Ledgrionyx Parent Co',
+                'country': 'US',
+                'entity_type': 'holding_company',
+                'status': 'active',
+                'local_currency': 'USD',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['entity_type'], 'holding_company')
+        self.assertTrue(
+            Entity.objects.filter(name='Ledgrionyx Parent Co', entity_type='holding_company').exists()
+        )
+
+    def test_permission_context_grants_owner_entity_access_without_seeded_permissions(self):
+        response = self.client.get(f'/api/organizations/{self.organization.id}/permission_context/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['role_code'], 'ORG_OWNER')
+        self.assertIn('view_entities', response.data['permission_codes'])
+        self.assertIn('create_entity', response.data['permission_codes'])
 
 
 @override_settings(

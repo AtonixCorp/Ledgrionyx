@@ -13,7 +13,7 @@ import './CreateWorkspace.css';
 /* ─────────────────────────────────────────────────────────────────────────────
    Ledgrionyx — Create Workspace
    Form to create a new company workspace (entity).
-   On success: activates the new workspace and redirects to overview.
+  On success: activates the new workspace and returns to the Global Console.
 ───────────────────────────────────────────────────────────────────────────── */
 
 const COUNTRIES = countryDropdownOptions;
@@ -371,11 +371,7 @@ const CreateWorkspace = () => {
       }
 
       if (newWorkspace) {
-        const wsId = newWorkspace.id;
-        const launchEquity = ['equity', 'standalone'].includes(form.workspaceMode)
-          && form.enabledModules.some((moduleKey) => moduleKey.startsWith('equity_'))
-          && !form.enabledModules.some((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey));
-        navigate(launchEquity ? `/app/equity/${wsId}/registry` : `/app/workspace/${wsId}/overview`);
+        navigate('/app/console');
       }
     } catch (err) {
       setError(err?.message || 'Failed to create workspace. Please try again.');
@@ -544,11 +540,6 @@ const CreateWorkspace = () => {
     const packageSelected = Boolean(form.workspaceMode);
     const accountingCount = form.enabledModules.filter((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey)).length;
     const equityCount = form.enabledModules.filter((moduleKey) => EQUITY_MODULE_KEYS.includes(moduleKey)).length;
-    const launchDestination = ['equity', 'standalone'].includes(form.workspaceMode)
-      && equityCount > 0
-      && accountingCount === 0
-      ? 'Ledgrionyx Equity Management'
-      : 'Standard Workspace Overview';
 
     return (
       <div className="cw-launch-layout">
@@ -644,10 +635,10 @@ const CreateWorkspace = () => {
               <div className="cw-review-row"><span>Organization</span><strong>{currentOrganization?.name || 'No organization selected'}</strong></div>
               <div className="cw-review-row"><span>Accounting modules</span><strong>{accountingCount}</strong></div>
               <div className="cw-review-row"><span>Equity modules</span><strong>{equityCount}</strong></div>
-              <div className="cw-review-row"><span>Launch target</span><strong>{launchDestination}</strong></div>
+              <div className="cw-review-row"><span>Appears after create</span><strong>Global Console</strong></div>
             </div>
             <div className="cw-review-note">
-              {selectedPackage?.description || 'Pick a package to preview how this workspace will launch.'}
+              {selectedPackage?.description || 'Pick a package to preview how this workspace will be configured before it appears on the console.'}
             </div>
           </div>
         </div>
@@ -658,26 +649,19 @@ const CreateWorkspace = () => {
   const selectedPackage = WORKSPACE_PACKAGE_OPTIONS.find((option) => option.id === form.workspaceMode) || null;
   const accountingCount = form.enabledModules.filter((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey)).length;
   const equityCount = form.enabledModules.filter((moduleKey) => EQUITY_MODULE_KEYS.includes(moduleKey)).length;
-  const launchDestination = ['equity', 'standalone'].includes(form.workspaceMode)
-    && equityCount > 0
-    && accountingCount === 0
-    ? 'Ledgrionyx Equity Management'
-    : 'Standard Workspace Overview';
 
   const dashboardGuide = [
     {
-      title: 'Primary landing dashboard',
-      description: selectedPackage
-        ? `${launchDestination} opens first based on the package and module mix you selected.`
-        : 'Choose a workspace package to preview the dashboard that opens first after launch.',
+      title: 'Shows on the Global Console',
+      description: 'After creation, the workspace is added to the main console so users see it on the first page after login.',
     },
     {
       title: 'Operations and team workspace',
       description: 'Every workspace starts with a shared operating layer for members, departments, meetings, permissions, files, and internal coordination.',
     },
     {
-      title: 'Ledgrionyx Equity Management routing',
-      description: 'When equity modules are enabled, the workspace can launch into Ledgrionyx Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
+      title: 'Equity capabilities stay attached',
+      description: 'If equity modules are enabled, they remain part of the workspace and can be opened from the console after creation.',
     },
   ];
 
@@ -755,7 +739,7 @@ const CreateWorkspace = () => {
                 className="cw-btn cw-btn-create"
                 disabled={submitting || !form.name || !form.country || !form.workspaceMode || !currentOrganization?.id}
               >
-                {submitting ? 'Creating Workspace…' : 'Launch Workspace'}
+                {submitting ? 'Creating Workspace…' : 'Create Workspace'}
               </button>
             )}
           </div>
@@ -799,7 +783,7 @@ const CreateWorkspace = () => {
         </ul>
 
         <div className="cw-sidebar-panel">
-          <h3>Dashboard Journey</h3>
+          <h3>After Creation</h3>
           <div className="cw-dashboard-guide">
             {dashboardGuide.map((item) => (
               <article key={item.title} className="cw-dashboard-guide-card">
@@ -811,11 +795,11 @@ const CreateWorkspace = () => {
         </div>
 
         <div className="cw-sidebar-panel cw-sidebar-panel-accent">
-          <h3>Current launch preview</h3>
+          <h3>Current workspace preview</h3>
           <div className="cw-sidebar-preview-row"><span>Package</span><strong>{selectedPackage?.title || 'Not selected yet'}</strong></div>
           <div className="cw-sidebar-preview-row"><span>Accounting modules</span><strong>{accountingCount}</strong></div>
           <div className="cw-sidebar-preview-row"><span>Equity modules</span><strong>{equityCount}</strong></div>
-          <div className="cw-sidebar-preview-row"><span>First dashboard</span><strong>{selectedPackage ? launchDestination : 'Choose package first'}</strong></div>
+          <div className="cw-sidebar-preview-row"><span>Appears on</span><strong>Global Console</strong></div>
         </div>
       </aside>
     </div>{/* /.create-workspace */}

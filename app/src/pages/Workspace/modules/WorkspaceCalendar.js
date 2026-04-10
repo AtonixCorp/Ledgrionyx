@@ -46,7 +46,7 @@ const WorkspaceCalendar = () => {
         <button className="wsm-btn-secondary" onClick={prevMonth}>←</button>
         <span className="wsm-cal-title">{MONTHS[month]} {year}</span>
         <button className="wsm-btn-secondary" onClick={nextMonth}>→</button>
-        <div className="wsm-chips" style={{ marginLeft: 'auto' }}>
+        <div className="wsm-chips wsm-cal-view-chips">
           {VIEWS.map(v => (
             <button key={v} className={`wsm-chip${calView === v ? ' active' : ''}`} onClick={() => setCalView(v)}>{v}</button>
           ))}
@@ -54,22 +54,15 @@ const WorkspaceCalendar = () => {
       </div>
 
       <div className="wsm-section">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+        <div className="wsm-cal-grid">
           {DAYS.map(d => (
-            <div key={d} style={{ textAlign: 'center', fontWeight: 700, fontSize: 11, color: '#9ca3af', padding: '6px 0', textTransform: 'uppercase' }}>{d}</div>
+            <div key={d} className="wsm-cal-day-label">{d}</div>
           ))}
           {cells.map((day, i) => (
-            <div key={i} style={{
-              minHeight: 72,
-              background: day ? '#fff' : 'transparent',
-              border: day ? '1px solid #e5e7eb' : 'none',
-              borderRadius: 6,
-              padding: '6px 8px',
-              fontSize: 13,
-              color: day === today.getDate() && month === today.getMonth() && year === today.getFullYear() ? '#2563eb' : '#0d1b2e',
-              fontWeight: day === today.getDate() && month === today.getMonth() && year === today.getFullYear() ? 700 : 400,
-              cursor: day ? 'pointer' : 'default',
-            }}>
+            <div
+              key={i}
+              className={`wsm-cal-cell${day ? ' wsm-cal-cell-filled' : ''}${day === today.getDate() && month === today.getMonth() && year === today.getFullYear() ? ' wsm-cal-cell-today' : ''}`}
+            >
               {day || ''}
             </div>
           ))}

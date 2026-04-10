@@ -38,7 +38,7 @@ const WorkspaceSettings = () => {
       </div>
 
       {/* ── General ── */}
-      <div className="wsm-section" style={{ maxWidth: 600, marginBottom: 24 }}>
+      <div className="wsm-section wsm-section-narrow">
         <div className="wsm-section-title">General</div>
         <div className="wsm-form">
           <div className="wsm-form-group">
@@ -66,13 +66,13 @@ const WorkspaceSettings = () => {
       </div>
 
       {/* ── Modules ── */}
-      <div className="wsm-section" style={{ maxWidth: 600, marginBottom: 24 }}>
+      <div className="wsm-section wsm-section-narrow">
         <div className="wsm-section-title">Modules</div>
         <div className="wsm-module-list">
           {MODULES.map(m => (
             <div key={m.key} className="wsm-module-item">
               <div className="wsm-module-info">
-                <div className="wsm-module-name">{m.name}{m.required && <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 6 }}>(required)</span>}</div>
+                <div className="wsm-module-name">{m.name}{m.required && <span className="wsm-module-required">(required)</span>}</div>
                 <div className="wsm-module-desc">{m.desc}</div>
               </div>
               <label className="wsm-module-toggle">
@@ -90,12 +90,12 @@ const WorkspaceSettings = () => {
       </div>
 
       {/* ── Danger zone ── */}
-      <div className="wsm-danger-zone" style={{ maxWidth: 600 }}>
+      <div className="wsm-danger-zone wsm-section-narrow">
         <div className="wsm-danger-zone-title">Danger Zone</div>
         <div className="wsm-danger-zone-desc">
           Archiving or deleting the workspace is permanent. Archived workspaces retain data but become read-only.
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="wsm-inline-actions">
           <button className="wsm-btn-secondary">Archive Workspace</button>
           <button className="wsm-btn-danger">Delete Workspace</button>
         </div>

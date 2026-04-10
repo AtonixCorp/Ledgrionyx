@@ -12,6 +12,7 @@ from django.http import FileResponse
 from django.http import HttpResponse
 from django.db.models import Sum, Q, Count
 from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_date
 from datetime import datetime, timedelta
 from collections import defaultdict
 from decimal import Decimal
@@ -20,8 +21,9 @@ from django.utils import timezone
 from workspaces.models import Workspace
 
 from .models import (
-    Organization, Entity, TeamMember, Role, Permission, TaxExposure,
-    TaxProfile, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask, EntityDepartment,
+    Organization, Entity, TeamMember, Role, Permission, TaxExposure, ROLE_ORG_OWNER, ROLE_CFO,
+    ROLE_FINANCE_ANALYST, ROLE_VIEWER, ROLE_EXTERNAL_ADVISOR,
+    TaxProfile, TaxRegimeRegistry, TaxCalculation, TaxFiling, TaxAuditLog, ComplianceDeadline, CashflowForecast, AuditLog, PlatformAuditEvent, PlatformTask, EntityDepartment,
     Budget, Scenario, Consolidation,
     EntityRole, EntityStaff, BankAccount, Wallet, ComplianceDocument,
     StaffPayrollProfile, PayrollComponent, StaffPayrollComponentAssignment,
@@ -63,6 +65,7 @@ from .serializers import (
     BankAccountSerializer, WalletSerializer, ComplianceDocumentSerializer,
     BookkeepingCategorySerializer, BookkeepingAccountSerializer, TransactionSerializer, BookkeepingAuditLogSerializer,
     RecurringTransactionSerializer, TaskRequestSerializer, PlatformTaskSerializer,
+    TaxRegimeRegistrySerializer, TaxCalculationSerializer, TaxFilingSerializer, TaxAuditLogSerializer,
     # New serializers
     ChartOfAccountsSerializer, GeneralLedgerSerializer, JournalApprovalMatrixSerializer,
     JournalApprovalDelegationSerializer, JournalEntryApprovalStepSerializer,
@@ -117,6 +120,8 @@ from .accounting_object_controls import (
 )
 from .intercompany_engine import post_intercompany_transaction
 from .payroll_bank_exports import list_bank_export_options
+from .tax_regimes import build_regime_rules, build_regime_payload, resolve_regime_code
+from .tax_engine import persist_tax_calculation, build_tax_filing, log_tax_audit
 from .payroll_presets import (
     get_payroll_country_preset,
     list_payroll_country_presets,
@@ -193,6 +198,48 @@ def _accessible_workspaces_queryset(user):
     return Workspace.objects.filter(Q(owner=user) | Q(members__user=user)).distinct()
 
 
+def _fallback_permission_codes_for_role(role_code):
+    all_permission_codes = [code for code, _ in Permission.PERMISSION_CHOICES]
+    role_permission_map = {
+        ROLE_ORG_OWNER: all_permission_codes,
+        ROLE_CFO: [code for code in all_permission_codes if code != 'manage_billing'],
+        ROLE_FINANCE_ANALYST: [
+            'view_org_overview',
+            'view_entities',
+            'create_entity',
+            'edit_entity',
+            'view_tax_compliance',
+            'edit_tax_compliance',
+            'view_cashflow',
+            'edit_cashflow',
+            'view_risk_exposure',
+            'view_reports',
+            'generate_reports',
+        ],
+        ROLE_VIEWER: [
+            'view_org_overview',
+            'view_entities',
+            'view_tax_compliance',
+            'view_cashflow',
+            'view_risk_exposure',
+            'view_reports',
+        ],
+        ROLE_EXTERNAL_ADVISOR: [
+            'view_tax_compliance',
+            'view_reports',
+        ],
+    }
+    return role_permission_map.get(role_code, [])
+
+
+def _resolve_permission_codes(role_code, role=None):
+    if role is not None:
+        codes = list(role.permissions.values_list('code', flat=True))
+        if codes:
+            return codes
+    return _fallback_permission_codes_for_role(role_code)
+
+
 def _get_accessible_entity_or_404(user, entity_id, organization=None):
     return get_object_or_404(_accessible_entities_queryset(user, organization), id=entity_id)
 
@@ -235,7 +282,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
         role_code = ROLE_ORG_OWNER if is_org_owner else getattr(getattr(team_member, 'role', None), 'code', None)
         role_name = 'Organization Owner' if is_org_owner else getattr(getattr(team_member, 'role', None), 'name', None)
-        permission_codes = list(Permission.objects.values_list('code', flat=True)) if is_org_owner else list(getattr(getattr(team_member, 'role', None), 'permissions', Permission.objects.none()).values_list('code', flat=True))
+        permission_codes = _resolve_permission_codes(role_code, getattr(team_member, 'role', None))
 
         levels = {key: 0 for key in CATEGORY_KEYS}
         for key, value in ORG_ROLE_CATEGORY_LEVELS.get(role_code, {}).items():
@@ -1439,13 +1486,18 @@ class EntityViewSet(viewsets.ModelViewSet):
             WorkspaceService.ensure_workspace_for_entity(entity)
 
             # Create a default tax profile for the entity country
+            regime_defaults = build_regime_rules(entity.country)
             TaxProfile.objects.get_or_create(
                 entity=entity,
                 country=entity.country,
                 defaults={
                     'status': 'active',
                     'compliance_score': 0,
-                    'tax_rules': {},
+                    'jurisdiction_code': regime_defaults['jurisdiction_code'],
+                    'tax_rules': regime_defaults['tax_rules'],
+                    'registered_regimes': regime_defaults['regime_codes'],
+                    'registration_numbers': regime_defaults['registration_numbers'],
+                    'filing_preferences': regime_defaults['filing_preferences'],
                     'auto_update': True,
                     'residency_status': 'detected',
                 },
@@ -1527,7 +1579,19 @@ class TaxProfileViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         entity_id = self.request.data.get('entity') or self.request.data.get('entity_id')
         entity = _get_accessible_entity_or_404(self.request.user, entity_id)
-        serializer.save(entity=entity)
+        request_regime_codes = self.request.data.get('registered_regimes') or self.request.data.get('regime_codes') or []
+        defaults = build_regime_rules(entity.country, regime_codes=request_regime_codes)
+        serializer.save(
+            entity=entity,
+            country=self.request.data.get('country') or entity.country,
+            jurisdiction_code=self.request.data.get('jurisdiction_code') or defaults['jurisdiction_code'],
+            effective_from=parse_date(self.request.data.get('effective_from')) if self.request.data.get('effective_from') else None,
+            effective_to=parse_date(self.request.data.get('effective_to')) if self.request.data.get('effective_to') else None,
+            tax_rules=self.request.data.get('tax_rules') or defaults['tax_rules'],
+            registered_regimes=request_regime_codes or defaults['regime_codes'],
+            registration_numbers=self.request.data.get('registration_numbers') or defaults['registration_numbers'],
+            filing_preferences=self.request.data.get('filing_preferences') or defaults['filing_preferences'],
+        )
 
     @action(detail=False, methods=['get'])
     def by_country(self, request):
@@ -1549,6 +1613,97 @@ class TaxProfileViewSet(viewsets.ModelViewSet):
             grouped[country]['entities'].append(exposure.entity.name)
 
         return Response(grouped)
+
+
+class TaxRegimeRegistryViewSet(viewsets.ModelViewSet):
+    """Global registry of tax regimes by jurisdiction."""
+
+    serializer_class = TaxRegimeRegistrySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = TaxRegimeRegistry.objects.all().order_by('jurisdiction_code', 'regime_name')
+        country = self.request.query_params.get('country')
+        jurisdiction_code = self.request.query_params.get('jurisdiction_code')
+        regime_code = self.request.query_params.get('regime_code')
+        tax_type = self.request.query_params.get('tax_type')
+        is_active = self.request.query_params.get('is_active')
+
+        if country:
+            qs = qs.filter(country__iexact=country)
+        if jurisdiction_code:
+            qs = qs.filter(jurisdiction_code__iexact=jurisdiction_code)
+        if regime_code:
+            qs = qs.filter(regime_code__iexact=regime_code)
+        if tax_type:
+            qs = qs.filter(tax_type__iexact=tax_type)
+        if is_active in {'true', 'false'}:
+            qs = qs.filter(is_active=is_active == 'true')
+        return qs
+
+
+class TaxCalculationHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = TaxCalculationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = _filter_queryset_by_entity_scope(TaxCalculation.objects.all(), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+
+class TaxFilingViewSet(viewsets.ModelViewSet):
+    serializer_class = TaxFilingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = _filter_queryset_by_entity_scope(TaxFiling.objects.all(), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
+
+    def perform_create(self, serializer):
+        entity = _get_accessible_entity_or_404(self.request.user, self.request.data.get('entity') or self.request.data.get('entity_id'))
+        serializer.save(entity=entity)
+
+    @action(detail=True, methods=['post'])
+    def submit(self, request, pk=None):
+        filing = self.get_object()
+        filing.submission_status = request.data.get('submission_status') or 'submitted'
+        if filing.submission_status == 'submitted' and filing.submitted_at is None:
+            filing.submitted_at = request.data.get('submitted_at') or timezone.now()
+        if request.data.get('reference_number'):
+            filing.reference_number = request.data.get('reference_number')
+        filing.save(update_fields=['submission_status', 'submitted_at', 'reference_number', 'updated_at'])
+
+        log_tax_audit(
+            entity=filing.entity,
+            user=request.user,
+            action_type='submit',
+            new_value_json={
+                'tax_filing_id': str(filing.id),
+                'submission_status': filing.submission_status,
+            },
+            reason='Tax filing submitted through the enterprise API.',
+            ip_address=request.META.get('REMOTE_ADDR'),
+        )
+
+        return Response(TaxFilingSerializer(filing).data)
+
+
+class TaxAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = TaxAuditLogSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = _filter_queryset_by_entity_scope(TaxAuditLog.objects.all(), self.request.user)
+        entity_id = self.request.query_params.get('entity_id') or self.request.query_params.get('entity')
+        if entity_id:
+            qs = qs.filter(entity_id=entity_id)
+        return qs
 
 
 class ComplianceDeadlineViewSet(viewsets.ModelViewSet):

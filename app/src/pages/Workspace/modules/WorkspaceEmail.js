@@ -17,33 +17,25 @@ const WorkspaceEmail = () => {
         <button className="wsm-btn-primary" onClick={() => setComposing(true)}>+ Compose</button>
       </div>
 
-      <div style={{ display: 'flex', gap: 20 }}>
+      <div className="wsm-email-shell">
         {/* Folder list */}
-        <div style={{ width: 180, flexShrink: 0 }}>
+        <div className="wsm-folder-panel">
           <div className="wsm-section">
             {FOLDERS.map(f => (
               <div
                 key={f}
                 onClick={() => setFolder(f)}
-                style={{
-                  padding: '9px 12px',
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  fontWeight: folder === f ? 700 : 400,
-                  background: folder === f ? '#eff6ff' : 'transparent',
-                  color: folder === f ? '#2563eb' : '#374151',
-                  fontSize: 13,
-                }}
+                className={`wsm-folder-item${folder === f ? ' wsm-folder-item-active' : ''}`}
               >
                 {f}
-                {f === 'Inbox' && <span style={{ float: 'right', fontSize: 11, color: '#9ca3af' }}>0</span>}
+                {f === 'Inbox' && <span className="wsm-folder-count">0</span>}
               </div>
             ))}
           </div>
         </div>
 
         {/* Email list */}
-        <div style={{ flex: 1 }}>
+        <div className="wsm-email-list-panel">
           <div className="wsm-section">
             <div className="wsm-section-title">{folder}</div>
             <div className="wsm-empty">No messages in {folder.toLowerCase()}.</div>
@@ -53,12 +45,9 @@ const WorkspaceEmail = () => {
 
       {/* Compose modal */}
       {composing && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-        }}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 28, width: 540, boxShadow: '0 8px 32px rgba(0,0,0,.2)' }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700 }}>New Message</h3>
+        <div className="wsm-modal-overlay">
+          <div className="wsm-modal-card wsm-modal-card-wide">
+            <h3 className="wsm-modal-title">New Message</h3>
             <div className="wsm-form">
               <div className="wsm-form-group">
                 <label className="wsm-label">To</label>
@@ -72,7 +61,7 @@ const WorkspaceEmail = () => {
                 <label className="wsm-label">Message</label>
                 <textarea className="wsm-textarea" rows={5} placeholder="Write your message…" />
               </div>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <div className="wsm-modal-actions">
                 <button className="wsm-btn-secondary" onClick={() => setComposing(false)}>Cancel</button>
                 <button className="wsm-btn-primary">Send</button>
               </div>

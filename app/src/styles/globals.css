@@ -1,63 +1,84 @@
 /**
- * MAT LEDGRIONYX — CORE COLOR SYSTEM
+ * LEDGRIONYX — FOUNDER-APPROVED PLATFORM COLOR SYSTEM
  *
- * Primary:    #EE6C4D
- * Text:       #000000
- * Background: #FFFFFF
- *
- * Platform rule:
- * - Use the three core colors only.
- * - Secondary and muted states must be opacity variants of the text color.
- * - Primary actions and accents must use the primary brand color.
+ * Deep Navy:          #002026
+ * Steel Blue:         #003F5C
+ * Accent Red:         #E74C3C
+ * Institutional Blue: #005B96
+ * Soft Grey:          #A9B7B8
+ * Header / Footer:    #000000
+ * Body Background:    #FFFFFF
+ * Body Text:          #A0A0A0
  */
 
-/* =============================================================================
-   ROOT DESIGN TOKENS — LEDGRIONYX 3-COLOR SYSTEM
-   ============================================================================= */
 :root {
-  --color-primary: #EE6C4D;
-  --color-primary-rgb: 238, 108, 77;
-  --color-text: #000000;
-  --color-text-rgb: 0, 0, 0;
+  --brand-deep-navy: #002026;
+  --brand-deep-navy-rgb: 0, 32, 38;
+  --brand-steel-blue: #003F5C;
+  --brand-steel-blue-rgb: 0, 63, 92;
+  --brand-accent-red: #E74C3C;
+  --brand-accent-red-rgb: 231, 76, 60;
+  --brand-institutional-blue: #005B96;
+  --brand-institutional-blue-rgb: 0, 91, 150;
+  --brand-soft-grey: #A9B7B8;
+  --brand-soft-grey-rgb: 169, 183, 184;
+  --layout-header: #000000;
+  --layout-footer: #000000;
+  --layout-body-bg: #FFFFFF;
+  --layout-body-text: #A0A0A0;
+  --layout-body-text-rgb: 160, 160, 160;
+
+  --color-primary: var(--brand-institutional-blue);
+  --color-primary-rgb: var(--brand-institutional-blue-rgb);
+  --color-text: var(--layout-body-text);
+  --color-text-rgb: var(--layout-body-text-rgb);
   --color-background: #FFFFFF;
   --color-background-rgb: 255, 255, 255;
   --color-black: #000000;
+  --color-heading: var(--brand-deep-navy);
+  --color-heading-rgb: var(--brand-deep-navy-rgb);
+  --color-structure: var(--brand-steel-blue);
+  --color-structure-rgb: var(--brand-steel-blue-rgb);
+  --color-alert: var(--brand-accent-red);
+  --color-alert-rgb: var(--brand-accent-red-rgb);
+  --color-neutral: var(--brand-soft-grey);
+  --color-neutral-rgb: var(--brand-soft-grey-rgb);
 
   /* ── CORE BRAND ALIASES ─────────────────────────────────────────────────── */
-  --atc-graphite: var(--color-text);
-  --atc-graphite-dark: rgba(var(--color-text-rgb), 0.92);
-  --atc-graphite-panel: rgba(var(--color-text-rgb), 0.82);
-  --atc-graphite-border: rgba(var(--color-text-rgb), 0.18);
-  --atc-graphite-rule: rgba(var(--color-text-rgb), 0.12);
-  --atc-graphite-hover: rgba(var(--color-text-rgb), 0.04);
-  --atc-graphite-muted: rgba(var(--color-text-rgb), 0.64);
+  --atc-graphite: var(--brand-deep-navy);
+  --atc-graphite-dark: var(--brand-deep-navy);
+  --atc-graphite-panel: var(--brand-steel-blue);
+  --atc-graphite-border: var(--brand-soft-grey);
+  --atc-graphite-rule: var(--brand-soft-grey);
+  --atc-graphite-hover: var(--brand-soft-grey);
+  --atc-graphite-muted: var(--layout-body-text);
 
   --atc-white: var(--color-background);
   --atc-white-soft: var(--color-background);
 
-  --atc-crimson: var(--color-primary);
-  --atc-crimson-hover: var(--color-primary);
-  --atc-crimson-pressed: var(--color-primary);
-  --atc-crimson-tint: rgba(var(--color-primary-rgb), 0.12);
-  --atc-crimson-border: rgba(var(--color-primary-rgb), 0.3);
+  --atc-crimson: var(--brand-accent-red);
+  --atc-crimson-hover: var(--brand-accent-red);
+  --atc-crimson-pressed: var(--brand-accent-red);
+  --atc-crimson-tint: var(--brand-accent-red);
+  --atc-crimson-border: var(--brand-accent-red);
 
   /* ── SYSTEM TOKENS ──────────────────────────────────────────────────────── */
-  --atc-color-primary: var(--color-primary);
-  --atc-color-primary-hover: var(--color-primary);
-  --atc-color-primary-soft: rgba(var(--color-primary-rgb), 0.12);
-  --atc-color-accent: var(--color-primary);
-  --atc-color-accent-soft: rgba(var(--color-primary-rgb), 0.12);
+  --atc-color-primary: var(--brand-institutional-blue);
+  --atc-color-primary-hover: var(--brand-steel-blue);
+  --atc-color-primary-soft: var(--brand-soft-grey);
+  --atc-color-accent: var(--brand-accent-red);
+  --atc-color-accent-soft: var(--brand-soft-grey);
   --atc-color-bg: var(--color-background);
   --atc-color-surface: var(--color-background);
-  --atc-color-header-utility: var(--color-primary);
-  --atc-color-text-primary: var(--color-text);
-  --atc-color-text-muted: rgba(var(--color-text-rgb), 0.64);
-  --atc-color-border: rgba(var(--color-text-rgb), 0.12);
-  --atc-color-error: var(--color-primary);
-  --atc-color-warning: rgba(var(--color-text-rgb), 0.72);
-  --atc-color-success: var(--color-text);
+  --atc-color-header-utility: var(--layout-header);
+  --atc-color-text-primary: var(--brand-deep-navy);
+  --atc-color-text-muted: var(--layout-body-text);
+  --atc-color-border: var(--brand-soft-grey);
+  --atc-color-error: var(--brand-accent-red);
+  --atc-color-warning: var(--brand-steel-blue);
+  --atc-color-success: var(--brand-institutional-blue);
 
-  --atc-font-family-sans: 'Inter', 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
+  --atc-font-family-sans: 'IBM Plex Sans', 'Open Sans', sans-serif;
   --atc-font-size-hero: 32px;
   --atc-font-size-h1: 32px;
   --atc-font-size-h2: 24px;
@@ -70,46 +91,46 @@
 
   /* ── COLOR SYSTEM (full legacy alias map) ───────────────────────────────── */
 
-    --color-midnight: var(--color-text);
-    --color-midnight-light: rgba(var(--color-text-rgb), 0.82);
-    --color-midnight-lighter: rgba(var(--color-text-rgb), 0.64);
+    --color-midnight: var(--brand-deep-navy);
+    --color-midnight-light: var(--brand-steel-blue);
+    --color-midnight-lighter: var(--layout-body-text);
 
-    --primary-600: var(--color-primary);
-    --primary-500: var(--color-primary);
-    --primary-100: rgba(var(--color-primary-rgb), 0.12);
+    --primary-600: var(--brand-institutional-blue);
+    --primary-500: var(--brand-steel-blue);
+    --primary-100: var(--brand-soft-grey);
 
-    --color-cyan: var(--color-primary);
-    --color-cyan-hover: var(--color-primary);
-    --color-cyan-dark: var(--color-primary);
-    --color-cyan-text: var(--color-primary);
-    --color-cyan-light: rgba(var(--color-primary-rgb), 0.12);
-    --color-cyan-very-light: rgba(var(--color-primary-rgb), 0.08);
+    --color-cyan: var(--brand-institutional-blue);
+    --color-cyan-hover: var(--brand-steel-blue);
+    --color-cyan-dark: var(--brand-deep-navy);
+    --color-cyan-text: var(--brand-institutional-blue);
+    --color-cyan-light: var(--brand-soft-grey);
+    --color-cyan-very-light: var(--brand-soft-grey);
 
-    --gray-900: var(--color-text);
-    --gray-700: rgba(var(--color-text-rgb), 0.82);
-    --gray-500: rgba(var(--color-text-rgb), 0.64);
-    --gray-300: rgba(var(--color-text-rgb), 0.12);
-    --gray-100: rgba(var(--color-text-rgb), 0.04);
+    --gray-900: var(--brand-deep-navy);
+    --gray-700: var(--brand-steel-blue);
+    --gray-500: var(--layout-body-text);
+    --gray-300: var(--brand-soft-grey);
+    --gray-100: var(--brand-soft-grey);
 
-    --color-silver: rgba(var(--color-text-rgb), 0.28);
-    --color-silver-dark: rgba(var(--color-text-rgb), 0.64);
-    --color-silver-light: rgba(var(--color-text-rgb), 0.18);
-    --color-silver-very-light: rgba(var(--color-text-rgb), 0.04);
+    --color-silver: var(--brand-soft-grey);
+    --color-silver-dark: var(--layout-body-text);
+    --color-silver-light: var(--brand-soft-grey);
+    --color-silver-very-light: var(--brand-soft-grey);
     --color-silver-white: var(--color-background);
 
     --color-white: var(--color-background);
-    --success-600: var(--color-text);
-    --warning-600: rgba(var(--color-text-rgb), 0.72);
-    --error-600: var(--color-primary);
+    --success-600: var(--brand-institutional-blue);
+    --warning-600: var(--brand-steel-blue);
+    --error-600: var(--brand-accent-red);
 
-    --color-success: var(--color-text);
-    --color-success-light: rgba(var(--color-text-rgb), 0.08);
-    --color-warning: rgba(var(--color-text-rgb), 0.72);
-    --color-warning-light: rgba(var(--color-text-rgb), 0.08);
-    --color-error: var(--color-primary);
-    --color-error-light: rgba(var(--color-primary-rgb), 0.12);
-    --color-info: rgba(var(--color-text-rgb), 0.82);
-    --color-info-light: rgba(var(--color-text-rgb), 0.08);
+    --color-success: var(--brand-institutional-blue);
+    --color-success-light: var(--brand-soft-grey);
+    --color-warning: var(--brand-steel-blue);
+    --color-warning-light: var(--brand-soft-grey);
+    --color-error: var(--brand-accent-red);
+    --color-error-light: var(--brand-soft-grey);
+    --color-info: var(--brand-steel-blue);
+    --color-info-light: var(--brand-soft-grey);
   
   /* === TYPOGRAPHY === */
   --font-family: var(--atc-font-family-sans);
@@ -157,9 +178,9 @@
   --border-width-base: 1.5px;
   --border-width-thick: 2px;
   
-  --border-color-default: rgba(var(--color-text-rgb), 0.12);
-  --border-color-active: var(--color-primary);
-  --border-color-error: var(--color-primary);
+  --border-color-default: var(--brand-soft-grey);
+  --border-color-active: var(--brand-steel-blue);
+  --border-color-error: var(--brand-accent-red);
   
   /* === SHADOWS — Minimal institutional depth === */
   --shadow-sm: none;
@@ -204,7 +225,7 @@ body {
   font-weight: var(--font-weight-regular);
   line-height: 1.43;
   color: var(--color-text);
-  background: var(--color-background);
+  background: var(--layout-body-bg);
 }
 
 /* =============================================================================
@@ -216,7 +237,7 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
   letter-spacing: -0.3px;
   margin: 0;
-  color: var(--color-midnight);
+  color: var(--color-heading);
 }
 
 h1 {
@@ -255,13 +276,13 @@ p {
 }
 
 a {
-  color: var(--color-text);
+  color: var(--brand-steel-blue);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  color: var(--color-primary);
+  color: var(--brand-institutional-blue);
 }
 
 /* =============================================================================
@@ -286,7 +307,7 @@ select {
   border: var(--border-width-thin) solid var(--border-color-default);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
-  color: var(--color-midnight);
+  color: var(--color-heading);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -312,8 +333,8 @@ input[type="search"]:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--primary-600);
-  box-shadow: 0 0 0 3px var(--primary-100);
+  border-color: var(--brand-steel-blue);
+  box-shadow: none;
 }
 
 textarea {
@@ -349,16 +370,16 @@ button, .btn {
 .btn-primary, .btn.btn-primary {
   background: var(--color-cyan);
   color: var(--color-white);
-  border: 1px solid transparent;
+  border: 1px solid var(--color-cyan);
 }
 
 .btn-primary:hover, .btn.btn-primary:hover {
-  background: rgba(var(--color-primary-rgb), 0.92);
+  background: var(--color-cyan-hover);
+  border-color: var(--color-cyan-hover);
 }
 
 .btn-primary:active {
-  background: rgba(var(--color-primary-rgb), 0.88);
-  transform: scale(0.98);
+  background: var(--color-cyan-dark);
 }
 
 .btn-secondary, .btn.btn-secondary {
@@ -368,20 +389,20 @@ button, .btn {
 }
 
 .btn-secondary:hover, .btn.btn-secondary:hover {
-  background: rgba(var(--color-primary-rgb), 0.92);
-  border-color: rgba(var(--color-primary-rgb), 0.92);
+  background: var(--brand-steel-blue);
+  border-color: var(--brand-steel-blue);
   color: var(--color-white);
 }
 
 .btn-outline, .btn.btn-outline {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border: 1px solid var(--color-primary);
+  background: var(--color-white);
+  color: var(--brand-steel-blue);
+  border: 1px solid var(--brand-steel-blue);
 }
 
 .btn-outline:hover, .btn.btn-outline:hover {
-  background: rgba(var(--color-primary-rgb), 0.92);
-  border-color: rgba(var(--color-primary-rgb), 0.92);
+  background: var(--brand-steel-blue);
+  border-color: var(--brand-steel-blue);
   color: var(--color-white);
 }
 
@@ -396,15 +417,15 @@ button, .btn {
 }
 
 .btn-ghost, .btn.btn-ghost {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border: 1px solid var(--color-primary);
+  background: var(--brand-soft-grey);
+  color: var(--brand-deep-navy);
+  border: 1px solid var(--brand-soft-grey);
   padding: var(--space-sm) var(--space-base);
 }
 
 .btn-ghost:hover, .btn.btn-ghost:hover {
-  background: rgba(var(--color-primary-rgb), 0.92);
-  border-color: rgba(var(--color-primary-rgb), 0.92);
+  background: var(--brand-steel-blue);
+  border-color: var(--brand-steel-blue);
   color: var(--color-white);
 }
 
@@ -438,13 +459,13 @@ button:disabled, .btn:disabled {
    ============================================================================= */
 .card {
   background: var(--color-white);
-  border: 1px solid var(--atc-graphite-rule);
+  border: 1px solid var(--brand-soft-grey);
   border-radius: var(--radius-lg);
   padding: 24px;
 }
 
 .card:hover {
-  border-color: var(--atc-graphite-rule);
+  border-color: var(--brand-institutional-blue);
 }
 
 .card-header {
@@ -483,8 +504,8 @@ button:disabled, .btn:disabled {
 }
 
 .ui-table thead {
-  background: var(--color-white);
-  border-bottom: 1px solid rgba(var(--color-text-rgb), 0.08);
+  background: var(--brand-soft-grey);
+  border-bottom: 1px solid var(--brand-soft-grey);
 }
 
 .ui-table th {
@@ -493,7 +514,7 @@ button:disabled, .btn:disabled {
   text-align: left;
   font-size: 14px;
   font-weight: var(--font-weight-medium);
-  color: var(--color-text);
+  color: var(--brand-deep-navy);
   white-space: nowrap;
   letter-spacing: 0;
   text-transform: none;
@@ -504,10 +525,11 @@ button:disabled, .btn:disabled {
   height: 48px;
   border-bottom: 1px solid var(--border-color-default);
   vertical-align: middle;
+  color: var(--brand-deep-navy);
 }
 
 .ui-table tbody tr:hover {
-  background: rgba(var(--color-text-rgb), 0.03);
+  background: var(--brand-soft-grey);
 }
 
 .ui-table tbody tr.clickable {
@@ -533,7 +555,7 @@ button:disabled, .btn:disabled {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(11, 12, 16, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   z-index: var(--z-modal-bg);
 }
 
@@ -543,8 +565,8 @@ button:disabled, .btn:disabled {
   left: 50%;
   transform: translate(-50%, -50%);
   background: var(--color-white);
+  border: 1px solid var(--brand-soft-grey);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   z-index: var(--z-modal);
   max-height: 90vh;
   overflow-y: auto;
@@ -584,7 +606,7 @@ button:disabled, .btn:disabled {
   border: none;
   font-size: 28px;
   cursor: pointer;
-  color: var(--color-silver-dark);
+  color: var(--brand-steel-blue);
   transition: color var(--transition-fast);
   padding: 0;
   width: 32px;
@@ -595,7 +617,7 @@ button:disabled, .btn:disabled {
 }
 
 .modal-close:hover {
-  color: var(--color-midnight);
+  color: var(--brand-deep-navy);
 }
 
 .modal-body {
@@ -623,7 +645,7 @@ button:disabled, .btn:disabled {
 .input-label {
   font-weight: var(--font-weight-medium);
   font-size: 12px;
-  color: var(--atc-graphite);
+  color: var(--brand-deep-navy);
 }
 
 .required {
@@ -663,7 +685,7 @@ input.error {
 
 .page-subtitle {
   font-size: 14px;
-  color: var(--color-silver-dark);
+  color: var(--layout-body-text);
   margin: 0;
 }
 
@@ -705,8 +727,8 @@ input.error {
   align-items: center;
   gap: 4px;
   padding: 4px 12px;
-  background: var(--color-cyan-light);
-  color: var(--color-cyan-text);
+  background: var(--brand-soft-grey);
+  color: var(--brand-deep-navy);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-sm);
@@ -714,8 +736,8 @@ input.error {
 }
 
 .badge-success, .label-success {
-  background: var(--color-success-light);
-  color: var(--color-success);
+  background: var(--brand-institutional-blue);
+  color: var(--color-white);
 }
 
 .badge-warning {

@@ -98,6 +98,7 @@ class Entity(models.Model):
         ('llc', 'LLC'),
         ('partnership', 'Partnership'),
         ('corporation', 'Corporation'),
+        ('holding_company', 'Holding Company'),
         ('nonprofit', 'Nonprofit'),
         ('subsidiary', 'Subsidiary'),
         ('branch', 'Branch'),
@@ -1156,6 +1157,65 @@ class TaxExposure(models.Model):
         return f"{self.tax_type} - {self.country} ({self.period_start} to {self.period_end})"
 
 
+class TaxRegimeRegistry(models.Model):
+    """Canonical registry of tax regimes by jurisdiction.
+
+    This lets the platform describe tax logic for any country or territory without
+    hard-coding regime behavior into entity or calculation flows.
+    """
+
+    REGIME_CATEGORY_CHOICES = [
+        ('income_tax', 'Income Tax'),
+        ('vat', 'VAT / GST / Sales Tax'),
+        ('withholding', 'Withholding Tax'),
+        ('payroll', 'Payroll Tax'),
+        ('property', 'Property Tax'),
+        ('customs', 'Customs / Duties'),
+        ('other', 'Other'),
+    ]
+
+    FILING_FREQUENCY_CHOICES = [
+        ('monthly', 'Monthly'),
+        ('bi_monthly', 'Bi-Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('semi_annual', 'Semi-Annual'),
+        ('annual', 'Annual'),
+        ('ad_hoc', 'Ad Hoc'),
+        ('event_based', 'Event-Based'),
+    ]
+
+    jurisdiction_code = models.CharField(max_length=50)
+    country = models.CharField(max_length=100)
+    regime_code = models.CharField(max_length=80)
+    regime_name = models.CharField(max_length=255)
+    tax_type = models.CharField(max_length=120, blank=True)
+    regime_category = models.CharField(max_length=30, choices=REGIME_CATEGORY_CHOICES, default='other')
+    filing_frequency = models.CharField(max_length=20, choices=FILING_FREQUENCY_CHOICES, default='annual')
+    filing_form = models.CharField(max_length=100, blank=True)
+    required_forms = models.JSONField(default=list, blank=True)
+    calculation_method = models.CharField(max_length=120, blank=True)
+    penalty_rules = models.JSONField(default=dict, blank=True)
+    rules_json = models.JSONField(default=dict, blank=True)
+    forms_json = models.JSONField(default=list, blank=True)
+    penalty_rules_json = models.JSONField(default=dict, blank=True)
+    compliance_rules_json = models.JSONField(default=dict, blank=True)
+    effective_from = models.DateField(null=True, blank=True)
+    effective_to = models.DateField(null=True, blank=True)
+    rule_set = models.JSONField(default=dict, blank=True)
+    reference_links = models.JSONField(default=list, blank=True)
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('jurisdiction_code', 'regime_code')
+        ordering = ['jurisdiction_code', 'regime_name']
+
+    def __str__(self):
+        return f"{self.jurisdiction_code} - {self.regime_name}"
+
+
 class TaxProfile(models.Model):
     """Tax profile per entity and country/jurisdiction.
 
@@ -1176,8 +1236,14 @@ class TaxProfile(models.Model):
 
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='tax_profiles')
     country = models.CharField(max_length=100)
+    jurisdiction_code = models.CharField(max_length=50, blank=True, default='')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    effective_from = models.DateField(null=True, blank=True)
+    effective_to = models.DateField(null=True, blank=True)
     tax_rules = models.JSONField(default=dict, blank=True)
+    registered_regimes = models.JSONField(default=list, blank=True)
+    registration_numbers = models.JSONField(default=dict, blank=True)
+    filing_preferences = models.JSONField(default=dict, blank=True)
     auto_update = models.BooleanField(default=True)
     residency_status = models.CharField(max_length=20, choices=RESIDENCY_STATUS_CHOICES, default='detected')
     compliance_score = models.IntegerField(default=0)
@@ -1191,6 +1257,16 @@ class TaxProfile(models.Model):
 
     def __str__(self):
         return f"TaxProfile {self.country} - {self.entity.name}"
+
+    @property
+    def resolved_jurisdiction_code(self):
+        return self.jurisdiction_code or self.country
+
+    @property
+    def active_regime_codes(self):
+        if isinstance(self.registered_regimes, list):
+            return [str(code) for code in self.registered_regimes if code]
+        return []
 
 
 class ComplianceDeadline(models.Model):
@@ -1799,6 +1875,13 @@ class TaxCalculation(models.Model):
     tax_year = models.IntegerField()
     calculation_type = models.CharField(max_length=50, choices=CALCULATION_TYPES)
     jurisdiction = models.CharField(max_length=100)
+    regime_code = models.CharField(max_length=80, blank=True, default='')
+    regime_name = models.CharField(max_length=255, blank=True, default='')
+    period_start = models.DateField(null=True, blank=True)
+    period_end = models.DateField(null=True, blank=True)
+    calculation_json = models.JSONField(default=dict, blank=True)
+    liability_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    status = models.CharField(max_length=20, default='draft')
 
     # Tax calculation inputs
     taxable_income = models.DecimalField(max_digits=15, decimal_places=2)
@@ -1818,6 +1901,78 @@ class TaxCalculation(models.Model):
 
     def __str__(self):
         return f"{self.calculation_type} - {self.entity.name} ({self.tax_year})"
+
+
+class TaxFiling(models.Model):
+    """Tax filing submission record."""
+
+    SUBMISSION_STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('in_progress', 'In Progress'),
+        ('ready', 'Ready'),
+        ('submitted', 'Submitted'),
+        ('due_soon', 'Due Soon'),
+        ('late', 'Late'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='tax_filings')
+    tax_regime_code = models.CharField(max_length=80)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    form_type = models.CharField(max_length=100)
+    form_json = models.JSONField(default=dict, blank=True)
+    calculation = models.ForeignKey(TaxCalculation, on_delete=models.SET_NULL, null=True, blank=True, related_name='filings')
+    submission_status = models.CharField(max_length=20, choices=SUBMISSION_STATUS_CHOICES, default='draft')
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    reference_number = models.CharField(max_length=120, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('entity', 'tax_regime_code', 'period_start', 'period_end')
+
+    def __str__(self):
+        return f"{self.tax_regime_code} - {self.entity.name} ({self.period_start} to {self.period_end})"
+
+
+class TaxAuditLog(models.Model):
+    """Immutable audit trail for tax actions."""
+
+    ACTION_TYPE_CHOICES = [
+        ('create_profile', 'Create Profile'),
+        ('update_profile', 'Update Profile'),
+        ('calculate', 'Calculate'),
+        ('file', 'File'),
+        ('submit', 'Submit'),
+        ('reconcile', 'Reconcile'),
+        ('rule_change', 'Rule Change'),
+        ('status_change', 'Status Change'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='tax_audit_logs')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tax_audit_logs')
+    action_type = models.CharField(max_length=50, choices=ACTION_TYPE_CHOICES)
+    old_value_json = models.JSONField(default=dict, blank=True)
+    new_value_json = models.JSONField(default=dict, blank=True)
+    reason = models.CharField(max_length=255, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise ValueError('TaxAuditLog entries are immutable.')
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.action_type} - {self.entity.name} ({self.timestamp})"
 
 
 # ============================================================================

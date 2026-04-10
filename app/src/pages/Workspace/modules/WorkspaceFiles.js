@@ -50,11 +50,10 @@ const WorkspaceFiles = () => {
       </div>
 
       <div
-        className="wsm-dropzone"
+        className={`wsm-dropzone${isDragging ? ' wsm-dropzone-active' : ''}`}
         onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        style={isDragging ? { borderColor: '#2563eb', background: '#f0f6ff', color: '#2563eb' } : {}}
         onClick={() => inputRef.current?.click()}
       >
         Drop files here or click to upload

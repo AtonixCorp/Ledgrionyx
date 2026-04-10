@@ -19,8 +19,10 @@ from .serializers import (
     ModelTemplateSerializer, FinancialModelSerializer, FinancialModelCreateSerializer,
     ScenarioSerializer, SensitivityAnalysisSerializer, AIInsightSerializer,
     CustomKPISerializer, KPICalculationSerializer, ReportSerializer,
-    ConsolidationSerializer, ConsolidationEntitySerializer, TaxCalculationSerializer
+    ConsolidationSerializer, ConsolidationEntitySerializer, TaxCalculationSerializer, TaxFilingSerializer
 )
+from .tax_regimes import build_regime_rules, build_regime_payload, resolve_regime_code
+from .tax_engine import persist_tax_calculation, log_tax_audit, build_tax_filing
 from .intercompany_engine import run_consolidation_engine
 from rest_framework.decorators import api_view
 from django.http import JsonResponse, Http404
@@ -755,65 +757,89 @@ class TaxCalculationViewSet(viewsets.ModelViewSet):
         """Calculate tax for given parameters"""
         entity_id = request.data.get('entity') or request.data.get('entity_id')
         entity = _get_accessible_entity_or_404(request.user, entity_id)
+        regime_defaults = build_regime_rules(entity.country)
 
         tax_year = int(request.data.get('tax_year'))
         calculation_type = request.data.get('calculation_type')
-        jurisdiction = request.data.get('jurisdiction')
-
-        taxable_income = Decimal(str(request.data.get('taxable_income', '0')))
-        raw_rate = Decimal(str(request.data.get('tax_rate', '0')))
-        rate = raw_rate / Decimal('100') if raw_rate > 1 else raw_rate
-
-        deductions = request.data.get('deductions') or {}
-        credits = request.data.get('credits') or {}
-
-        def _sum_numeric(d):
-            total = Decimal('0')
-            if isinstance(d, dict):
-                for v in d.values():
-                    try:
-                        total += Decimal(str(v))
-                    except Exception:
-                        continue
-            return total
-
-        deductions_total = _sum_numeric(deductions)
-        credits_total = _sum_numeric(credits)
-
-        adjusted_income = taxable_income - deductions_total
-        if adjusted_income < 0:
-            adjusted_income = Decimal('0')
-
-        calculated_tax = (adjusted_income * rate) - credits_total
-        if calculated_tax < 0:
-            calculated_tax = Decimal('0')
-
-        effective_rate = Decimal('0')
-        if taxable_income > 0:
-            effective_rate = calculated_tax / taxable_income
-
-        breakdown = {
-            'taxable_income': str(taxable_income),
-            'deductions_total': str(deductions_total),
-            'credits_total': str(credits_total),
-            'adjusted_income': str(adjusted_income),
-            'rate_used': str(rate),
+        jurisdiction = request.data.get('jurisdiction') or entity.country
+        requested_regime_code = request.data.get('regime_code') or request.data.get('tax_regime')
+        regime_code = resolve_regime_code(requested_regime_code) if requested_regime_code else (regime_defaults['regime_codes'][0] if regime_defaults['regime_codes'] else '')
+        regime_template = build_regime_payload(regime_code) if regime_code else None
+        regime_name = request.data.get('regime_name') or (regime_template or {}).get('regime_name', '')
+        period_start = request.data.get('period_start')
+        period_end = request.data.get('period_end')
+        payload = {
+            'taxable_income': request.data.get('taxable_income'),
+            'tax_rate': request.data.get('tax_rate'),
+            'deductions': request.data.get('deductions') or {},
+            'credits': request.data.get('credits') or {},
+            'exemptions': request.data.get('exemptions') or {},
+            'carryforwards': request.data.get('carryforwards') or {},
+            'output_vat': request.data.get('output_vat'),
+            'input_vat': request.data.get('input_vat'),
+            'taxable_sales': request.data.get('taxable_sales'),
+            'employment_income': request.data.get('employment_income'),
+            'asset_value': request.data.get('asset_value'),
+            'emissions': request.data.get('emissions'),
+            'digital_revenue': request.data.get('digital_revenue'),
+            'customs_value': request.data.get('customs_value'),
+            'estimated_profit': request.data.get('estimated_profit'),
         }
 
-        obj, _created = TaxCalculation.objects.update_or_create(
+        obj = persist_tax_calculation(
             entity=entity,
+            regime_code=regime_code,
+            period_start=period_start,
+            period_end=period_end,
+            payload=payload,
             tax_year=tax_year,
             calculation_type=calculation_type,
             jurisdiction=jurisdiction,
-            defaults={
-                'taxable_income': taxable_income,
-                'tax_rate': rate,
-                'deductions': deductions,
-                'credits': credits,
-                'calculated_tax': calculated_tax,
-                'effective_rate': effective_rate,
-                'breakdown': breakdown,
+            status='draft',
+        )
+
+        log_tax_audit(
+            entity=entity,
+            user=request.user,
+            action_type='calculate',
+            new_value_json={
+                'tax_calculation_id': str(obj.id),
+                'regime_code': obj.regime_code,
+                'liability_amount': str(obj.liability_amount),
+                'period_start': obj.period_start.isoformat() if obj.period_start else None,
+                'period_end': obj.period_end.isoformat() if obj.period_end else None,
             },
+            reason='Tax calculation executed through the global tax engine.',
+            ip_address=request.META.get('REMOTE_ADDR'),
         )
 
         return Response(self.get_serializer(obj).data)
+
+    @action(detail=True, methods=['post'])
+    def generate_filing(self, request, pk=None):
+        calculation = self.get_object()
+        reference_number = request.data.get('reference_number') or ''
+        form_type = request.data.get('form_type') or None
+        filing = build_tax_filing(
+            entity=calculation.entity,
+            calculation=calculation,
+            form_type=form_type,
+            reference_number=reference_number,
+            submission_status=request.data.get('submission_status') or 'draft',
+        )
+
+        log_tax_audit(
+            entity=calculation.entity,
+            user=request.user,
+            action_type='file',
+            new_value_json={
+                'tax_filing_id': str(filing.id),
+                'tax_regime_code': filing.tax_regime_code,
+                'form_type': filing.form_type,
+                'submission_status': filing.submission_status,
+            },
+            reason='Tax filing generated from a stored tax calculation.',
+            ip_address=request.META.get('REMOTE_ADDR'),
+        )
+
+        return Response(TaxFilingSerializer(filing).data, status=201)

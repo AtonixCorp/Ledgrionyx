@@ -122,7 +122,7 @@ const WorkspacePermissions = () => {
         </section>
       </div>
 
-      <div className="wsm-permission-note" style={{ marginTop: 20 }}>
+      <div className="wsm-permission-note">
         <strong>Context:</strong> Organization role: {summary.context?.organization_role_name || 'None'} | Entity role: {summary.context?.entity_role_name || 'None'} | Workspace role: {summary.workspace_role}
       </div>
     </div>

@@ -25,13 +25,11 @@ const INDUSTRY_LABELS = {
 };
 
 const STATUS_META = {
-  active:   { label: 'Active',   cls: 'status-active' },
+  active:   { label: 'Active', cls: 'status-active' },
   inactive: { label: 'Inactive', cls: 'status-inactive' },
-  pending:  { label: 'Pending',  cls: 'status-pending' },
+  pending:  { label: 'Pending', cls: 'status-pending' },
 };
 
-// ─── derive simple workspace cards from entities ─────────────────────────────
-// Workspace roles are workspace-scoped; never inherit org/platform role here.
 function buildWorkspaceCards(entities) {
   return entities.map((e) => ({
     id: e.id,
@@ -49,7 +47,6 @@ function buildWorkspaceCards(entities) {
   }));
 }
 
-// ─── helper: colour class for workspace card accent ──────────────────────────
 const PALETTE = ['ws-indigo', 'ws-teal', 'ws-violet', 'ws-rose', 'ws-amber', 'ws-sky'];
 const palette = (idx) => PALETTE[idx % PALETTE.length];
 
@@ -84,61 +81,20 @@ const auditSeverity = (event) => {
   return 'medium';
 };
 
-const EMPTY_WORKSPACE_VALUE_CARDS = [
-  {
-    eyebrow: 'Operations',
-    title: 'Operational Hub',
-    description: 'Manage projects, teams, files, and tools in one unified environment.',
-  },
-  {
-    eyebrow: 'Equity',
-    title: 'Equity Management',
-    description: 'Launch Ledgrionyx Equity Management for registry, cap table, vesting, valuation, transactions, and governance workflows.',
-  },
-  {
-    eyebrow: 'Infrastructure',
-    title: 'Secure & Scalable',
-    description: 'Enterprise-grade infrastructure with global compliance and multi-region support.',
-  },
-];
-
-const EMPTY_WORKSPACE_PLATFORM_CAPABILITIES = [
-  {
-    title: 'Run the organization from one operating layer',
-    description: 'Each workspace gives one entity a structured home for people, approvals, documents, tasks, and operating data.',
-  },
-  {
-    title: 'Open the right dashboard for the job',
-    description: 'New workspaces can launch into accounting, Ledgrionyx Equity Management, or a combined operating setup depending on the package you choose.',
-  },
-  {
-    title: 'Scale without rebuilding process',
-    description: 'The platform keeps shared governance, audit history, permissions, and organization visibility consistent across finance workspaces and Ledgrionyx Equity Management environments.',
-  },
-];
-
-const EMPTY_WORKSPACE_JOURNEY = [
-  {
-    step: '01',
-    title: 'Name the workspace',
-    description: 'Create one workspace for one company, entity, or operating environment.',
-  },
-  {
-    step: '02',
-    title: 'Choose how it should launch',
-    description: 'Select accounting, Ledgrionyx Equity Management, combined, or standalone so the correct dashboard opens first.',
-  },
-  {
-    step: '03',
-    title: 'Activate the operating areas',
-    description: 'Enable the modules that define the collaboration, finance, and Equity Management workflows for that workspace.',
-  },
-  {
-    step: '04',
-    title: 'Enter the workspace dashboard',
-    description: 'After creation, you are redirected into the new workspace with the selected launch path already configured.',
-  },
-];
+const EmptyWorkspaceIllustration = () => (
+  <div className="gc-empty-illustration" aria-hidden="true">
+    <div className="gc-empty-illustration-frame">
+      <div className="gc-empty-illustration-dot" />
+      <div className="gc-empty-illustration-line gc-empty-illustration-line-short" />
+      <div className="gc-empty-illustration-grid">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
+  </div>
+);
 
 const emitAnalyticsEvent = (eventName, payload = {}) => {
   if (typeof window === 'undefined') return;
@@ -157,46 +113,6 @@ const emitAnalyticsEvent = (eventName, payload = {}) => {
   window.__LEDGRIONYX_ANALYTICS_QUEUE__.push(eventPayload);
   window.dispatchEvent(new CustomEvent('ledgrionyx:analytics', { detail: eventPayload }));
 };
-
-const EmptyWorkspaceIllustration = () => (
-  <div className="gc-empty-illustration" aria-hidden="true">
-    <div className="gc-empty-illustration-frame">
-      <div className="gc-empty-illustration-dot" />
-      <div className="gc-empty-illustration-line gc-empty-illustration-line-short" />
-      <div className="gc-empty-illustration-grid">
-        <span />
-        <span />
-        <span />
-        <span />
-      </div>
-    </div>
-  </div>
-);
-
-const EmptyWorkspaceValueCard = ({ eyebrow, title, description }) => (
-  <article className="gc-empty-value-card">
-    <span className="gc-empty-value-eyebrow">{eyebrow}</span>
-    <h3>{title}</h3>
-    <p>{description}</p>
-  </article>
-);
-
-const EmptyWorkspaceCapabilityCard = ({ title, description }) => (
-  <article className="gc-empty-capability-card">
-    <h3>{title}</h3>
-    <p>{description}</p>
-  </article>
-);
-
-const EmptyWorkspaceJourneyStep = ({ step, title, description }) => (
-  <article className="gc-empty-journey-step">
-    <span className="gc-empty-journey-step-number">{step}</span>
-    <div>
-      <h3>{title}</h3>
-      <p>{description}</p>
-    </div>
-  </article>
-);
 
 const GlobalConsole = () => {
   const navigate = useNavigate();
@@ -288,14 +204,6 @@ const GlobalConsole = () => {
       setActiveWorkspace(entity);
       navigate(getWorkspaceLandingPath(entity));
     }
-  };
-
-  const handleOpenLastWorkspace = () => {
-    // Only open if a workspace has been explicitly selected — never auto-pick.
-    if (activeWorkspace) {
-      navigate(getWorkspaceLandingPath(activeWorkspace));
-    }
-    // No workspace selected → stay on console. The button is disabled in this case anyway.
   };
 
   const notifs = auditEvents.length > 0
@@ -460,70 +368,26 @@ const GlobalConsole = () => {
 
       {showWorkspaceOnboarding ? (
         <div className="gc-empty-workspace-shell">
-          <section className="gc-empty-workspace-hero">
-            <span className="gc-empty-workspace-kicker">Workspace Setup</span>
-            <h1>Welcome to your Organization Dashboard</h1>
-            <p>Create your first workspace to begin managing your operations.</p>
-            <button className="gc-empty-workspace-cta" onClick={() => handleCreateWorkspace('empty_state')}>
-              Create Workspace
-            </button>
-          </section>
-
-          <section className="gc-empty-workspace-panel">
-            <EmptyWorkspaceIllustration />
+          <section className="gc-empty-workspace-panel gc-empty-workspace-panel--hero">
             <div className="gc-empty-workspace-copy">
+              <span className="gc-empty-workspace-kicker">Workspace Setup</span>
               <h2>You don’t have any workspaces yet.</h2>
-              <p>Create one to get started.</p>
+              <p>Create your first workspace to begin managing your organization.</p>
             </div>
-          </section>
 
-          <section className="gc-empty-workspace-values" aria-label="Workspace value proposition">
-            {EMPTY_WORKSPACE_VALUE_CARDS.map((card) => (
-              <EmptyWorkspaceValueCard
-                key={card.title}
-                eyebrow={card.eyebrow}
-                title={card.title}
-                description={card.description}
-              />
-            ))}
-          </section>
+            <EmptyWorkspaceIllustration />
 
-          <section className="gc-empty-platform-section" aria-label="How the platform works">
-            <div className="gc-empty-section-head">
-              <span className="gc-empty-section-kicker">Platform Overview</span>
-              <h2>Understand what a workspace unlocks before you create one</h2>
-              <p>
-                Ledgrionyx is organized around workspaces. Each workspace becomes the operational home for one entity and opens the right dashboard structure for the way that entity is managed.
-              </p>
+            <div className="gc-empty-workspace-highlights" aria-label="Workspace highlights">
+              <span className="gc-empty-workspace-highlight">Accounting ready</span>
+              <span className="gc-empty-workspace-highlight">Equity capable</span>
+              <span className="gc-empty-workspace-highlight">Team permissions built in</span>
             </div>
-            <div className="gc-empty-capability-grid">
-              {EMPTY_WORKSPACE_PLATFORM_CAPABILITIES.map((item) => (
-                <EmptyWorkspaceCapabilityCard
-                  key={item.title}
-                  title={item.title}
-                  description={item.description}
-                />
-              ))}
-            </div>
-          </section>
 
-          <section className="gc-empty-platform-section" aria-label="Workspace creation journey">
-            <div className="gc-empty-section-head">
-              <span className="gc-empty-section-kicker">Creation Journey</span>
-              <h2>How the platform walks you into your first dashboard</h2>
-              <p>
-                The creation flow sets the workspace identity, package, modules, and launch target so the first dashboard already matches the operating model you selected.
-              </p>
-            </div>
-            <div className="gc-empty-journey-grid">
-              {EMPTY_WORKSPACE_JOURNEY.map((item) => (
-                <EmptyWorkspaceJourneyStep
-                  key={item.step}
-                  step={item.step}
-                  title={item.title}
-                  description={item.description}
-                />
-              ))}
+            <div className="gc-empty-workspace-actions">
+              <button className="gc-empty-workspace-cta" onClick={() => handleCreateWorkspace('empty_state')}>
+                Get Started
+              </button>
+              <p className="gc-empty-workspace-note">You can add modules, currency, and workspace type during setup.</p>
             </div>
           </section>
         </div>
@@ -561,10 +425,6 @@ const GlobalConsole = () => {
         <button className="gc-action-btn gc-action-primary" onClick={() => handleCreateWorkspace('quick_actions')}>
           <span className="gc-action-icon">+</span>
           Create Workspace
-        </button>
-        <button className="gc-action-btn gc-action-secondary" onClick={handleOpenLastWorkspace} disabled={!activeWorkspace}>
-          <span className="gc-action-icon">▶</span>
-          Open Last Workspace
         </button>
         <button className="gc-action-btn gc-action-secondary" onClick={() => navigate('/app/settings/team')}>
           <span className="gc-action-icon">+</span>

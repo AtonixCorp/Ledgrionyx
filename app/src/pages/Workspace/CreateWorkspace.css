@@ -99,8 +99,8 @@
   flex: 1 1 0;
   min-width: 0;
   background: var(--cw-surface);
-  border-radius: var(--cw-radius);
-  box-shadow: var(--cw-shadow);
+  border-radius: 16px;
+  box-shadow: 0 10px 34px rgba(30, 35, 40, 0.10);
   border: 1px solid var(--cw-line);
   overflow: hidden;
 }
@@ -112,6 +112,7 @@
   color: #fff;
   position: relative;
   overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .cw-header::before {
@@ -337,9 +338,10 @@
 
 /* ─── Review Card (step 3) ────────────────────────────────────────── */
 .cw-review-card {
-  background: #f8fafc;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--cw-line);
-  border-radius: 10px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(30, 35, 40, 0.08);
   padding: 24px 28px;
 }
 .cw-review-title {
@@ -391,7 +393,7 @@
   gap: 8px;
   padding: 18px;
   text-align: left;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid var(--cw-line);
   background: #fff;
   cursor: pointer;
@@ -421,6 +423,77 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.cw-launch-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.cw-launch-main {
+  display: grid;
+  gap: 20px;
+}
+
+.cw-launch-sidebar {
+  display: grid;
+  gap: 18px;
+  position: sticky;
+  top: 24px;
+}
+
+.cw-module-section {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--cw-line);
+  border-radius: 16px;
+  background: var(--cw-surface);
+  box-shadow: 0 10px 30px rgba(30, 35, 40, 0.06);
+}
+
+.cw-module-section-equity {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.cw-module-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cw-module-section-head h4 {
+  margin: 0;
+  color: var(--cw-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.cw-module-section-head p {
+  margin: 4px 0 0;
+  color: var(--cw-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cw-module-count {
+  flex-shrink: 0;
+  height: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--cw-accent-10);
+  color: #1e40af;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cw-launch-summary {
+  border: 1px solid var(--cw-line);
+  box-shadow: 0 10px 30px rgba(30, 35, 40, 0.08);
 }
 
 .cw-module-toggle {
@@ -558,6 +631,9 @@
   flex-shrink: 0;
   position: sticky;
   top: 40px;
+  display: grid;
+  gap: 18px;
+  align-self: start;
 }
 
 .cw-sidebar h3 {
@@ -611,18 +687,26 @@
 }
 
 .cw-sidebar-panel {
-  background: var(--cw-surface);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--cw-line);
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(30, 35, 40, 0.08);
   display: grid;
   gap: 12px;
-  margin-top: 18px;
   padding: 18px;
 }
 
 .cw-sidebar-panel-accent {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.cw-sidebar-panel h3 {
+  margin: 0;
+  color: var(--cw-ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .cw-dashboard-guide {
@@ -632,7 +716,7 @@
 
 .cw-dashboard-guide-card {
   border: 1px solid var(--cw-line);
-  border-radius: 10px;
+  border-radius: 14px;
   display: grid;
   gap: 6px;
   padding: 14px;
@@ -678,6 +762,14 @@
 @media (max-width: 1020px) {
   .cw-sidebar { display: none; }
   .create-workspace { padding: 24px 16px 64px; }
+
+  .cw-launch-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cw-launch-sidebar {
+    position: static;
+  }
 }
 
 @media (max-width: 720px) {
@@ -688,6 +780,10 @@
   .cw-field-wide { grid-column: 1; }
   .cw-package-grid,
   .cw-module-grid { grid-template-columns: 1fr; }
+  .cw-module-section-head,
+  .cw-sidebar-preview-row {
+    flex-direction: column;
+  }
   .cw-steps .cw-step-label { display: none; }
   .cw-error { margin: 0 24px 4px; }
 }
