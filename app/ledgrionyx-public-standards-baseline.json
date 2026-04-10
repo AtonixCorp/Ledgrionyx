@@ -1,54 +1,68 @@
 {
-  "generatedAt": "2026-03-18T02:39:58.751Z",
+  "generatedAt": "2026-04-10T05:57:16.248Z",
   "findings": [
     {
-      "key": "src/components/Footer/Footer.css|forbidden-pill-radius|190|border-radius: 999px",
+      "key": "src/components/Footer/Footer.css|forbidden-pill-radius|183|border-radius: 999px",
       "file": "src/components/Footer/Footer.css",
-      "line": 190,
+      "line": 183,
       "rule": "forbidden-pill-radius",
       "snippet": "border-radius: 999px"
     },
     {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|120|padding-top: 20px;",
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|113|padding-top: 20px;",
       "file": "src/components/Footer/Footer.css",
-      "line": 120,
+      "line": 113,
       "rule": "off-grid-spacing",
       "snippet": "padding-top: 20px;"
     },
     {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|121|padding-bottom: 20px;",
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|114|padding-bottom: 20px;",
       "file": "src/components/Footer/Footer.css",
-      "line": 121,
+      "line": 114,
       "rule": "off-grid-spacing",
       "snippet": "padding-bottom: 20px;"
     },
     {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|127|gap: 20px;",
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|120|gap: 20px;",
       "file": "src/components/Footer/Footer.css",
-      "line": 127,
+      "line": 120,
       "rule": "off-grid-spacing",
       "snippet": "gap: 20px;"
     },
     {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|179|gap: 10px;",
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|172|gap: 10px;",
       "file": "src/components/Footer/Footer.css",
-      "line": 179,
+      "line": 172,
       "rule": "off-grid-spacing",
       "snippet": "gap: 10px;"
     },
     {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|225|padding-left: 20px;",
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|218|padding-left: 20px;",
       "file": "src/components/Footer/Footer.css",
-      "line": 225,
+      "line": 218,
       "rule": "off-grid-spacing",
       "snippet": "padding-left: 20px;"
     },
     {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|226|padding-right: 20px;",
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|219|padding-right: 20px;",
       "file": "src/components/Footer/Footer.css",
-      "line": 226,
+      "line": 219,
       "rule": "off-grid-spacing",
       "snippet": "padding-right: 20px;"
+    },
+    {
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|224|padding-top: 40px;",
+      "file": "src/components/Footer/Footer.css",
+      "line": 224,
+      "rule": "off-grid-spacing",
+      "snippet": "padding-top: 40px;"
+    },
+    {
+      "key": "src/components/Footer/Footer.css|off-grid-spacing|225|padding-bottom: 28px;",
+      "file": "src/components/Footer/Footer.css",
+      "line": 225,
+      "rule": "off-grid-spacing",
+      "snippet": "padding-bottom: 28px;"
     },
     {
       "key": "src/components/Footer/Footer.css|off-grid-spacing|23|padding-top: 64px;",
@@ -58,116 +72,11 @@
       "snippet": "padding-top: 64px;"
     },
     {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|231|padding-top: 40px;",
-      "file": "src/components/Footer/Footer.css",
-      "line": 231,
-      "rule": "off-grid-spacing",
-      "snippet": "padding-top: 40px;"
-    },
-    {
-      "key": "src/components/Footer/Footer.css|off-grid-spacing|232|padding-bottom: 28px;",
-      "file": "src/components/Footer/Footer.css",
-      "line": 232,
-      "rule": "off-grid-spacing",
-      "snippet": "padding-bottom: 28px;"
-    },
-    {
       "key": "src/components/Footer/Footer.css|off-grid-spacing|77|gap: 10px;",
       "file": "src/components/Footer/Footer.css",
       "line": 77,
       "rule": "off-grid-spacing",
       "snippet": "gap: 10px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|forbidden-effect|88|box-shadow:",
-      "file": "src/components/Header/Header.css",
-      "line": 88,
-      "rule": "forbidden-effect",
-      "snippet": "box-shadow:"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|124|gap: 20px;",
-      "file": "src/components/Header/Header.css",
-      "line": 124,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 20px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|185|padding: 0 40px;",
-      "file": "src/components/Header/Header.css",
-      "line": 185,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 40px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|196|margin-right: 40px;",
-      "file": "src/components/Header/Header.css",
-      "line": 196,
-      "rule": "off-grid-spacing",
-      "snippet": "margin-right: 40px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|214|padding-bottom: 3px;",
-      "file": "src/components/Header/Header.css",
-      "line": 214,
-      "rule": "off-grid-spacing",
-      "snippet": "padding-bottom: 3px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|261|padding: 0 22px;",
-      "file": "src/components/Header/Header.css",
-      "line": 261,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 22px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|287|gap: 5px;",
-      "file": "src/components/Header/Header.css",
-      "line": 287,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 5px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|320|padding: 14px 0;",
-      "file": "src/components/Header/Header.css",
-      "line": 320,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 14px 0;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|351|gap: 20px;",
-      "file": "src/components/Header/Header.css",
-      "line": 351,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 20px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|379|padding: 0 20px;",
-      "file": "src/components/Header/Header.css",
-      "line": 379,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 20px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|56|gap: 6px;",
-      "file": "src/components/Header/Header.css",
-      "line": 56,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 6px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|94|gap: 10px;",
-      "file": "src/components/Header/Header.css",
-      "line": 94,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 10px;"
-    },
-    {
-      "key": "src/components/Header/Header.css|off-grid-spacing|96|padding: 9px 16px;",
-      "file": "src/components/Header/Header.css",
-      "line": 96,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 9px 16px;"
     },
     {
       "key": "src/pages/About/About.css|forbidden-clamp|125|clamp(",
@@ -1024,16 +933,16 @@
       "snippet": "gap: 10px;"
     },
     {
-      "key": "src/pages/GlobalTax/GlobalTax.css|off-grid-spacing|462|padding: 0 14px;",
+      "key": "src/pages/GlobalTax/GlobalTax.css|off-grid-spacing|471|gap: 10px;",
       "file": "src/pages/GlobalTax/GlobalTax.css",
-      "line": 462,
+      "line": 471,
       "rule": "off-grid-spacing",
-      "snippet": "padding: 0 14px;"
+      "snippet": "gap: 10px;"
     },
     {
-      "key": "src/pages/GlobalTax/GlobalTax.css|off-grid-spacing|511|gap: 10px;",
+      "key": "src/pages/GlobalTax/GlobalTax.css|off-grid-spacing|493|gap: 10px;",
       "file": "src/pages/GlobalTax/GlobalTax.css",
-      "line": 511,
+      "line": 493,
       "rule": "off-grid-spacing",
       "snippet": "gap: 10px;"
     },
@@ -1043,6 +952,20 @@
       "line": 53,
       "rule": "off-grid-spacing",
       "snippet": "padding: 14px 16px;"
+    },
+    {
+      "key": "src/pages/GlobalTax/GlobalTax.css|off-grid-spacing|555|gap: 10px;",
+      "file": "src/pages/GlobalTax/GlobalTax.css",
+      "line": 555,
+      "rule": "off-grid-spacing",
+      "snippet": "gap: 10px;"
+    },
+    {
+      "key": "src/pages/GlobalTax/GlobalTax.css|off-grid-spacing|598|padding: 0 14px;",
+      "file": "src/pages/GlobalTax/GlobalTax.css",
+      "line": 598,
+      "rule": "off-grid-spacing",
+      "snippet": "padding: 0 14px;"
     },
     {
       "key": "src/pages/GlobalTax/GlobalTax.css|off-grid-spacing|95|padding: 0 24px 14px;",
@@ -1227,6 +1150,20 @@
       "snippet": "clamp("
     },
     {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|1000|padding-right: 20px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 1000,
+      "rule": "off-grid-spacing",
+      "snippet": "padding-right: 20px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|1004|margin-bottom: 28px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 1004,
+      "rule": "off-grid-spacing",
+      "snippet": "margin-bottom: 28px;"
+    },
+    {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|101|padding: 0 30px;",
       "file": "src/pages/Landing/Landing.css",
       "line": 101,
@@ -1241,32 +1178,11 @@
       "snippet": "gap: 5px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|182|margin-bottom: 6px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|212|gap: 3px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 182,
+      "line": 212,
       "rule": "off-grid-spacing",
-      "snippet": "margin-bottom: 6px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|198|margin: 0 0 20px 0;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 198,
-      "rule": "off-grid-spacing",
-      "snippet": "margin: 0 0 20px 0;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|206|margin-bottom: 20px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 206,
-      "rule": "off-grid-spacing",
-      "snippet": "margin-bottom: 20px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|256|padding: 10px 0;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 256,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 10px 0;"
+      "snippet": "gap: 3px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|276|margin-top: 2px;",
@@ -1274,6 +1190,13 @@
       "line": 276,
       "rule": "off-grid-spacing",
       "snippet": "margin-top: 2px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|294|margin: 28px 0;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 294,
+      "rule": "off-grid-spacing",
+      "snippet": "margin: 28px 0;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|304|padding: 80px 0;",
@@ -1290,11 +1213,11 @@
       "snippet": "padding: 0 40px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|34|padding: 80px 40px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|34|padding: 56px 40px;",
       "file": "src/pages/Landing/Landing.css",
       "line": 34,
       "rule": "off-grid-spacing",
-      "snippet": "padding: 80px 40px;"
+      "snippet": "padding: 56px 40px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|351|margin-bottom: 20px;",
@@ -1304,11 +1227,11 @@
       "snippet": "margin-bottom: 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|37|gap: 80px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|37|gap: 56px;",
       "file": "src/pages/Landing/Landing.css",
       "line": 37,
       "rule": "off-grid-spacing",
-      "snippet": "gap: 80px;"
+      "snippet": "gap: 56px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|384|padding-bottom: 1px;",
@@ -1318,18 +1241,32 @@
       "snippet": "padding-bottom: 1px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|401|padding: 60px 32px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|400|gap: 40px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 400,
+      "rule": "off-grid-spacing",
+      "snippet": "gap: 40px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|401|padding: 52px 32px;",
       "file": "src/pages/Landing/Landing.css",
       "line": 401,
       "rule": "off-grid-spacing",
-      "snippet": "padding: 60px 32px;"
+      "snippet": "padding: 52px 32px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|418|padding: 56px 24px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|417|gap: 36px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 417,
+      "rule": "off-grid-spacing",
+      "snippet": "gap: 36px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|418|padding: 44px 24px;",
       "file": "src/pages/Landing/Landing.css",
       "line": 418,
       "rule": "off-grid-spacing",
-      "snippet": "padding: 56px 24px;"
+      "snippet": "padding: 44px 24px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|439|padding: 60px 0;",
@@ -1339,11 +1276,11 @@
       "snippet": "padding: 60px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|454|padding: 40px 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|454|padding: 32px 20px;",
       "file": "src/pages/Landing/Landing.css",
       "line": 454,
       "rule": "off-grid-spacing",
-      "snippet": "padding: 40px 20px;"
+      "snippet": "padding: 32px 20px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|458|padding: 0 20px;",
@@ -1386,6 +1323,13 @@
       "line": 537,
       "rule": "off-grid-spacing",
       "snippet": "gap: 18px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|55|margin: 0 0 18px 0;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 55,
+      "rule": "off-grid-spacing",
+      "snippet": "margin: 0 0 18px 0;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|567|margin: 14px 0 0;",
@@ -1437,11 +1381,11 @@
       "snippet": "margin: 0 0 14px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|65|margin: 0 0 40px 0;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|65|margin: 0 0 28px 0;",
       "file": "src/pages/Landing/Landing.css",
       "line": 65,
       "rule": "off-grid-spacing",
-      "snippet": "margin: 0 0 40px 0;"
+      "snippet": "margin: 0 0 28px 0;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|665|gap: 18px;",
@@ -1605,53 +1549,39 @@
       "snippet": "gap: 14px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|909|padding: 0 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|923|padding: 0 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 909,
+      "line": 923,
       "rule": "off-grid-spacing",
       "snippet": "padding: 0 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|957|padding: 64px 0;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|971|padding: 64px 0;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 957,
+      "line": 971,
       "rule": "off-grid-spacing",
       "snippet": "padding: 64px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|963|padding-left: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|977|padding-left: 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 963,
+      "line": 977,
       "rule": "off-grid-spacing",
       "snippet": "padding-left: 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|964|padding-right: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|978|padding-right: 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 964,
+      "line": 978,
       "rule": "off-grid-spacing",
       "snippet": "padding-right: 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|985|padding-left: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|999|padding-left: 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 985,
+      "line": 999,
       "rule": "off-grid-spacing",
       "snippet": "padding-left: 20px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|986|padding-right: 20px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 986,
-      "rule": "off-grid-spacing",
-      "snippet": "padding-right: 20px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|990|margin-bottom: 28px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 990,
-      "rule": "off-grid-spacing",
-      "snippet": "margin-bottom: 28px;"
     },
     {
       "key": "src/pages/Pricing/Pricing.css|forbidden-clamp|209|clamp(",
@@ -2114,181 +2044,6 @@
       "line": 98,
       "rule": "off-grid-spacing",
       "snippet": "padding: 72px 0;"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-effect|1577|box-shadow:",
-      "file": "src/styles/globals.css",
-      "line": 1577,
-      "rule": "forbidden-effect",
-      "snippet": "box-shadow:"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-effect|1685|box-shadow:",
-      "file": "src/styles/globals.css",
-      "line": 1685,
-      "rule": "forbidden-effect",
-      "snippet": "box-shadow:"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-effect|316|box-shadow:",
-      "file": "src/styles/globals.css",
-      "line": 316,
-      "rule": "forbidden-effect",
-      "snippet": "box-shadow:"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-effect|542|box-shadow:",
-      "file": "src/styles/globals.css",
-      "line": 542,
-      "rule": "forbidden-effect",
-      "snippet": "box-shadow:"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-pill-radius|1544|border-radius: 999px",
-      "file": "src/styles/globals.css",
-      "line": 1544,
-      "rule": "forbidden-pill-radius",
-      "snippet": "border-radius: 999px"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-pill-radius|1569|border-radius: 999px",
-      "file": "src/styles/globals.css",
-      "line": 1569,
-      "rule": "forbidden-pill-radius",
-      "snippet": "border-radius: 999px"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-rgb-color|1674|rgba(11, 12, 16, 0.55)",
-      "file": "src/styles/globals.css",
-      "line": 1674,
-      "rule": "forbidden-rgb-color",
-      "snippet": "rgba(11, 12, 16, 0.55)"
-    },
-    {
-      "key": "src/styles/globals.css|forbidden-rgb-color|531|rgba(11, 12, 16, 0.5)",
-      "file": "src/styles/globals.css",
-      "line": 531,
-      "rule": "forbidden-rgb-color",
-      "snippet": "rgba(11, 12, 16, 0.5)"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1089|gap: 20px;",
-      "file": "src/styles/globals.css",
-      "line": 1089,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 20px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1098|padding: 0 14px;",
-      "file": "src/styles/globals.css",
-      "line": 1098,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 14px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1172|padding: 0 20px 10px;",
-      "file": "src/styles/globals.css",
-      "line": 1172,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 20px 10px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1181|gap: 2px;",
-      "file": "src/styles/globals.css",
-      "line": 1181,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 2px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1185|padding: 0 10px;",
-      "file": "src/styles/globals.css",
-      "line": 1185,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 10px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1191|gap: 10px;",
-      "file": "src/styles/globals.css",
-      "line": 1191,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 10px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1441|padding: 2px 8px;",
-      "file": "src/styles/globals.css",
-      "line": 1441,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 2px 8px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1568|padding: 0 5px;",
-      "file": "src/styles/globals.css",
-      "line": 1568,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 5px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1831|margin-bottom: -2px;",
-      "file": "src/styles/globals.css",
-      "line": 1831,
-      "rule": "off-grid-spacing",
-      "snippet": "margin-bottom: -2px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|1991|padding: 2px 8px;",
-      "file": "src/styles/globals.css",
-      "line": 1991,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 2px 8px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|2004|padding: 2px 8px;",
-      "file": "src/styles/globals.css",
-      "line": 2004,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 2px 8px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|2089|padding: 2px 7px;",
-      "file": "src/styles/globals.css",
-      "line": 2089,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 2px 7px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|2102|padding: 2px 7px;",
-      "file": "src/styles/globals.css",
-      "line": 2102,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 2px 7px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|320|padding: 10px 12px;",
-      "file": "src/styles/globals.css",
-      "line": 320,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 10px 12px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|632|margin-top: 2px;",
-      "file": "src/styles/globals.css",
-      "line": 632,
-      "rule": "off-grid-spacing",
-      "snippet": "margin-top: 2px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|796|margin: -1px;",
-      "file": "src/styles/globals.css",
-      "line": 796,
-      "rule": "off-grid-spacing",
-      "snippet": "margin: -1px;"
-    },
-    {
-      "key": "src/styles/globals.css|off-grid-spacing|869|padding: 2px 8px;",
-      "file": "src/styles/globals.css",
-      "line": 869,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 2px 8px;"
     },
     {
       "key": "src/styles/pages.css|forbidden-clamp|157|clamp(",
@@ -2949,30 +2704,30 @@
       "snippet": "box-shadow:"
     },
     {
-      "key": "src/styles/public-site.css|forbidden-effect|427|box-shadow:",
+      "key": "src/styles/public-site.css|forbidden-effect|446|box-shadow:",
       "file": "src/styles/public-site.css",
-      "line": 427,
+      "line": 446,
       "rule": "forbidden-effect",
       "snippet": "box-shadow:"
     },
     {
-      "key": "src/styles/public-site.css|forbidden-effect|428|backdrop-filter:",
+      "key": "src/styles/public-site.css|forbidden-effect|447|backdrop-filter:",
       "file": "src/styles/public-site.css",
-      "line": 428,
+      "line": 447,
       "rule": "forbidden-effect",
       "snippet": "backdrop-filter:"
     },
     {
-      "key": "src/styles/public-site.css|forbidden-effect|498|box-shadow:",
+      "key": "src/styles/public-site.css|forbidden-effect|517|box-shadow:",
       "file": "src/styles/public-site.css",
-      "line": 498,
+      "line": 517,
       "rule": "forbidden-effect",
       "snippet": "box-shadow:"
     },
     {
-      "key": "src/styles/public-site.css|forbidden-effect|533|box-shadow:",
+      "key": "src/styles/public-site.css|forbidden-effect|552|box-shadow:",
       "file": "src/styles/public-site.css",
-      "line": 533,
+      "line": 552,
       "rule": "forbidden-effect",
       "snippet": "box-shadow:"
     }

@@ -12,7 +12,6 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = 'medium' }) =>
         aria-modal="true"
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
-        style={{ position: 'relative', top: 'auto', left: 'auto', transform: 'none' }}
       >
         <div className="modal-header">
           <h2>{title}</h2>

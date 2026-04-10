@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const rootDir = path.resolve(__dirname, '..');
-const baselinePath = path.join(rootDir, 'atc-public-standards-baseline.json');
+const baselinePath = path.join(rootDir, 'ledgrionyx-public-standards-baseline.json');
 const writeBaseline = process.argv.includes('--write-baseline');
 
 const allowedHexValues = new Set(['000000', 'ffffff', 'ee6c4d', '000', 'fff']);
@@ -14,6 +14,9 @@ const targets = [
   'src/styles/globals.css',
   'src/styles/pages.css',
   'src/styles/public-site.css',
+  'src/components/ui',
+  'src/components/Layout',
+  'src/components/WorkspaceLayout',
   'src/components/Header',
   'src/components/Footer',
   'src/components/footer',

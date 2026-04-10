@@ -1,15 +1,15 @@
 export const Colors = {
-  deepNavy: '#002026',
-  steelBlue: '#003F5C',
-  accentRed: '#E74C3C',
-  institutionalBlue: '#005B96',
-  softGrey: '#A9B7B8',
-  header: '#000000',
-  footer: '#000000',
-  background: '#FFFFFF',
-  bodyText: '#A0A0A0',
-  primary: '#005B96',
-  text: '#A0A0A0',
+  deepNavy: 'var(--brand-deep-navy)',
+  steelBlue: 'var(--brand-steel-blue)',
+  accentRed: 'var(--brand-accent-red)',
+  institutionalBlue: 'var(--brand-institutional-blue)',
+  softGrey: 'var(--brand-soft-grey)',
+  header: 'var(--layout-header)',
+  footer: 'var(--layout-footer)',
+  background: 'var(--color-background)',
+  bodyText: 'var(--layout-body-text)',
+  primary: 'var(--color-primary)',
+  text: 'var(--color-text)',
 };
 
 export default Colors;

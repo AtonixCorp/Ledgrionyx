@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { FiChevronDown } from 'react-icons/fi';
 import { useLanguage, LANGUAGE_LIST } from '../../context/LanguageContext';
 import LedgrionyxLogo from '../branding/LedgrionyxLogo';
+import { Icon } from '../ui';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
 import './Header.css';
 
@@ -42,10 +44,7 @@ const Header = () => {
               aria-expanded={countryOpen}
             >
               <span>{selectedCountry.name}</span>
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5"
-                      strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Icon icon={FiChevronDown} size="sm" />
             </button>
 
             {countryOpen && (
