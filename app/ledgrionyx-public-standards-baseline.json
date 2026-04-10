@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-10T05:57:16.248Z",
+  "generatedAt": "2026-04-10T06:07:43.663Z",
   "findings": [
     {
       "key": "src/components/Footer/Footer.css|forbidden-pill-radius|183|border-radius: 999px",
@@ -1129,88 +1129,81 @@
       "snippet": "padding-bottom: 56px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|forbidden-clamp|561|clamp(",
+      "key": "src/pages/Landing/Landing.css|forbidden-clamp|512|clamp(",
       "file": "src/pages/Landing/Landing.css",
-      "line": 561,
+      "line": 512,
       "rule": "forbidden-clamp",
       "snippet": "clamp("
     },
     {
-      "key": "src/pages/Landing/Landing.css|forbidden-clamp|645|clamp(",
+      "key": "src/pages/Landing/Landing.css|forbidden-clamp|567|clamp(",
       "file": "src/pages/Landing/Landing.css",
-      "line": 645,
+      "line": 567,
       "rule": "forbidden-clamp",
       "snippet": "clamp("
     },
     {
-      "key": "src/pages/Landing/Landing.css|forbidden-clamp|879|clamp(",
+      "key": "src/pages/Landing/Landing.css|forbidden-clamp|801|clamp(",
       "file": "src/pages/Landing/Landing.css",
-      "line": 879,
+      "line": 801,
       "rule": "forbidden-clamp",
       "snippet": "clamp("
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|1000|padding-right: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|111|gap: 5px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 1000,
-      "rule": "off-grid-spacing",
-      "snippet": "padding-right: 20px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|1004|margin-bottom: 28px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 1004,
-      "rule": "off-grid-spacing",
-      "snippet": "margin-bottom: 28px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|101|padding: 0 30px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 101,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 30px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|160|gap: 5px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 160,
+      "line": 111,
       "rule": "off-grid-spacing",
       "snippet": "gap: 5px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|212|gap: 3px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|163|gap: 3px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 212,
+      "line": 163,
       "rule": "off-grid-spacing",
       "snippet": "gap: 3px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|276|margin-top: 2px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|227|margin-top: 2px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 276,
+      "line": 227,
       "rule": "off-grid-spacing",
       "snippet": "margin-top: 2px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|294|margin: 28px 0;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|245|margin: 28px 0;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 294,
+      "line": 245,
       "rule": "off-grid-spacing",
       "snippet": "margin: 28px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|304|padding: 80px 0;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|255|padding: 80px 0;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 304,
+      "line": 255,
       "rule": "off-grid-spacing",
       "snippet": "padding: 80px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|310|padding: 0 40px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|261|padding: 0 40px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 310,
+      "line": 261,
       "rule": "off-grid-spacing",
       "snippet": "padding: 0 40px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|302|margin-bottom: 20px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 302,
+      "rule": "off-grid-spacing",
+      "snippet": "margin-bottom: 20px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|335|padding-bottom: 1px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 335,
+      "rule": "off-grid-spacing",
+      "snippet": "padding-bottom: 1px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|34|padding: 56px 40px;",
@@ -1220,11 +1213,32 @@
       "snippet": "padding: 56px 40px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|351|margin-bottom: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|351|gap: 40px;",
       "file": "src/pages/Landing/Landing.css",
       "line": 351,
       "rule": "off-grid-spacing",
-      "snippet": "margin-bottom: 20px;"
+      "snippet": "gap: 40px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|352|padding: 52px 32px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 352,
+      "rule": "off-grid-spacing",
+      "snippet": "padding: 52px 32px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|368|gap: 36px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 368,
+      "rule": "off-grid-spacing",
+      "snippet": "gap: 36px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|369|padding: 44px 24px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 369,
+      "rule": "off-grid-spacing",
+      "snippet": "padding: 44px 24px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|37|gap: 56px;",
@@ -1234,95 +1248,81 @@
       "snippet": "gap: 56px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|384|padding-bottom: 1px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|390|padding: 60px 0;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 384,
-      "rule": "off-grid-spacing",
-      "snippet": "padding-bottom: 1px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|400|gap: 40px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 400,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 40px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|401|padding: 52px 32px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 401,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 52px 32px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|417|gap: 36px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 417,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 36px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|418|padding: 44px 24px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 418,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 44px 24px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|439|padding: 60px 0;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 439,
+      "line": 390,
       "rule": "off-grid-spacing",
       "snippet": "padding: 60px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|454|padding: 32px 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|405|padding: 32px 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 454,
+      "line": 405,
       "rule": "off-grid-spacing",
       "snippet": "padding: 32px 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|458|padding: 0 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|409|padding: 0 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 458,
+      "line": 409,
       "rule": "off-grid-spacing",
       "snippet": "padding: 0 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|488|padding: 56px 40px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|439|padding: 56px 40px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 488,
+      "line": 439,
       "rule": "off-grid-spacing",
       "snippet": "padding: 56px 40px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|492|margin: 0 0 14px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|443|margin: 0 0 14px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 492,
+      "line": 443,
       "rule": "off-grid-spacing",
       "snippet": "margin: 0 0 14px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|503|gap: 10px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|454|gap: 10px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 503,
+      "line": 454,
       "rule": "off-grid-spacing",
       "snippet": "gap: 10px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|534|padding: 0 40px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|485|padding: 0 40px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 534,
+      "line": 485,
       "rule": "off-grid-spacing",
       "snippet": "padding: 0 40px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|537|gap: 18px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|488|gap: 18px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 537,
+      "line": 488,
       "rule": "off-grid-spacing",
       "snippet": "gap: 18px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|518|margin: 14px 0 0;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 518,
+      "rule": "off-grid-spacing",
+      "snippet": "margin: 14px 0 0;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|539|padding: 88px 0;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 539,
+      "rule": "off-grid-spacing",
+      "snippet": "padding: 88px 0;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|548|padding: 0 40px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 548,
+      "rule": "off-grid-spacing",
+      "snippet": "padding: 0 40px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|55|margin: 0 0 18px 0;",
@@ -1332,53 +1332,81 @@
       "snippet": "margin: 0 0 18px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|567|margin: 14px 0 0;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|553|margin: 0 0 40px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 567,
-      "rule": "off-grid-spacing",
-      "snippet": "margin: 14px 0 0;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|586|padding: 0 18px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 586,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 18px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|617|padding: 88px 0;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 617,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 88px 0;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|626|padding: 0 40px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 626,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 40px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|631|margin: 0 0 40px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 631,
+      "line": 553,
       "rule": "off-grid-spacing",
       "snippet": "margin: 0 0 40px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|635|margin: 0 0 10px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|557|margin: 0 0 10px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 635,
+      "line": 557,
       "rule": "off-grid-spacing",
       "snippet": "margin: 0 0 10px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|644|margin: 0 0 14px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|566|margin: 0 0 14px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 644,
+      "line": 566,
       "rule": "off-grid-spacing",
       "snippet": "margin: 0 0 14px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|587|gap: 18px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 587,
+      "rule": "off-grid-spacing",
+      "snippet": "gap: 18px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|592|padding: 20px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 592,
+      "rule": "off-grid-spacing",
+      "snippet": "padding: 20px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|606|margin: 0 0 10px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 606,
+      "rule": "off-grid-spacing",
+      "snippet": "margin: 0 0 10px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|624|gap: 18px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 624,
+      "rule": "off-grid-spacing",
+      "snippet": "gap: 18px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|630|padding: 20px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 630,
+      "rule": "off-grid-spacing",
+      "snippet": "padding: 20px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|637|margin-bottom: 14px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 637,
+      "rule": "off-grid-spacing",
+      "snippet": "margin-bottom: 14px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|642|margin: 0 0 10px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 642,
+      "rule": "off-grid-spacing",
+      "snippet": "margin: 0 0 10px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|649|padding-left: 18px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 649,
+      "rule": "off-grid-spacing",
+      "snippet": "padding-left: 18px;"
     },
     {
       "key": "src/pages/Landing/Landing.css|off-grid-spacing|65|margin: 0 0 28px 0;",
@@ -1388,200 +1416,151 @@
       "snippet": "margin: 0 0 28px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|665|gap: 18px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|653|margin-bottom: 6px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 665,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 18px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|670|padding: 20px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 670,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 20px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|684|margin: 0 0 10px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 684,
-      "rule": "off-grid-spacing",
-      "snippet": "margin: 0 0 10px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|702|gap: 18px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 702,
-      "rule": "off-grid-spacing",
-      "snippet": "gap: 18px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|708|padding: 20px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 708,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 20px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|715|margin-bottom: 14px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 715,
-      "rule": "off-grid-spacing",
-      "snippet": "margin-bottom: 14px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|720|margin: 0 0 10px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 720,
-      "rule": "off-grid-spacing",
-      "snippet": "margin: 0 0 10px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|727|padding-left: 18px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 727,
-      "rule": "off-grid-spacing",
-      "snippet": "padding-left: 18px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|731|margin-bottom: 6px;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 731,
+      "line": 653,
       "rule": "off-grid-spacing",
       "snippet": "margin-bottom: 6px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|752|padding: 88px 0;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|674|padding: 88px 0;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 752,
+      "line": 674,
       "rule": "off-grid-spacing",
       "snippet": "padding: 88px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|760|padding: 0 40px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|682|padding: 0 40px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 760,
+      "line": 682,
       "rule": "off-grid-spacing",
       "snippet": "padding: 0 40px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|781|margin-top: 18px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|703|margin-top: 18px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 781,
+      "line": 703,
       "rule": "off-grid-spacing",
       "snippet": "margin-top: 18px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|792|gap: 10px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|714|gap: 10px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 792,
+      "line": 714,
       "rule": "off-grid-spacing",
       "snippet": "gap: 10px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|811|padding: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|733|padding: 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 811,
+      "line": 733,
       "rule": "off-grid-spacing",
       "snippet": "padding: 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|828|gap: 14px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|750|gap: 14px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 828,
+      "line": 750,
       "rule": "off-grid-spacing",
       "snippet": "gap: 14px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|837|gap: 10px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|759|gap: 10px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 837,
+      "line": 759,
       "rule": "off-grid-spacing",
       "snippet": "gap: 10px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|838|padding: 0 14px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|760|padding: 0 14px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 838,
+      "line": 760,
       "rule": "off-grid-spacing",
       "snippet": "padding: 0 14px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|857|padding: 88px 0;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|779|padding: 88px 0;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 857,
+      "line": 779,
       "rule": "off-grid-spacing",
       "snippet": "padding: 88px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|864|padding: 0 40px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|786|padding: 0 40px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 864,
+      "line": 786,
       "rule": "off-grid-spacing",
       "snippet": "padding: 0 40px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|869|margin: 0 0 10px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|791|margin: 0 0 10px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 869,
+      "line": 791,
       "rule": "off-grid-spacing",
       "snippet": "margin: 0 0 10px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|878|margin: 0 0 14px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|800|margin: 0 0 14px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 878,
+      "line": 800,
       "rule": "off-grid-spacing",
       "snippet": "margin: 0 0 14px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|891|margin-top: 28px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|813|margin-top: 28px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 891,
+      "line": 813,
       "rule": "off-grid-spacing",
       "snippet": "margin-top: 28px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|895|gap: 14px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|817|gap: 14px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 895,
+      "line": 817,
       "rule": "off-grid-spacing",
       "snippet": "gap: 14px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|923|padding: 0 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|862|padding: 64px 0;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 923,
-      "rule": "off-grid-spacing",
-      "snippet": "padding: 0 20px;"
-    },
-    {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|971|padding: 64px 0;",
-      "file": "src/pages/Landing/Landing.css",
-      "line": 971,
+      "line": 862,
       "rule": "off-grid-spacing",
       "snippet": "padding: 64px 0;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|977|padding-left: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|868|padding-left: 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 977,
+      "line": 868,
       "rule": "off-grid-spacing",
       "snippet": "padding-left: 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|978|padding-right: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|869|padding-right: 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 978,
+      "line": 869,
       "rule": "off-grid-spacing",
       "snippet": "padding-right: 20px;"
     },
     {
-      "key": "src/pages/Landing/Landing.css|off-grid-spacing|999|padding-left: 20px;",
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|890|padding-left: 20px;",
       "file": "src/pages/Landing/Landing.css",
-      "line": 999,
+      "line": 890,
       "rule": "off-grid-spacing",
       "snippet": "padding-left: 20px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|891|padding-right: 20px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 891,
+      "rule": "off-grid-spacing",
+      "snippet": "padding-right: 20px;"
+    },
+    {
+      "key": "src/pages/Landing/Landing.css|off-grid-spacing|895|margin-bottom: 28px;",
+      "file": "src/pages/Landing/Landing.css",
+      "line": 895,
+      "rule": "off-grid-spacing",
+      "snippet": "margin-bottom: 28px;"
     },
     {
       "key": "src/pages/Pricing/Pricing.css|forbidden-clamp|209|clamp(",

@@ -73,51 +73,6 @@
   flex-wrap: wrap;
 }
 
-.atc-hero-btn-primary {
-  height: 48px;
-  padding: 0 32px;
-  background: var(--atc-color-primary);
-  color: var(--color-white);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  font-family: var(--font-family);
-  text-decoration: none;
-  border: none;
-  border-radius: var(--atc-radius-control);
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-  transition: background 0.12s;
-}
-
-.atc-hero-btn-primary:hover {
-  background: var(--atc-color-primary-hover);
-  color: var(--color-white);
-}
-
-.atc-hero-btn-secondary {
-  height: 48px;
-  padding: 0 30px;
-  background: transparent;
-  color: var(--color-black);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  font-family: var(--font-family);
-  text-decoration: none;
-  border: 1.5px solid var(--color-black);
-  border-radius: var(--atc-radius-control);
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-  transition: background 0.12s;
-}
-
-.atc-hero-btn-secondary:hover {
-  background: rgba(0, 0, 0, 0.06);
-}
-
 /* ── Hero product card — right column ─────────────────────────────────────── */
 .atc-hero-card-wrap {
   display: flex;
@@ -493,6 +448,51 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.problem-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.problem-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  color: rgba(0, 0, 0, 0.82);
+  font-size: var(--font-size-sm);
+}
+
+.problem-resolve {
+  margin: 16px 0 0;
+  color: var(--color-black);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+/* =============================================================================
+   DEPLOYMENT PROMO
+   ============================================================================= */
+.landing-deployment-promo {
+  padding: 32px 0 0;
+  background: var(--color-background);
+}
+
+.landing-deployment-promo__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.9fr);
+  gap: 18px;
+}
+
+.landing-deployment-promo__copy,
+.landing-deployment-promo__actions {
+  border: 1px solid var(--border-color-default);
+  padding: 24px;
+  background:
     linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.08), rgba(var(--color-primary-rgb), 0.02)),
     var(--color-background);
 }
@@ -897,11 +897,5 @@
 
   .cta-buttons {
     flex-direction: column;
-  }
-
-  .cta-buttons .btn-primary,
-  .cta-buttons .btn-outline-white {
-    width: 100%;
-    justify-content: center;
   }
 }
