@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { countries, getBanksByCountryCode } from '../../utils/countries';
@@ -24,6 +24,7 @@ const EnterpriseEntities = () => {
   const [editingEntity, setEditingEntity] = useState(null);
   const [deletingEntityId, setDeletingEntityId] = useState(null);
   const [availableBanks, setAvailableBanks] = useState([]);
+  const [workspaces, setWorkspaces] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     country: '',
@@ -41,6 +42,44 @@ const EnterpriseEntities = () => {
       fetchEntities(currentOrganization.id);
     }
   }, [currentOrganization, fetchEntities]);
+
+  useEffect(() => {
+    const loadWorkspaces = async () => {
+      if (!currentOrganization?.id) {
+        setWorkspaces([]);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+        const response = await fetch(`/api/organizations/${currentOrganization.id}/workspaces/`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (!response.ok) {
+          setWorkspaces([]);
+          return;
+        }
+
+        const data = await response.json();
+        setWorkspaces(Array.isArray(data.results) ? data.results : []);
+      } catch (err) {
+        console.error('Failed to fetch workspaces:', err);
+        setWorkspaces([]);
+      }
+    };
+
+    loadWorkspaces();
+  }, [currentOrganization]);
+
+  const workspaceByEntityId = useMemo(() => {
+    return workspaces.reduce((accumulator, workspace) => {
+      if (workspace?.linked_entity_id) {
+        accumulator[String(workspace.linked_entity_id)] = workspace;
+      }
+      return accumulator;
+    }, {});
+  }, [workspaces]);
 
   if (!hasPermission(PERMISSIONS.VIEW_ENTITIES)) {
     return <div className="permission-denied">You don't have permission to view entities.</div>;
@@ -185,6 +224,14 @@ const EnterpriseEntities = () => {
 
   const getStatusStyle = (status) => statusColors[status] || { bg: 'rgba(0, 0, 0, 0.06)', color: '#000000', dot: '#000000' };
 
+  const openWorkspace = (entityId) => {
+    const workspace = workspaceByEntityId[String(entityId)];
+    if (!workspace?.id) {
+      return;
+    }
+    navigate(`/app/workspace/${workspace.id}/overview`);
+  };
+
   const kpis = [
     { label: 'Total Entities', value: entities.length, accent: '#000000' },
     { label: 'Active', value: entities.filter(e => e.status === 'active').length, accent: '#EE6C4D' },
@@ -281,6 +328,15 @@ const EnterpriseEntities = () => {
                 )}
 
                 <div className="entity-card-actions" onClick={e => e.stopPropagation()}>
+                  {workspaceByEntityId[String(entity.id)]?.id && (
+                    <button
+                      className="btn-secondary btn-sm"
+                      style={{ flex: 1 }}
+                      onClick={() => openWorkspace(entity.id)}
+                    >
+                      Workspace
+                    </button>
+                  )}
                   <button
                     className="btn-primary btn-sm"
                     style={{ flex: 1 }}
@@ -345,6 +401,9 @@ const EnterpriseEntities = () => {
                       <td className="table-row-muted">{entity.next_filing_date ? new Date(entity.next_filing_date).toLocaleDateString() : '—'}</td>
                       <td onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: 6 }}>
+                          {workspaceByEntityId[String(entity.id)]?.id && (
+                            <button className="btn-secondary btn-sm" onClick={() => openWorkspace(entity.id)}>Workspace</button>
+                          )}
                           <button className="btn-view btn-sm" onClick={() => navigate(`/app/enterprise/entities/${entity.id}/dashboard`)}>View</button>
                           {hasPermission(PERMISSIONS.EDIT_ENTITY) && (
                             <button className="btn-secondary btn-sm" onClick={() => handleOpenModal(entity)}>Edit</button>

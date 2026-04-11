@@ -1,5 +1,5 @@
 ---
-# roles/atc-common/tasks/main.yml
+# roles/lgx-common/tasks/main.yml
 # Baseline hardening and tooling applied to every Ledgrionyx host.
 
 - name: Set timezone to UTC
@@ -15,8 +15,8 @@
 
 - name: Create Ledgrionyx app user
   ansible.builtin.user:
-    name: "{{ atc_app_user }}"
-    group: "{{ atc_app_group }}"
+    name: "{{ ledgrionyx_app_user }}"
+    group: "{{ ledgrionyx_app_group }}"
     system: true
     shell: /bin/false
     home: /opt/ledgrionyx
@@ -26,8 +26,8 @@
   ansible.builtin.file:
     path: "{{ atc_log_dir }}"
     state: directory
-    owner: "{{ atc_app_user }}"
-    group: "{{ atc_app_group }}"
+    owner: "{{ ledgrionyx_app_user }}"
+    group: "{{ ledgrionyx_app_group }}"
     mode: '0750'
 
 - name: Configure NTP
@@ -73,15 +73,15 @@
     state: started
     enabled: true
 
-- name: Add ATC app user to docker group
+- name: Add LGX app user to docker group
   ansible.builtin.user:
-    name: "{{ atc_app_user }}"
+    name: "{{ ledgrionyx_app_user }}"
     groups: docker
     append: true
 
 - name: Configure unattended security upgrades
   ansible.builtin.copy:
-    dest: /etc/apt/apt.conf.d/50unattended-upgrades-atc
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades-ledgrionyx
     content: |
       Unattended-Upgrade::Allowed-Origins {
         "${distro_id}:${distro_codename}-security";

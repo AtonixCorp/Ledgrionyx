@@ -18,18 +18,12 @@ const formatPoints = (series) => {
 const MONTHS = ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
 
 const SCENARIOS = {
-  best:  { label: 'Best Case',  color: 'var(--color-success)', revenue: [310,335,360,385,410,440], expenses: [158,162,168,174,180,188] },
-  base:  { label: 'Base Case',  color: 'var(--color-cyan)',    revenue: [292,305,318,330,345,358], expenses: [162,168,175,182,190,197] },
-  worst: { label: 'Worst Case', color: 'var(--color-error)',   revenue: [275,285,295,305,315,322], expenses: [168,175,183,191,200,208] },
+  best:  { label: 'Best Case',  color: 'var(--color-success)', revenue: [], expenses: [] },
+  base:  { label: 'Base Case',  color: 'var(--color-cyan)',    revenue: [], expenses: [] },
+  worst: { label: 'Worst Case', color: 'var(--color-error)',   revenue: [], expenses: [] },
 };
 
-const mockForecast = [
-  { month: 'Feb 2025', revenue: '$292,000', expenses: '$162,000', netIncome: '$130,000', cashFlow: '$118,000', confidence: 'High' },
-  { month: 'Mar 2025', revenue: '$305,000', expenses: '$168,000', netIncome: '$137,000', cashFlow: '$124,000', confidence: 'High' },
-  { month: 'Apr 2025', revenue: '$318,000', expenses: '$175,000', netIncome: '$143,000', cashFlow: '$129,000', confidence: 'Medium' },
-  { month: 'May 2025', revenue: '$330,000', expenses: '$182,000', netIncome: '$148,000', cashFlow: '$133,000', confidence: 'Medium' },
-  { month: 'Jun 2025', revenue: '$345,000', expenses: '$190,000', netIncome: '$155,000', cashFlow: '$140,000', confidence: 'Low' },
-];
+const forecastRows = [];
 
 const CONFIDENCE_COLORS = { High: 'var(--color-success)', Medium: 'var(--color-warning)', Low: 'var(--color-error)' };
 
@@ -55,7 +49,9 @@ export default function Forecasts() {
   const scenario = SCENARIOS[activeScenario];
   const netIncome = scenario.revenue.map((r, i) => r - scenario.expenses[i]);
   const totalRev = (scenario.revenue.reduce((s, v) => s + v, 0) * 1000).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-  const avgNet = Math.round(netIncome.reduce((s, v) => s + v, 0) / netIncome.length * 1000).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const avgNet = netIncome.length > 0
+    ? Math.round(netIncome.reduce((s, v) => s + v, 0) / netIncome.length * 1000).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+    : '$0';
 
   const handleCreate = () => { setForm(BLANK_FORECAST); setShowModal(false); };
 
@@ -113,10 +109,14 @@ export default function Forecasts() {
           </div>
         </div>
         <div style={{ height: 200, border: '1px solid var(--border-color-default)', borderRadius: 4, overflow: 'hidden', background: 'var(--color-silver-very-light)' }}>
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-            <polyline fill="none" stroke={scenario.color} strokeWidth="2" points={formatPoints(scenario.revenue)} />
-            <polyline fill="none" stroke="var(--color-silver-dark)" strokeWidth="2" strokeDasharray="3 2" points={formatPoints(netIncome)} />
-          </svg>
+          {scenario.revenue.length > 0 ? (
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+              <polyline fill="none" stroke={scenario.color} strokeWidth="2" points={formatPoints(scenario.revenue)} />
+              <polyline fill="none" stroke="var(--color-silver-dark)" strokeWidth="2" strokeDasharray="3 2" points={formatPoints(netIncome)} />
+            </svg>
+          ) : (
+            <div className="empty-state" style={{ height: '100%' }}>No forecast data yet. Create a scenario to populate this box.</div>
+          )}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
           {MONTHS.map(m => <span key={m} style={{ fontSize: 10, color: 'var(--color-silver-dark)', fontWeight: 600 }}>{m}</span>)}
@@ -132,7 +132,7 @@ export default function Forecasts() {
       </Card>
 
       <Card title="Monthly Projections">
-        <Table columns={columns} data={mockForecast} />
+        {forecastRows.length > 0 ? <Table columns={columns} data={forecastRows} /> : <p className="empty-state">No projections yet. Add a scenario to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_FORECAST); }} title="New Forecast Scenario">

@@ -9,16 +9,16 @@
   hosts: all
   gather_facts: true
   roles:
-    - atc-common
+    - lgx-common
 
 - name: Configure API service hosts (ledger, accounts, risk, reporting)
   hosts: api
   gather_facts: true
   roles:
-    - atc-api
+    - lgx-api
 
 - name: Configure database hosts
   hosts: database
   gather_facts: true
   roles:
-    - atc-db
+    - lgx-db

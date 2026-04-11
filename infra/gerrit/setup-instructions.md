@@ -8,7 +8,7 @@ Run the following `ssh` commands against your Gerrit instance (or use the Admin 
 # Replace GERRIT_HOST and GERRIT_PORT accordingly
 GERRIT="ssh -p $GERRIT_PORT $GERRIT_HOST gerrit"
 
-$GERRIT create-project infra/openstack-atc \
+$GERRIT create-project infra/openstack-ledgrionyx \
   --description "Ledgrionyx OpenStack Infrastructure as Code" \
   --submit-type MERGE_IF_NECESSARY \
   --require-change-id
@@ -45,12 +45,12 @@ After creating each project, push the `project.config` from this directory to th
 `refs/meta/config` ref of each Gerrit project:
 
 ```bash
-# Example for infra/openstack-atc
-git clone ssh://$GERRIT_HOST:$GERRIT_PORT/infra/openstack-atc
-cd infra-openstack-atc
+# Example for infra/openstack-ledgrionyx
+git clone ssh://$GERRIT_HOST:$GERRIT_PORT/infra/openstack-ledgrionyx
+cd infra-openstack-ledgrionyx
 git fetch origin refs/meta/config:refs/meta/config
 git checkout refs/meta/config
-cp /path/to/infra-openstack-atc.config project.config
+cp /path/to/infra-openstack-ledgrionyx.config project.config
 git add project.config
 git commit -m "Apply Ledgrionyx governance config"
 git push origin HEAD:refs/meta/config

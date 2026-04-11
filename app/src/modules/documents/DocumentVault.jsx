@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const mockDocs = [
-  { id: 'DOC-001', name: 'Audit Report FY2024.pdf', type: 'Audit', size: '2.4 MB', uploaded: '2025-01-20', uploader: 'Sarah Johnson', tags: 'audit, FY2024' },
-  { id: 'DOC-002', name: 'W-9 Form - KPMG.pdf', type: 'Tax Document', size: '180 KB', uploaded: '2025-01-15', uploader: 'Michael Chen', tags: 'vendor, tax, W-9' },
-  { id: 'DOC-003', name: 'Board Resolution Jan 2025.docx', type: 'Legal', size: '85 KB', uploaded: '2025-01-10', uploader: 'Admin', tags: 'board, legal, 2025' },
-  { id: 'DOC-004', name: 'Lease Agreement - HQ.pdf', type: 'Contract', size: '1.1 MB', uploaded: '2024-06-01', uploader: 'Admin', tags: 'lease, contract, real-estate' },
-];
+const documentRows = [];
 
 const columns = [
   { key: 'name', header: 'Document Name' },
@@ -22,7 +17,7 @@ const BLANK_DOC = { name: '', type: '', tags: '', notes: '' };
 export default function DocumentVault() {
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState('');
-  const [docList, setDocList] = useState(mockDocs);
+  const [docList, setDocList] = useState(documentRows);
   const [form, setForm] = useState(BLANK_DOC);
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
 
@@ -58,15 +53,15 @@ export default function DocumentVault() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Total Documents</div>
-          <div className="stat-value">4</div>
+          <div className="stat-value">{docList.length}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Total Storage</div>
-          <div className="stat-value">3.8 MB</div>
+          <div className="stat-value">0 MB</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Recent Uploads</div>
-          <div className="stat-value">2</div>
+          <div className="stat-value">0</div>
         </Card>
       </div>
 
@@ -84,7 +79,7 @@ export default function DocumentVault() {
             }}
           />
         </div>
-        <Table columns={columns} data={filtered} />
+        {filtered.length > 0 ? <Table columns={columns} data={filtered} /> : <p className="empty-state">No documents yet. Upload one to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_DOC); }} title="Upload Document" size="medium">

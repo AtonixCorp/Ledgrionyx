@@ -3,7 +3,7 @@ import { useFinance } from '../../context/FinanceContext';
 import { financialDNAService } from '../../services/financialDNAService';
 
 const FinancialDNA = () => {
-  const { transactions, mockPortfolio } = useFinance();
+  const { transactions, portfolioData } = useFinance();
   const [dnaProfile, setDnaProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -11,13 +11,13 @@ const FinancialDNA = () => {
     setTimeout(() => {
       const profile = financialDNAService.analyzeFinancialDNA(
         transactions,
-        mockPortfolio,
+        portfolioData,
         {}
       );
       setDnaProfile(profile);
       setLoading(false);
     }, 2000);
-  }, [transactions, mockPortfolio]);
+  }, [transactions, portfolioData]);
 
   if (loading) {
     return (

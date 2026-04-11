@@ -29,15 +29,6 @@ const STATUS_CONFIG = {
   draft: { label: 'Draft', cls: 'wso-badge-dormant' },
 };
 
-const ENTITY_LINKS = [
-  { label: 'Entity Dashboard', path: (id) => `/app/enterprise/entities/${id}/dashboard` },
-  { label: 'Bookkeeping', path: (id) => `/enterprise/entity/${id}/bookkeeping` },
-  { label: 'Transactions', path: (id) => `/enterprise/entity/${id}/bookkeeping/transactions` },
-  { label: 'Accounts', path: (id) => `/enterprise/entity/${id}/bookkeeping/accounts` },
-  { label: 'Reports', path: (id) => `/enterprise/entity/${id}/bookkeeping/reports` },
-  { label: 'Staff & HR', path: (id) => `/enterprise/entity/${id}/bookkeeping/staff-hr` },
-];
-
 const MEMBER_ROLE_COUNTS = [
   { label: 'Owners', value: 1 },
   { label: 'Admins', value: 0 },
@@ -109,7 +100,7 @@ const ModuleToggleCard = ({ name, enabled }) => (
 const WorkspaceOverview = () => {
   const { workspaceId } = useParams();
   const navigate = useNavigate();
-  const { activeWorkspace, entities } = useEnterprise();
+  const { activeWorkspace, entities, getWorkspacePermissionSummary } = useEnterprise();
   const [mailFolder, setMailFolder] = useState('Inbox');
   const [marketingFilter, setMarketingFilter] = useState('All');
 
@@ -130,14 +121,12 @@ const WorkspaceOverview = () => {
     }
     return activeWorkspace || {};
   }, [workspaceId, activeWorkspace, entities]);
+  const permissionSummary = getWorkspacePermissionSummary(ws.id || workspaceId);
 
   const statusCfg = STATUS_CONFIG[ws.status] || { label: ws.status || 'Active', cls: 'wso-badge-active' };
   const entityLabel = ENTITY_TYPE_LABELS[ws.entity_type] || ws.entity_type || '—';
   const initials = (ws.name || 'W').slice(0, 2).toUpperCase();
   const equityEnabled = hasEquityModule(ws);
-  const quickLinks = equityEnabled
-    ? [...ENTITY_LINKS, { label: 'Equity Management', path: (id) => `/app/equity/${id}/registry` }]
-    : ENTITY_LINKS;
   const enabledModules = useMemo(() => {
     const fallbackModules = [
       ...REQUIRED_MODULES.map((module) => module.key),
@@ -155,12 +144,13 @@ const WorkspaceOverview = () => {
     navigate(`/app/workspace/${ws.id}/${module}`);
   };
 
+  const canOpenEntityDashboard = Boolean(permissionSummary?.dashboards?.entity_dashboard);
+
   return (
     <div className="wsm-page wso-root">
       <div className="wsm-page-header">
         <div>
           <h1 className="wsm-page-title">{ws.name || 'Workspace Overview'}</h1>
-          <p className="wsm-page-sub">Entity profile and workspace activity summary.</p>
         </div>
       </div>
 
@@ -227,29 +217,18 @@ const WorkspaceOverview = () => {
               {fmtDate(ws.created_at)}
             </span>
           )}
-          <button className="wso-btn-primary" onClick={() => navigate(`/app/enterprise/entities/${ws.id}/dashboard`)}>
-            Open Entity Dashboard →
-          </button>
-          {equityEnabled && (
+          {canOpenEntityDashboard && (
+            <button className="wso-btn-primary" onClick={() => navigate(`/app/enterprise/entities/${ws.id}/dashboard`)}>
+              Open Entity Dashboard →
+            </button>
+          )}
+          {equityEnabled && canOpenEntityDashboard && (
             <button className="wso-btn-primary" onClick={() => navigate(`/app/equity/${ws.id}/registry`)}>
               Open Equity Management →
             </button>
           )}
         </div>
       </div>
-
-      {ws.id && (
-        <div className="wso-quicklinks">
-          <div className="wso-quicklinks-title">Entity Access</div>
-          <div className="wso-quicklinks-grid">
-            {quickLinks.map(({ label, path }) => (
-              <button key={label} className="wso-quicklink-card" onClick={() => navigate(path(ws.id))}>
-                <span className="wso-ql-label">{label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="wso-dashboard-grid">
         <section className="wso-dashboard-section">

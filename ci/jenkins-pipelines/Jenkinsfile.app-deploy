@@ -7,7 +7,7 @@
 // (no rebuilds). PROD applies require explicit manual gate approval.
 // =============================================================================
 
-@Library('atc-pipeline-library') _
+@Library('lgx-pipeline-library') _
 
 pipeline {
     agent { label 'ansible' }
@@ -34,7 +34,7 @@ pipeline {
         timeout(time: 60, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '100'))
         ansiColor('xterm')
-        lock(resource: "deploy-atc-${params.TARGET_ENV}")
+        lock(resource: "deploy-lgx-${params.TARGET_ENV}")
     }
 
     environment {
@@ -88,7 +88,7 @@ Approve to proceed within the current change window.""",
             steps {
                 withCredentials([
                     sshUserPrivateKey(
-                        credentialsId: "atc-${params.TARGET_ENV}-deploy-key",
+                        credentialsId: "lgx-${params.TARGET_ENV}-deploy-key",
                         keyFileVariable: 'ANSIBLE_PRIVATE_KEY_FILE'
                     ),
                     string(credentialsId: 'vault-token', variable: 'VAULT_TOKEN')
@@ -96,7 +96,7 @@ Approve to proceed within the current change window.""",
                     sh '''
                         set -e
                         ansible-playbook \
-                          infra/openstack/ansible/playbooks/deploy-atc-services.yml \
+                          infra/openstack/ansible/playbooks/deploy-lgx-services.yml \
                           --inventory  infra/openstack/ansible/inventories/${TARGET_ENV}/hosts.yml \
                           --private-key ${ANSIBLE_PRIVATE_KEY_FILE} \
                           --extra-vars "env=${TARGET_ENV}" \
@@ -125,13 +125,13 @@ Approve to proceed within the current change window.""",
                     # Basic health-check against the deployed environment
                     BASTION_IP=$(ansible-inventory \
                       --inventory infra/openstack/ansible/inventories/${TARGET_ENV}/hosts.yml \
-                      --host atc-${TARGET_ENV}-bastion-01 | python3 -c "import sys,json; print(json.load(sys.stdin)['ansible_host'])")
+                      --host lgx-${TARGET_ENV}-bastion-01 | python3 -c "import sys,json; print(json.load(sys.stdin)['ansible_host'])")
 
                     # Health endpoint check through bastion tunnel (adjust URL per environment)
                     ssh -o StrictHostKeyChecking=no \
                         -i ${ANSIBLE_PRIVATE_KEY_FILE:-~/.ssh/id_rsa} \
                         ubuntu@${BASTION_IP} \
-                        "curl -sf http://atc-${TARGET_ENV}-ledger-01:8000/health/ && echo SMOKE_OK"
+                        "curl -sf http://lgx-${TARGET_ENV}-ledger-01:8000/health/ && echo SMOKE_OK"
                 '''
             }
         }

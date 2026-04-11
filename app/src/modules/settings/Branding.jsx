@@ -12,7 +12,7 @@ export default function Branding() {
     secondaryColor: '#0B0C10',
     accentColor: '#10B981',
     font: 'Inter',
-    logoText: 'ATC',
+    logoText: 'LGX',
     supportEmail: 'support@ledgrionyx.com',
     website: 'https://ledgrionyx.com',
     footerText: '© 2026 Ledgrionyx. All rights reserved.',

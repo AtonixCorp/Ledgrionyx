@@ -8,6 +8,7 @@ import { FilterProvider } from './context/FilterContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import GlobalConsoleRoute from './components/GlobalConsoleRoute';
 import Layout from './components/Layout/Layout';
 import EntityLayout from './components/EntityLayout/EntityLayout';
 import Landing from './pages/Landing/Landing';
@@ -114,7 +115,9 @@ import Contact from './pages/Contact/Contact';
 import Privacy from './pages/Privacy/Privacy';
 import CLIDocs from './pages/CLIDocs/CLIDocs';
 import GlobalErrorCenter from './components/GlobalErrorCenter';
+import Dashboard from './pages/Dashboard/Dashboard';
 import GlobalConsole from './pages/GlobalConsole/GlobalConsole';
+import WorkspaceSelector from './pages/WorkspaceSelector/WorkspaceSelector';
 import CreateWorkspace from './pages/Workspace/CreateWorkspace';
 import WorkspaceRoute from './components/WorkspaceRoute';
 import WorkspaceLayout from './components/WorkspaceLayout/WorkspaceLayout';
@@ -193,8 +196,8 @@ function App() {
               <Route path="/global-tax" element={<GlobalTax />} />
               <Route path="/v1/docs" element={<CLIDocs />} />
 
-              {/* Redirect legacy personal routes to enterprise */}
-              <Route path="/dashboard" element={<Navigate to="/app/console" replace />} />
+              {/* Legacy financial dashboard shell */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
               {/* Standalone authenticated surfaces — no dashboard shell */}
               {renderStandalonePageRoutes('/security-center', AppSecurity, 'manage_org_settings')}
@@ -202,7 +205,8 @@ function App() {
               {renderStandalonePageRoutes('/support-tickets', AppSupportTickets, 'view_org_overview')}
 
               {/* Global Console — no sidebar */}
-              <Route path="/app/console" element={<ProtectedRoute><GlobalConsole /></ProtectedRoute>} />
+              <Route path="/app/console" element={<ProtectedRoute><GlobalConsoleRoute><GlobalConsole /></GlobalConsoleRoute></ProtectedRoute>} />
+              <Route path="/app/workspaces/select" element={<ProtectedRoute><WorkspaceSelector /></ProtectedRoute>} />
               <Route path="/app/workspaces/create" element={<ProtectedRoute><CreateWorkspace /></ProtectedRoute>} />
 
               {/* Enterprise Routes */}

@@ -5,6 +5,7 @@ import {
   bankingTransactionsAPI,
   entitiesAPI,
 } from '../../services/api';
+import './APIIntegrations.css';
 
 const INTEGRATION_CATEGORIES = [
   {
@@ -538,7 +539,7 @@ const APIIntegrations = () => {
                       {syncing[integration.id] ? 'Syncing…' : 'Sync Now'}
                     </button>
                     <button className="btn-remove" onClick={() => handleDelete(integration.id)}>
-
+                      Remove
                     </button>
                   </div>
                 </div>

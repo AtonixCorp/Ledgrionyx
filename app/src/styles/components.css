@@ -34,9 +34,9 @@
 .ws-department-sidebar-item,
 .cw-card,
 .cw-review-card {
-  background: var(--color-surface);
-  border: var(--border-width-thin) solid var(--border-color-default);
-  box-shadow: var(--shadow-base);
+  background: var(--surface2, var(--color-surface));
+  border: var(--border-width-thin) solid var(--border-subtle, var(--border-color-default));
+  box-shadow: var(--shadow-2);
 }
 
 .card {
@@ -197,6 +197,26 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  color: var(--ly-icon-on-light);
+}
+
+.icon svg,
+.btn-icon svg,
+.nav-icon svg {
+  width: 1em;
+  height: 1em;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  fill: none;
+}
+
+.icon-on-dark,
+.nav-icon {
+  color: var(--ly-icon-on-dark);
+}
+
+.icon-active {
+  color: var(--ly-icon-active);
 }
 
 .icon-sm { font-size: 14px; }

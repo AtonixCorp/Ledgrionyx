@@ -2,8 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
-import LedgrionyxLogo from '../branding/LedgrionyxLogo';
+import { LogoMark } from '../Brand/LogoMark';
 import { hasEquityModule } from '../../utils/workspaceModules';
+import { reportUiError } from '../../utils/errorReporting';
+import { Icon } from '../ui';
+import {
+  LuCalendarDays,
+  LuFolder,
+  LuLayoutDashboard,
+  LuMail,
+  LuMegaphone,
+  LuSettings,
+  LuShield,
+  LuUsers,
+  LuUsersRound,
+} from 'react-icons/lu';
 import './WorkspaceLayout.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -79,41 +92,61 @@ const WorkspaceLayout = ({ children }) => {
 
   // ── Workspace sidebar navigation ──────────────────────────────────────────
   const coreModules = [
-    { key: 'overview', to: `${base}/overview`, label: 'Overview' },
-    { key: 'members', to: `${base}/members`, label: 'Members' },
-    { key: 'departments', to: `${base}/departments`, label: 'Departments' },
-    { key: 'meetings', to: `${base}/meetings`, label: 'Meetings' },
-    { key: 'calendar', to: `${base}/calendar`, label: 'Calendar' },
-    { key: 'files', to: `${base}/files`, label: 'Files' },
+    { key: 'overview', to: `${base}/overview`, label: 'Overview', icon: LuLayoutDashboard },
+    { key: 'members', to: `${base}/members`, label: 'Members', icon: LuUsers },
+    { key: 'departments', to: `${base}/departments`, label: 'Departments', icon: LuUsersRound },
+    { key: 'meetings', to: `${base}/meetings`, label: 'Meetings', icon: LuUsersRound },
+    { key: 'calendar', to: `${base}/calendar`, label: 'Calendar', icon: LuCalendarDays },
+    { key: 'files', to: `${base}/files`, label: 'Files', icon: LuFolder },
   ];
 
   const managementModules = [
-    { key: 'permissions', to: `${base}/permissions`, label: 'Permissions' },
-    { key: 'settings', to: `${base}/settings`, label: 'Settings' },
+    { key: 'permissions', to: `${base}/permissions`, label: 'Permissions', icon: LuShield },
+    { key: 'settings', to: `${base}/settings`, label: 'Settings', icon: LuSettings },
   ];
 
   const optionalModules = [
-    { key: 'email', to: `${base}/email`, label: 'Email' },
-    { key: 'marketing', to: `${base}/marketing`, label: 'Marketing' },
+    { key: 'email', to: `${base}/email`, label: 'Email', icon: LuMail },
+    { key: 'marketing', to: `${base}/marketing`, label: 'Marketing', icon: LuMegaphone },
   ];
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
 
+  const handleDeniedNavigation = (label) => {
+    reportUiError({
+      title: 'Access restricted',
+      message: `You do not have access to the ${label} module.`,
+      severity: 'warning',
+      source: 'workspace',
+      autoHideMs: 5000,
+    });
+  };
+
   const renderNavItems = (items) =>
-    items
-      .filter(({ key }) => !permissionSummary || sectionAccess[key])
-      .map(({ to, label }) => (
+    items.map(({ to, label, key, icon }) => {
+      const hasAccess = !permissionSummary || Boolean(sectionAccess[key]);
+      return (
       <li key={to}>
         <NavLink
           to={to}
-          className={({ isActive }) => `ws-nav-link${isActive ? ' active' : ''}`}
+          className={({ isActive }) => `ws-nav-link${isActive ? ' active' : ''}${hasAccess ? '' : ' ws-nav-link-denied'}`}
           title={sidebarMinimized ? label : undefined}
+          onClick={(event) => {
+            if (!hasAccess) {
+              event.preventDefault();
+              handleDeniedNavigation(label);
+            }
+          }}
         >
+          <span className="ws-nav-icon-wrap">
+            <Icon icon={icon} size="sm" tone="dark" className="nav-icon" />
+          </span>
           {!sidebarMinimized && <span className="ws-nav-label">{label}</span>}
           {sidebarMinimized && <span className="ws-nav-abbr">{label.charAt(0)}</span>}
         </NavLink>
       </li>
-    ));
+    );
+  });
 
   const renderSection = (label, items) => (
     <React.Fragment key={label}>
@@ -134,7 +167,7 @@ const WorkspaceLayout = ({ children }) => {
         <div className="ws-sidebar-header">
           {!sidebarMinimized && (
             <div className="ws-sidebar-brand">
-              <LedgrionyxLogo variant="white" size="small" withText={false} />
+              <LogoMark size={24} />
               <div className="ws-sidebar-brand-text">
                 <span className="ws-sidebar-title">{wsName}</span>
                 <span className="ws-sidebar-sub">Workspace</span>
@@ -143,7 +176,7 @@ const WorkspaceLayout = ({ children }) => {
           )}
           {sidebarMinimized && (
             <div className="ws-sidebar-brand-min">
-              <LedgrionyxLogo variant="white" size="small" withText={false} />
+              <LogoMark size={24} />
             </div>
           )}
           <button

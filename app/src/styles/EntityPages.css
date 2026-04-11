@@ -154,9 +154,9 @@
 
 .btn-danger,
 .btn-delete {
-  background: var(--atc-crimson-tint, #FAE9EC);
-  color: var(--atc-crimson, #C41E3A);
-  border: 1px solid var(--atc-crimson-border, #E6A3AE);
+  background: var(--ly-crimson-tint, #FAE9EC);
+  color: var(--ly-crimson, #C41E3A);
+  border: 1px solid var(--ly-crimson-border, #E6A3AE);
   border-radius: 7px;
   padding: 8px 14px;
   font-size: 12px;
@@ -167,18 +167,18 @@
 
 .btn-danger:hover,
 .btn-delete:hover {
-  background: var(--atc-crimson, #C41E3A);
+  background: var(--ly-crimson, #C41E3A);
   color: #FFFFFF;
 }
 
 .btn-warning {
-  background: var(--atc-graphite-hover, #F2F3F4);
-  color: var(--atc-graphite, #1E2328);
-  border: 1px solid var(--atc-graphite-rule, #E0E2E5);
+  background: var(--ly-graphite-hover, #F2F3F4);
+  color: var(--ly-graphite, #1E2328);
+  border: 1px solid var(--ly-graphite-rule, #E0E2E5);
 }
 
 .btn-warning:hover {
-  background: var(--atc-graphite-rule, #E0E2E5);
+  background: var(--ly-graphite-rule, #E0E2E5);
 }
 
 .btn-sm {

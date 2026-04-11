@@ -30,7 +30,7 @@ CLI_API_KEY_DELIMITER = '.'
 
 
 def current_api_environment() -> str:
-    return getattr(settings, 'ATC_API_ENVIRONMENT', 'sandbox' if settings.DEBUG else 'production')
+    return getattr(settings, 'LEDGRIONYX_API_ENVIRONMENT', 'sandbox' if settings.DEBUG else 'production')
 
 
 # ---------------------------------------------------------------------------

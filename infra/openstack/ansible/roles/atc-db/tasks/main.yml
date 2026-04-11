@@ -1,5 +1,5 @@
 ---
-# roles/atc-db/tasks/main.yml
+# roles/lgx-db/tasks/main.yml
 # Provisions and configures the PostgreSQL container on db-group hosts.
 
 - name: Create Postgres data directory
@@ -14,15 +14,15 @@
   ansible.builtin.template:
     src: postgres.env.j2
     dest: /opt/ledgrionyx/postgres.env
-    owner: "{{ atc_app_user }}"
-    group: "{{ atc_app_group }}"
+    owner: "{{ ledgrionyx_app_user }}"
+    group: "{{ ledgrionyx_app_group }}"
     mode: '0600'
   no_log: true
   notify: Restart postgres container
 
 - name: Ensure postgres container is running
   community.docker.docker_container:
-    name: "atc-{{ env }}-postgres"
+    name: "lgx-{{ env }}-postgres"
     image: "{{ atc_db_image }}"
     state: started
     restart_policy: "{{ atc_db_container_restart_policy }}"
@@ -43,7 +43,7 @@
     db: postgres
     login_host: 127.0.0.1
     login_port: "{{ atc_db_port }}"
-    login_user: "{{ postgres_user | default('atc') }}"
+    login_user: "{{ postgres_user | default('ledgrionyx') }}"
     login_password: "{{ postgres_password }}"
   retries: 10
   delay: 5

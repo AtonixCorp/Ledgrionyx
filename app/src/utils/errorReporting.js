@@ -1,4 +1,4 @@
-const UI_ERROR_EVENT = 'atc:ui-error';
+const UI_ERROR_EVENT = 'ly:ui-error';
 
 let errorSequence = 0;
 

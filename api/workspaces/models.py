@@ -74,7 +74,9 @@ class WorkspaceMember(models.Model):
     id           = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workspace    = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='members')
     user         = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workspace_memberships')
-    role         = models.CharField(max_length=20, choices=MemberRole.choices, default=MemberRole.MEMBER)
+    member_code  = models.CharField(max_length=6, unique=True, editable=False, null=True, blank=True)
+    role         = models.CharField(max_length=20, choices=MemberRole.choices, null=True, blank=True, default=None)
+    status       = models.CharField(max_length=20, choices=ParticipantStatus.choices, default=ParticipantStatus.ACCEPTED)
     created_at   = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -82,7 +84,8 @@ class WorkspaceMember(models.Model):
         ordering = ['created_at']
 
     def __str__(self):
-        return f'{self.user.email} → {self.workspace.name} ({self.role})'
+        role_label = self.role or 'invited'
+        return f'{self.user.email} → {self.workspace.name} ({role_label})'
 
 
 # ─────────────────────────────────────────────────────────────────────────────

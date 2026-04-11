@@ -4,11 +4,11 @@ import { useAuth } from '../../../context/AuthContext';
 import { workspaceMembersAPI } from '../../../services/api';
 import './WorkspaceModules.css';
 
-const ROLES = ['all', 'owner', 'admin', 'member', 'viewer'];
+const ROLES = ['all', 'owner', 'admin', 'member', 'viewer', 'invited'];
 const MANAGEABLE_ROLES = ['admin', 'member', 'viewer'];
 
 const formatRoleLabel = (role) => {
-  if (!role) return 'Unknown';
+  if (!role) return 'Invited';
   return role.charAt(0).toUpperCase() + role.slice(1);
 };
 
@@ -16,7 +16,7 @@ const getMemberName = (member) => {
   const first = member.user?.first_name || '';
   const last = member.user?.last_name || '';
   const fullName = `${first} ${last}`.trim();
-  return fullName || member.user?.username || member.user?.email || `User ${member.user?.id || ''}`.trim();
+  return fullName || member.user?.username || `User ${member.user?.id || ''}`.trim();
 };
 
 const WorkspaceMembers = () => {
@@ -61,7 +61,8 @@ const WorkspaceMembers = () => {
   const filteredMembers = useMemo(() => {
     const query = search.trim().toLowerCase();
     return members.filter((member) => {
-      if (filterRole !== 'all' && member.role !== filterRole) {
+      const memberRole = member.role || 'invited';
+      if (filterRole !== 'all' && memberRole !== filterRole) {
         return false;
       }
       if (!query) {
@@ -71,7 +72,10 @@ const WorkspaceMembers = () => {
         getMemberName(member),
         member.user?.email,
         member.user?.username,
-        member.role,
+        member.member_code,
+        member.user_id,
+        memberRole,
+        member.departments,
       ]
         .filter(Boolean)
         .join(' ')
@@ -84,10 +88,11 @@ const WorkspaceMembers = () => {
     return members.reduce(
       (accumulator, member) => {
         accumulator.total += 1;
-        accumulator[member.role] = (accumulator[member.role] || 0) + 1;
+        const memberRole = member.role || 'invited';
+        accumulator[memberRole] = (accumulator[memberRole] || 0) + 1;
         return accumulator;
       },
-      { total: 0, owner: 0, admin: 0, member: 0, viewer: 0 }
+      { total: 0, owner: 0, admin: 0, member: 0, viewer: 0, invited: 0 }
     );
   }, [members]);
 
@@ -214,7 +219,10 @@ const WorkspaceMembers = () => {
               <th>Member</th>
               <th>Email</th>
               <th>Username</th>
+              <th>User Code</th>
+              <th>User ID</th>
               <th>Role</th>
+              <th>Department</th>
               <th>Joined</th>
               <th>Actions</th>
             </tr>
@@ -222,17 +230,19 @@ const WorkspaceMembers = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6}><div className="wsm-empty">Loading members…</div></td>
+                <td colSpan={9}><div className="wsm-empty">Loading members…</div></td>
               </tr>
             ) : filteredMembers.length === 0 ? (
               <tr>
-                <td colSpan={6}><div className="wsm-empty">No members match the current filters.</div></td>
+                <td colSpan={9}><div className="wsm-empty">No members match the current filters.</div></td>
               </tr>
             ) : (
               filteredMembers.map((member) => {
                 const isOwner = member.role === 'owner';
-                const isBusy = actionUserId === member.user?.id;
-                const isSelf = String(member.user?.id) === String(user?.id);
+                const memberRole = member.role || 'invited';
+                const memberUserId = member.user_id ?? member.user?.id;
+                const isBusy = actionUserId === memberUserId;
+                const isSelf = String(memberUserId) === String(user?.id);
                 return (
                   <tr key={member.id}>
                     <td>
@@ -246,11 +256,15 @@ const WorkspaceMembers = () => {
                     </td>
                     <td>{member.user?.email || '—'}</td>
                     <td>{member.user?.username || '—'}</td>
+                    <td>{member.member_code || '—'}</td>
+                    <td>{memberUserId || '—'}</td>
                     <td>
-                      {canManageMembers && !isOwner ? (
+                      {memberRole === 'invited' ? (
+                        <span className={`wsm-badge wsm-badge-${memberRole}`}>{formatRoleLabel(memberRole)}</span>
+                      ) : canManageMembers && !isOwner ? (
                         <select
                           className="wsm-select wsm-inline-select"
-                          value={member.role}
+                          value={memberRole}
                           onChange={(event) => handleRoleChange(member, event.target.value)}
                           disabled={isBusy}
                         >
@@ -259,9 +273,10 @@ const WorkspaceMembers = () => {
                           ))}
                         </select>
                       ) : (
-                        <span className={`wsm-badge wsm-badge-${member.role}`}>{formatRoleLabel(member.role)}</span>
+                        <span className={`wsm-badge wsm-badge-${memberRole}`}>{formatRoleLabel(memberRole)}</span>
                       )}
                     </td>
+                    <td>{member.departments || '—'}</td>
                     <td>{member.created_at ? new Date(member.created_at).toLocaleDateString() : '—'}</td>
                     <td>
                       <button

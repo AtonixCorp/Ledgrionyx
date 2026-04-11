@@ -39,6 +39,13 @@ export const EnterpriseProvider = ({ children }) => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, []);
 
+  const resolveNumericEntityId = useCallback((entityId) => {
+    const numericEntityId = Number(entityId);
+    return Number.isInteger(numericEntityId) && String(numericEntityId) === String(entityId).trim()
+      ? numericEntityId
+      : null;
+  }, []);
+
   // Silently refresh the access token using the stored refresh token.
   // Returns the new access token string, or null on failure.
   const refreshAccessToken = useCallback(async () => {
@@ -1540,7 +1547,9 @@ export const EnterpriseProvider = ({ children }) => {
    */
   const fetchTransactions = useCallback(async (entityId, filters = {}) => {
     try {
-      const params = new URLSearchParams({ entity_id: entityId, ...filters });
+      const numericEntityId = resolveNumericEntityId(entityId);
+      if (numericEntityId === null) return [];
+      const params = new URLSearchParams({ entity_id: numericEntityId, ...filters });
       const response = await fetch(apiUrl(`/api/transactions/?${params}`), {
         headers: buildAuthHeaders(),
       });
@@ -1555,7 +1564,7 @@ export const EnterpriseProvider = ({ children }) => {
       console.error(err);
       return [];
     }
-  }, [apiUrl, buildAuthHeaders]);
+  }, [apiUrl, buildAuthHeaders, resolveNumericEntityId]);
 
   /**
    * Create transaction
@@ -1638,7 +1647,9 @@ export const EnterpriseProvider = ({ children }) => {
    */
   const fetchBookkeepingSummary = useCallback(async (entityId, filters = {}) => {
     try {
-      const params = new URLSearchParams({ entity_id: entityId, ...filters });
+      const numericEntityId = resolveNumericEntityId(entityId);
+      if (numericEntityId === null) return null;
+      const params = new URLSearchParams({ entity_id: numericEntityId, ...filters });
       const response = await fetch(apiUrl(`/api/transactions/summary/?${params}`), {
         headers: buildAuthHeaders(),
       });
@@ -1653,14 +1664,16 @@ export const EnterpriseProvider = ({ children }) => {
       console.error(err);
       return null;
     }
-  }, [apiUrl, buildAuthHeaders]);
+  }, [apiUrl, buildAuthHeaders, resolveNumericEntityId]);
 
   /**
    * Fetch cashflow treasury dashboard data
    */
   const fetchCashflowTreasuryDashboard = useCallback(async (entityId, filters = {}) => {
     try {
-      const params = new URLSearchParams({ entity_id: entityId, ...filters });
+      const numericEntityId = resolveNumericEntityId(entityId);
+      if (numericEntityId === null) return null;
+      const params = new URLSearchParams({ entity_id: numericEntityId, ...filters });
       const response = await fetch(apiUrl(`/api/cashflow-treasury/dashboard/?${params}`), {
         headers: buildAuthHeaders(),
       });
@@ -1675,7 +1688,7 @@ export const EnterpriseProvider = ({ children }) => {
       console.error(err);
       return null;
     }
-  }, [apiUrl, buildAuthHeaders]);
+  }, [apiUrl, buildAuthHeaders, resolveNumericEntityId]);
 
   /**
    * Execute internal transfer

@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  color: var(--atc-color-primary);
+  color: var(--ly-color-primary);
 }
 
 .ledgrionyx-logo-mark {
@@ -23,7 +23,7 @@
 }
 
 .ledgrionyx-logo-mark__orbit {
-  stroke: var(--atc-color-accent);
+  stroke: var(--ly-color-accent);
   stroke-width: 4;
   stroke-linecap: round;
 }
@@ -44,7 +44,7 @@
 }
 
 .ledgrionyx-logo-wordmark__primary {
-  font-family: var(--atc-font-family-sans);
+  font-family: var(--ly-font-family-sans);
   font-size: 1rem;
   font-weight: 700;
   color: currentColor;
@@ -52,10 +52,10 @@
 }
 
 .ledgrionyx-logo-wordmark__secondary {
-  font-family: var(--atc-font-family-sans);
+  font-family: var(--ly-font-family-sans);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--atc-color-text-muted);
+  color: var(--ly-color-text-muted);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -89,9 +89,9 @@
 }
 
 .ledgrionyx-logo--mono {
-  color: var(--atc-color-text-primary);
+  color: var(--ly-color-text-primary);
 }
 
 .ledgrionyx-logo--mono .ledgrionyx-logo-mark__orbit {
-  stroke: var(--atc-color-text-muted);
+  stroke: var(--ly-color-text-muted);
 }

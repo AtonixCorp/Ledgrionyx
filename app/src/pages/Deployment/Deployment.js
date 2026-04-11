@@ -179,7 +179,7 @@ const Deployment = () => {
             <h3>App publishing is ready for GitHub Pages visibility.</h3>
             <p>
               The app is now wired to support the repository base path used by GitHub Pages, making
-              atonixcorp.github.io/ledgrionyx/ the correct public surface for this repository deployment.
+              ledgrionyx.github.io/ledgrionyx/ the correct public surface for this repository deployment.
             </p>
           </aside>
         </div>
@@ -246,7 +246,7 @@ const Deployment = () => {
         <div className="deployment-shell deployment-cta">
           <div>
             <p className="deployment-eyebrow deployment-eyebrow--inverse">GitHub Pages Target</p>
-            <h2>This app page is designed to be visible at atonixcorp.github.io/ledgrionyx/.</h2>
+            <h2>This app page is designed to be visible at ledgrionyx.github.io/ledgrionyx/.</h2>
             <p>
               It gives users a clean public view of how Ledgrionyx is shipped, promoted, and verified without exposing
               them directly to internal deployment files first.

@@ -4,14 +4,17 @@ Every service enforces membership + role before mutating data.
 Every write generates a WorkspaceLog entry via LogService.
 Selected workspace activity is mirrored into the shared platform audit stream.
 """
+import secrets
 from django.apps import apps
 from django.db import transaction
+from django.db.models import Count, Q
 from django.contrib.auth.models import User
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError
 
 from .models import (
     DEFAULT_MODULES,
     MemberRole,
+    ParticipantStatus,
     Workspace, WorkspaceStatus, WorkspaceTier,
     WorkspaceCalendarEvent,
     WorkspaceFile, WorkspaceFolder,
@@ -287,7 +290,7 @@ class WorkspaceService:
         ])
 
         # Owner is automatically a member with role=owner
-        WorkspaceMember.objects.create(workspace=ws, user=user, role=MemberRole.OWNER)
+        WorkspaceMember.objects.create(workspace=ws, user=user, role=MemberRole.OWNER, status=ParticipantStatus.ACCEPTED)
 
         WorkspaceService._seed_default_departments(ws)
 
@@ -355,7 +358,12 @@ class WorkspaceService:
     def list_user_workspaces(user: User):
         """Return all workspaces where the user holds any membership."""
         member_ws_ids = WorkspaceMember.objects.filter(user=user).values_list('workspace_id', flat=True)
-        return Workspace.objects.filter(pk__in=member_ws_ids).exclude(status=WorkspaceStatus.DELETED)
+        return Workspace.objects.filter(pk__in=member_ws_ids).exclude(status=WorkspaceStatus.DELETED).select_related('linked_entity__organization').annotate(
+            members_count=Count('members', distinct=True),
+            departments_count=Count('groups', distinct=True),
+            clients_count=Count('linked_entity__organization__clients', distinct=True),
+            component_count=Count('modules', filter=Q(modules__enabled=True), distinct=True),
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -363,6 +371,21 @@ class WorkspaceService:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class MemberService:
+
+    @staticmethod
+    def _generate_member_code():
+        return f'{secrets.randbelow(1_000_000):06d}'
+
+    @staticmethod
+    def _assign_member_code(member: WorkspaceMember):
+        if member.member_code:
+            return member.member_code
+
+        while True:
+            candidate = MemberService._generate_member_code()
+            if not WorkspaceMember.objects.filter(member_code=candidate).exists():
+                member.member_code = candidate
+                return candidate
 
     @staticmethod
     @transaction.atomic
@@ -373,12 +396,41 @@ class MemberService:
         if role == MemberRole.OWNER:
             raise PermissionDenied('Cannot assign owner role via this endpoint.')
         member, created = WorkspaceMember.objects.get_or_create(
-            workspace_id=workspace_id, user=user,
-            defaults={'role': role}
+            workspace_id=workspace_id,
+            user=user,
+            defaults={'role': role, 'status': ParticipantStatus.ACCEPTED, 'member_code': MemberService._generate_member_code()},
         )
         if not created:
+            if member.status == ParticipantStatus.INVITED and member.role is None:
+                member.role = role
+                member.status = ParticipantStatus.ACCEPTED
+                MemberService._assign_member_code(member)
+                member.save(update_fields=['role', 'status', 'member_code'])
+                LogService.log(workspace_id, actor, 'member.invite_accepted', {'user_id': str(user.pk), 'role': role})
+                return member
             raise ValidationError({'user': 'User is already a member of this workspace.'})
+        MemberService._assign_member_code(member)
+        member.save(update_fields=['member_code'])
         LogService.log(workspace_id, actor, 'member.added', {'user_id': str(user.pk), 'role': role})
+        return member
+
+    @staticmethod
+    @transaction.atomic
+    def invite_member(workspace_id, actor: User, user: User) -> WorkspaceMember:
+        PermissionService.assert_owner_or_admin(workspace_id, actor)
+        member, created = WorkspaceMember.objects.get_or_create(
+            workspace_id=workspace_id,
+            user=user,
+            defaults={'role': None, 'status': ParticipantStatus.INVITED, 'member_code': MemberService._generate_member_code()},
+        )
+        if not created:
+            if member.role is not None and member.status == ParticipantStatus.ACCEPTED:
+                raise ValidationError({'user': 'User is already a member of this workspace.'})
+            member.role = None
+            member.status = ParticipantStatus.INVITED
+            MemberService._assign_member_code(member)
+            member.save(update_fields=['role', 'status', 'member_code'])
+        LogService.log(workspace_id, actor, 'member.invited', {'user_id': str(user.pk)})
         return member
 
     @staticmethod
@@ -421,6 +473,18 @@ class MemberService:
     def list_members(workspace_id, actor: User):
         PermissionService.assert_member(workspace_id, actor)
         return WorkspaceMember.objects.filter(workspace_id=workspace_id).select_related('user')
+
+    @staticmethod
+    def member_department_map(workspace_id):
+        department_map = {}
+        memberships = WorkspaceGroupMember.objects.filter(
+            group__workspace_id=workspace_id,
+        ).select_related('group', 'user').order_by('group__name')
+
+        for membership in memberships:
+            department_map.setdefault(membership.user_id, []).append(membership.group.name)
+
+        return department_map
 
 
 # ─────────────────────────────────────────────────────────────────────────────

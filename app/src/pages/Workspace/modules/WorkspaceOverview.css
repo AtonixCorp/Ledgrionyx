@@ -6,8 +6,83 @@
   --card-radius: 14px;
 }
 
+.wso-hero-shell {
+  align-items: stretch;
+  background: linear-gradient(135deg, rgba(var(--brand-institutional-blue-rgb), 0.08) 0%, rgba(var(--brand-accent-red-rgb), 0.08) 100%);
+  border: 1px solid var(--brand-soft-grey);
+  border-radius: var(--card-radius);
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+  margin-bottom: 24px;
+  padding: 24px 28px;
+}
+
+.wso-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wso-hero-kicker {
+  color: var(--brand-accent-red);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.wso-hero-title {
+  color: var(--brand-deep-navy);
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+  max-width: 15ch;
+}
+
+.wso-hero-text {
+  color: var(--layout-body-text);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 62ch;
+}
+
+.wso-hero-metrics {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.wso-hero-metric {
+  align-items: flex-start;
+  background: rgba(var(--brand-soft-grey-rgb), 0.18);
+  border: 1px solid var(--brand-soft-grey);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+  min-height: 108px;
+  padding: 16px;
+}
+
+.wso-hero-metric span {
+  color: var(--layout-body-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wso-hero-metric strong {
+  color: var(--brand-deep-navy);
+  font-size: 16px;
+  font-weight: 800;
+}
+
 .wso-entity-card,
-.wso-quicklinks,
 .wso-dashboard-section,
 .wso-management-panel {
   background: var(--color-white);
@@ -15,8 +90,7 @@
   border-radius: var(--card-radius);
 }
 
-.wso-entity-card,
-.wso-quicklinks {
+.wso-entity-card {
   margin-bottom: 24px;
 }
 
@@ -169,7 +243,6 @@
 
 .wso-entity-details,
 .wso-dashboard-grid,
-.wso-quicklinks-grid,
 .wso-management-grid,
 .wso-card-grid.compact,
 .wso-calendar-preview,

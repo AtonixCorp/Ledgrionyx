@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
@@ -10,9 +10,32 @@ const EntityLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { entityId } = useParams();
-  const { entities } = useEnterprise();
+  const { entities, activeWorkspace } = useEnterprise();
 
-  const entity = (entities || []).find(e => e.id?.toString() === entityId?.toString());
+  const resolvedEntityId = useMemo(() => {
+    const directEntityId = Number(entityId);
+    if (Number.isInteger(directEntityId) && String(directEntityId) === String(entityId).trim()) {
+      return directEntityId;
+    }
+
+    const workspaceCandidates = [activeWorkspace];
+    try {
+      const savedWorkspace = localStorage.getItem('ledgrionyx_active_workspace');
+      if (savedWorkspace) {
+        workspaceCandidates.push(JSON.parse(savedWorkspace));
+      }
+    } catch {
+      // Ignore malformed saved workspace state.
+    }
+
+    const matchingWorkspace = workspaceCandidates.find((workspace) => workspace && String(workspace.id) === String(entityId));
+    const linkedEntityId = matchingWorkspace?.linked_entity_id || matchingWorkspace?.linked_entity?.id;
+    const numericLinkedEntityId = Number(linkedEntityId);
+
+    return Number.isInteger(numericLinkedEntityId) ? numericLinkedEntityId : null;
+  }, [activeWorkspace, entityId]);
+
+  const entity = (entities || []).find(e => e.id?.toString() === (resolvedEntityId || entityId)?.toString());
   const entityName = entity?.name || 'Entity';
 
   const [sidebarMinimized, setSidebarMinimized] = useState(false);
@@ -36,7 +59,7 @@ const EntityLayout = ({ children }) => {
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
 
-  const id = entityId;
+  const id = resolvedEntityId || entityId;
 
   const navSections = [
     {

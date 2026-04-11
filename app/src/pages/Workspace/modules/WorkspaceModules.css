@@ -481,37 +481,37 @@
 }
 
 .wsm-btn-primary {
-  background: var(--brand-institutional-blue);
-  border: 1px solid var(--brand-institutional-blue);
+  background: var(--ly-button-primary);
+  border: 1px solid var(--ly-button-primary);
   color: var(--color-white);
 }
 
 .wsm-btn-primary:hover {
-  background: var(--brand-steel-blue);
-  border-color: var(--brand-steel-blue);
+  background: var(--ly-button-primary-hover);
+  border-color: var(--ly-button-primary-hover);
 }
 
 .wsm-btn-secondary {
-  background: var(--color-white);
-  border: 1px solid var(--brand-soft-grey);
-  color: var(--brand-deep-navy);
+  background: var(--ly-button-secondary);
+  border: 1px solid var(--ly-button-secondary);
+  color: var(--color-white);
 }
 
 .wsm-btn-secondary:hover {
-  background: rgba(var(--brand-soft-grey-rgb), 0.16);
-  border-color: var(--brand-institutional-blue);
-  color: var(--brand-institutional-blue);
+  background: var(--ly-button-secondary-hover);
+  border-color: var(--ly-button-secondary-hover);
+  color: var(--color-white);
 }
 
 .wsm-btn-danger {
-  background: var(--brand-accent-red);
-  border: 1px solid var(--brand-accent-red);
+  background: var(--ly-button-critical);
+  border: 1px solid var(--ly-button-critical);
   color: var(--color-white);
 }
 
 .wsm-btn-danger:hover {
-  background: var(--brand-deep-navy);
-  border-color: var(--brand-deep-navy);
+  background: var(--ly-button-critical-hover);
+  border-color: var(--ly-button-critical-hover);
 }
 
 .wsm-btn-danger-inline {
@@ -982,8 +982,15 @@
   background: rgba(var(--brand-accent-red-rgb), 0.08);
   border: 1px solid var(--brand-accent-red);
   border-radius: 10px;
+  display: grid;
+  gap: 14px;
   margin-top: 32px;
   padding: 20px;
+}
+
+.wsm-danger-zone-copy {
+  display: grid;
+  gap: 8px;
 }
 
 .wsm-danger-zone-title {
@@ -991,6 +998,10 @@
   font-size: 14px;
   font-weight: 700;
   margin: 0 0 8px;
+}
+
+.wsm-inline-actions-danger {
+  justify-content: flex-start;
 }
 
 .wsm-cal-view-chips,

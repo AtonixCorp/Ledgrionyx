@@ -3,7 +3,7 @@
 terraform {
   backend "swift" {
     auth_url            = "https://openstack.ledgrionyx.internal:5000/v3"
-    container           = "atc-terraform-state"
+    container           = "lgx-terraform-state"
     state_name          = "dev/terraform.tfstate"
     region_name         = "RegionOne"
     application_credential_id     = ""  # Supplied via env var OS_APPLICATION_CREDENTIAL_ID

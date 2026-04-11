@@ -8,13 +8,14 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   margin: 0;
-  background: var(--layout-body-bg);
-  color: var(--color-text);
-  font-family: var(--font-family);
+  background: var(--ledg-bg, var(--layout-body-bg));
+  color: var(--ledg-text, var(--color-text));
+  font-family: var(--ledg-font-primary, var(--font-family));
   font-size: var(--font-size-base);
   line-height: var(--line-height-body);
 }
@@ -29,8 +30,8 @@ body {
 }
 
 ::selection {
-  background: rgba(var(--color-primary-rgb), 0.16);
-  color: var(--color-heading);
+  background: hsla(var(--brand-hue, 222) var(--brand-saturation, 69%) var(--brand-lightness, 39%) / 0.20);
+  color: var(--text1, var(--color-heading));
 }
 
 h1,
@@ -148,28 +149,28 @@ button:disabled,
 
 .btn-primary,
 .btn.btn-primary {
-  background: var(--color-primary);
+  background: var(--ly-button-primary);
   color: var(--color-white);
-  border: var(--border-width-thin) solid var(--color-primary);
+  border: var(--border-width-thin) solid var(--ly-button-primary);
 }
 
 .btn-primary:hover,
 .btn.btn-primary:hover {
-  background: var(--brand-steel-blue);
-  border-color: var(--brand-steel-blue);
+  background: var(--ly-button-primary-hover);
+  border-color: var(--ly-button-primary-hover);
 }
 
 .btn-secondary,
 .btn.btn-secondary {
-  background: var(--color-secondary);
+  background: var(--ly-button-secondary);
   color: var(--color-white);
-  border: var(--border-width-thin) solid var(--color-secondary);
+  border: var(--border-width-thin) solid var(--ly-button-secondary);
 }
 
 .btn-secondary:hover,
 .btn.btn-secondary:hover {
-  background: var(--brand-deep-navy);
-  border-color: var(--brand-deep-navy);
+  background: var(--ly-button-secondary-hover);
+  border-color: var(--ly-button-secondary-hover);
 }
 
 .btn-outline,
@@ -177,31 +178,44 @@ button:disabled,
 .btn-outline-white,
 .btn.btn-outline-white {
   background: transparent;
-  color: var(--brand-steel-blue);
-  border: var(--border-width-thin) solid var(--brand-steel-blue);
+  color: var(--ly-button-ghost-text);
+  border: var(--border-width-thin) solid var(--ly-button-ghost-border);
 }
 
 .btn-outline:hover,
 .btn.btn-outline:hover,
 .btn-outline-white:hover,
 .btn.btn-outline-white:hover {
-  background: var(--brand-steel-blue);
-  color: var(--color-white);
+  background: var(--ly-button-ghost-hover-bg);
+  color: var(--ly-button-ghost-text);
 }
 
 .btn-danger,
 .btn.btn-danger {
-  background: var(--color-error);
+  background: var(--ly-button-critical);
   color: var(--color-white);
-  border: var(--border-width-thin) solid var(--color-error);
+  border: var(--border-width-thin) solid var(--ly-button-critical);
+}
+
+.btn-danger:hover,
+.btn.btn-danger:hover {
+  background: var(--ly-button-critical-hover);
+  border-color: var(--ly-button-critical-hover);
 }
 
 .btn-ghost,
 .btn.btn-ghost,
 .btn-link {
   background: transparent;
-  color: var(--brand-steel-blue);
-  border: var(--border-width-thin) solid transparent;
+  color: var(--ly-button-ghost-text);
+  border: var(--border-width-thin) solid var(--ly-button-ghost-border);
+}
+
+.btn-ghost:hover,
+.btn.btn-ghost:hover,
+.btn-link:hover {
+  background: var(--ly-button-ghost-hover-bg);
+  color: var(--ly-button-ghost-text);
 }
 
 .btn-large,

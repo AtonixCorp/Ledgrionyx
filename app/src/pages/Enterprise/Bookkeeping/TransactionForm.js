@@ -8,8 +8,11 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
     fetchBookkeepingCategories,
     fetchBookkeepingAccounts,
     createTransaction,
-    updateTransaction
+    updateTransaction,
+    entities
   } = useEnterprise();
+
+  const entity = entities.find((item) => String(item.id) === String(entityId));
 
   const [formData, setFormData] = useState({
     entity: entityId,
@@ -30,35 +33,43 @@ const TransactionForm = ({ entityId, transaction, onClose, onSave }) => {
   const [loading, setLoading] = useState(false);
 
   const loadData = useCallback(async () => {
+    if (!entity?.id) {
+      setCategories([]);
+      setAccounts([]);
+      return;
+    }
     const [categoriesData, accountsData] = await Promise.all([
-      fetchBookkeepingCategories(entityId),
-      fetchBookkeepingAccounts(entityId)
+      fetchBookkeepingCategories(entity.id),
+      fetchBookkeepingAccounts(entity.id)
     ]);
     setCategories(categoriesData.results || categoriesData);
     setAccounts(accountsData.results || accountsData);
-  }, [entityId, fetchBookkeepingAccounts, fetchBookkeepingCategories]);
+  }, [entity, fetchBookkeepingAccounts, fetchBookkeepingCategories]);
 
   useEffect(() => {
     loadData();
     if (transaction) {
       setFormData({
         ...transaction,
-        entity: entityId,
+        entity: entity?.id || entityId,
         category: transaction.category?.id || transaction.category,
         account: transaction.account?.id || transaction.account
       });
     }
-  }, [entityId, loadData, transaction]);
+  }, [entity, entityId, loadData, transaction]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const resolvedEntityId = entity?.id || entityId;
+      const payload = { ...formData, entity: resolvedEntityId };
+
       if (transaction) {
-        await updateTransaction(transaction.id, formData);
+        await updateTransaction(transaction.id, payload);
       } else {
-        await createTransaction(formData);
+        await createTransaction(payload);
       }
       onSave();
     } catch (err) {

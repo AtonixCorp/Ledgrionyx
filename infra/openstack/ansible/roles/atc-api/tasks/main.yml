@@ -1,24 +1,24 @@
 ---
-# roles/atc-api/tasks/main.yml
+# roles/lgx-api/tasks/main.yml
 # Deploys the Ledgrionyx API container on each api-group host.
 
 - name: Create service data directory
   ansible.builtin.file:
     path: "{{ atc_data_dir }}"
     state: directory
-    owner: "{{ atc_app_user }}"
-    group: "{{ atc_app_group }}"
+    owner: "{{ ledgrionyx_app_user }}"
+    group: "{{ ledgrionyx_app_group }}"
     mode: '0750'
 
 - name: Template environment file from Vault secrets
   ansible.builtin.template:
-    src: atc-api.env.j2
+    src: lgx-api.env.j2
     dest: "{{ atc_env_file }}"
-    owner: "{{ atc_app_user }}"
-    group: "{{ atc_app_group }}"
+    owner: "{{ ledgrionyx_app_user }}"
+    group: "{{ ledgrionyx_app_group }}"
     mode: '0600'
   no_log: true   # Never expose env file contents in Ansible output
-  notify: Restart atc-api container
+  notify: Restart lgx-api container
 
 - name: Pull latest image
   community.docker.docker_image:
@@ -26,9 +26,9 @@
     source: pull
     force_source: true
 
-- name: Ensure atc-api container is running
+- name: Ensure lgx-api container is running
   community.docker.docker_container:
-    name: "atc-{{ env }}-{{ atc_service }}"
+    name: "lgx-{{ env }}-{{ atc_service }}"
     image: "{{ atc_image }}"
     state: started
     restart_policy: "{{ atc_container_restart_policy }}"

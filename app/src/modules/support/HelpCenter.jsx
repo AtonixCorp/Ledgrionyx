@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Button, Input } from '../../components/ui';
 import StandaloneModuleShell from '../../components/StandaloneModuleShell';
+import './HelpCenter.css';
 
 const FAQ_CATEGORIES = ['Getting Started', 'Accounting', 'Billing', 'Integrations', 'Security', 'Reporting'];
 
@@ -89,24 +90,23 @@ export default function HelpCenter() {
 
       {/* Search */}
       <Card>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div className="help-center-search-row">
           <Input
             placeholder="Search help articles…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ flex: 1, height: 44, fontSize: 15 }}
+            className="help-center-search"
           />
           {search && (
             <Button variant="secondary" onClick={() => setSearch('')}>Clear</Button>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+        <div className="help-center-categories">
           {['All', ...FAQ_CATEGORIES].map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`filter-btn ${activeCategory === cat ? 'active' : ''}`}
-              style={{ padding: '4px 14px', fontSize: 12, fontWeight: 600, border: '1px solid var(--border-color-default)', cursor: 'pointer', background: activeCategory === cat ? 'var(--color-midnight)' : 'var(--color-white)', color: activeCategory === cat ? '#fff' : 'var(--color-midnight)' }}
+              className={`help-center-chip ${activeCategory === cat ? 'active' : ''}`}
             >
               {cat}
             </button>
@@ -116,7 +116,7 @@ export default function HelpCenter() {
 
       {/* Quick Links */}
       {!search && activeCategory === 'All' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div className="help-center-links-grid">
           {[
             { title: 'Quick Start Guide', desc: 'Set up your first entity and chart of accounts in under 10 minutes.' },
             { title: 'API Documentation', desc: 'Full REST API reference with code examples in Python, JS, and cURL.' },
@@ -125,9 +125,9 @@ export default function HelpCenter() {
             { title: 'Bank Integrations', desc: 'Supported banks, connection methods, and troubleshooting.' },
             { title: 'Video Tutorials', desc: 'Watch walkthroughs of every major feature in the platform.' },
           ].map(link => (
-            <Card key={link.title} style={{ cursor: 'pointer' }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--color-midnight)', marginBottom: 4 }}>{link.title}</div>
-              <div style={{ fontSize: 12, color: 'var(--color-silver-dark)' }}>{link.desc}</div>
+            <Card key={link.title} className="help-center-link-card">
+              <div className="help-center-link-title">{link.title}</div>
+              <div className="help-center-link-desc">{link.desc}</div>
             </Card>
           ))}
         </div>
@@ -136,34 +136,30 @@ export default function HelpCenter() {
       {/* FAQs */}
         <Card header={`Frequently Asked Questions ${filtered.length < FAQ_ITEMS.length ? `— ${filtered.length} results` : ''}`}>
         {filtered.length === 0 ? (
-          <p style={{ textAlign: 'center', color: 'var(--color-silver-dark)', padding: '32px 0' }}>
+          <p className="help-center-empty">
             No articles found for "{search}". <Button variant="secondary" size="small" onClick={() => { setSearch(''); setActiveCategory('All'); }}>Clear filters</Button>
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          <div className="help-center-faq-list">
             {filtered.map((item, i) => (
               <div
                 key={i}
-                style={{ borderBottom: '1px solid var(--border-color-default)' }}
+                className="help-center-faq-item"
               >
                 <button
                   onClick={() => setExpanded(expanded === i ? null : i)}
-                  style={{
-                    width: '100%', textAlign: 'left', background: 'none', border: 'none',
-                    padding: '14px 16px', cursor: 'pointer', display: 'flex',
-                    alignItems: 'center', justifyContent: 'space-between', gap: 16,
-                  }}
+                  className="help-center-faq-question"
                 >
-                  <div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-cyan-text)', textTransform: 'uppercase', letterSpacing: '0.4px', marginRight: 10 }}>{item.category}</span>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-midnight)' }}>{item.q}</span>
+                  <div className="help-center-faq-question-copy">
+                    <span className="help-center-faq-category">{item.category}</span>
+                    <span className="help-center-faq-title">{item.q}</span>
                   </div>
-                  <span style={{ color: 'var(--color-silver-dark)', fontSize: 18, fontWeight: 300, flexShrink: 0 }}>
+                  <span className="help-center-faq-toggle">
                     {expanded === i ? '−' : '+'}
                   </span>
                 </button>
                 {expanded === i && (
-                  <div style={{ padding: '0 16px 16px', fontSize: 14, color: 'var(--color-midnight)', lineHeight: 1.7, maxWidth: 680 }}>
+                  <div className="help-center-faq-answer">
                     {item.a}
                   </div>
                 )}

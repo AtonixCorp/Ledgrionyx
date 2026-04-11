@@ -34,7 +34,7 @@ const TransactionList = () => {
     search: ''
   });
 
-  const entity = entities.find(e => e.id === parseInt(entityId));
+  const entity = entities.find(e => String(e.id) === String(entityId));
 
   const buildQueryParams = useCallback(() => {
     const params = {};
@@ -50,20 +50,29 @@ const TransactionList = () => {
   }, [filters]);
 
   const loadData = useCallback(async () => {
+    if (!entity?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const data = await fetchTransactions(entityId, buildQueryParams());
+    const data = await fetchTransactions(entity.id, buildQueryParams());
     setTransactions(data.results || data);
     setLoading(false);
-  }, [buildQueryParams, entityId, fetchTransactions]);
+  }, [buildQueryParams, entity, fetchTransactions]);
 
   const loadFiltersData = useCallback(async () => {
+    if (!entity?.id) {
+      setCategories([]);
+      setAccounts([]);
+      return;
+    }
     const [cats, accs] = await Promise.all([
-      fetchBookkeepingCategories(entityId),
-      fetchBookkeepingAccounts(entityId)
+      fetchBookkeepingCategories(entity.id),
+      fetchBookkeepingAccounts(entity.id)
     ]);
     setCategories(cats.results || cats);
     setAccounts(accs.results || accs);
-  }, [entityId, fetchBookkeepingAccounts, fetchBookkeepingCategories]);
+  }, [entity, fetchBookkeepingAccounts, fetchBookkeepingCategories]);
 
   useEffect(() => {
     loadData();

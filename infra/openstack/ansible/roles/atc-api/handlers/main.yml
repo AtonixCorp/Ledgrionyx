@@ -1,8 +1,8 @@
 ---
-# roles/atc-api/handlers/main.yml
+# roles/lgx-api/handlers/main.yml
 
-- name: Restart atc-api container
+- name: Restart lgx-api container
   community.docker.docker_container:
-    name: "atc-{{ env }}-{{ atc_service }}"
+    name: "lgx-{{ env }}-{{ atc_service }}"
     state: started
     restart: true

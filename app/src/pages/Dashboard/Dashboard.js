@@ -1,12 +1,71 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinance } from '../../context/FinanceContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from 'recharts';
+import './Dashboard.css';
+
+const sidebarItems = [
+  { label: 'Search', route: '/app/workspaces/select' },
+  { label: 'Budget Calculator', route: '/budget' },
+  { label: 'Set New Goal', route: '/help-center' },
+  { label: 'Ask Coach', route: '/support-center' },
+  { label: 'Courses', route: '/help-center' },
+  { label: 'Inbox', route: '/support-tickets' },
+  { label: 'Help Center', route: '/help-center' },
+  { label: 'Settings', route: '/security-center' },
+];
+
+const topicTabs = ['All Topics', 'Budgeting', 'Saving', 'Investing'];
+
+const courseCatalog = [
+  {
+    title: 'Budgeting Foundations',
+    topic: 'Budgeting',
+    level: 'Beginner',
+    description: 'Build a stable monthly budget that supports disciplined spending and measurable savings.',
+    duration: '18 min',
+    sections: 5,
+  },
+  {
+    title: 'Saving Systems',
+    topic: 'Saving',
+    level: 'Intermediate',
+    description: 'Set up simple savings routines with progress checkpoints and calm, predictable momentum.',
+    duration: '24 min',
+    sections: 6,
+  },
+  {
+    title: 'Cash Flow Discipline',
+    topic: 'Budgeting',
+    level: 'Intermediate',
+    description: 'Track income and expenses with a clean structure that keeps decisions easy to review.',
+    duration: '22 min',
+    sections: 4,
+  },
+  {
+    title: 'Investing Basics',
+    topic: 'Investing',
+    level: 'Advanced',
+    description: 'Understand risk, allocation, and compounding through a controlled institutional framework.',
+    duration: '30 min',
+    sections: 7,
+  },
+];
+
+const moduleTiles = [
+  { label: 'Budget Calculator', description: 'Review projected cash flow and basic spending discipline.', route: '/budget' },
+  { label: 'Savings Tracker', description: 'Follow the savings progress bar and keep targets visible.', route: '/help-center' },
+  { label: 'Ask Coach', description: 'Use the support center for guided financial help.', route: '/support-center' },
+  { label: 'Learning Library', description: 'Move through the course catalog without leaving the dashboard.', route: '/help-center' },
+  { label: 'Inbox', description: 'Check notifications and unresolved financial tasks.', route: '/support-tickets' },
+  { label: 'Settings', description: 'Adjust institutional controls and security preferences.', route: '/security-center' },
+];
+
+const formatMoney = (value) => `$${Number(value || 0).toFixed(2)}`;
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const {
     totalIncome,
     totalExpenses,
@@ -23,580 +82,376 @@ const Dashboard = () => {
     setExpenseSourceFilter,
   } = useFinance();
 
-  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'all-time'
+  const [viewMode, setViewMode] = useState('monthly');
+  const [activeTopic, setActiveTopic] = useState('All Topics');
 
-  // Get month name
-  const getMonthName = (month) => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'];
-    return months[month];
-  };
+  const displayData = useMemo(() => {
+    if (viewMode === 'monthly' && monthlySummary) {
+      return {
+        income: monthlySummary.totals?.totalIncome || 0,
+        expenses: monthlySummary.totals?.totalExpenses || 0,
+        balance: monthlySummary.totals?.remainingBalance || 0,
+        tax: monthlySummary.totals?.totalTax || 0,
+        netIncome: monthlySummary.totals?.netIncome || 0,
+        categoryData: Array.isArray(monthlySummary.categories) ? monthlySummary.categories : [],
+        budgetComparison: Array.isArray(monthlySummary.budgetAnalysis?.comparison) ? monthlySummary.budgetAnalysis.comparison : [],
+        recentTransactions: Array.isArray(monthlySummary.transactions) ? monthlySummary.transactions : [],
+      };
+    }
 
-  // Determine data to display based on view mode
-  const displayData = viewMode === 'monthly' && monthlySummary ? {
-    income: monthlySummary.totals?.totalIncome || 0,
-    expenses: monthlySummary.totals?.totalExpenses || 0,
-    balance: monthlySummary.totals?.remainingBalance || 0,
-    tax: monthlySummary.totals?.totalTax || 0,
-    netIncome: monthlySummary.totals?.netIncome || 0,
-    categoryData: Array.isArray(monthlySummary.categories) ? monthlySummary.categories : [],
-    budgetComparison: Array.isArray(monthlySummary.budgetAnalysis?.comparison) ? monthlySummary.budgetAnalysis.comparison : [],
-    recentTransactions: Array.isArray(monthlySummary.transactions) ? monthlySummary.transactions : []
-  } : {
-    income: totalIncome || 0,
-    expenses: totalExpenses || 0,
-    balance: balance || 0,
-    tax: financialSummary?.tax?.amount || 0,
-    netIncome: financialSummary?.income?.net || 0,
-    categoryData: Array.isArray(expenses) ? expenses.reduce((acc, expense) => {
-      const existing = acc.find(item => item.category === expense.category);
-      if (existing) {
-        existing.amount += expense.amount;
-      } else {
-        acc.push({ category: expense.category, amount: expense.amount });
-      }
-      return acc;
-    }, []) : [],
-    budgetComparison: Array.isArray(budgets) ? budgets.map(b => ({
-      category: b.category,
-      budget: b.limit || 0,
-      spent: (Array.isArray(expenses) ? expenses : [])
-        .filter((expense) => expense.category === b.category)
-        .reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0),
-      remaining: (b.limit || 0) - (Array.isArray(expenses) ? expenses : [])
-        .filter((expense) => expense.category === b.category)
-        .reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0)
-    })) : [],
-    recentTransactions: Array.isArray(expenses) ? [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5) : []
-  };
+    const categoryData = Array.isArray(expenses)
+      ? expenses.reduce((accumulator, expense) => {
+          const existing = accumulator.find((item) => item.category === expense.category);
+          if (existing) {
+            existing.amount += expense.amount;
+          } else {
+            accumulator.push({ category: expense.category, amount: expense.amount });
+          }
+          return accumulator;
+        }, [])
+      : [];
+
+    const budgetComparison = Array.isArray(budgets)
+      ? budgets.map((budget) => {
+          const spent = (Array.isArray(expenses) ? expenses : [])
+            .filter((expense) => expense.category === budget.category)
+            .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
+          return {
+            category: budget.category,
+            budget: budget.limit || 0,
+            spent,
+            remaining: (budget.limit || 0) - spent,
+          };
+        })
+      : [];
+
+    return {
+      income: totalIncome || 0,
+      expenses: totalExpenses || 0,
+      balance: balance || 0,
+      tax: financialSummary?.tax?.amount || 0,
+      netIncome: financialSummary?.income?.net || 0,
+      categoryData,
+      budgetComparison,
+      recentTransactions: Array.isArray(expenses)
+        ? [...expenses].sort((left, right) => new Date(right.date) - new Date(left.date)).slice(0, 5)
+        : [],
+    };
+  }, [balance, budgets, expenses, financialSummary, monthlySummary, selectedMonth, totalExpenses, totalIncome, viewMode]);
 
   const budgetAlertDetails = Array.isArray(validationResults?.warningDetails)
     ? validationResults.warningDetails
     : [];
 
-  const THEME = {
-    base: 'var(--color-background)',
-    panel: 'var(--color-background)',
-    border: 'var(--border-color-default)',
-    text: 'var(--color-text)',
-    muted: 'var(--color-silver-dark)',
-    primary: 'var(--color-primary)',
-    accent: 'var(--color-primary)'
+  const savingsValue = Math.max(displayData.balance, 0);
+  const savingsProgress = displayData.income > 0 ? Math.min(100, Math.round((savingsValue / displayData.income) * 100)) : 0;
+  const learningProgress = Math.min(100, Math.max(18, (monthlySummary?.categories?.length || displayData.recentTransactions.length || 0) * 12));
+  const modulesCompleted = Math.max(1, (budgets?.length || 0) + (displayData.recentTransactions.length || 0));
+  const streakValue = Math.max(1, availableMonths.length || 1);
+  const levelValue = Math.min(9, Math.max(1, Math.round(((validationResults?.healthScore || 72) / 10))));
+  const filteredCourses = activeTopic === 'All Topics'
+    ? courseCatalog
+    : courseCatalog.filter((course) => course.topic === activeTopic);
+
+  const overviewCards = [
+    {
+      title: viewMode === 'monthly' ? 'Monthly Income' : 'Total Income',
+      value: formatMoney(displayData.income),
+      label: viewMode === 'monthly' ? 'Current period income' : 'All-time income total',
+      tone: 'blue',
+      progress: 100,
+    },
+    {
+      title: viewMode === 'monthly' ? 'Monthly Savings' : 'Total Savings',
+      value: formatMoney(savingsValue),
+      label: 'Amount retained after expenses',
+      tone: 'green',
+      progress: savingsProgress,
+    },
+    {
+      title: 'Savings Progress',
+      value: `${savingsProgress}%`,
+      label: 'Progress toward disciplined saving',
+      tone: 'gray',
+      progress: savingsProgress,
+    },
+    {
+      title: 'Learning Progress',
+      value: `${learningProgress}%`,
+      label: 'Current financial learning momentum',
+      tone: 'purple',
+      progress: learningProgress,
+    },
+  ];
+
+  const quickStats = [
+    { label: 'Streak', value: `${streakValue} months` },
+    { label: 'Modules completed', value: String(modulesCompleted) },
+    { label: 'Level', value: `Lv. ${levelValue}` },
+  ];
+
+  const goTo = (route) => {
+    navigate(route);
   };
 
-  const COLORS = [
-    'rgba(var(--color-primary-rgb), 1)',
-    'rgba(var(--color-primary-rgb), 0.78)',
-    'rgba(var(--color-text-rgb), 0.64)',
-    'rgba(var(--color-primary-rgb), 0.56)',
-    'rgba(var(--color-text-rgb), 0.36)',
-    'rgba(var(--color-text-rgb), 0.18)'
-  ];
-
-  const sourceFilterLabel =
-    expenseSourceFilter === 'manual'
-      ? 'Manual Only'
-      : expenseSourceFilter === 'imported'
-        ? 'Imported Only'
-        : 'All Sources';
-
-  const overviewHighlights = [
-    {
-      label: 'Reporting View',
-      value: viewMode === 'monthly' ? 'Monthly Focus' : 'All-Time Scope',
-      tone: 'primary',
-    },
-    {
-      label: 'Expense Source',
-      value: sourceFilterLabel,
-      tone: 'accent',
-    },
-    {
-      label: 'Net Position',
-      value: `${displayData.balance >= 0 ? '+' : '-'}$${Math.abs(displayData.balance).toFixed(2)}`,
-      tone: displayData.balance >= 0 ? 'success' : 'danger',
-    },
-  ];
-
   return (
-    <div className="page-container dashboard-page" key={language}>
-      <section className="dashboard-overview-shell">
-        <div className="dashboard-hero-card">
-          <div className="dashboard-header">
-            <div className="dashboard-title-block">
-              <span className="dashboard-kicker">Ledgrionyx Overview</span>
-              <h1 className="page-title">{t('dashboard.title')}</h1>
-              <p className="dashboard-subtitle">
-                Monitor cash movement, spending pressure, and budget momentum from one command surface.
-              </p>
-            </div>
+    <div className="dashboard-finance-page" key={selectedMonth?.month || 'dashboard'}>
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-sidebar-brand">
+          <span className="dashboard-sidebar-brand-mark">LGX</span>
+          <div>
+            <div className="dashboard-sidebar-brand-name">Ledgrionyx</div>
+            <div className="dashboard-sidebar-brand-subtitle">Financial Dashboard</div>
+          </div>
+        </div>
 
-            <div className="dashboard-controls-cluster">
-              <div className="view-toggle dashboard-toggle-group">
-                <button
-                  className={`toggle-btn ${viewMode === 'monthly' ? 'active' : ''}`}
-                  onClick={() => setViewMode('monthly')}
-                >
-                  {t('dashboard.monthlyView')}
-                </button>
-                <button
-                  className={`toggle-btn ${viewMode === 'all-time' ? 'active' : ''}`}
-                  onClick={() => setViewMode('all-time')}
-                >
-                  {t('dashboard.allTime')}
-                </button>
+        <nav className="dashboard-sidebar-nav" aria-label="Dashboard navigation">
+          {sidebarItems.map((item) => (
+            <button
+              key={item.label}
+              className="dashboard-sidebar-item"
+              onClick={() => goTo(item.route)}
+              type="button"
+            >
+              <span className="dashboard-sidebar-icon" aria-hidden="true" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="dashboard-main-column">
+        <header className="dashboard-top-header">
+          <div className="dashboard-top-copy">
+            <p className="dashboard-top-kicker">Ledgrionyx Financial Console</p>
+            <h1 className="dashboard-top-title">{t('dashboard.title')}</h1>
+            <p className="dashboard-top-subtitle">
+              Clean oversight for income, savings, learning, and financial discipline.
+            </p>
+          </div>
+
+          <div className="dashboard-top-stats" aria-label="Dashboard quick stats">
+            {quickStats.map((item) => (
+              <div className="dashboard-stat" key={item.label}>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
               </div>
+            ))}
+          </div>
+        </header>
 
-              <div className="view-toggle dashboard-toggle-group">
-                <button
-                  className={`toggle-btn ${expenseSourceFilter === 'all' ? 'active' : ''}`}
-                  onClick={() => setExpenseSourceFilter('all')}
-                >All Sources
-                </button>
-                <button
-                  className={`toggle-btn ${expenseSourceFilter === 'manual' ? 'active' : ''}`}
-                  onClick={() => setExpenseSourceFilter('manual')}
-                >Manual Only
-                </button>
-                <button
-                  className={`toggle-btn ${expenseSourceFilter === 'imported' ? 'active' : ''}`}
-                  onClick={() => setExpenseSourceFilter('imported')}
-                >Imported Only
-                </button>
+        <main className="dashboard-content">
+          <section className="dashboard-section">
+            <div className="dashboard-section-header">
+              <div>
+                <h2 className="dashboard-section-title">Overview</h2>
+                <p className="dashboard-section-subtitle">At-a-glance metrics with calm, institutional presentation.</p>
               </div>
-
-              {viewMode === 'monthly' && availableMonths.length > 0 && (
-                <div className="month-selector">
-                  <select
-                    value={`${selectedMonth.year}-${selectedMonth.month}`}
-                    onChange={(e) => {
-                      const [year, month] = e.target.value.split('-');
-                      changeMonth(parseInt(year), parseInt(month));
-                    }}
-                    className="month-select"
+              <div className="dashboard-filters">
+                <div className="dashboard-toggle-group" role="tablist" aria-label="Dashboard view mode">
+                  <button
+                    type="button"
+                    className={`dashboard-toggle${viewMode === 'monthly' ? ' active' : ''}`}
+                    onClick={() => setViewMode('monthly')}
                   >
-                    {availableMonths.map(m => (
-                      <option key={`${m.year}-${m.month}`} value={`${m.year}-${m.month}`}>
-                        {getMonthName(m.month)} {m.year}
+                    {t('dashboard.monthlyView')}
+                  </button>
+                  <button
+                    type="button"
+                    className={`dashboard-toggle${viewMode === 'all-time' ? ' active' : ''}`}
+                    onClick={() => setViewMode('all-time')}
+                  >
+                    {t('dashboard.allTime')}
+                  </button>
+                </div>
+
+                <div className="dashboard-toggle-group" role="tablist" aria-label="Expense source filter">
+                  {['all', 'manual', 'imported'].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`dashboard-toggle${expenseSourceFilter === value ? ' active' : ''}`}
+                      onClick={() => setExpenseSourceFilter(value)}
+                    >
+                      {value === 'all' ? 'All Sources' : value === 'manual' ? 'Manual Only' : 'Imported Only'}
+                    </button>
+                  ))}
+                </div>
+
+                {viewMode === 'monthly' && availableMonths.length > 0 && (
+                  <select
+                    className="dashboard-month-select"
+                    value={`${selectedMonth.year}-${selectedMonth.month}`}
+                    onChange={(event) => {
+                      const [year, month] = event.target.value.split('-');
+                      changeMonth(Number(year), Number(month));
+                    }}
+                  >
+                    {availableMonths.map((monthItem) => (
+                      <option key={`${monthItem.year}-${monthItem.month}`} value={`${monthItem.year}-${monthItem.month}`}>
+                        {new Date(monthItem.year, monthItem.month, 1).toLocaleString([], { month: 'long' })} {monthItem.year}
                       </option>
                     ))}
                   </select>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="dashboard-overview-metrics">
-            {overviewHighlights.map((item) => (
-              <div key={item.label} className={`dashboard-overview-pill tone-${item.tone}`}>
-                <span className="dashboard-overview-label">{item.label}</span>
-                <strong className="dashboard-overview-value">{item.value}</strong>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid-3 quick-access-cards">
-          <div className="card nav-card dashboard-card" onClick={() => navigate('/dashboard')}>
-            <div className="nav-icon"></div>
-            <div className="nav-content">
-              <h3>Dashboard</h3>
-              <p>Real-time overview</p>
-            </div>
-            <div className="nav-arrow">→</div>
-          </div>
-
-          <div className="card nav-card expenses-card" onClick={() => navigate('/expenses')}>
-            <div className="nav-icon"></div>
-            <div className="nav-content">
-              <h3>Expenses</h3>
-              <p>Track spending</p>
-            </div>
-            <div className="nav-arrow">→</div>
-          </div>
-
-          <div className="card nav-card budgets-card" onClick={() => navigate('/budget')}>
-            <div className="nav-icon"></div>
-            <div className="nav-content">
-              <h3>Budgets</h3>
-              <p>Set limits</p>
-            </div>
-            <div className="nav-arrow">→</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Health Score (if available) */}
-      {validationResults && (
-        <div className={`card health-score dashboard-panel ${
-          validationResults.healthScore >= 80 ? 'health-excellent' :
-          validationResults.healthScore >= 60 ? 'health-good' :
-          validationResults.healthScore >= 40 ? 'health-fair' : 'health-poor'
-        }`}>
-          <div className="health-content">
-            <h3>Financial Health Score</h3>
-            <div className="health-bar">
-              <div
-                className="health-fill"
-                style={{ width: `${validationResults.healthScore}%` }}
-              />
-            </div>
-            <p className="health-value">{validationResults.healthScore.toFixed(0)}%</p>
-            {validationResults.recommendations && validationResults.recommendations.length > 0 && (
-              <div className="health-tips">
-                <strong>Tips:</strong>
-                <ul>
-                  {validationResults.recommendations.slice(0, 2).map((rec, idx) => (
-                    <li key={idx}>{rec}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {budgetAlertDetails.length > 0 && (
-        <div className="card anomaly-card dashboard-panel">
-          <h2 className="chart-title">Source-Aware Budget Alerts</h2>
-          <div className="anomalies-list">
-            {budgetAlertDetails.slice(0, 3).map((alert) => (
-              <div key={alert.category} className={`anomaly-item severity-${alert.severity}`}>
-                <div className="anomaly-header">
-                  <span className="anomaly-type">{alert.category}</span>
-                  <span className="anomaly-severity">{alert.dominantSource?.label || 'Mixed sources'}</span>
-                </div>
-                <p className="anomaly-message">{alert.message}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Summary Cards */}
-      <div className="grid-4 summary-cards">
-        <div className="card summary-card dashboard-summary-card income">
-          <div className="summary-icon"></div>
-          <div className="summary-content">
-            <h3>
-              {viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.income')}
-              {viewMode === 'monthly' && monthlySummary?.trends?.comparison && (
-                <span className={`trend ${monthlySummary.trends.comparison.incomeChange >= 0 ? 'up' : 'down'}`}>
-                  {monthlySummary.trends.comparison.incomeChange >= 0 ? '↑' : '↓'}
-                  {Math.abs(monthlySummary.trends.comparison.incomeChange).toFixed(1)}%
-                </span>
-              )}
-            </h3>
-            <p className="summary-amount">${displayData.income.toFixed(2)}</p>
-            {viewMode === 'monthly' && monthlySummary?.patterns?.dailyAverage != null && (
-              <p className="summary-detail">Avg/day: ${monthlySummary.patterns.dailyAverage.toFixed(2)}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="card summary-card dashboard-summary-card expense">
-          <div className="summary-icon"></div>
-          <div className="summary-content">
-            <h3>
-              {viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.expenses')}
-              {viewMode === 'monthly' && monthlySummary?.trends?.comparison && (
-                <span className={`trend ${monthlySummary.trends.comparison.expenseChange >= 0 ? 'down' : 'up'}`}>
-                  {monthlySummary.trends.comparison.expenseChange >= 0 ? '↑' : '↓'}
-                  {Math.abs(monthlySummary.trends.comparison.expenseChange).toFixed(1)}%
-                </span>
-              )}
-            </h3>
-            <p className="summary-amount">${displayData.expenses.toFixed(2)}</p>
-            {viewMode === 'monthly' && monthlySummary?.patterns?.dailyAverage != null && (
-              <p className="summary-detail">Avg/day: ${monthlySummary.patterns.dailyAverage.toFixed(2)}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="card summary-card dashboard-summary-card tax">
-          <div className="summary-icon"></div>
-          <div className="summary-content">
-            <h3>{viewMode === 'monthly' ? 'Monthly' : 'Total'} {t('labels.tax')}</h3>
-            <p className="summary-amount">${displayData.tax.toFixed(2)}</p>
-            {financialSummary?.tax && (
-              <p className="summary-detail">{financialSummary.tax.rate.toFixed(1)}% rate</p>
-            )}
-          </div>
-        </div>
-
-        <div className={`card summary-card dashboard-summary-card ${displayData.balance >= 0 ? 'balance-positive' : 'balance-negative'}`}>
-          <div className="summary-icon"></div>
-          <div className="summary-content">
-            <h3>{viewMode === 'monthly' ? 'Monthly' : 'Net'} {t('labels.balance')}</h3>
-            <p className="summary-amount">${displayData.balance.toFixed(2)}</p>
-            {viewMode === 'monthly' && monthlySummary?.budgetAnalysis && (
-              <p className="summary-detail">
-                ''
-                {''}{monthlySummary.budgetAnalysis.overallStatus} budget
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Charts */}
-      <div className="grid-2">
-        {/* Category Breakdown */}
-        <div className="card dashboard-panel dashboard-chart-panel">
-          <h2 className="chart-title">
-            {viewMode === 'monthly' ? 'Monthly' : 'All-Time'} Expenses by Category
-          </h2>
-          {displayData.categoryData.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={displayData.categoryData}
-                    dataKey="amount"
-                    nameKey="category"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    animationDuration={150}
-                  >
-                    {displayData.categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => `$${value.toFixed(2)}`}
-                    contentStyle={{
-                      backgroundColor: THEME.panel,
-                      border: `1px solid ${THEME.border}`,
-                      borderRadius: 8,
-                      color: THEME.text
-                    }}
-                    labelStyle={{ color: THEME.text }}
-                    itemStyle={{ color: THEME.text }}
-                  />
-                  <Legend wrapperStyle={{ color: THEME.muted }} />
-                </PieChart>
-              </ResponsiveContainer>
-
-              {viewMode === 'monthly' && Array.isArray(monthlySummary?.categories) && monthlySummary.categories.length > 0 && (
-                <div className="category-details">
-                  <h4>Top Spending Categories:</h4>
-                  <ul>
-                    {monthlySummary.categories.slice(0, 3).map((cat, idx) => (
-                      <li key={idx}>
-                        <strong>{cat.category}:</strong> ${(cat.amount || 0).toFixed(2)}
-                        ({(cat.percentage || 0).toFixed(1)}%)
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="empty-state">No expense data available</p>
-          )}
-        </div>
-
-        {/* Budget vs Actual */}
-        <div className="card dashboard-panel dashboard-chart-panel">
-          <h2 className="chart-title">Budget vs Actual Spending</h2>
-          {displayData.budgetComparison.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={displayData.budgetComparison}>
-                  <CartesianGrid stroke={THEME.border} strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="category"
-                    tick={{ fill: THEME.muted, fontSize: 12 }}
-                    axisLine={{ stroke: THEME.border }}
-                    tickLine={{ stroke: THEME.border }}
-                  />
-                  <YAxis
-                    tick={{ fill: THEME.muted, fontSize: 12 }}
-                    axisLine={{ stroke: THEME.border }}
-                    tickLine={{ stroke: THEME.border }}
-                  />
-                  <Tooltip
-                    formatter={(value) => `$${value.toFixed(2)}`}
-                    contentStyle={{
-                      backgroundColor: THEME.panel,
-                      border: `1px solid ${THEME.border}`,
-                      borderRadius: 8,
-                      color: THEME.text
-                    }}
-                    labelStyle={{ color: THEME.text }}
-                    itemStyle={{ color: THEME.text }}
-                  />
-                  <Legend wrapperStyle={{ color: THEME.muted }} />
-                  <Bar dataKey="spent" fill={THEME.accent} name={t('labels.spent')} animationDuration={150} />
-                  <Bar dataKey="budget" fill={THEME.primary} name={t('labels.budget')} animationDuration={150} />
-                </BarChart>
-              </ResponsiveContainer>
-
-              {viewMode === 'monthly' && monthlySummary?.budgetAnalysis && (
-                <div className="budget-status">
-                  <p>
-                    <strong>Status:</strong> ''
-                    {''}{(monthlySummary.budgetAnalysis.totalRemaining || 0) >= 0 ? 'Under' : 'Over'} {t('labels.budget')} by
-                    ${Math.abs(monthlySummary.budgetAnalysis.totalRemaining || 0).toFixed(2)}
-                  </p>
-                  {Array.isArray(monthlySummary.budgetAnalysis.overBudgetCategories) && monthlySummary.budgetAnalysis.overBudgetCategories.length > 0 && (
-                    <div className="warning-box">
-                      <strong> {t('labels.overBudget')}:</strong>
-                      <ul>
-                        {monthlySummary.budgetAnalysis.overBudgetCategories.map((cat, idx) => (
-                          <li key={idx}>{cat.category} (${ (cat.over || 0).toFixed(2)} over)</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="empty-state">No budget data available</p>
-          )}
-        </div>
-      </div>
-
-      {/* Spending Patterns (Monthly View Only) */}
-      {viewMode === 'monthly' && monthlySummary?.patterns?.weeklySpending && (
-        <div className="card dashboard-panel dashboard-chart-panel">
-          <h2 className="chart-title">Weekly Spending Pattern</h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={monthlySummary.patterns.weeklySpending}>
-              <CartesianGrid stroke={THEME.border} strokeDasharray="3 3" />
-              <XAxis
-                dataKey="week"
-                tick={{ fill: THEME.muted, fontSize: 12 }}
-                axisLine={{ stroke: THEME.border }}
-                tickLine={{ stroke: THEME.border }}
-              />
-              <YAxis
-                tick={{ fill: THEME.muted, fontSize: 12 }}
-                axisLine={{ stroke: THEME.border }}
-                tickLine={{ stroke: THEME.border }}
-              />
-              <Tooltip
-                formatter={(value) => `$${value.toFixed(2)}`}
-                contentStyle={{
-                  backgroundColor: THEME.panel,
-                  border: `1px solid ${THEME.border}`,
-                  borderRadius: 8,
-                  color: THEME.text
-                }}
-                labelStyle={{ color: THEME.text }}
-                itemStyle={{ color: THEME.text }}
-              />
-              <Legend wrapperStyle={{ color: THEME.muted }} />
-              <Line
-                type="monotone"
-                dataKey="amount"
-                stroke={THEME.primary}
-                strokeWidth={2}
-                dot={false}
-                animationDuration={150}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-
-          {monthlySummary.patterns?.highestSpendingDay && (
-            <div className="pattern-insights">
-              <p>
-                <strong>Insights:</strong>Highest spending day was{''}
-                <strong>{monthlySummary.patterns.highestSpendingDay.date}</strong>
-                {''}with <strong>${(monthlySummary.patterns.highestSpendingDay.amount || 0).toFixed(2)}</strong>
-              </p>
-              <p>Daily average: <strong>${(monthlySummary.patterns.dailyAverage || 0).toFixed(2)}</strong>
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Recent Transactions */}
-      <div className="card dashboard-panel dashboard-transactions-panel">
-        <h2 className="chart-title">
-          {viewMode === 'monthly' ? 'Monthly' : 'Recent'} Transactions
-        </h2>
-        <div className="transactions-list">
-          {displayData.recentTransactions.length > 0 ? (
-            <table className="transactions-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Category</th>
-                  <th>Source</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayData.recentTransactions.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td>{new Date(transaction.date).toLocaleDateString()}</td>
-                    <td>{transaction.description}</td>
-                    <td>
-                      <span className="category-badge">{transaction.category}</span>
-                    </td>
-                    <td>{transaction.sourceLabel || 'Manual'}</td>
-                    <td className="amount-expense">-${(transaction.amount || 0).toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="empty-state">
-              {viewMode === 'monthly' ? 'No transactions this month' : 'No transactions yet'}
-            </p>
-          )}
-
-          {viewMode === 'monthly' && monthlySummary && (
-            <div className="monthly-summary-footer">
-              <div className="summary-stats">
-                <div className="stat">
-                  <span className="stat-label">Total Transactions:</span>
-                  <span className="stat-value">{monthlySummary.transactions?.length || 0}</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-label">Categories:</span>
-                  <span className="stat-value">{monthlySummary.categories?.length || 0}</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-label">Savings Rate:</span>
-                  <span className="stat-value">
-                    {monthlySummary.totals?.totalIncome > 0
-                      ? (((monthlySummary.totals?.remainingBalance || 0) / monthlySummary.totals.totalIncome) * 100).toFixed(1)
-                      : '0.0'
-                    }%
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* AI Insights */}
-      {validationResults?.anomalies && validationResults.anomalies.length > 0 && (
-        <div className="card anomaly-card dashboard-panel">
-          <h2 className="chart-title">AI-Detected Anomalies</h2>
-          <div className="anomalies-list">
-            {validationResults.anomalies.map((anomaly, idx) => (
-              <div key={idx} className={`anomaly-item severity-${anomaly.severity}`}>
-                <div className="anomaly-header">
-                  <span className="anomaly-type">{anomaly.type}</span>
-                  <span className="anomaly-severity">{anomaly.severity}</span>
-                </div>
-                <p className="anomaly-message">{anomaly.message}</p>
-                {anomaly.suggestion && (
-                  <p className="anomaly-suggestion"> {anomaly.suggestion}</p>
                 )}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+
+            <div className="dashboard-overview-grid">
+              {overviewCards.map((card) => (
+                <article key={card.title} className={`dashboard-overview-card dashboard-overview-card--${card.tone}`}>
+                  <span className="dashboard-overview-title">{card.title}</span>
+                  <strong className="dashboard-overview-value">{card.value}</strong>
+                  <span className="dashboard-overview-label">{card.label}</span>
+                  <div className="dashboard-progress" aria-hidden="true">
+                    <span style={{ width: `${card.progress}%` }} />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="dashboard-section">
+            <div className="dashboard-section-header dashboard-section-header--stacked">
+              <div>
+                <h2 className="dashboard-section-title">Learning Opportunities</h2>
+                <p className="dashboard-section-subtitle">A calm financial academy with predictable course cards and clear actions.</p>
+              </div>
+              <div className="dashboard-tabs" role="tablist" aria-label="Learning topics">
+                {topicTabs.map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    className={`dashboard-tab${activeTopic === tab ? ' active' : ''}`}
+                    onClick={() => setActiveTopic(tab)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="dashboard-course-grid">
+              {filteredCourses.map((course) => (
+                <article key={course.title} className="dashboard-course-card">
+                  <div className="dashboard-course-meta">
+                    <span>{course.level}</span>
+                    <span>{course.duration}</span>
+                  </div>
+                  <h3>{course.title}</h3>
+                  <p>{course.description}</p>
+                  <div className="dashboard-course-footer">
+                    <span>{course.sections} sections</span>
+                    <button type="button" className="dashboard-link-button" onClick={() => goTo('/help-center')}>
+                      Start Learning
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="dashboard-section">
+            <div className="dashboard-section-header dashboard-section-header--stacked">
+              <div>
+                <h2 className="dashboard-section-title">Financial Modules</h2>
+                <p className="dashboard-section-subtitle">Clean, reusable module cards for the main dashboard shell.</p>
+              </div>
+            </div>
+
+            <div className="dashboard-module-grid">
+              {moduleTiles.map((module) => (
+                <article key={module.label} className="dashboard-module-card">
+                  <h3>{module.label}</h3>
+                  <p>{module.description}</p>
+                  <button type="button" className="dashboard-link-button" onClick={() => goTo(module.route)}>
+                    View Details
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="dashboard-section dashboard-dual-grid">
+            <article className="dashboard-panel">
+              <div className="dashboard-section-header dashboard-section-header--compact">
+                <div>
+                  <h2 className="dashboard-section-title">Recent Transactions</h2>
+                  <p className="dashboard-section-subtitle">The latest activity from the selected reporting mode.</p>
+                </div>
+              </div>
+
+              {displayData.recentTransactions.length > 0 ? (
+                <div className="dashboard-transaction-list">
+                  {displayData.recentTransactions.map((transaction) => (
+                    <div key={transaction.id} className="dashboard-transaction">
+                      <div>
+                        <strong>{transaction.description}</strong>
+                        <span>{new Date(transaction.date).toLocaleDateString()}</span>
+                      </div>
+                      <div>
+                        <span className="dashboard-transaction-badge">{transaction.category}</span>
+                        <span className="dashboard-transaction-amount">-${Number(transaction.amount || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="dashboard-empty-state">
+                  <h3>No transactions yet</h3>
+                  <p>Add activity to see the transaction list populate here.</p>
+                </div>
+              )}
+            </article>
+
+            <article className="dashboard-panel">
+              <div className="dashboard-section-header dashboard-section-header--compact">
+                <div>
+                  <h2 className="dashboard-section-title">Budget Alerts</h2>
+                  <p className="dashboard-section-subtitle">Calm, solvable alerts with institutional visual treatment.</p>
+                </div>
+              </div>
+
+              {budgetAlertDetails.length > 0 ? (
+                <div className="dashboard-alert-list">
+                  {budgetAlertDetails.slice(0, 3).map((alert) => (
+                    <div key={alert.category} className={`dashboard-alert dashboard-alert--${alert.severity}`}>
+                      <strong>{alert.category}</strong>
+                      <p>{alert.message}</p>
+                      <span>{alert.dominantSource?.label || 'Mixed sources'}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="dashboard-empty-state">
+                  <h3>No budget alerts</h3>
+                  <p>Your budget review is currently clean.</p>
+                </div>
+              )}
+            </article>
+          </section>
+
+          {validationResults?.anomalies && validationResults.anomalies.length > 0 && (
+            <section className="dashboard-section">
+              <div className="dashboard-section-header dashboard-section-header--compact">
+                <div>
+                  <h2 className="dashboard-section-title">AI-Detected Anomalies</h2>
+                  <p className="dashboard-section-subtitle">Highlighted carefully so they remain clear and non-alarming.</p>
+                </div>
+              </div>
+              <div className="dashboard-alert-list">
+                {validationResults.anomalies.map((anomaly, index) => (
+                  <div key={`${anomaly.type}-${index}`} className={`dashboard-alert dashboard-alert--${anomaly.severity || 'medium'}`}>
+                    <strong>{anomaly.type}</strong>
+                    <p>{anomaly.message}</p>
+                    {anomaly.suggestion && <span>{anomaly.suggestion}</span>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 };

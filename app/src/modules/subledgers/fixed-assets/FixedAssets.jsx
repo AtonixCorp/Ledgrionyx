@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../../components/ui';
 
-const mockAssets = [
-  { id: 'FA-001', name: 'Office Building', category: 'Real Estate', cost: '$2,500,000.00', accumulated: '$125,000.00', netBook: '$2,375,000.00', method: 'Straight-line', life: '40 yrs', status: 'Active' },
-  { id: 'FA-002', name: 'Server Infrastructure', category: 'Technology', cost: '$180,000.00', accumulated: '$72,000.00', netBook: '$108,000.00', method: 'Straight-line', life: '5 yrs', status: 'Active' },
-  { id: 'FA-003', name: 'Company Vehicles (x3)', category: 'Vehicles', cost: '$120,000.00', accumulated: '$48,000.00', netBook: '$72,000.00', method: 'Declining Balance', life: '5 yrs', status: 'Active' },
-  { id: 'FA-004', name: 'Leasehold Improvements', category: 'Improvements', cost: '$85,000.00', accumulated: '$85,000.00', netBook: '$0.00', method: 'Straight-line', life: '10 yrs', status: 'Fully Depreciated' },
-];
+const assetRows = [];
 
 const STATUS_COLORS = { Active: 'var(--color-success)', 'Fully Depreciated': 'var(--color-silver-dark)', Disposed: 'var(--color-error)' };
 
@@ -28,9 +23,13 @@ const BLANK_ASSET = { name: '', category: '', acquisitionDate: '', cost: '', met
 
 export default function FixedAssets() {
   const [showModal, setShowModal] = useState(false);
-  const [assetList, setAssetList] = useState(mockAssets);
+  const [assetList, setAssetList] = useState(assetRows);
   const [form, setForm] = useState(BLANK_ASSET);
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
+  const totalCost = assetList.reduce((sum, asset) => sum + (parseFloat(String(asset.cost).replace(/[^0-9.-]/g, '')) || 0), 0);
+  const netBookValue = assetList.reduce((sum, asset) => sum + (parseFloat(String(asset.netBook).replace(/[^0-9.-]/g, '')) || 0), 0);
+  const ytdDepreciation = assetList.reduce((sum, asset) => sum + Math.max((parseFloat(String(asset.cost).replace(/[^0-9.-]/g, '')) || 0) - (parseFloat(String(asset.netBook).replace(/[^0-9.-]/g, '')) || 0), 0), 0);
+  const activeAssets = assetList.filter((asset) => asset.status === 'Active').length;
 
   const handleCreate = () => {
     if (!form.name.trim() || !form.cost.trim()) return;
@@ -63,24 +62,24 @@ export default function FixedAssets() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Total Assets (Cost)</div>
-          <div className="stat-value">$2,885,000.00</div>
+          <div className="stat-value">{totalCost.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Net Book Value</div>
-          <div className="stat-value">$2,555,000.00</div>
+          <div className="stat-value">{netBookValue.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">YTD Depreciation</div>
-          <div className="stat-value" style={{ color: 'var(--color-error)' }}>$85,400.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>{ytdDepreciation.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Active Assets</div>
-          <div className="stat-value">3</div>
+          <div className="stat-value">{activeAssets}</div>
         </Card>
       </div>
 
       <Card title="Asset Register">
-        <Table columns={columns} data={assetList} />
+        {assetList.length > 0 ? <Table columns={columns} data={assetList} /> : <p className="empty-state">No fixed assets yet. Add one to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_ASSET); }} title="Add Fixed Asset" size="medium">

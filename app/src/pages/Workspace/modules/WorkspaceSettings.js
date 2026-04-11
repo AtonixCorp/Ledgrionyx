@@ -91,11 +91,13 @@ const WorkspaceSettings = () => {
 
       {/* ── Danger zone ── */}
       <div className="wsm-danger-zone wsm-section-narrow">
-        <div className="wsm-danger-zone-title">Danger Zone</div>
-        <div className="wsm-danger-zone-desc">
-          Archiving or deleting the workspace is permanent. Archived workspaces retain data but become read-only.
+        <div className="wsm-danger-zone-copy">
+          <div className="wsm-danger-zone-title">Ledgrionyx Console Danger Zone</div>
+          <div className="wsm-danger-zone-desc">
+            Archiving or deleting the workspace is permanent. Archived workspaces retain data but become read-only.
+          </div>
         </div>
-        <div className="wsm-inline-actions">
+        <div className="wsm-inline-actions wsm-inline-actions-danger">
           <button className="wsm-btn-secondary">Archive Workspace</button>
           <button className="wsm-btn-danger">Delete Workspace</button>
         </div>

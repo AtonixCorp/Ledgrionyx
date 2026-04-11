@@ -24,14 +24,18 @@ const AccountManager = () => {
     balance: 0
   });
 
-  const entity = entities.find(e => e.id === parseInt(entityId));
+  const entity = entities.find(e => String(e.id) === String(entityId));
 
   const loadAccounts = useCallback(async () => {
+    if (!entity?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const data = await fetchBookkeepingAccounts(entityId);
+    const data = await fetchBookkeepingAccounts(entity.id);
     setAccounts(data.results || data);
     setLoading(false);
-  }, [entityId, fetchBookkeepingAccounts]);
+  }, [entity, fetchBookkeepingAccounts]);
 
   useEffect(() => {
     loadAccounts();
@@ -48,7 +52,7 @@ const AccountManager = () => {
 
     try {
       await createBookkeepingAccount({
-        entity: parseInt(entityId),
+        entity: entity.id,
         ...formData,
         is_active: true
       });

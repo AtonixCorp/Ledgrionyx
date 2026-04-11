@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { FiChevronDown } from 'react-icons/fi';
 import { useLanguage, LANGUAGE_LIST } from '../../context/LanguageContext';
-import LedgrionyxLogo from '../branding/LedgrionyxLogo';
+import { Logo } from '../Brand/Logo';
 import { Icon } from '../ui';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
 import './Header.css';
@@ -26,19 +26,19 @@ const Header = () => {
   const [mobileOpen,   setMobileOpen]   = useState(false);
 
   return (
-    <header className="atc-header">
+    <header className="ly-header">
 
       {/* ── Tier 1 — Utility Bar ─────────────────────────────────── */}
-      <div className="atc-utility-bar">
-        <div className="atc-utility-inner">
+      <div className="ly-utility-bar">
+        <div className="ly-utility-inner">
 
           {/* Left — Brand identifier */}
-          <span className="atc-utility-brand">Ledgrionyx Global Platform</span>
+          <span className="ly-utility-brand">Ledgrionyx Global Platform</span>
 
           {/* Center — Country selector */}
-          <div className="atc-utility-center">
+          <div className="ly-utility-center">
             <button
-              className="atc-country-btn"
+              className="ly-country-btn"
               onClick={() => setCountryOpen(o => !o)}
               aria-haspopup="listbox"
               aria-expanded={countryOpen}
@@ -48,13 +48,13 @@ const Header = () => {
             </button>
 
             {countryOpen && (
-              <div className="atc-country-dropdown" role="listbox">
+              <div className="ly-country-dropdown" role="listbox">
                 {countryDropdownOptions.map(c => (
                   <button
                     key={c.code}
                     role="option"
                     aria-selected={c.code === selectedCountry.code}
-                    className="atc-country-option"
+                    className="ly-country-option"
                     onClick={() => { setSelectedCountry(c); setCountryOpen(false); }}
                   >
                     <span>{c.name}</span>
@@ -65,15 +65,15 @@ const Header = () => {
           </div>
 
           {/* Right — Utility links */}
-          <nav className="atc-utility-links" aria-label="Utility navigation">
+          <nav className="ly-utility-links" aria-label="Utility navigation">
             <Link to="/support">Support</Link>
             <Link to="/help-center">Security Center</Link>
             <Link to="/contact">Contact</Link>
-            <div className="atc-lang-wrap">
+            <div className="ly-lang-wrap">
               <select
                 value={language}
                 onChange={e => setLanguage(e.target.value)}
-                className="atc-lang-select"
+                className="ly-lang-select"
                 aria-label="Select language"
               >
                 {LANGUAGE_LIST.map(l => (
@@ -81,29 +81,29 @@ const Header = () => {
                 ))}
               </select>
             </div>
-            <Link to="/login" className="atc-signin">Sign In</Link>
+            <Link to="/login" className="ly-signin">Sign In</Link>
           </nav>
         </div>
       </div>
 
       {/* ── Tier 2 — Primary Navigation Bar ─────────────────────── */}
-      <div className="atc-primary-bar">
-        <div className="atc-primary-inner">
+      <div className="ly-primary-bar">
+        <div className="ly-primary-inner">
 
           {/* Logo */}
-          <Link to="/" className="atc-logo-link" aria-label="Ledgrionyx Home">
-            <LedgrionyxLogo size="medium" withText />
+          <Link to="/" className="ly-logo-link" aria-label="Ledgrionyx Home">
+            <Logo height={32} />
           </Link>
 
           {/* Navigation */}
-          <nav className="atc-primary-nav" aria-label="Primary navigation">
+          <nav className="ly-primary-nav" aria-label="Primary navigation">
             {NAV_ITEMS.map(({ label, to }) => (
               <NavLink
                 key={label}
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  'atc-nav-link' + (isActive ? ' atc-nav-link--active' : '')
+                  'ly-nav-link' + (isActive ? ' ly-nav-link--active' : '')
                 }
               >
                 {label}
@@ -112,13 +112,14 @@ const Header = () => {
           </nav>
 
           {/* CTA buttons */}
-          <div className="atc-primary-actions">
-            <Link to="/v1/docs" className="atc-cta-secondary">API Portal</Link>
+          <div className="ly-primary-actions">
+            <Link to="/register" className="ly-cta-primary">Open Account</Link>
+            <Link to="/product" className="ly-cta-secondary">Explore Products</Link>
           </div>
 
           {/* Hamburger — mobile only */}
           <button
-            className="atc-hamburger"
+            className="ly-hamburger"
             onClick={() => setMobileOpen(o => !o)}
             aria-label="Toggle navigation menu"
             aria-expanded={mobileOpen}
@@ -130,28 +131,28 @@ const Header = () => {
 
       {/* ── Mobile navigation drawer ─────────────────────────────── */}
       {mobileOpen && (
-        <nav className="atc-mobile-nav" aria-label="Mobile navigation">
+        <nav className="ly-mobile-nav" aria-label="Mobile navigation">
           {NAV_ITEMS.map(({ label, to }) => (
             <Link
               key={label}
               to={to}
-              className="atc-mobile-link"
+              className="ly-mobile-link"
               onClick={() => setMobileOpen(false)}
             >
               {label}
             </Link>
           ))}
-          <div className="atc-mobile-actions">
+          <div className="ly-mobile-actions">
             <Link
               to="/register"
-              className="atc-cta-primary"
+              className="ly-cta-primary"
               onClick={() => setMobileOpen(false)}
             >
               Open Account
             </Link>
             <Link
               to="/login"
-              className="atc-mobile-signin"
+              className="ly-mobile-signin"
               onClick={() => setMobileOpen(false)}
             >
               Sign In

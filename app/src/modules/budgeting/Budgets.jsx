@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const mockBudgets = [
-  { name: 'FY2025 Operating Budget', period: '2025-01-01 to 2025-12-31', total: '$4,200,000.00', spent: '$346,000.00', remaining: '$3,854,000.00', pct: 8.2, status: 'Active' },
-  { name: 'Q1 2025 Marketing', period: '2025-01-01 to 2025-03-31', total: '$120,000.00', spent: '$38,500.00', remaining: '$81,500.00', pct: 32.1, status: 'Active' },
-  { name: 'FY2024 Operating Budget', period: '2024-01-01 to 2024-12-31', total: '$3,800,000.00', spent: '$3,810,000.00', remaining: '($10,000.00)', pct: 100.3, status: 'Closed' },
-];
+const budgetRows = [];
 
 const columns = [
   { key: 'name', header: 'Budget Name' },
@@ -28,9 +24,13 @@ const BLANK_BUDGET = { name: '', fiscalYear: '', startDate: '', endDate: '', amo
 
 export default function Budgets() {
   const [showModal, setShowModal] = useState(false);
-  const [budgetList, setBudgetList] = useState(mockBudgets);
+  const [budgetList, setBudgetList] = useState(budgetRows);
   const [form, setForm] = useState(BLANK_BUDGET);
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
+  const activeBudgets = budgetList.filter((budget) => budget.status === 'Active').length;
+  const totalBudgetValue = budgetList.reduce((sum, budget) => sum + (parseFloat(String(budget.total).replace(/[^0-9.-]/g, '')) || 0), 0);
+  const totalSpentValue = budgetList.reduce((sum, budget) => sum + (parseFloat(String(budget.spent).replace(/[^0-9.-]/g, '')) || 0), 0);
+  const utilizationValue = totalBudgetValue > 0 ? Math.round((totalSpentValue / totalBudgetValue) * 1000) / 10 : 0;
 
   const handleCreate = () => {
     if (!form.name.trim()) return;
@@ -59,24 +59,24 @@ export default function Budgets() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Active Budgets</div>
-          <div className="stat-value">2</div>
+          <div className="stat-value">{activeBudgets}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">FY2025 Total</div>
-          <div className="stat-value">$4,200,000.00</div>
+          <div className="stat-value">{totalBudgetValue.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">YTD Spend</div>
-          <div className="stat-value" style={{ color: 'var(--color-error)' }}>$346,000.00</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>{totalSpentValue.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Budget Utilization</div>
-          <div className="stat-value">8.2%</div>
+          <div className="stat-value">{utilizationValue}%</div>
         </Card>
       </div>
 
       <Card>
-        <Table columns={columns} data={budgetList} />
+        {budgetList.length > 0 ? <Table columns={columns} data={budgetList} /> : <p className="empty-state">No budgets yet. Create one to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_BUDGET); }} title="Create Budget" size="medium">

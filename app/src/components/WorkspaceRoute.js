@@ -10,45 +10,101 @@ import { useEnterprise } from '../context/EnterpriseContext';
  */
 const WorkspaceRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  const { activeWorkspace, entities, fetchWorkspacePermissionSummary, getWorkspacePermissionSummary } = useEnterprise();
+  const { activeWorkspace, entities, setActiveWorkspace, fetchWorkspacePermissionSummary, getWorkspacePermissionSummary } = useEnterprise();
   const location = useLocation();
   const { workspaceId } = useParams();
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+  const [resolvedWorkspace, setResolvedWorkspace] = React.useState(null);
   const [permissionLoading, setPermissionLoading] = React.useState(true);
   const [permissionDenied, setPermissionDenied] = React.useState(false);
 
-  let resolvedWorkspace = null;
-
-  if (workspaceId) {
-    // 1. Active context matches URL
-    if (activeWorkspace && String(activeWorkspace.id) === String(workspaceId)) {
-      resolvedWorkspace = activeWorkspace;
-    }
-    // 2. Find it in the already-loaded entities list
-    if (!resolvedWorkspace) {
-      resolvedWorkspace = (entities || []).find(e => String(e.id) === String(workspaceId)) || null;
-    }
-    // 3. Fall back to localStorage snapshot
-    if (!resolvedWorkspace) {
-      try {
-        const saved = localStorage.getItem('ledgrionyx_active_workspace');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (String(parsed.id) === String(workspaceId)) resolvedWorkspace = parsed;
+  const localResolvedWorkspace = React.useMemo(() => {
+    if (!workspaceId) {
+      return activeWorkspace || (() => {
+        try {
+          const saved = localStorage.getItem('ledgrionyx_active_workspace');
+          return saved ? JSON.parse(saved) : null;
+        } catch {
+          return null;
         }
-      } catch { /* ignore */ }
+      })();
     }
-  } else {
-    // No workspaceId in URL — accept whatever is active
-    resolvedWorkspace = activeWorkspace || (() => {
-      try {
-        const saved = localStorage.getItem('ledgrionyx_active_workspace');
-        return saved ? JSON.parse(saved) : null;
-      } catch { return null; }
-    })();
-  }
 
-  const resolvedWorkspaceId = resolvedWorkspace?.id || workspaceId || null;
+    if (activeWorkspace && String(activeWorkspace.id) === String(workspaceId)) {
+      return activeWorkspace;
+    }
+
+    const fromList = (entities || []).find((entity) => String(entity.id) === String(workspaceId)) || null;
+    if (fromList) {
+      return fromList;
+    }
+
+    try {
+      const saved = localStorage.getItem('ledgrionyx_active_workspace');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (String(parsed.id) === String(workspaceId)) {
+          return parsed;
+        }
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  }, [activeWorkspace, entities, workspaceId]);
+
+  const effectiveWorkspace = resolvedWorkspace || localResolvedWorkspace;
+  const resolvedWorkspaceId = effectiveWorkspace?.id || workspaceId || null;
   const permissionSummary = getWorkspacePermissionSummary(resolvedWorkspaceId);
+  const lookupInProgress = Boolean(workspaceId) && !effectiveWorkspace;
+
+  React.useEffect(() => {
+    let active = true;
+
+    if (!workspaceId || effectiveWorkspace) {
+      setResolvedWorkspace(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    setPermissionLoading(true);
+
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+    fetch(`${API_BASE_URL}/v1/workspaces/${workspaceId}`, {
+      headers: token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Workspace not found');
+        }
+        return response.json();
+      })
+      .then((workspace) => {
+        if (!active) return;
+        setResolvedWorkspace(workspace);
+        setActiveWorkspace(workspace);
+        try {
+          localStorage.setItem('ledgrionyx_active_workspace', JSON.stringify(workspace));
+        } catch {
+          // ignore storage failures
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setResolvedWorkspace(null);
+      })
+      .finally(() => {
+        if (active) {
+          setPermissionLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [API_BASE_URL, effectiveWorkspace, setActiveWorkspace, workspaceId]);
 
   React.useEffect(() => {
     let active = true;
@@ -115,7 +171,24 @@ const WorkspaceRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!resolvedWorkspace) {
+  if (lookupInProgress) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        fontFamily: 'var(--font-family)',
+        fontSize: 'var(--font-size-base)',
+        color: 'var(--color-silver-dark)',
+        background: 'var(--color-silver-very-light)',
+      }}>
+        Loading workspace...
+      </div>
+    );
+  }
+
+  if (!effectiveWorkspace) {
     return <Navigate to="/app/console" state={{ from: location }} replace />;
   }
 

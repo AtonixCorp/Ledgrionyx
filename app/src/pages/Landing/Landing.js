@@ -1,28 +1,43 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
+import { useAuth } from '../../context/AuthContext';
 import './Landing.css';
 
 const Landing = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="landing-page landing-page--loading">
+        Loading...
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/app/console" replace />;
+  }
+
   return (
     <div className="landing-page">
       <Header />
 
       {/* ── HERO SECTION ─────────────────────────────────────────── */}
-      <section className="atc-hero" aria-label="Hero">
-        <div className="atc-hero-inner">
-          <div className="atc-hero-text">
-            <h1 className="atc-hero-headline">
+      <section className="ly-hero" aria-label="Hero">
+        <div className="ly-hero-inner">
+          <div className="ly-hero-text">
+            <h1 className="ly-hero-headline">
               Accounting Built for<br />Global Confidence
             </h1>
-            <p className="atc-hero-sub">
+            <p className="ly-hero-sub">
               Ledgrionyx delivers secure accounts, global transfers, and
               institution-grade financial tools designed for individuals
               and businesses worldwide.
             </p>
-            <div className="atc-hero-actions">
+            <div className="ly-hero-actions">
               <Link to="/register" className="btn btn-primary btn-large">
                 Open Your Account
               </Link>
@@ -32,51 +47,51 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="atc-hero-card-wrap">
-            <div className="card atc-product-card" role="presentation">
-              <div className="atc-card-header">
-                <span className="atc-card-label">Account Overview</span>
-                <span className="atc-card-live">
-                  <span className="atc-live-dot" aria-hidden="true" />
+          <div className="ly-hero-card-wrap">
+            <div className="card ly-product-card" role="presentation">
+              <div className="ly-card-header">
+                <span className="ly-card-label">Account Overview</span>
+                <span className="ly-card-live">
+                  <span className="ly-live-dot" aria-hidden="true" />
                   Live
                 </span>
               </div>
 
-              <div className="atc-card-balance">$2,847,392.00</div>
-              <div className="atc-card-currency">USD · Multi-Currency Ready</div>
+              <div className="ly-card-balance">$2,847,392.00</div>
+              <div className="ly-card-currency">USD · Multi-Currency Ready</div>
 
-              <div className="atc-card-divider" />
+              <div className="ly-card-divider" />
 
-              <div className="atc-card-metrics">
-                <div className="atc-card-metric">
-                  <span className="atc-metric-label">Inflow (30d)</span>
-                  <span className="atc-metric-value atc-metric-up">+$184,720</span>
+              <div className="ly-card-metrics">
+                <div className="ly-card-metric">
+                  <span className="ly-metric-label">Inflow (30d)</span>
+                  <span className="ly-metric-value ly-metric-up">+$184,720</span>
                 </div>
-                <div className="atc-card-metric">
-                  <span className="atc-metric-label">Outflow (30d)</span>
-                  <span className="atc-metric-value atc-metric-down">−$62,410</span>
+                <div className="ly-card-metric">
+                  <span className="ly-metric-label">Outflow (30d)</span>
+                  <span className="ly-metric-value ly-metric-down">−$62,410</span>
                 </div>
-                <div className="atc-card-metric">
-                  <span className="atc-metric-label">Entities</span>
-                  <span className="atc-metric-value">12</span>
+                <div className="ly-card-metric">
+                  <span className="ly-metric-label">Entities</span>
+                  <span className="ly-metric-value">12</span>
                 </div>
               </div>
 
-              <div className="atc-card-divider" />
+              <div className="ly-card-divider" />
 
-              <div className="atc-card-activity">
-                <span className="atc-activity-label">Recent Activity</span>
+              <div className="ly-card-activity">
+                <span className="ly-activity-label">Recent Activity</span>
                 {[
                   { desc: 'Wire Transfer — HSBC London', amount: '−$12,000', time: '2m ago', up: false },
                   { desc: 'Invoice Settlement — Acme Corp', amount: '+$45,200', time: '1h ago', up: true },
                   { desc: 'FX Conversion — EUR/USD', amount: '+$8,340', time: '3h ago', up: true },
                 ].slice(0, 2).map((tx, i) => (
-                  <div className="atc-activity-row" key={i}>
+                  <div className="ly-activity-row" key={i}>
                     <div>
-                      <div className="atc-activity-desc">{tx.desc}</div>
-                      <div className="atc-activity-time">{tx.time}</div>
+                      <div className="ly-activity-desc">{tx.desc}</div>
+                      <div className="ly-activity-time">{tx.time}</div>
                     </div>
-                    <span className={`atc-activity-amount ${tx.up ? 'atc-metric-up' : 'atc-metric-down'}`}>
+                    <span className={`ly-activity-amount ${tx.up ? 'ly-metric-up' : 'ly-metric-down'}`}>
                       {tx.amount}
                     </span>
                   </div>
@@ -88,7 +103,7 @@ const Landing = () => {
       </section>
 
       {/* ── SECTION DIVIDER ────────────────────────────────────────── */}
-      <div className="atc-section-divider" />
+      <div className="ly-section-divider" />
 
       {/*  PROBLEM STRIP  */}
       <section className="problem-strip">
@@ -346,7 +361,7 @@ const Landing = () => {
             and institutions that require precision. Your entire financial world — unified.
           </p>
           <div className="cta-buttons">
-            <Link to="/register" className="btn btn-primary btn-large">Get Started Today
+            <Link to="/register" className="btn btn-primary btn-large">Create Enterprise Account
             </Link>
             <Link to="/features" className="btn btn-outline btn-large">Explore the Platform
             </Link>

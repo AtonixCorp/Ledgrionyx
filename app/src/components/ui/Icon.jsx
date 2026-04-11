@@ -6,13 +6,14 @@ const SIZE_CLASS_MAP = {
   lg: 'icon-lg',
 };
 
-const Icon = ({ icon: IconComponent, size = 'md', className = '', title, ...props }) => {
+const Icon = ({ icon: IconComponent, size = 'md', className = '', title, tone = 'light', ...props }) => {
   if (!IconComponent) {
     return null;
   }
 
   const sizeClass = SIZE_CLASS_MAP[size] || size;
-  const classes = ['icon', sizeClass, className].filter(Boolean).join(' ');
+  const toneClass = tone === 'dark' ? 'icon-on-dark' : tone === 'active' ? 'icon-active' : null;
+  const classes = ['icon', sizeClass, toneClass, className].filter(Boolean).join(' ');
 
   return (
     <span className={classes} aria-hidden={title ? undefined : 'true'} aria-label={title} title={title} {...props}>

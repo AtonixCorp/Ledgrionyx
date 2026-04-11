@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Ledgrionyx – PROD environment root
-# OpenStack Project: atc-prod
+# OpenStack Project: lgx-prod
 #
 # NON-NEGOTIABLES:
 #   - No manual changes in the OpenStack UI.

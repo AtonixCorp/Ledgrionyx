@@ -322,6 +322,14 @@ export const workspacePermissionsAPI = {
   getMine: (workspaceId) => api.get(workspaceApiPath(workspaceId, '/permissions/me')),
 };
 
+export const workspacesAPI = {
+  getMine: () => api.get('/v1/workspaces'),
+};
+
+export const globalInviteAPI = {
+  create: (data) => api.post('/global/invite', data),
+};
+
 // Roles API
 export const rolesAPI = {
   getAll: () => api.get('/roles/'),

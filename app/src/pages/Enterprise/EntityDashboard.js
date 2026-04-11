@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -8,10 +8,13 @@ const EntityDashboard = () => {
   const { entityId } = useParams();
   const navigate = useNavigate();
   const enterpriseContext = useEnterprise();
+  const didRequestEntitiesRef = useRef(false);
 
   // Safely destructure with fallbacks
   const {
     entities = [],
+    currentOrganization,
+    fetchEntities,
     fetchEntityExpenses,
     fetchEntityIncome,
     fetchEntityBudgets,
@@ -21,9 +24,33 @@ const EntityDashboard = () => {
     fetchEntityBankAccounts,
     fetchEntityWallets,
     fetchEntityComplianceDocuments,
+    activeWorkspace,
     hasPermission,
     PERMISSIONS
   } = enterpriseContext || {};
+
+  const resolvedEntityId = useMemo(() => {
+    const directEntityId = Number(entityId);
+    if (Number.isInteger(directEntityId) && String(directEntityId) === String(entityId).trim()) {
+      return directEntityId;
+    }
+
+    const workspaceCandidates = [activeWorkspace];
+    try {
+      const savedWorkspace = localStorage.getItem('ledgrionyx_active_workspace');
+      if (savedWorkspace) {
+        workspaceCandidates.push(JSON.parse(savedWorkspace));
+      }
+    } catch {
+      // Ignore malformed saved workspace state.
+    }
+
+    const matchingWorkspace = workspaceCandidates.find((workspace) => workspace && String(workspace.id) === String(entityId));
+    const linkedEntityId = matchingWorkspace?.linked_entity_id || matchingWorkspace?.linked_entity?.id;
+    const numericLinkedEntityId = Number(linkedEntityId);
+
+    return Number.isInteger(numericLinkedEntityId) ? numericLinkedEntityId : null;
+  }, [activeWorkspace, entityId]);
 
   const [entity, setEntity] = useState(null);
   const [expenses, setExpenses] = useState([]);
@@ -46,8 +73,13 @@ const EntityDashboard = () => {
           return;
         }
 
+        if (currentOrganization && entities.length === 0 && !didRequestEntitiesRef.current && fetchEntities) {
+          didRequestEntitiesRef.current = true;
+          await fetchEntities(currentOrganization.id);
+        }
+
         // Find entity
-        const foundEntity = entities.find(e => e.id.toString() === entityId);
+        const foundEntity = entities.find((candidate) => String(candidate.id) === String(resolvedEntityId));
         if (!foundEntity) {
           setLoading(false);
           return;
@@ -62,9 +94,9 @@ const EntityDashboard = () => {
             // Load entity-specific financial data with timeout
             const financialPromise = Promise.race([
               Promise.all([
-                fetchEntityExpenses(entityId),
-                fetchEntityIncome(entityId),
-                fetchEntityBudgets(entityId)
+                fetchEntityExpenses(resolvedEntityId),
+                fetchEntityIncome(resolvedEntityId),
+                fetchEntityBudgets(resolvedEntityId)
               ]),
               new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
             ]);
@@ -77,12 +109,12 @@ const EntityDashboard = () => {
             // Load entity management data with timeout
             const managementPromise = Promise.race([
               Promise.all([
-                fetchEntityDepartments(entityId),
-                fetchEntityRoles(entityId),
-                fetchEntityStaff(entityId),
-                fetchEntityBankAccounts(entityId),
-                fetchEntityWallets(entityId),
-                fetchEntityComplianceDocuments(entityId)
+                fetchEntityDepartments(resolvedEntityId),
+                fetchEntityRoles(resolvedEntityId),
+                fetchEntityStaff(resolvedEntityId),
+                fetchEntityBankAccounts(resolvedEntityId),
+                fetchEntityWallets(resolvedEntityId),
+                fetchEntityComplianceDocuments(resolvedEntityId)
               ]),
               new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
             ]);
@@ -116,7 +148,7 @@ const EntityDashboard = () => {
 
     loadEntityData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entityId]);
+  }, [entityId, entities, currentOrganization, fetchEntities, resolvedEntityId]);
 
   // Check if context is loaded
   if (!hasPermission || !PERMISSIONS) {
@@ -132,7 +164,14 @@ const EntityDashboard = () => {
   }
 
   if (!entity) {
-    return <div className="error">Entity not found.</div>;
+    return (
+      <div className="error">
+        <div>Entity Dashboard not found.</div>
+        <button className="btn-primary btn-sm" onClick={() => navigate('/app/enterprise/entities')} style={{ marginTop: 12 }}>
+          Back to Entities
+        </button>
+      </div>
+    );
   }
 
   // Calculate financial metrics
@@ -173,6 +212,7 @@ const EntityDashboard = () => {
       {/* Page Header */}
       <div className="ed-header">
         <div>
+          <div className="ed-tab-subtitle" style={{ marginBottom: 6 }}>Entity Dashboard</div>
           <h1 className="ed-entity-name">{entity.name}</h1>
           <div className="ed-meta-row">
             {entity.country && <span className="ed-meta-item">{entity.country}</span>}
@@ -210,6 +250,11 @@ const EntityDashboard = () => {
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <div>
+            <div className="ed-section" style={{ marginBottom: 20 }}>
+              <h2 className="ed-section-title">Overview</h2>
+              <p className="ed-tab-subtitle">Snapshot of entity performance, cash position, and key operational areas.</p>
+            </div>
+
             {/* Financial KPI cards */}
             <div className="summary-cards" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginBottom: 28 }}>
               <div className="summary-card income">
@@ -234,14 +279,14 @@ const EntityDashboard = () => {
               <h2 className="ed-section-title">Quick Access</h2>
               <div className="ed-quick-access">
                 {[
-                  { label: 'Expenses',          count: expenses.length, action: () => navigate(`/enterprise/entity/${entityId}/expenses`) },
-                  { label: 'Income',             count: income.length,   action: () => navigate(`/enterprise/entity/${entityId}/income`) },
-                  { label: 'Budgets',            count: budgets.length,  action: () => navigate(`/enterprise/entity/${entityId}/budgets`) },
-                  { label: 'Bookkeeping',        action: () => navigate(`/enterprise/entity/${entityId}/bookkeeping`) },
-                  { label: 'Cashflow',           action: () => navigate(`/enterprise/entity/${entityId}/cashflow-treasury`) },
+                  { label: 'Expenses',          count: expenses.length, action: () => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/expenses`) },
+                  { label: 'Income',             count: income.length,   action: () => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/income`) },
+                  { label: 'Budgets',            count: budgets.length,  action: () => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/budgets`) },
+                  { label: 'Bookkeeping',        action: () => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/bookkeeping`) },
+                  { label: 'Cashflow',           action: () => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/cashflow-treasury`) },
                   { label: 'Staff & HR',         count: staff.length,    action: () => setActiveTab('staff') },
-                  { label: 'Chart of Accounts',  action: () => navigate(`/enterprise/entity/${entityId}/chart-of-accounts`) },
-                  { label: 'General Ledger',     action: () => navigate(`/enterprise/entity/${entityId}/general-ledger`) },
+                  { label: 'Chart of Accounts',  action: () => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/chart-of-accounts`) },
+                  { label: 'General Ledger',     action: () => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/general-ledger`) },
                 ].map((item, i) => (
                   <button key={i} onClick={item.action} className="ed-quick-card">
                     <div className="ed-quick-label">{item.label}</div>
@@ -295,7 +340,7 @@ const EntityDashboard = () => {
                 <h3 className="ed-tab-title">Expense Management</h3>
                 <p className="ed-tab-subtitle">Track and manage all business expenses</p>
               </div>
-              <button className="btn-primary btn-sm" onClick={() => navigate(`/enterprise/entity/${entityId}/expenses`)}>Open Manager →</button>
+              <button className="btn-primary btn-sm" onClick={() => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/expenses`)}>Open Manager →</button>
             </div>
             <div className="data-table-container">
               <table>
@@ -324,7 +369,7 @@ const EntityDashboard = () => {
                 <h3 className="ed-tab-title">Income Management</h3>
                 <p className="ed-tab-subtitle">Track revenue streams and analyze income sources</p>
               </div>
-              <button className="btn-primary btn-sm" onClick={() => navigate(`/enterprise/entity/${entityId}/income`)}>Open Manager →</button>
+              <button className="btn-primary btn-sm" onClick={() => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/income`)}>Open Manager →</button>
             </div>
             <div className="data-table-container">
               <table>
@@ -353,7 +398,7 @@ const EntityDashboard = () => {
                 <h3 className="ed-tab-title">Budget Management</h3>
                 <p className="ed-tab-subtitle">Set spending limits and monitor utilization</p>
               </div>
-              <button className="btn-primary btn-sm" onClick={() => navigate(`/enterprise/entity/${entityId}/budgets`)}>Open Manager →</button>
+              <button className="btn-primary btn-sm" onClick={() => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/budgets`)}>Open Manager →</button>
             </div>
             <div className="data-table-container">
               <table>
@@ -535,10 +580,10 @@ const EntityDashboard = () => {
               <h3 className="ed-tab-title" style={{ marginBottom: 6 }}>Bookkeeping Module</h3>
               <p className="ed-tab-subtitle">Manage financial transactions, chart of accounts, and reporting.</p>
               <div className="ed-bk-actions">
-                <button className="btn-primary" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping`)}>Dashboard</button>
-                <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${entityId}/bookkeeping/transactions`)}>Transactions</button>
-                <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${entityId}/chart-of-accounts`)}>Chart of Accounts</button>
-                <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${entityId}/general-ledger`)}>General Ledger</button>
+                <button className="btn-primary" onClick={() => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/bookkeeping`)}>Dashboard</button>
+                <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/bookkeeping/transactions`)}>Transactions</button>
+                <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/chart-of-accounts`)}>Chart of Accounts</button>
+                <button className="btn-secondary" onClick={() => navigate(`/enterprise/entity/${resolvedEntityId || entityId}/general-ledger`)}>General Ledger</button>
               </div>
             </div>
             <div className="warning-banner">

@@ -1,12 +1,12 @@
 // =============================================================================
 // Ledgrionyx – Infrastructure Validate Pipeline
-// Trigger: Gerrit patchset-created on infra/openstack-atc
+// Trigger: Gerrit patchset-created on infra/openstack-ledgrionyx
 //
 // Runs lint, security checks, and terraform plan. Posts Verified vote
 // and a plan summary back to the Gerrit change.
 // =============================================================================
 
-@Library('atc-pipeline-library') _
+@Library('lgx-pipeline-library') _
 
 pipeline {
     agent { label 'terraform' }
@@ -83,7 +83,7 @@ pipeline {
                     withCredentials([
                         string(credentialsId: 'openstack-plan-appid',     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
                         string(credentialsId: 'openstack-plan-appsecret', variable: 'OS_APPLICATION_CREDENTIAL_SECRET'),
-                        string(credentialsId: 'atc-dev-ssh-pubkey',       variable: 'TF_VAR_ssh_public_key')
+                        string(credentialsId: 'lgx-dev-ssh-pubkey',       variable: 'TF_VAR_ssh_public_key')
                     ]) {
                         sh '''
                             set -e

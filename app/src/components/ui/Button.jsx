@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from './Icon';
 
 const Button = ({
   children,
@@ -11,11 +12,17 @@ const Button = ({
   icon,
   ...props
 }) => {
+  const normalizedVariant = variant === 'critical' ? 'danger' : variant;
+
   const renderIcon = () => {
     if (!icon) return null;
-    if (React.isValidElement(icon)) return React.cloneElement(icon, { className: 'btn-icon' });
-    const IconComponent = icon;
-    return <IconComponent className="btn-icon" />;
+    if (React.isValidElement(icon)) {
+      return React.cloneElement(icon, {
+        className: ['btn-icon', icon.props.className].filter(Boolean).join(' '),
+      });
+    }
+
+    return <Icon icon={icon} size="sm" className="btn-icon" />;
   };
 
   return (
@@ -23,7 +30,7 @@ const Button = ({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`btn btn-${variant} btn-${size} ${className}`}
+      className={`btn btn-${normalizedVariant} btn-${size} ${className}`}
       {...props}
     >
       {renderIcon()}

@@ -706,7 +706,7 @@ class DeveloperPortalViewTests(TestCase):
                 'first_name': 'Ato',
                 'last_name': 'Developer',
                 'email': 'developer@ledgrionyx.test',
-                'organization': 'ATC Developer Lab',
+                'organization': 'LGX Developer Lab',
                 'intended_use': 'Build a portfolio sync integration.',
             },
             format='json',
@@ -722,7 +722,7 @@ class DeveloperPortalViewTests(TestCase):
         user = User.objects.get(email='developer@ledgrionyx.test')
         self.assertTrue(UserProfile.objects.filter(user=user).exists())
 
-        organization = Organization.objects.get(owner=user, name='ATC Developer Lab')
+        organization = Organization.objects.get(owner=user, name='LGX Developer Lab')
         request_record = DeveloperPortalKeyRequest.objects.get(email='developer@ledgrionyx.test')
         application = OAuthApplication.objects.get(pk=request_record.application_id)
 
@@ -778,7 +778,7 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(response.data['error']['code'], 'UNAUTHORIZED')
 
 
-@override_settings(ATC_API_ENVIRONMENT='sandbox')
+@override_settings(LEDGRIONYX_API_ENVIRONMENT='sandbox')
 class CoreFinancialAPIV1Tests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -788,14 +788,14 @@ class CoreFinancialAPIV1Tests(TestCase):
         )
         self.organization = Organization.objects.create(
             owner=self.user,
-            name='ATC Demo LLC',
-            slug='atc-demo-llc',
+            name='LGX Demo LLC',
+            slug='lgx-demo-llc',
             primary_country='US',
             primary_currency='USD',
         )
         self.entity = Entity.objects.create(
             organization=self.organization,
-            name='ATC Demo LLC',
+            name='LGX Demo LLC',
             country='US',
             entity_type='corporation',
             status='active',
@@ -875,6 +875,31 @@ class CoreFinancialAPIV1Tests(TestCase):
 
         application = OAuthApplication.objects.get(pk=int(create_response.data['id'].split('_', 1)[1]))
         self.assertFalse(application.is_active)
+
+    def test_global_workspace_invite_creates_pending_membership_without_role(self):
+        workspace = WorkspaceService.create_workspace(self.user, {'name': 'Global Invite Workspace'})
+        invitee = User.objects.create_user(
+            username='global-invitee',
+            email='global-invitee@example.com',
+            password='strong-pass-123',
+        )
+
+        response = self.client.post(
+            '/api/global/invite',
+            {
+                'email': invitee.email,
+                'workspace_id': str(workspace.id),
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['status'], 'invited')
+        self.assertIsNone(response.data['role'])
+
+        membership = WorkspaceMember.objects.get(workspace=workspace, user=invitee)
+        self.assertEqual(membership.status, 'invited')
+        self.assertIsNone(membership.role)
 
     def test_cli_login_refresh_and_me_endpoints(self):
         create_response = self.client.post(
@@ -1470,8 +1495,8 @@ class CoreFinancialAPIV1Tests(TestCase):
 
         request_obj = mocked_urlopen.call_args.args[0]
         self.assertEqual(request_obj.full_url, 'https://client.example.com/webhooks')
-        self.assertEqual(request_obj.headers['X-atc-event'], 'invoice.created')
-        self.assertTrue(request_obj.headers['X-atc-signature-sha256'].startswith('sha256='))
+        self.assertEqual(request_obj.headers['X-lgx-event'], 'invoice.created')
+        self.assertTrue(request_obj.headers['X-lgx-signature-sha256'].startswith('sha256='))
 
         delivery = WebhookDelivery.objects.get()
         self.assertEqual(delivery.status, 'delivered')

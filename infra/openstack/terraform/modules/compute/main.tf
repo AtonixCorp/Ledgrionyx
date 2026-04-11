@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # Ledgrionyx – OpenStack Compute Module
 # Provisions Nova instances for a named Ledgrionyx service.
-# Naming convention: atc-<env>-<service>-<zero-padded-index>
+# Naming convention: lgx-<env>-<service>-<zero-padded-index>
 # Every instance carries the full Ledgrionyx traceability tag set.
 # -----------------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ terraform {
 # ── SSH key-pair (one per environment) ───────────────────────────────────────
 
 resource "openstack_compute_keypair_v2" "service" {
-  name       = "atc-${var.env}-${var.service}-keypair"
+  name       = "lgx-${var.env}-${var.service}-keypair"
   public_key = var.ssh_public_key
 }
 
@@ -27,7 +27,7 @@ resource "openstack_compute_keypair_v2" "service" {
 resource "openstack_compute_instance_v2" "service" {
   count = var.instance_count
 
-  name            = format("atc-%s-%s-%02d", var.env, var.service, count.index + 1)
+  name            = format("lgx-%s-%s-%02d", var.env, var.service, count.index + 1)
   flavor_name     = var.flavor_name
   image_name      = var.image_name
   key_pair        = openstack_compute_keypair_v2.service.name

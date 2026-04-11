@@ -17,9 +17,13 @@ const BookkeepingDashboard = () => {
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
 
-  const entity = entities.find(e => e.id === parseInt(entityId));
+  const entity = entities.find(e => String(e.id) === String(entityId));
 
   const loadData = useCallback(async () => {
+    if (!entity?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
 
     // Calculate date range
@@ -45,15 +49,15 @@ const BookkeepingDashboard = () => {
     } : {};
 
     // Fetch summary
-    const summaryData = await fetchBookkeepingSummary(entityId, filters);
+    const summaryData = await fetchBookkeepingSummary(entity.id, filters);
     setSummary(summaryData);
 
     // Fetch recent transactions (last 10)
-    const transactionsData = await fetchTransactions(entityId, filters);
+    const transactionsData = await fetchTransactions(entity.id, filters);
     setRecentTransactions((transactionsData.results || transactionsData).slice(0, 10));
 
     setLoading(false);
-  }, [dateFilter, entityId, fetchBookkeepingSummary, fetchTransactions]);
+  }, [dateFilter, entity, fetchBookkeepingSummary, fetchTransactions]);
 
   useEffect(() => {
     loadData();

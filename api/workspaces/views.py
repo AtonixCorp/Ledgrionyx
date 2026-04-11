@@ -63,6 +63,12 @@ def _resolve_workspace_id_or_404(workspace_ref):
     return WorkspaceService.resolve_workspace_id(workspace_ref)
 
 
+def _workspace_member_serializer_context(workspace_id):
+    return {
+        'department_map': MemberService.member_department_map(workspace_id),
+    }
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /workspaces          — create
 # GET  /workspaces          — list user's workspaces
@@ -146,7 +152,7 @@ class WorkspaceMemberListView(APIView):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
         PermissionService.assert_workspace_section(workspace_id, request.user, 'members')
         members = MemberService.list_members(workspace_id, request.user)
-        return Response(WorkspaceMemberSerializer(members, many=True).data)
+        return Response(WorkspaceMemberSerializer(members, many=True, context=_workspace_member_serializer_context(workspace_id)).data)
 
     def post(self, request, workspace_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)
@@ -154,7 +160,7 @@ class WorkspaceMemberListView(APIView):
         ser.is_valid(raise_exception=True)
         user = _get_user_or_404(ser.validated_data['user_id'])
         member = MemberService.add_member(workspace_id, request.user, user, ser.validated_data['role'])
-        return Response(WorkspaceMemberSerializer(member).data, status=status.HTTP_201_CREATED)
+        return Response(WorkspaceMemberSerializer(member, context=_workspace_member_serializer_context(workspace_id)).data, status=status.HTTP_201_CREATED)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -171,7 +177,7 @@ class WorkspaceMemberDetailView(APIView):
         ser.is_valid(raise_exception=True)
         target = _get_user_or_404(user_id)
         member = MemberService.update_role(workspace_id, request.user, target, ser.validated_data['role'])
-        return Response(WorkspaceMemberSerializer(member).data)
+        return Response(WorkspaceMemberSerializer(member, context=_workspace_member_serializer_context(workspace_id)).data)
 
     def delete(self, request, workspace_id, user_id):
         workspace_id = _resolve_workspace_id_or_404(workspace_id)

@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const mockClients = [
-  { id: 'CLI-001', name: 'Acme Corporation', industry: 'Manufacturing', entities: 3, engagement: 'Full Service', contact: 'John Smith', email: 'jsmith@acme.com', status: 'Active' },
-  { id: 'CLI-002', name: 'Globex Holdings', industry: 'Finance', entities: 7, engagement: 'Tax Only', contact: 'Jane Doe', email: 'jdoe@globex.com', status: 'Active' },
-  { id: 'CLI-003', name: 'Initech Group', industry: 'Technology', entities: 2, engagement: 'Bookkeeping', contact: 'Bob Jones', email: 'bjones@initech.com', status: 'Inactive' },
-];
+const clientRows = [];
 
 const columns = [
   { key: 'id', header: 'Client ID' },
@@ -24,9 +20,11 @@ const BLANK_CLIENT = { name: '', industry: '', engagement: '', contactName: '', 
 
 export default function ClientDirectory() {
   const [showModal, setShowModal] = useState(false);
-  const [clientList, setClientList] = useState(mockClients);
+  const [clientList, setClientList] = useState(clientRows);
   const [form, setForm] = useState(BLANK_CLIENT);
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
+  const activeClients = clientList.filter((client) => client.status === 'Active').length;
+  const totalEntitiesManaged = clientList.reduce((sum, client) => sum + Number(client.entities || 0), 0);
 
   const handleCreate = () => {
     if (!form.name.trim()) return;
@@ -50,20 +48,20 @@ export default function ClientDirectory() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Total Clients</div>
-          <div className="stat-value">3</div>
+          <div className="stat-value">{clientList.length}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Active</div>
-          <div className="stat-value" style={{ color: 'var(--color-success)' }}>2</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>{activeClients}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Total Entities Managed</div>
-          <div className="stat-value">12</div>
+          <div className="stat-value">{totalEntitiesManaged}</div>
         </Card>
       </div>
 
       <Card>
-        <Table columns={columns} data={clientList} />
+        {clientList.length > 0 ? <Table columns={columns} data={clientList} /> : <p className="empty-state">No clients yet. Add one to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_CLIENT); }} title="Add Client" size="medium">

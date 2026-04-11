@@ -3,12 +3,7 @@ import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/
 
 const ROLE_COLORS = { Admin: 'var(--color-error)', Manager: 'var(--color-cyan)', Editor: 'var(--color-success)', Viewer: 'var(--color-silver-dark)' };
 
-const mockTeam = [
-  { id: 'USR-001', name: 'Sarah Johnson', email: 'sarah@atc.com', role: 'Admin', entities: 'All', lastLogin: '2025-01-31', status: 'Active' },
-  { id: 'USR-002', name: 'Michael Chen', email: 'michael@atc.com', role: 'Editor', entities: 'Entity A, Entity B', lastLogin: '2025-01-30', status: 'Active' },
-  { id: 'USR-003', name: 'Lisa Rodriguez', email: 'lisa@atc.com', role: 'Manager', entities: 'Entity A', lastLogin: '2025-01-28', status: 'Active' },
-  { id: 'USR-004', name: 'Guest Auditor', email: 'auditor@external.com', role: 'Viewer', entities: 'All (Read Only)', lastLogin: '2025-01-15', status: 'Active' },
-];
+const teamRows = [];
 
 const columns = [
   { key: 'name', header: 'Name' },
@@ -27,7 +22,7 @@ const BLANK_TEAM = { name: '', email: '', role: 'Editor', entities: '' };
 
 export default function TeamPermissions() {
   const [showModal, setShowModal] = useState(false);
-  const [teamList, setTeamList] = useState(mockTeam);
+  const [teamList, setTeamList] = useState(teamRows);
   const [form, setForm] = useState(BLANK_TEAM);
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
 
@@ -53,20 +48,20 @@ export default function TeamPermissions() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Total Users</div>
-          <div className="stat-value">4</div>
+          <div className="stat-value">{teamList.length}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Admins</div>
-          <div className="stat-value" style={{ color: 'var(--color-error)' }}>1</div>
+          <div className="stat-value" style={{ color: 'var(--color-error)' }}>{teamList.filter((member) => member.role === 'Admin').length}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Active (Last 30 Days)</div>
-          <div className="stat-value" style={{ color: 'var(--color-success)' }}>4</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>{teamList.filter((member) => member.status === 'Active').length}</div>
         </Card>
       </div>
 
       <Card>
-        <Table columns={columns} data={teamList} />
+        {teamList.length > 0 ? <Table columns={columns} data={teamList} /> : <p className="empty-state">No team members yet. Invite someone to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_TEAM); }} title="Invite Team Member" size="medium">

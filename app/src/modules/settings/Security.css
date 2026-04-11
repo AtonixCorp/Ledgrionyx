@@ -1,0 +1,116 @@
+.security-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.security-options {
+  display: grid;
+  gap: 14px;
+}
+
+.security-option,
+.security-session-row,
+.security-summary-item {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+}
+
+.security-option {
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(var(--color-text-rgb), 0.08);
+}
+
+.security-option-copy,
+.security-session-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.security-option-title {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.security-option-desc {
+  color: rgba(var(--color-text-rgb), 0.68);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.security-toggle {
+  align-items: center;
+  background: rgba(var(--color-text-rgb), 0.16);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  padding: 2px;
+  width: 52px;
+}
+
+.security-toggle.is-on {
+  background: var(--color-primary);
+}
+
+.security-toggle-knob {
+  background: var(--color-white);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+  display: block;
+  height: 22px;
+  transform: translateX(0);
+  transition: transform 0.18s ease;
+  width: 22px;
+}
+
+.security-toggle.is-on .security-toggle-knob {
+  transform: translateX(24px);
+}
+
+.security-session-row {
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.security-select {
+  min-width: 180px;
+}
+
+.security-summary-list {
+  display: grid;
+  gap: 0;
+}
+
+.security-summary-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(var(--color-text-rgb), 0.08);
+}
+
+.security-summary-item:last-child {
+  border-bottom: none;
+}
+
+.security-summary-label.is-ok {
+  color: var(--color-text);
+}
+
+.security-summary-label.is-muted {
+  color: rgba(var(--color-text-rgb), 0.64);
+}
+
+@media (max-width: 720px) {
+  .security-option,
+  .security-session-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .security-select {
+    min-width: 0;
+    width: 100%;
+  }
+}

@@ -200,7 +200,7 @@ const EnterpriseOrgOverview = () => {
             <span className="ed-meta-sep">·</span>
             <span className="ed-meta-item">{regionCount} regions</span>
             <span className={`badge ${attentionCount > 0 ? 'dormant' : 'success'}`}>
-              {attentionCount > 0 ? `${attentionCount} items need review` : 'Portfolio healthy'}
+              {attentionCount > 0 ? `${attentionCount} pending review` : 'Portfolio healthy'}
             </span>
           </div>
         </div>

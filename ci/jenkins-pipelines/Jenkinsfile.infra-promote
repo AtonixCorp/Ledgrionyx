@@ -7,7 +7,7 @@
 // Every promotion is logged with change ID, approver, and timestamp.
 // =============================================================================
 
-@Library('atc-pipeline-library') _
+@Library('lgx-pipeline-library') _
 
 pipeline {
     agent { label 'terraform' }
@@ -63,7 +63,7 @@ pipeline {
                     $class: 'GitSCM',
                     branches: [[name: params.SOURCE_COMMIT]],
                     userRemoteConfigs: [[
-                        url: 'ssh://gerrit.ledgrionyx.internal:29418/infra/openstack-atc',
+                        url: 'ssh://gerrit.ledgrionyx.internal:29418/infra/openstack-ledgrionyx',
                         credentialsId: 'gerrit-ssh-key'
                     ]]
                 ])
@@ -94,7 +94,7 @@ pipeline {
                     withCredentials([
                         string(credentialsId: "openstack-${params.TARGET_ENV}-appid",     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
                         string(credentialsId: "openstack-${params.TARGET_ENV}-appsecret", variable: 'OS_APPLICATION_CREDENTIAL_SECRET'),
-                        string(credentialsId: "atc-${params.TARGET_ENV}-ssh-pubkey",      variable: 'TF_VAR_ssh_public_key')
+                        string(credentialsId: "lgx-${params.TARGET_ENV}-ssh-pubkey",      variable: 'TF_VAR_ssh_public_key')
                     ]) {
                         sh '''
                             set -e

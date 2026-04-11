@@ -72,7 +72,7 @@
 .cli-docs-page .cli-docs-hero h1,
 .deployment-page .deployment-hero h1,
 .global-tax-page .tax-hero-title,
-.landing-page .atc-hero-headline {
+.landing-page .ly-hero-headline {
   color: var(--color-text);
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-semibold);
@@ -92,7 +92,7 @@
 .deployment-page .deployment-hero__lede,
 .global-tax-page .tax-hero-subtitle,
 .global-tax-page .tax-hero-description,
-.landing-page .atc-hero-sub,
+.landing-page .ly-hero-sub,
 .landing-page .landing-deployment-promo__text,
 .about-page .about-section-sub,
 .about-page .solution-text p,
@@ -339,13 +339,13 @@
 .deployment-page .deployment-btn--ghost,
 .about-page .btn-outline-hero,
 .about-page .about-cta-buttons .btn-outline,
-.landing-page .atc-hero-btn-secondary {
+.landing-page .ly-hero-btn-secondary {
   background: var(--color-primary);
   color: var(--color-white);
   border: 1px solid var(--color-primary);
 }
 
-.landing-page .atc-hero-btn-primary,
+.landing-page .ly-hero-btn-primary,
 .pricing-page .plan-button.primary,
 .deployment-page .deployment-btn--primary,
 .deployment-page .deployment-btn--light,
@@ -362,7 +362,7 @@
 .landing-page .landing-deployment-promo__secondary,
 .deployment-page .deployment-btn--secondary,
 .cli-docs-page .cli-docs-hero-links a,
-.landing-page .atc-hero-btn-secondary,
+.landing-page .ly-hero-btn-secondary,
 .product-page .btn-outline,
 .features-page .btn-outline,
 .pricing-page .btn-outline,
@@ -383,7 +383,7 @@
 .landing-page .landing-deployment-promo__secondary:hover,
 .deployment-page .deployment-btn--secondary:hover,
 .cli-docs-page .cli-docs-hero-links a:hover,
-.landing-page .atc-hero-btn-secondary:hover,
+.landing-page .ly-hero-btn-secondary:hover,
 .product-page .btn-outline:hover,
 .features-page .btn-outline:hover,
 .pricing-page .btn-outline:hover,
@@ -422,7 +422,7 @@
 .support-page .community-stats .stat-number,
 .deployment-page .deployment-status-card__metric,
 .pricing-page .amount,
-.landing-page .atc-card-balance {
+.landing-page .ly-card-balance {
   color: var(--color-text);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
@@ -430,8 +430,8 @@
 
 .product-page .stat-label,
 .support-page .community-stats .stat-label,
-.landing-page .atc-card-label,
-.landing-page .atc-activity-label,
+.landing-page .ly-card-label,
+.landing-page .ly-activity-label,
 .global-tax-page .section-title {
   color: rgba(var(--color-text-rgb), 0.64);
 }

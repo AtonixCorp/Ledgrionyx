@@ -3,6 +3,13 @@ import { useEnterprise } from '../../context/EnterpriseContext';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
+const EMPTY_DASHBOARD = {
+  clients: { total: 0, active: 0, inactive: 0, prospects: 0, recent: [] },
+  workload: { total: 0, pending: 0, in_progress: 0, completed: 0, overdue: 0, by_entity: [] },
+  staff: { total: 0, performance: [] },
+  billing: { total_invoiced: 0, total_paid: 0, overdue_count: 0 },
+};
+
 const FirmDashboard = () => {
   const { currentOrganization } = useEnterprise();
   const [data, setData] = useState(null);
@@ -26,41 +33,7 @@ const FirmDashboard = () => {
       setData(json);
     } catch (e) {
       setError(e.message);
-      // Fallback demo data
-      setData({
-        clients: {
-          total: 42, active: 35, inactive: 5, prospects: 2,
-          recent: [
-            { id: 1, name: 'Meridian Holdings Ltd', status: 'active', email: 'contact@meridian.com', industry: 'Finance', created_at: '2026-02-15T00:00:00Z' },
-            { id: 2, name: 'Apex Retail Group', status: 'active', email: 'ops@apexretail.com', industry: 'Retail', created_at: '2026-02-10T00:00:00Z' },
-            { id: 3, name: 'Solaris Tech Inc.', status: 'prospect', email: 'cfo@solaristech.io', industry: 'Technology', created_at: '2026-02-05T00:00:00Z' },
-            { id: 4, name: 'BlueSky Logistics', status: 'active', email: 'finance@bluesky.co', industry: 'Logistics', created_at: '2026-01-28T00:00:00Z' },
-            { id: 5, name: 'Vertex Capital Partners', status: 'inactive', email: 'info@vertex.vc', industry: 'Investment', created_at: '2026-01-15T00:00:00Z' },
-          ]
-        },
-        workload: {
-          total: 128, pending: 45, in_progress: 38, completed: 40, overdue: 5,
-          by_entity: [
-            { entity__name: 'Main Entity US', count: 52 },
-            { entity__name: 'UK Subsidiary', count: 38 },
-            { entity__name: 'Dubai Branch', count: 24 },
-            { entity__name: 'Singapore Office', count: 14 },
-          ]
-        },
-        staff: {
-          total: 8,
-          performance: [
-            { id: 1, name: 'Sarah Johnson', email: 'sarah@firm.com', role: 'Senior Accountant', entity: 'Main Entity US', tasks_assigned: 12, tasks_completed: 8, is_active: true },
-            { id: 2, name: 'James Carter', email: 'james@firm.com', role: 'Tax Specialist', entity: 'UK Subsidiary', tasks_assigned: 9, tasks_completed: 6, is_active: true },
-            { id: 3, name: 'Priya Patel', email: 'priya@firm.com', role: 'Bookkeeper', entity: 'Main Entity US', tasks_assigned: 14, tasks_completed: 11, is_active: true },
-            { id: 4, name: 'Omar Hassan', email: 'omar@firm.com', role: 'Compliance Officer', entity: 'Dubai Branch', tasks_assigned: 7, tasks_completed: 5, is_active: true },
-            { id: 5, name: 'Anna Weber', email: 'anna@firm.com', role: 'Auditor', entity: 'UK Subsidiary', tasks_assigned: 6, tasks_completed: 4, is_active: true },
-          ]
-        },
-        billing: {
-          total_invoiced: 284750, total_paid: 231400, overdue_count: 3
-        }
-      });
+      setData(EMPTY_DASHBOARD);
     } finally {
       setLoading(false);
     }
@@ -113,7 +86,7 @@ const FirmDashboard = () => {
         </button>
       </div>
 
-      {error && <div className="alert-warning">Demo mode: {error}</div>}
+      {error && <div className="alert-warning">Data unavailable: {error}</div>}
 
       {/* KPI Strip */}
       {data && (

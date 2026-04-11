@@ -18,7 +18,7 @@ def terraform(Map args) {
         withCredentials([
             string(credentialsId: "openstack-${envName}-appid",     variable: 'OS_APPLICATION_CREDENTIAL_ID'),
             string(credentialsId: "openstack-${envName}-appsecret", variable: 'OS_APPLICATION_CREDENTIAL_SECRET'),
-            string(credentialsId: "atc-${envName}-ssh-pubkey",      variable: 'TF_VAR_ssh_public_key')
+            string(credentialsId: "lgx-${envName}-ssh-pubkey",      variable: 'TF_VAR_ssh_public_key')
         ]) {
             sh """
                 set -e

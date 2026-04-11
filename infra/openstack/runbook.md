@@ -11,7 +11,7 @@
 | Role                     | Responsibilities                                                    |
 |--------------------------|---------------------------------------------------------------------|
 | Founder / Ledgrionyx Owner | Defines non-negotiable standards; approves PROD governance changes |
-| Platform / Infra Lead    | Owns `infra/openstack-atc`; approves STAGE + PROD infra changes    |
+| Platform / Infra Lead    | Owns `infra/openstack-ledgrionyx`; approves STAGE + PROD infra changes    |
 | Application Leads        | Own `apps/ledgrionyx-core`; approve STAGE + PROD app changes      |
 | DevOps / CI Engineers    | Own Jenkins and Gerrit integration; maintain pipeline library       |
 | Developers               | Raise Gerrit changes; ensure tests and plans pass                  |
@@ -21,7 +21,7 @@
 ## 2. Standard change flow – infrastructure
 
 1. Engineer identifies the resource change needed (new instance, security rule, etc.).
-2. Clone `infra/openstack-atc`, create a feature branch.
+2. Clone `infra/openstack-ledgrionyx`, create a feature branch.
 3. Modify the relevant Terraform env root or module.
 4. Push as a Gerrit changeset: `git push origin HEAD:refs/for/main`.
 5. Jenkins runs `Jenkinsfile.infra-validate`: lint → security scan → terraform plan.
@@ -91,7 +91,7 @@ In a true emergency (e.g., runaway process, security incident):
 2. Update the relevant Ansible inventory (`inventories/<env>/hosts.yml`) to include the new host.
 3. If the service needs new security group rules, update `infra/openstack/terraform/modules/security/main.tf`.
 4. Raise the change via Gerrit → review → merge → Jenkins applies.
-5. Run `site.yml` to apply baseline config, then `deploy-atc-services.yml` with the image tag.
+5. Run `site.yml` to apply baseline config, then `deploy-lgx-services.yml` with the image tag.
 
 ---
 
@@ -104,7 +104,7 @@ To verify that all resources in a given environment carry correct Ledgrionyx tag
 openstack server list --tags system=ledgrionyx --format json | jq '.[].Name'
 
 # Check a specific resource for change_id
-openstack server show atc-prod-ledger-01 -f json | jq '.properties'
+openstack server show lgx-prod-ledger-01 -f json | jq '.properties'
 ```
 
 Cross-reference the `change_id` tag with the Gerrit change and the Jenkins build URL.

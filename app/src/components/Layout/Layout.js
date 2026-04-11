@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import LedgrionyxLogo from '../branding/LedgrionyxLogo';
+import { LogoMark } from '../Brand/LogoMark';
 import './Layout.css';
 
 const Layout = ({ children }) => {
@@ -232,7 +232,8 @@ const Layout = ({ children }) => {
         {/* Brand Header */}
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <LedgrionyxLogo variant="white" size="small" withText={!sidebarMinimized} text="Ledgrionyx Console" />
+            <LogoMark size={24} />
+            {!sidebarMinimized && <span style={{ color: '#fff', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap' }}>Ledgrionyx Console</span>}
           </div>
           {!sidebarMinimized && (
             <NavLink to="/app/console" className="sidebar-console-link" title="All Workspaces">

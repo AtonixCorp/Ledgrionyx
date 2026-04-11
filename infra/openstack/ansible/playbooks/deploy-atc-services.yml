@@ -1,5 +1,5 @@
 ---
-# deploy-atc-services.yml
+# deploy-lgx-services.yml
 # Deploys the Ledgrionyx container image to API hosts in the target environment.
 # Called by Jenkins Jenkinsfile.app-deploy.
 #
@@ -42,7 +42,7 @@
         fail_msg: "Failed to pull {{ atc_image }}. Check registry connectivity."
 
   roles:
-    - atc-api
+    - lgx-api
 
   post_tasks:
     - name: Health-check the deployed service

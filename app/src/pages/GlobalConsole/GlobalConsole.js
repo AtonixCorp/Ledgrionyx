@@ -3,49 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
-import { platformAuditEventsAPI, platformTasksAPI } from '../../services/api';
-import { getWorkspaceLandingPath, WORKSPACE_MODE_LABELS } from '../../utils/workspaceModules';
+import { globalInviteAPI, platformAuditEventsAPI, platformTasksAPI } from '../../services/api';
 import './GlobalConsole.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Ledgrionyx — Global Console
+  Ledgrionyx — Global Capital Console
    The cross-company control center a user sees immediately after login.
    Shows: My Workspaces · Global Notifications · Global Tasks · Quick Actions
 ───────────────────────────────────────────────────────────────────────────── */
 
-const INDUSTRY_LABELS = {
-  technology: 'Technology',
-  finance: 'Finance',
-  healthcare: 'Healthcare',
-  retail: 'Retail',
-  manufacturing: 'Manufacturing',
-  real_estate: 'Real Estate',
-  consulting: 'Consulting',
-  other: 'Other',
+const formatDate = (value) => {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return '—';
+  }
 };
-
-const STATUS_META = {
-  active:   { label: 'Active', cls: 'status-active' },
-  inactive: { label: 'Inactive', cls: 'status-inactive' },
-  pending:  { label: 'Pending', cls: 'status-pending' },
-};
-
-function buildWorkspaceCards(entities) {
-  return entities.map((e) => ({
-    id: e.id,
-    name: e.name,
-    country: e.country || '—',
-    currency: e.local_currency || 'USD',
-    entityType: e.entity_type || 'corporation',
-    industry: INDUSTRY_LABELS[e.industry] || e.industry || '—',
-    status: e.status || 'active',
-    role: 'Member',
-    registrationNumber: e.registration_number || null,
-    fiscalYearEnd: e.fiscal_year_end || null,
-    workspaceMode: e.workspace_mode || 'accounting',
-    workspaceModeLabel: WORKSPACE_MODE_LABELS[e.workspace_mode || 'accounting'] || 'Accounting',
-  }));
-}
 
 const PALETTE = ['ws-indigo', 'ws-teal', 'ws-violet', 'ws-rose', 'ws-amber', 'ws-sky'];
 const palette = (idx) => PALETTE[idx % PALETTE.length];
@@ -120,10 +94,9 @@ const GlobalConsole = () => {
   const {
     currentOrganization,
     entities,
-    activeWorkspace,
-    setActiveWorkspace,
     globalNotifications,
     fetchGlobalNotifications,
+    teamMembers,
     loading,
     complianceDeadlines,
   } = useEnterprise();
@@ -137,6 +110,12 @@ const GlobalConsole = () => {
   const [tasks, setTasks] = useState([]);
   const [auditEvents, setAuditEvents] = useState([]);
   const [taskActionPendingId, setTaskActionPendingId] = useState(null);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteSaving, setInviteSaving] = useState(false);
+  const [inviteError, setInviteError] = useState('');
+  const [inviteSuccess, setInviteSuccess] = useState('');
+  const [inviteForm, setInviteForm] = useState({ invitee: '', workspaceId: '' });
   const profileRef = useRef(null);
   const onboardingEnteredAtRef = useRef(null);
   const onboardingCtaClickedRef = useRef(false);
@@ -154,6 +133,13 @@ const GlobalConsole = () => {
   useEffect(() => {
     if (fetchGlobalNotifications) fetchGlobalNotifications();
   }, [fetchGlobalNotifications]);
+
+  useEffect(() => {
+    const tick = () => setCurrentTime(new Date());
+    tick();
+    const timer = window.setInterval(tick, 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -188,22 +174,53 @@ const GlobalConsole = () => {
     };
   }, [costCenterFilter, departmentFilter, taskFilter, user?.id]);
 
-  // Filtered workspaces
-  const workspaceCards = buildWorkspaceCards(entities);
-  const workspaceCount = workspaceCards.length;
+  const workspaceCount = entities.length;
   const showWorkspaceOnboarding = !loading && workspaceCount === 0;
-  const filtered = workspaceCards.filter((w) => {
-    const matchSearch = !search || w.name.toLowerCase().includes(search.toLowerCase()) || w.country.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === 'all' || w.status === filterStatus;
-    return matchSearch && matchStatus;
-  });
+  const pendingInvitations = Array.isArray(teamMembers)
+    ? teamMembers.filter((member) => member?.accepted_at == null || member?.invitation_status === 'pending' || member?.status === 'pending').length
+    : 0;
+  const workspaceSelectOptions = entities.map((entity) => ({
+    value: String(entity.id),
+    label: `${entity.name}${entity.linked_entity_name ? ` · ${entity.linked_entity_name}` : ''}`,
+  }));
 
-  const handleOpenWorkspace = (workspace) => {
-    const entity = entities.find((e) => e.id === workspace.id);
-    if (entity) {
-      setActiveWorkspace(entity);
-      navigate(getWorkspaceLandingPath(entity));
+  const handleInviteUser = async () => {
+    setInviteError('');
+    setInviteSuccess('');
+
+    const workspaceId = String(inviteForm.workspaceId || '').trim();
+    const invitee = String(inviteForm.invitee || '').trim();
+
+    if (!workspaceId || !invitee) {
+      setInviteError('Workspace and invitee are required.');
+      return;
     }
+
+    setInviteSaving(true);
+    try {
+      const payload = { workspace_id: workspaceId };
+      if (/^\d+$/.test(invitee)) {
+        payload.user_id = Number(invitee);
+      } else {
+        payload.email = invitee.toLowerCase();
+      }
+      await globalInviteAPI.create(payload);
+      setInviteSuccess('Workspace invitation sent.');
+      setInviteForm({ invitee: '', workspaceId: '' });
+      fetchGlobalNotifications?.();
+      setTimeout(() => {
+        setInviteModalOpen(false);
+        setInviteSuccess('');
+      }, 700);
+    } catch (error) {
+      setInviteError(error?.response?.data?.detail || error?.response?.data?.user_id?.[0] || error?.response?.data?.email?.[0] || 'Failed to invite user to the workspace.');
+    } finally {
+      setInviteSaving(false);
+    }
+  };
+
+  const scrollToWorkspaces = () => {
+    navigate('/app/workspaces/select');
   };
 
   const notifs = auditEvents.length > 0
@@ -312,6 +329,28 @@ const GlobalConsole = () => {
     navigate('/');
   };
 
+  const activeWorkspaceCount = workspaceCount;
+  const complianceAlertCount = notifs.filter((item) => item.severity === 'critical' || item.severity === 'high').length;
+  const pendingCapitalTasks = tasks.length;
+  const marketPulse = [
+    { label: 'Global Equity Index', value: 'No data connected', tone: 'muted' },
+    { label: 'Volatility Index', value: 'Stable', tone: 'positive' },
+    { label: 'Portfolio NAV', value: 'Not yet configured', tone: 'muted' },
+    { label: 'Compliance Status', value: 'Current', tone: 'positive' },
+  ];
+  const equityTools = [
+    'Capital Tables',
+    'Vesting Schedules',
+    'Equity Events',
+    'Compliance Filings',
+    'Entity Management',
+  ];
+  const todaysOverview = [
+    'No active filings',
+    'No pending equity events',
+    'No capital movements scheduled',
+  ];
+
   return (
     <div className="global-console-page">
 
@@ -327,6 +366,10 @@ const GlobalConsole = () => {
           </div>
         </div>
         <div className="gc-topnav-right" ref={profileRef}>
+          <div className="gc-topnav-clock" aria-label="Current date and time">
+            <span>{currentTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            <strong>{currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong>
+          </div>
           <button className="gc-topnav-notifications" onClick={handleNotificationsClick} aria-label="Notifications">
             <span className="gc-topnav-notifications-label">Notifications</span>
             <span className="gc-topnav-notifications-count">{notifs.length}</span>
@@ -365,313 +408,195 @@ const GlobalConsole = () => {
 
       <div className="gc-body">
         <div className="global-console">
-
-      {showWorkspaceOnboarding ? (
-        <div className="gc-empty-workspace-shell">
-          <section className="gc-empty-workspace-panel gc-empty-workspace-panel--hero">
-            <div className="gc-empty-workspace-copy">
-              <span className="gc-empty-workspace-kicker">Workspace Setup</span>
-              <h2>You don’t have any workspaces yet.</h2>
-              <p>Create your first workspace to begin managing your organization.</p>
+          <section className="gc-capital-hero">
+            <div className="gc-capital-hero-copy">
+              <span className="gc-kicker gc-kicker--capital">Ledgrionyx — Global Capital Console</span>
+              <h1 className="gc-capital-title">Ledgrionyx — Global Capital Console</h1>
+              <p className="gc-capital-subtitle">Oversight • Risk • Compliance • Liquidity</p>
+              <div className="gc-capital-meta-row">
+                <span className="gc-capital-pill">Prime capital posture</span>
+                <span className="gc-capital-pill gc-capital-pill--muted">Market pulse enabled</span>
+              </div>
             </div>
-
-            <EmptyWorkspaceIllustration />
-
-            <div className="gc-empty-workspace-highlights" aria-label="Workspace highlights">
-              <span className="gc-empty-workspace-highlight">Accounting ready</span>
-              <span className="gc-empty-workspace-highlight">Equity capable</span>
-              <span className="gc-empty-workspace-highlight">Team permissions built in</span>
-            </div>
-
-            <div className="gc-empty-workspace-actions">
-              <button className="gc-empty-workspace-cta" onClick={() => handleCreateWorkspace('empty_state')}>
-                Get Started
-              </button>
-              <p className="gc-empty-workspace-note">You can add modules, currency, and workspace type during setup.</p>
+            <div className="gc-capital-badges">
+              <span className="gc-compliance-badge">Compliance: Current</span>
+              <span className="gc-capital-watermark">LEDGRIONYX GLOBAL</span>
             </div>
           </section>
-        </div>
-      ) : (
-        <>
 
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="gc-hero">
-        <div className="gc-hero-copy">
-          <span className="gc-kicker">Ledgrionyx — Global Console</span>
-          <h1 className="gc-title">Good morning, {firstName}</h1>
-          <p className="gc-subtitle">
-            Select a workspace to continue, or manage your organization from here.
-          </p>
-          <span className="gc-platform-badge">Ledgrionyx Console</span>
-        </div>
-        <div className="gc-hero-stats">
-          <div className="gc-hero-stat">
-            <span className="gc-hero-stat-value">{entities.length}</span>
-            <span className="gc-hero-stat-label">Workspaces</span>
-          </div>
-          <div className="gc-hero-stat">
-            <span className="gc-hero-stat-value">{notifs.filter(n => n.severity === 'critical' || n.severity === 'high').length}</span>
-            <span className="gc-hero-stat-label">Urgent Alerts</span>
-          </div>
-          <div className="gc-hero-stat">
-            <span className="gc-hero-stat-value">{tasks.length}</span>
-            <span className="gc-hero-stat-label">Pending Tasks</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── QUICK ACTIONS ────────────────────────────────────────────────── */}
-      <section className="gc-quick-actions">
-        <button className="gc-action-btn gc-action-primary" onClick={() => handleCreateWorkspace('quick_actions')}>
-          <span className="gc-action-icon">+</span>
-          Create Workspace
-        </button>
-        <button className="gc-action-btn gc-action-secondary" onClick={() => navigate('/app/settings/team')}>
-          <span className="gc-action-icon">+</span>
-          Invite User
-        </button>
-        <button className="gc-action-btn gc-action-secondary" onClick={() => navigate('/app/enterprise/entities')}>
-          <span className="gc-action-icon">#</span>
-          Manage Entities
-        </button>
-      </section>
-
-      {/* ── MAIN GRID ────────────────────────────────────────────────────── */}
-      <div className="gc-main-grid">
-
-        {/* LEFT — My Workspaces ───────────────────────────────────────────── */}
-        <section className="gc-section gc-workspaces-section">
-          <div className="gc-section-header">
-            <h2>My Workspaces</h2>
-            <span className="gc-section-count">{filtered.length} of {workspaceCards.length}</span>
-          </div>
-
-          {/* Filters */}
-          <div className="gc-workspace-filters">
-            <input
-              className="gc-search"
-              type="text"
-              placeholder="Search by name or country…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <div className="gc-filter-chips">
-              {['all', 'active', 'inactive', 'pending'].map((s) => (
-                <button
-                  key={s}
-                  className={`gc-chip${filterStatus === s ? ' active' : ''}`}
-                  onClick={() => setFilterStatus(s)}
-                >
-                  {s === 'all' ? 'All' : STATUS_META[s]?.label || s}
-                </button>
+          <section className="gc-market-strip">
+            <div className="gc-section-header gc-section-header--tight">
+              <div>
+                <h2>Market Pulse (Live)</h2>
+                <p>Institutional readout</p>
+              </div>
+            </div>
+            <div className="gc-market-grid">
+              {marketPulse.map((signal) => (
+                <article key={signal.label} className={`gc-market-card gc-market-card--${signal.tone}`}>
+                  <span>{signal.label}</span>
+                  <strong>{signal.value}</strong>
+                </article>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Workspace cards */}
-          {loading && <div className="gc-loading">Loading workspaces…</div>}
+          <section className="gc-action-ribbon" aria-label="Institutional actions">
+            <button className="gc-action-btn gc-action-primary gc-action-btn--ribbon" onClick={() => handleCreateWorkspace('institutional_ribbon')}>
+              New Equity Workspace
+            </button>
+            <button className="gc-action-btn gc-action-secondary gc-action-btn--ribbon" onClick={() => setInviteModalOpen(true)}>
+              Add Participant / Entity
+            </button>
+            <button className="gc-action-btn gc-action-secondary gc-action-btn--ribbon" onClick={scrollToWorkspaces}>
+              Portfolio Workspaces
+            </button>
+          </section>
 
-          {!loading && filtered.length === 0 && (
-            <div className="gc-empty-state">
-              <div className="gc-empty-icon"></div>
-              <h3>No workspaces match these filters</h3>
-              <p>Adjust your filters or create another workspace.</p>
-              <button className="gc-action-btn gc-action-primary" onClick={() => handleCreateWorkspace('workspace_grid_empty')}>
-                Create Workspace
-              </button>
+          <section className="gc-kpi-section">
+            <div className="gc-section-header gc-section-header--tight">
+              <div>
+                <h2>Operational KPIs</h2>
+                <p>Institutional control metrics</p>
+              </div>
             </div>
-          )}
+            <div className="gc-kpi-grid">
+              <article className="gc-kpi-card">
+                <span>Active Workspaces</span>
+                <strong>{activeWorkspaceCount}</strong>
+              </article>
+              <article className="gc-kpi-card">
+                <span>Outstanding Compliance Alerts</span>
+                <strong>{complianceAlertCount}</strong>
+              </article>
+              <article className="gc-kpi-card">
+                <span>Pending Capital Tasks</span>
+                <strong>{pendingCapitalTasks}</strong>
+              </article>
+            </div>
+          </section>
 
-          <div className="gc-workspaces-grid">
-            {filtered.map((ws, idx) => {
-              const isActive = activeWorkspace?.id === ws.id;
-              const statusMeta = STATUS_META[ws.status] || STATUS_META.active;
-              return (
-                <div key={ws.id} className={`gc-workspace-card ${palette(idx)}${isActive ? ' gc-ws-active' : ''}`}>
-                  {isActive && <span className="gc-ws-active-badge">Current</span>}
-                  <div className="gc-ws-header">
-                    <div className="gc-ws-avatar">{ws.name.charAt(0).toUpperCase()}</div>
-                    <div className="gc-ws-meta">
-                      <h3 className="gc-ws-name">{ws.name}</h3>
-                      <span className="gc-ws-country">{ws.country} · {ws.currency}</span>
-                    </div>
-                    <span className={`gc-ws-status ${statusMeta.cls}`}>{statusMeta.label}</span>
+          <div className="gc-main-grid">
+            <section className="gc-section gc-overview-panel">
+              <div className="gc-section-header gc-section-header--tight">
+                <div>
+                  <h2>Today’s Equity Overview</h2>
+                  <p>Operational readiness</p>
+                </div>
+              </div>
+              <div className="gc-equity-overview">
+                {todaysOverview.map((item) => (
+                  <div key={item} className="gc-equity-overview-item">
+                    <span className="gc-equity-overview-dot" />
+                    <p>{item}</p>
                   </div>
+                ))}
+              </div>
+            </section>
 
-                  <div className="gc-ws-details">
-                    {ws.industry && ws.industry !== '—' && (
-                      <span className="gc-ws-tag">{ws.industry}</span>
-                    )}
-                    <span className="gc-ws-tag">{ws.workspaceModeLabel}</span>
-                    <span className="gc-ws-tag gc-ws-tag-role">{ws.role}</span>
-                    <span className="gc-ws-tag">{ws.entityType.replace('_', ' ')}</span>
-                  </div>
-
-                  {ws.fiscalYearEnd && (
-                    <p className="gc-ws-fiscal">Fiscal year end: {ws.fiscalYearEnd}</p>
-                  )}
-
-                  <div className="gc-ws-actions">
-                    <button
-                      className="gc-ws-open-btn"
-                      onClick={() => handleOpenWorkspace(ws)}
-                    >
-                      Open Workspace →
-                    </button>
+            <aside className="gc-side-stack gc-institutional-rail">
+              <section className="gc-section gc-tools-section">
+                <div className="gc-section-header gc-section-header--tight">
+                  <div>
+                    <h2>Equity Tools</h2>
+                    <p>Capital navigation</p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
+                <div className="gc-tools-list">
+                  {equityTools.map((tool) => (
+                    <div key={tool} className="gc-tool-item">{tool}</div>
+                  ))}
+                </div>
+              </section>
 
-        {/* RIGHT — Notifications + Tasks ───────────────────────────────────── */}
-        <aside className="gc-side-stack">
-
-          {/* Global Notifications */}
-          <section className="gc-section gc-notif-section">
-            <div className="gc-section-header">
-              <h2>Global Notifications</h2>
-              {notifs.length > 0 && (
-                <span className="gc-notif-badge">{notifs.filter(n => n.severity !== 'medium').length}</span>
-              )}
-            </div>
-            {notifs.length === 0 ? (
-              <div className="gc-notif-empty">
-                <span>All compliance obligations are current</span>
-              </div>
-            ) : (
-              <ul className="gc-notif-list">
-                {notifs.slice(0, 6).map((n, i) => (
-                  <li key={n.id || i} className={`gc-notif-item sev-${n.severity}`}>
-                    <div className="gc-notif-dot" />
-                    <div className="gc-notif-content">
-                      <p className="gc-notif-msg">{n.message}</p>
-                      {n.daysLeft !== null && (
-                        <span className="gc-notif-time">
-                          {n.daysLeft <= 0 ? `Overdue by ${Math.abs(n.daysLeft)}d` : `Due in ${n.daysLeft} days`}
-                        </span>
-                      )}
-                    </div>
-                    <span className={`gc-notif-sev gc-sev-${n.severity}`}>
-                      {n.severity === 'critical' ? 'Critical' : n.severity === 'high' ? 'High' : 'Medium'}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {/* Global Tasks */}
-          <section className="gc-section gc-tasks-section">
-            <div className="gc-section-header">
-              <h2>My Tasks</h2>
-              <span className="gc-section-count">{tasks.length}</span>
-            </div>
-            <div className="gc-filter-chips">
-              {['open', 'in_progress', 'completed', 'all'].map((state) => (
-                <button
-                  key={state}
-                  className={`gc-chip${taskFilter === state ? ' active' : ''}`}
-                  onClick={() => setTaskFilter(state)}
-                >
-                  {state === 'in_progress' ? 'In Progress' : state === 'all' ? 'All' : state.charAt(0).toUpperCase() + state.slice(1)}
-                </button>
-              ))}
-            </div>
-            <div className="gc-task-filter-row">
-              <select className="gc-task-select" value={departmentFilter} onChange={(event) => { setDepartmentFilter(event.target.value); setCostCenterFilter('all'); }}>
-                <option value="all">All Departments</option>
-                {departmentOptions.map((departmentName) => (
-                  <option key={departmentName} value={departmentName}>{departmentName}</option>
-                ))}
-              </select>
-              <select className="gc-task-select" value={costCenterFilter} onChange={(event) => setCostCenterFilter(event.target.value)}>
-                <option value="all">All Cost Centers</option>
-                {costCenterOptions.map((costCenter) => (
-                  <option key={costCenter} value={costCenter}>{costCenter}</option>
-                ))}
-              </select>
-            </div>
-            {tasks.length === 0 ? (
-              <div className="gc-task-empty">
-                <span>No pending tasks</span>
-              </div>
-            ) : (
-              <ul className="gc-task-list">
-                {tasks.map((t, i) => (
-                  <li key={t.id || i} className={`gc-task-item priority-${t.priority}`}>
-                    <div className={`gc-task-priority-bar pbar-${toTaskPriority(t)}`} />
-                    <div className="gc-task-body">
-                      <p className="gc-task-title">{t.title}</p>
-                      <span className="gc-task-type">{(t.type || t.task_type || 'task').replaceAll('_', ' ')}</span>
-                      {(t.department_name || t.cost_center) && (
-                        <div className="gc-task-meta-row">
-                          {t.department_name && <span className="gc-task-meta-chip">{t.department_name}</span>}
-                          {t.cost_center && <span className="gc-task-meta-chip gc-task-meta-chip-muted">{t.cost_center}</span>}
+              <section className="gc-section gc-notif-section">
+                <div className="gc-section-header gc-section-header--tight">
+                  <div>
+                    <h2>Compliance Feed</h2>
+                    <p>Global alerts and status</p>
+                  </div>
+                  {notifs.length > 0 && <span className="gc-notif-badge">{complianceAlertCount}</span>}
+                </div>
+                {notifs.length === 0 ? (
+                  <div className="gc-notif-empty">
+                    <span>All compliance obligations are current</span>
+                  </div>
+                ) : (
+                  <ul className="gc-notif-list">
+                    {notifs.slice(0, 5).map((n, i) => (
+                      <li key={n.id || i} className={`gc-notif-item sev-${n.severity}`}>
+                        <div className="gc-notif-dot" />
+                        <div className="gc-notif-content">
+                          <p className="gc-notif-msg">{n.message}</p>
+                          {n.daysLeft !== null && (
+                            <span className="gc-notif-time">
+                              {n.daysLeft <= 0 ? `Overdue by ${Math.abs(n.daysLeft)}d` : `Due in ${n.daysLeft} days`}
+                            </span>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <span className="gc-task-due">{t.due_at ? formatRelativeTime(t.due_at) : (t.state || t.status || 'open').replaceAll('_', ' ')}</span>
-                    <div className="gc-task-actions">
-                      {(t.state || t.status) === 'open' && (
-                        <button className="gc-task-action" disabled={taskActionPendingId === t.id} onClick={() => handleTaskAction(t, 'start')}>
-                          Start
-                        </button>
-                      )}
-                      {(t.state || t.status) === 'in_progress' && (
-                        <button className="gc-task-action" disabled={taskActionPendingId === t.id} onClick={() => handleTaskAction(t, 'complete')}>
-                          Complete
-                        </button>
-                      )}
-                      {!t.assignee_id && (
-                        <button className="gc-task-action gc-task-action-secondary" disabled={taskActionPendingId === t.id} onClick={() => handleTaskAction(t, 'assign')}>
-                          Assign to Me
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+                        <span className={`gc-notif-sev gc-sev-${n.severity}`}>
+                          {n.severity === 'critical' ? 'Critical' : n.severity === 'high' ? 'High' : 'Medium'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </aside>
+          </div>
 
-          <section className="gc-section gc-notif-section">
-            <div className="gc-section-header">
-              <h2>Audit Activity</h2>
-              <div className="gc-section-header-actions">
-                <span className="gc-section-count">{auditEvents.length}</span>
-                <button className="gc-section-link" onClick={() => navigate('/app/enterprise/audit-explorer')}>
-                  Open Explorer
-                </button>
+          <footer className="gc-capital-footer">
+            <span>PrimeSource Equity • Global Capital Infrastructure • Systems Operational</span>
+          </footer>
+
+      {inviteModalOpen && (
+        <div className="gc-modal-backdrop" role="presentation" onClick={() => !inviteSaving && setInviteModalOpen(false)}>
+          <div className="gc-modal" role="dialog" aria-modal="true" aria-labelledby="global-invite-title" onClick={(event) => event.stopPropagation()}>
+            <div className="gc-modal-header">
+              <div>
+                <p className="gc-modal-kicker">Global Invite</p>
+                <h3 id="global-invite-title">Invite User to a Workspace</h3>
               </div>
+              <button className="gc-modal-close" onClick={() => setInviteModalOpen(false)} disabled={inviteSaving} aria-label="Close invite dialog">
+                ×
+              </button>
             </div>
-            {auditEvents.length === 0 ? (
-              <div className="gc-notif-empty">
-                <span>No recent audit activity</span>
-              </div>
-            ) : (
-              <ul className="gc-notif-list">
-                {auditEvents.slice(0, 6).map((event) => (
-                  <li key={event.id} className={`gc-notif-item sev-${auditSeverity(event)}`}>
-                    <div className="gc-notif-dot" />
-                    <div className="gc-notif-content">
-                      <p className="gc-notif-msg">{event.summary}</p>
-                      <span className="gc-notif-time">{formatRelativeTime(event.occurred_at)}</span>
-                    </div>
-                    <span className={`gc-notif-sev gc-sev-${auditSeverity(event)}`}>
-                      {event.action?.replaceAll('_', ' ') || 'event'}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-        </aside>
-
-      </div>{/* /.gc-main-grid */}
-      </>
+            <p className="gc-modal-copy">
+              Use a user ID to attach someone to a workspace. Department, role, and module access stay inside the workspace itself.
+            </p>
+            <div className="gc-modal-grid">
+              <label className="gc-modal-field">
+                <span>Email or User ID</span>
+                <input
+                  type="text"
+                  value={inviteForm.invitee}
+                  onChange={(event) => setInviteForm((current) => ({ ...current, invitee: event.target.value }))}
+                  placeholder="e.g. ada@example.com or 42"
+                />
+              </label>
+              <label className="gc-modal-field">
+                <span>Workspace</span>
+                <select
+                  value={inviteForm.workspaceId}
+                  onChange={(event) => setInviteForm((current) => ({ ...current, workspaceId: event.target.value }))}
+                >
+                  <option value="">Select a workspace</option>
+                  {workspaceSelectOptions.map((workspace) => (
+                    <option key={workspace.value} value={workspace.value}>{workspace.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {inviteError && <div className="gc-modal-error">{inviteError}</div>}
+            {inviteSuccess && <div className="gc-modal-success">{inviteSuccess}</div>}
+            <div className="gc-modal-actions">
+              <button className="gc-action-btn gc-action-secondary" onClick={() => setInviteModalOpen(false)} disabled={inviteSaving}>Cancel</button>
+              <button className="gc-action-btn gc-action-primary" onClick={handleInviteUser} disabled={inviteSaving}>
+                {inviteSaving ? 'Inviting…' : 'Send Global Invite'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       </div>{/* /.global-console */}
       </div>{/* /.gc-body */}

@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Ledgrionyx – TEST environment root
-# OpenStack Project: atc-test
+# OpenStack Project: lgx-test
 # Applied via Jenkins promotion job after successful DEV verification.
 # TEST mirrors the production topology to ensure meaningful integration tests.
 # -----------------------------------------------------------------------------

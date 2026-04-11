@@ -29,12 +29,7 @@ const PLANS = [
   },
 ];
 
-const mockInvoices = [
-  { id: 'SUB-2026-03', date: 'Mar 1, 2026', amount: '$499.00', status: 'Paid' },
-  { id: 'SUB-2026-02', date: 'Feb 1, 2026', amount: '$499.00', status: 'Paid' },
-  { id: 'SUB-2026-01', date: 'Jan 1, 2026', amount: '$499.00', status: 'Paid' },
-  { id: 'SUB-2025-12', date: 'Dec 1, 2025', amount: '$499.00', status: 'Paid' },
-];
+const invoiceRows = [];
 
 const usage = [
   { label: 'Entities', used: 3, limit: Infinity, display: '3 / Unlimited' },
@@ -145,15 +140,23 @@ export default function Subscription() {
             </tr>
           </thead>
           <tbody>
-            {mockInvoices.map(inv => (
-              <tr key={inv.id}>
-                <td>{inv.id}</td>
-                <td>{inv.date}</td>
-                <td>{inv.amount}</td>
-                <td><span className="status-badge" style={{ background: 'var(--color-success)' }}>{inv.status}</span></td>
-                <td><Button variant="secondary" size="small">Download PDF</Button></td>
+            {invoiceRows.length > 0 ? (
+              invoiceRows.map(inv => (
+                <tr key={inv.id}>
+                  <td>{inv.id}</td>
+                  <td>{inv.date}</td>
+                  <td>{inv.amount}</td>
+                  <td><span className="status-badge" style={{ background: 'var(--color-success)' }}>{inv.status}</span></td>
+                  <td><Button variant="secondary" size="small">Download PDF</Button></td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">
+                  <p className="empty-state" style={{ padding: '16px 0' }}>No invoices yet. Billing history will appear here.</p>
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </Card>

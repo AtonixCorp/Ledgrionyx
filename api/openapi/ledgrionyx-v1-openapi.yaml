@@ -31,10 +31,10 @@ tags:
   - name: Reports
   - name: Webhooks
   - name: Audit
-x-atc-error-envelope:
+x-lgx-error-envelope:
   schema: '#/components/schemas/StandardError'
   note: All runtime v1 error responses are normalized to the StandardError envelope.
-x-atc-scope-policy:
+x-lgx-scope-policy:
   v1-api-keys:
     GET: [auth:manage]
     POST: [auth:manage]

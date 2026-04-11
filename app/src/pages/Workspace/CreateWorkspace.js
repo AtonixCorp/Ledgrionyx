@@ -5,6 +5,7 @@ import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
 import {
   ACCOUNTING_MODULE_KEYS,
+  WORKSPACE_MODE_LABELS,
   EQUITY_MODULE_KEYS,
   WORKSPACE_PACKAGE_OPTIONS,
 } from '../../utils/workspaceModules';
@@ -13,113 +14,10 @@ import './CreateWorkspace.css';
 /* ─────────────────────────────────────────────────────────────────────────────
    Ledgrionyx — Create Workspace
    Form to create a new company workspace (entity).
-  On success: activates the new workspace and returns to the Global Console.
+  On success: activates the new workspace and opens it from the workspace flow.
 ───────────────────────────────────────────────────────────────────────────── */
-
-const COUNTRIES = countryDropdownOptions;
-
 const CURRENCIES = [
   { code: 'AED', label: 'AED — UAE Dirham' },
-  { code: 'AFN', label: 'AFN — Afghan Afghani' },
-  { code: 'ALL', label: 'ALL — Albanian Lek' },
-  { code: 'AMD', label: 'AMD — Armenian Dram' },
-  { code: 'AOA', label: 'AOA — Angolan Kwanza' },
-  { code: 'ARS', label: 'ARS — Argentine Peso' },
-  { code: 'AUD', label: 'AUD — Australian Dollar' },
-  { code: 'AZN', label: 'AZN — Azerbaijani Manat' },
-  { code: 'BAM', label: 'BAM — Bosnia Mark' },
-  { code: 'BBD', label: 'BBD — Barbadian Dollar' },
-  { code: 'BDT', label: 'BDT — Bangladeshi Taka' },
-  { code: 'BGN', label: 'BGN — Bulgarian Lev' },
-  { code: 'BHD', label: 'BHD — Bahraini Dinar' },
-  { code: 'BIF', label: 'BIF — Burundian Franc' },
-  { code: 'BMD', label: 'BMD — Bermudian Dollar' },
-  { code: 'BND', label: 'BND — Brunei Dollar' },
-  { code: 'BOB', label: 'BOB — Bolivian Boliviano' },
-  { code: 'BRL', label: 'BRL — Brazilian Real' },
-  { code: 'BSD', label: 'BSD — Bahamian Dollar' },
-  { code: 'BTN', label: 'BTN — Bhutanese Ngultrum' },
-  { code: 'BWP', label: 'BWP — Botswana Pula' },
-  { code: 'BYN', label: 'BYN — Belarusian Ruble' },
-  { code: 'BZD', label: 'BZD — Belize Dollar' },
-  { code: 'CAD', label: 'CAD — Canadian Dollar' },
-  { code: 'CDF', label: 'CDF — Congolese Franc' },
-  { code: 'CHF', label: 'CHF — Swiss Franc' },
-  { code: 'CLP', label: 'CLP — Chilean Peso' },
-  { code: 'CNY', label: 'CNY — Chinese Yuan' },
-  { code: 'COP', label: 'COP — Colombian Peso' },
-  { code: 'CRC', label: 'CRC — Costa Rican Colón' },
-  { code: 'CUP', label: 'CUP — Cuban Peso' },
-  { code: 'CVE', label: 'CVE — Cape Verdean Escudo' },
-  { code: 'CZK', label: 'CZK — Czech Koruna' },
-  { code: 'DJF', label: 'DJF — Djiboutian Franc' },
-  { code: 'DKK', label: 'DKK — Danish Krone' },
-  { code: 'DOP', label: 'DOP — Dominican Peso' },
-  { code: 'DZD', label: 'DZD — Algerian Dinar' },
-  { code: 'EGP', label: 'EGP — Egyptian Pound' },
-  { code: 'ERN', label: 'ERN — Eritrean Nakfa' },
-  { code: 'ETB', label: 'ETB — Ethiopian Birr' },
-  { code: 'EUR', label: 'EUR — Euro' },
-  { code: 'FJD', label: 'FJD — Fijian Dollar' },
-  { code: 'GBP', label: 'GBP — British Pound' },
-  { code: 'GEL', label: 'GEL — Georgian Lari' },
-  { code: 'GHS', label: 'GHS — Ghanaian Cedi' },
-  { code: 'GMD', label: 'GMD — Gambian Dalasi' },
-  { code: 'GNF', label: 'GNF — Guinean Franc' },
-  { code: 'GTQ', label: 'GTQ — Guatemalan Quetzal' },
-  { code: 'GYD', label: 'GYD — Guyanese Dollar' },
-  { code: 'HKD', label: 'HKD — Hong Kong Dollar' },
-  { code: 'HNL', label: 'HNL — Honduran Lempira' },
-  { code: 'HRK', label: 'HRK — Croatian Kuna' },
-  { code: 'HTG', label: 'HTG — Haitian Gourde' },
-  { code: 'HUF', label: 'HUF — Hungarian Forint' },
-  { code: 'IDR', label: 'IDR — Indonesian Rupiah' },
-  { code: 'ILS', label: 'ILS — Israeli Shekel' },
-  { code: 'INR', label: 'INR — Indian Rupee' },
-  { code: 'IQD', label: 'IQD — Iraqi Dinar' },
-  { code: 'IRR', label: 'IRR — Iranian Rial' },
-  { code: 'ISK', label: 'ISK — Icelandic Króna' },
-  { code: 'JMD', label: 'JMD — Jamaican Dollar' },
-  { code: 'JOD', label: 'JOD — Jordanian Dinar' },
-  { code: 'JPY', label: 'JPY — Japanese Yen' },
-  { code: 'KES', label: 'KES — Kenyan Shilling' },
-  { code: 'KGS', label: 'KGS — Kyrgyzstani Som' },
-  { code: 'KHR', label: 'KHR — Cambodian Riel' },
-  { code: 'KMF', label: 'KMF — Comorian Franc' },
-  { code: 'KRW', label: 'KRW — South Korean Won' },
-  { code: 'KWD', label: 'KWD — Kuwaiti Dinar' },
-  { code: 'KZT', label: 'KZT — Kazakhstani Tenge' },
-  { code: 'LAK', label: 'LAK — Lao Kip' },
-  { code: 'LBP', label: 'LBP — Lebanese Pound' },
-  { code: 'LKR', label: 'LKR — Sri Lankan Rupee' },
-  { code: 'LRD', label: 'LRD — Liberian Dollar' },
-  { code: 'LSL', label: 'LSL — Lesotho Loti' },
-  { code: 'LYD', label: 'LYD — Libyan Dinar' },
-  { code: 'MAD', label: 'MAD — Moroccan Dirham' },
-  { code: 'MDL', label: 'MDL — Moldovan Leu' },
-  { code: 'MGA', label: 'MGA — Malagasy Ariary' },
-  { code: 'MKD', label: 'MKD — Macedonian Denar' },
-  { code: 'MMK', label: 'MMK — Myanmar Kyat' },
-  { code: 'MNT', label: 'MNT — Mongolian Tögrög' },
-  { code: 'MOP', label: 'MOP — Macanese Pataca' },
-  { code: 'MRU', label: 'MRU — Mauritanian Ouguiya' },
-  { code: 'MUR', label: 'MUR — Mauritian Rupee' },
-  { code: 'MVR', label: 'MVR — Maldivian Rufiyaa' },
-  { code: 'MWK', label: 'MWK — Malawian Kwacha' },
-  { code: 'MXN', label: 'MXN — Mexican Peso' },
-  { code: 'MYR', label: 'MYR — Malaysian Ringgit' },
-  { code: 'MZN', label: 'MZN — Mozambican Metical' },
-  { code: 'NAD', label: 'NAD — Namibian Dollar' },
-  { code: 'NGN', label: 'NGN — Nigerian Naira' },
-  { code: 'NIO', label: 'NIO — Nicaraguan Córdoba' },
-  { code: 'NOK', label: 'NOK — Norwegian Krone' },
-  { code: 'NPR', label: 'NPR — Nepalese Rupee' },
-  { code: 'NZD', label: 'NZD — New Zealand Dollar' },
-  { code: 'OMR', label: 'OMR — Omani Rial' },
-  { code: 'PAB', label: 'PAB — Panamanian Balboa' },
-  { code: 'PEN', label: 'PEN — Peruvian Sol' },
-  { code: 'PGK', label: 'PGK — Papua New Guinean Kina' },
-  { code: 'PHP', label: 'PHP — Philippine Peso' },
   { code: 'PKR', label: 'PKR — Pakistani Rupee' },
   { code: 'PLN', label: 'PLN — Polish Złoty' },
   { code: 'PYG', label: 'PYG — Paraguayan Guaraní' },
@@ -166,6 +64,8 @@ const CURRENCIES = [
   { code: 'ZMW', label: 'ZMW — Zambian Kwacha' },
   { code: 'ZWL', label: 'ZWL — Zimbabwean Dollar' },
 ];
+
+const COUNTRIES = countryDropdownOptions;
 
 const ENTITY_TYPES = [
   { value: 'corporation', label: 'Corporation' },
@@ -537,111 +437,121 @@ const CreateWorkspace = () => {
   const renderStep4 = () => {
     const selectedPackage = WORKSPACE_PACKAGE_OPTIONS.find((option) => option.id === form.workspaceMode) || null;
     const packageTitle = selectedPackage?.title || 'Choose a workspace package';
-    const packageSelected = Boolean(form.workspaceMode);
-    const accountingCount = form.enabledModules.filter((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey)).length;
-    const equityCount = form.enabledModules.filter((moduleKey) => EQUITY_MODULE_KEYS.includes(moduleKey)).length;
+    const accountingModules = ACCOUNTING_MODULE_OPTIONS.filter((module) => form.enabledModules.includes(module.key));
+    const equityModules = EQUITY_MODULE_OPTIONS.filter((module) => form.enabledModules.includes(module.key));
+    const governanceModules = equityModules.filter((module) => module.key === 'equity_governance');
+    const preinstalledCount = selectedPackage?.modules?.length || 0;
+    const operatingSystem = WORKSPACE_MODE_LABELS[form.workspaceMode] || 'Choose a workspace package';
+    const licenseLabel = selectedPackage ? 'Included with workspace package' : 'Not selected';
+    const userLabel = '1 owner';
+
+    const renderModuleNames = (modules) => {
+      if (modules.length === 0) return 'None selected';
+      return modules.slice(0, 3).map((module) => module.label).join(' · ');
+    };
 
     return (
-      <div className="cw-launch-layout">
-        <div className="cw-launch-main">
-          <div className="cw-field cw-field-wide">
-            <label className="cw-label">Workspace Package</label>
-            <span className="cw-hint">Choose the operating model first. Module customization opens after you select a package.</span>
-            <div className="cw-package-grid">
-              {WORKSPACE_PACKAGE_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={`cw-package-card${form.workspaceMode === option.id ? ' selected' : ''}`}
-                  onClick={() => selectPackage(option.id)}
-                  aria-pressed={form.workspaceMode === option.id}
-                >
-                  <span className="cw-package-title">{option.title}</span>
-                  <span className="cw-package-desc">{option.description}</span>
-                </button>
-              ))}
+      <div className="cw-launch-template">
+        <section className="cw-launch-section cw-launch-section--summary">
+          <div className="cw-launch-section-header">
+            <div>
+              <h4 className="cw-launch-section-title">Workspace Summary</h4>
+              <p className="cw-launch-section-subtitle">Select the operating model, then confirm the package that will be created.</p>
+            </div>
+            <span className="cw-launch-section-pill">Ready to configure</span>
+          </div>
+
+          <div className="cw-launch-summary-grid">
+            <div className="cw-launch-summary-row">
+              <span>Package</span>
+              <strong>{packageTitle}</strong>
+            </div>
+            <div className="cw-launch-summary-row">
+              <span>Operating System</span>
+              <strong>{operatingSystem}</strong>
+            </div>
+            <div className="cw-launch-summary-row">
+              <span>Preinstalled Modules</span>
+              <strong>{preinstalledCount}</strong>
+            </div>
+            <div className="cw-launch-summary-row">
+              <span>License</span>
+              <strong>{licenseLabel}</strong>
+            </div>
+            <div className="cw-launch-summary-row">
+              <span>Users</span>
+              <strong>{userLabel}</strong>
             </div>
           </div>
 
-          <div className="cw-launch-modules">
-            <section className="cw-module-section">
-              <div className="cw-module-section-head">
-                <div>
-                  <h4>Accounting Workspace Modules</h4>
-                  <p>Core collaboration and finance workspace capabilities.</p>
-                </div>
-                <span className="cw-module-count">{accountingCount} selected</span>
-              </div>
-              <div className="cw-module-grid">
-                {ACCOUNTING_MODULE_OPTIONS.map((module) => (
-                  <label
-                    key={module.key}
-                    className={`cw-module-toggle${form.enabledModules.includes(module.key) ? ' selected' : ''}${!packageSelected ? ' disabled' : ''}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.enabledModules.includes(module.key)}
-                      onChange={() => toggleModule(module.key)}
-                      disabled={!packageSelected}
-                    />
-                    <span className="cw-module-copy">
-                      <strong>{module.label}</strong>
-                      <small>{module.detail}</small>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </section>
-
-            <section className="cw-module-section cw-module-section-equity">
-              <div className="cw-module-section-head">
-                <div>
-                  <h4>Equity Management Modules</h4>
-                  <p>Dedicated Ledgrionyx Equity navigation and ownership workflows.</p>
-                </div>
-                <span className="cw-module-count">{equityCount} selected</span>
-              </div>
-              <div className="cw-module-grid cw-module-grid-equity">
-                {EQUITY_MODULE_OPTIONS.map((module) => (
-                  <label
-                    key={module.key}
-                    className={`cw-module-toggle${form.enabledModules.includes(module.key) ? ' selected' : ''}${!packageSelected ? ' disabled' : ''}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.enabledModules.includes(module.key)}
-                      onChange={() => toggleModule(module.key)}
-                      disabled={!packageSelected}
-                    />
-                    <span className="cw-module-copy">
-                      <strong>{module.label}</strong>
-                      <small>{module.detail}</small>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </section>
+          <div className="cw-launch-package-grid" aria-label="Workspace packages">
+            {WORKSPACE_PACKAGE_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={`cw-launch-package-card${form.workspaceMode === option.id ? ' selected' : ''}`}
+                onClick={() => selectPackage(option.id)}
+                aria-pressed={form.workspaceMode === option.id}
+              >
+                <span className="cw-launch-package-title">{option.title}</span>
+                <span className="cw-launch-package-desc">{option.description}</span>
+              </button>
+            ))}
           </div>
+        </section>
 
-          {!packageSelected && <span className="cw-hint">Select a workspace package to unlock module customization.</span>}
-          <span className="cw-hint">Equity modules launch inside a dedicated Equity Management sidebar while keeping the standard workspace intact.</span>
-        </div>
-
-        <div className="cw-launch-sidebar">
-          <div className="cw-review-card cw-review-card-accent cw-launch-summary">
-            <h4 className="cw-review-title">Launch Configuration</h4>
-            <div className="cw-review-rows">
-              <div className="cw-review-row"><span>Workspace package</span><strong>{packageTitle}</strong></div>
-              <div className="cw-review-row"><span>Organization</span><strong>{currentOrganization?.name || 'No organization selected'}</strong></div>
-              <div className="cw-review-row"><span>Accounting modules</span><strong>{accountingCount}</strong></div>
-              <div className="cw-review-row"><span>Equity modules</span><strong>{equityCount}</strong></div>
-              <div className="cw-review-row"><span>Appears after create</span><strong>Global Console</strong></div>
-            </div>
-            <div className="cw-review-note">
-              {selectedPackage?.description || 'Pick a package to preview how this workspace will be configured before it appears on the console.'}
+        <section className="cw-launch-section cw-launch-section--modules">
+          <div className="cw-launch-section-header">
+            <div>
+              <h4 className="cw-launch-section-title">Module Overview</h4>
+              <p className="cw-launch-section-subtitle">Only the selected modules will preinstall into the workspace shell.</p>
             </div>
           </div>
-        </div>
+
+          <div className="cw-launch-module-grid">
+            <article className="cw-launch-module-card">
+              <span className="cw-launch-module-label">Accounting modules</span>
+              <strong>{accountingModules.length} selected</strong>
+              <p>{renderModuleNames(accountingModules)}</p>
+            </article>
+            <article className="cw-launch-module-card">
+              <span className="cw-launch-module-label">Equity modules</span>
+              <strong>{equityModules.length} selected</strong>
+              <p>{renderModuleNames(equityModules)}</p>
+            </article>
+            <article className="cw-launch-module-card">
+              <span className="cw-launch-module-label">Governance modules</span>
+              <strong>{governanceModules.length} selected</strong>
+              <p>{renderModuleNames(governanceModules)}</p>
+            </article>
+          </div>
+        </section>
+
+        <section className="cw-launch-section cw-launch-section--confirmation">
+          <div className="cw-launch-confirmation-card">
+            <div className="cw-launch-section-header cw-launch-section-header--center">
+              <div>
+                <h4 className="cw-launch-section-title">Launch Confirmation</h4>
+                <p className="cw-launch-section-subtitle">Review the final preview, then create the workspace.</p>
+              </div>
+            </div>
+
+            <div className="cw-launch-confirmation-copy">
+              <span>Launch Preview</span>
+              <strong>{selectedPackage?.description || 'Pick a package to preview how this workspace will be configured.'}</strong>
+            </div>
+
+            <div className="cw-launch-confirmation-actions">
+              <button
+                type="submit"
+                className="cw-btn cw-btn-create"
+                disabled={submitting || !form.name || !form.country || !form.workspaceMode || !currentOrganization?.id}
+              >
+                {submitting ? 'Creating Workspace…' : 'Create Workspace'}
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
     );
   };
@@ -652,16 +562,16 @@ const CreateWorkspace = () => {
 
   const dashboardGuide = [
     {
-      title: 'Shows on the Global Console',
-      description: 'After creation, the workspace is added to the main console so users see it on the first page after login.',
+      title: 'Visible in Workspace Selector',
+      description: 'After creation, the new workspace shows in the selector so users can open it directly.',
     },
     {
-      title: 'Operations and team workspace',
-      description: 'Every workspace starts with a shared operating layer for members, departments, meetings, permissions, files, and internal coordination.',
+      title: 'Workspace-first operating model',
+      description: 'Every workspace starts with shared collaboration, finance, and access controls inside the workspace shell.',
     },
     {
-      title: 'Equity capabilities stay attached',
-      description: 'If equity modules are enabled, they remain part of the workspace and can be opened from the console after creation.',
+      title: 'Equity stays inside the workspace',
+      description: 'If equity modules are enabled, they remain attached to the workspace and launch from the equity sidebar.',
     },
   ];
 
@@ -717,14 +627,14 @@ const CreateWorkspace = () => {
           {step === 4 && renderStep4()}
 
           {/* Navigation */}
-          <div className="cw-nav">
-            {step > 1 && (
-              <button type="button" className="cw-btn cw-btn-secondary" onClick={() => setStep(step - 1)}>
-                ← Previous
-              </button>
-            )}
-            <div className="cw-nav-spacer" />
-            {step < STEPS.length ? (
+          {step < 4 && (
+            <div className="cw-nav">
+              {step > 1 && (
+                <button type="button" className="cw-btn cw-btn-secondary" onClick={() => setStep(step - 1)}>
+                  ← Previous
+                </button>
+              )}
+              <div className="cw-nav-spacer" />
               <button
                 type="button"
                 className="cw-btn cw-btn-primary"
@@ -733,16 +643,8 @@ const CreateWorkspace = () => {
               >
                 Next →
               </button>
-            ) : (
-              <button
-                type="submit"
-                className="cw-btn cw-btn-create"
-                disabled={submitting || !form.name || !form.country || !form.workspaceMode || !currentOrganization?.id}
-              >
-                {submitting ? 'Creating Workspace…' : 'Create Workspace'}
-              </button>
-            )}
-          </div>
+            </div>
+          )}
         </form>
       </div>
 
@@ -794,13 +696,6 @@ const CreateWorkspace = () => {
           </div>
         </div>
 
-        <div className="cw-sidebar-panel cw-sidebar-panel-accent">
-          <h3>Current workspace preview</h3>
-          <div className="cw-sidebar-preview-row"><span>Package</span><strong>{selectedPackage?.title || 'Not selected yet'}</strong></div>
-          <div className="cw-sidebar-preview-row"><span>Accounting modules</span><strong>{accountingCount}</strong></div>
-          <div className="cw-sidebar-preview-row"><span>Equity modules</span><strong>{equityCount}</strong></div>
-          <div className="cw-sidebar-preview-row"><span>Appears on</span><strong>Global Console</strong></div>
-        </div>
       </aside>
     </div>{/* /.create-workspace */}
     </div>

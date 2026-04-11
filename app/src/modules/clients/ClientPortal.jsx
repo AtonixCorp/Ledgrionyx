@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const INITIAL_CLIENTS = [
-  { name: 'Acme Corporation',  email: 'finance@acme.com',    lastLogin: '2025-01-31 09:45', docsShared: 12, requestsPending: 2, status: 'Active'   },
-  { name: 'Globex Holdings',   email: 'cfo@globex.com',      lastLogin: '2025-01-28 14:22', docsShared: 8,  requestsPending: 0, status: 'Active'   },
-  { name: 'Weyland Corp',      email: 'billing@weyland.com', lastLogin: '2025-01-15 11:00', docsShared: 5,  requestsPending: 1, status: 'Inactive' },
-];
+const INITIAL_CLIENTS = [];
 
 const STATUS_COLORS = { Active: 'var(--color-success)', Inactive: 'var(--color-silver-dark)' };
 
@@ -84,7 +80,7 @@ export default function ClientPortal() {
       </div>
 
       <Card title="Portal Clients">
-        <Table columns={columns} data={clients} />
+        {clients.length > 0 ? <Table columns={columns} data={clients} /> : <p className="empty-state">No portal clients yet. Invite one to populate this box.</p>}
       </Card>
 
       <Card title="Portal Security" style={{ marginTop: 20 }}>

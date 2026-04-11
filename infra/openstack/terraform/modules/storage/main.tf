@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 # Ledgrionyx – OpenStack Storage Module
 # Provisions Cinder volumes for a named Ledgrionyx service.
-# Naming convention: atc-<env>-<service>-data-<zero-padded-index>
+# Naming convention: lgx-<env>-<service>-data-<zero-padded-index>
 # Volume snapshots are managed via a separate scheduled Jenkins job.
 # -----------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ terraform {
 resource "openstack_blockstorage_volume_v3" "data" {
   count = var.volume_count
 
-  name        = format("atc-%s-%s-data-%02d", var.env, var.service, count.index + 1)
+  name        = format("lgx-%s-%s-data-%02d", var.env, var.service, count.index + 1)
   size        = var.volume_size_gb
   volume_type = var.volume_type
   description = "Ledgrionyx ${var.service} data volume – ${var.env}"

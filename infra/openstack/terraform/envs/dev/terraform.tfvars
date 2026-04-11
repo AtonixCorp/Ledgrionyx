@@ -1,4 +1,4 @@
-# Non-secret configuration for atc-dev.
+# Non-secret configuration for lgx-dev.
 # Secrets (credentials, SSH key) are injected by Jenkins from Vault
 # and must NEVER be committed here.
 

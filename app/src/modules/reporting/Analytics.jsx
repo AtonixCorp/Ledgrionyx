@@ -17,11 +17,11 @@ const reports = [
 ];
 
 const recentRuns = [
-  { report: 'Income Statement',    user: 'sarah.johnson@atc.com',  date: '2025-01-31', format: 'PDF',  status: 'Complete' },
-  { report: 'AR Aging Report',     user: 'michael.chen@atc.com',   date: '2025-01-31', format: 'CSV',  status: 'Complete' },
-  { report: 'Budget vs Actual',    user: 'admin@atc.com',          date: '2025-01-30', format: 'XLSX', status: 'Complete' },
-  { report: 'General Ledger',      user: 'sarah.johnson@atc.com',  date: '2025-01-30', format: 'CSV',  status: 'Complete' },
-  { report: 'Tax Liability Report',user: 'michael.chen@atc.com',   date: '2025-01-29', format: 'PDF',  status: 'Error'    },
+  { report: 'Income Statement',    user: 'sarah.johnson@ledgrionyx.com',  date: '2025-01-31', format: 'PDF',  status: 'Complete' },
+  { report: 'AR Aging Report',     user: 'michael.chen@ledgrionyx.com',   date: '2025-01-31', format: 'CSV',  status: 'Complete' },
+  { report: 'Budget vs Actual',    user: 'admin@ledgrionyx.com',          date: '2025-01-30', format: 'XLSX', status: 'Complete' },
+  { report: 'General Ledger',      user: 'sarah.johnson@ledgrionyx.com',  date: '2025-01-30', format: 'CSV',  status: 'Complete' },
+  { report: 'Tax Liability Report',user: 'michael.chen@ledgrionyx.com',   date: '2025-01-29', format: 'PDF',  status: 'Error'    },
 ];
 
 const CATEGORY_COLORS = {

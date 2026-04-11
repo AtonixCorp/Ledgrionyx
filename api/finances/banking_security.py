@@ -13,7 +13,7 @@ _NONCE_SIZE = 12
 
 def _banking_encryption_key():
     configured_key = getattr(settings, 'BANKING_TOKEN_ENCRYPTION_KEY', '') or os.getenv('BANKING_TOKEN_ENCRYPTION_KEY', '')
-    key_material = configured_key or f"atc-banking::{settings.SECRET_KEY}"
+    key_material = configured_key or f"lgx-banking::{settings.SECRET_KEY}"
     if isinstance(key_material, str):
         key_material = key_material.encode(_ENCODING)
     return hashlib.sha256(key_material).digest()

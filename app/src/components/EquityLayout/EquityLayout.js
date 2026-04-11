@@ -4,6 +4,21 @@ import { useAuth } from '../../context/AuthContext';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import LedgrionyxLogo from '../branding/LedgrionyxLogo';
 import { getWorkspaceLandingPath } from '../../utils/workspaceModules';
+import { reportUiError } from '../../utils/errorReporting';
+import { Icon } from '../ui';
+import {
+  LuBadgeDollarSign,
+  LuBot,
+  LuClipboardCheck,
+  LuFileText,
+  LuGitBranch,
+  LuHandshake,
+  LuListTree,
+  LuScale,
+  LuScrollText,
+  LuTableProperties,
+  LuUserRound,
+} from 'react-icons/lu';
 import './EquityLayout.css';
 
 const EquityLayout = ({ children }) => {
@@ -58,18 +73,28 @@ const EquityLayout = ({ children }) => {
   const base = workspaceId ? `/app/equity/${workspaceId}` : '/app/equity';
   const permissionSummary = getWorkspacePermissionSummary(workspaceId || resolvedWorkspace?.id);
   const navItems = [
-    { key: 'me', to: `${base}/me`, label: 'My Equity' },
-    { key: 'registry', to: `${base}/registry`, label: 'Ownership Registry' },
-    { key: 'cap-table', to: `${base}/cap-table`, label: 'Cap Table' },
-    { key: 'grants', to: `${base}/grants`, label: 'Vesting & Grants' },
-    { key: 'exercises', to: `${base}/exercises`, label: 'Exercise Center' },
-    { key: 'automation', to: `${base}/automation`, label: 'Automation Center' },
-    { key: 'valuation', to: `${base}/valuation`, label: 'Valuation' },
-    { key: 'approvals', to: `${base}/approvals`, label: 'Approval Inbox' },
-    { key: 'scenarios', to: `${base}/scenarios`, label: 'Scenario Modeling' },
-    { key: 'transactions', to: `${base}/transactions`, label: 'Equity Transactions' },
-    { key: 'governance', to: `${base}/governance`, label: 'Governance & Reporting' },
+    { key: 'me', to: `${base}/me`, label: 'My Equity', icon: LuUserRound },
+    { key: 'registry', to: `${base}/registry`, label: 'Ownership Registry', icon: LuListTree },
+    { key: 'cap-table', to: `${base}/cap-table`, label: 'Cap Table', icon: LuTableProperties },
+    { key: 'grants', to: `${base}/grants`, label: 'Vesting & Grants', icon: LuHandshake },
+    { key: 'exercises', to: `${base}/exercises`, label: 'Exercise Center', icon: LuBadgeDollarSign },
+    { key: 'automation', to: `${base}/automation`, label: 'Automation Center', icon: LuBot },
+    { key: 'valuation', to: `${base}/valuation`, label: 'Valuation', icon: LuScale },
+    { key: 'approvals', to: `${base}/approvals`, label: 'Approval Inbox', icon: LuClipboardCheck },
+    { key: 'scenarios', to: `${base}/scenarios`, label: 'Scenario Modeling', icon: LuGitBranch },
+    { key: 'transactions', to: `${base}/transactions`, label: 'Equity Transactions', icon: LuScrollText },
+    { key: 'governance', to: `${base}/governance`, label: 'Governance & Reporting', icon: LuFileText },
   ];
+
+  const handleDeniedNavigation = (label) => {
+    reportUiError({
+      title: 'Access restricted',
+      message: `You do not have access to the ${label} module.`,
+      severity: 'warning',
+      source: 'equity',
+      autoHideMs: 5000,
+    });
+  };
 
   const userInitial = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
 
@@ -98,17 +123,28 @@ const EquityLayout = ({ children }) => {
         )}
 
         <ul className="eq-nav-list">
-          {navItems.filter((item) => !permissionSummary || permissionSummary.equity_sections?.[item.key]).map((item) => (
+          {navItems.map((item) => {
+            const hasAccess = !permissionSummary || Boolean(permissionSummary.equity_sections?.[item.key]);
+            return (
             <li key={item.to}>
               <NavLink
                 to={item.to}
-                className={({ isActive }) => `eq-nav-link${isActive ? ' active' : ''}`}
+                className={({ isActive }) => `eq-nav-link${isActive ? ' active' : ''}${hasAccess ? '' : ' eq-nav-link-denied'}`}
                 title={sidebarMinimized ? item.label : undefined}
+                onClick={(event) => {
+                  if (!hasAccess) {
+                    event.preventDefault();
+                    handleDeniedNavigation(item.label);
+                  }
+                }}
               >
+                <span className="eq-nav-icon-wrap">
+                  <Icon icon={item.icon} size="sm" tone="dark" className="nav-icon" />
+                </span>
                 <span>{sidebarMinimized ? item.label.charAt(0) : item.label}</span>
               </NavLink>
             </li>
-          ))}
+          );})}
         </ul>
 
         <div className="eq-sidebar-footer">

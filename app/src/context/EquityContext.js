@@ -63,7 +63,14 @@ export const EquityProvider = ({ children }) => {
   });
   const [saving, setSaving] = useState(false);
 
-  const workspaceId = activeWorkspace?.id;
+  const resolveEntityId = useCallback((workspace) => {
+    if (!workspace) return null;
+    if (workspace.linked_entity_id) return workspace.linked_entity_id;
+    if (workspace.entity_type || workspace.registration_number || workspace.country) return workspace.id;
+    return null;
+  }, []);
+
+  const workspaceId = resolveEntityId(activeWorkspace);
   const equityEnabled = hasEquityModule(activeWorkspace);
 
   const refreshEquity = useCallback(async (entityId = workspaceId) => {

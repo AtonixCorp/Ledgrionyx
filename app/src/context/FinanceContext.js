@@ -11,7 +11,7 @@ import {
 
 const FinanceContext = createContext();
 
-const mockPortfolio = [];
+const portfolioData = [];
 const EXPENSE_SOURCE_OPTIONS = [
   { value: 'all', label: 'All Sources' },
   { value: 'manual', label: 'Manual Only' },
@@ -843,7 +843,7 @@ export const FinanceProvider = ({ children }) => {
     income,
     budgets,
     transactions,
-    mockPortfolio,
+    portfolioData,
     expenseSourceFilter,
     setExpenseSourceFilter,
     expenseSourceOptions: EXPENSE_SOURCE_OPTIONS,

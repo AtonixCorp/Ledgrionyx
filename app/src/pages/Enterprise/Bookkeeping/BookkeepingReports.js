@@ -17,19 +17,23 @@ const BookkeepingReports = () => {
   });
   const [reportType, setReportType] = useState('pnl');
 
-  const entity = entities.find(e => e.id === parseInt(entityId));
+  const entity = entities.find(e => String(e.id) === String(entityId));
 
   const loadReportData = useCallback(async () => {
+    if (!entity?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const filters = {
       start_date: dateRange.start,
       end_date: dateRange.end
     };
 
-    const summaryData = await fetchBookkeepingSummary(entityId, filters);
+    const summaryData = await fetchBookkeepingSummary(entity.id, filters);
     setSummary(summaryData);
     setLoading(false);
-  }, [dateRange.end, dateRange.start, entityId, fetchBookkeepingSummary]);
+  }, [dateRange.end, dateRange.start, entity, fetchBookkeepingSummary]);
 
   useEffect(() => {
     loadReportData();

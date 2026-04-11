@@ -15,26 +15,26 @@ infra/openstack/
 │   ├── modules/
 │   │   ├── network/       Neutron networks, subnets, router (per env)
 │   │   ├── security/      Security groups – deny-all default, minimal port opens
-│   │   ├── compute/       Nova instances with ATC traceability metadata
+│   │   ├── compute/       Nova instances with LGX traceability metadata
 │   │   └── storage/       Cinder volumes with auto-attach
 │   └── envs/
-│       ├── dev/           atc-dev project  (auto-applied on merge to main)
-│       ├── test/          atc-test project (promotion pipeline)
-│       ├── stage/         atc-stage project (promotion pipeline, 2 approvals)
-│       └── prod/          atc-prod project (promotion pipeline, PROD gate + 2 approvals)
+│       ├── dev/           lgx-dev project  (auto-applied on merge to main)
+│       ├── test/          lgx-test project (promotion pipeline)
+│       ├── stage/         lgx-stage project (promotion pipeline, 2 approvals)
+│       └── prod/          lgx-prod project (promotion pipeline, PROD gate + 2 approvals)
 ├── ansible/
 │   ├── ansible.cfg
 │   ├── inventories/       Per-environment static host inventories
 │   ├── playbooks/
 │   │   ├── site.yml                Baseline hardening for all hosts
-│   │   └── deploy-atc-services.yml Rolling deploy of the ATC API container
+│   │   └── deploy-lgx-services.yml Rolling deploy of the LGX API container
 │   └── roles/
-│       ├── atc-common/    OS hardening, Docker, audit logging
-│       ├── atc-api/       Container lifecycle for ledger/accounts/risk/reporting
-│       └── atc-db/        PostgreSQL container on db hosts
+│       ├── lgx-common/    OS hardening, Docker, audit logging
+│       ├── lgx-api/       Container lifecycle for ledger/accounts/risk/reporting
+│       └── lgx-db/        PostgreSQL container on db hosts
 infra/gerrit/
 ├── projects/
-│   ├── infra-openstack-atc.config  Access rules for infra/openstack-atc
+│   ├── infra-openstack-ledgrionyx.config  Access rules for infra/openstack-ledgrionyx
 │   ├── apps-ledgrionyx-core.config Access rules for apps/ledgrionyx-core
 │   └── ci-jenkins-pipelines.config Access rules for ci/jenkins-pipelines
 ├── groups                          Gerrit group UUID registry
@@ -57,10 +57,10 @@ ci/jenkins-pipelines/
 
 | Environment | OpenStack project | CIDR (main) | CIDR (backend) | Auto-deploy?       |
 |-------------|-------------------|-------------|----------------|--------------------|
-| DEV         | atc-dev           | 10.10.0.0/24| 10.10.1.0/24   | Yes (on merge)     |
-| TEST        | atc-test          | 10.20.0.0/24| 10.20.1.0/24   | Manual promotion   |
-| STAGE       | atc-stage         | 10.30.0.0/24| 10.30.1.0/24   | Manual, 2 approvals|
-| PROD        | atc-prod          | 10.40.0.0/24| 10.40.1.0/24   | Manual gate + PROD approval |
+| DEV         | lgx-dev           | 10.10.0.0/24| 10.10.1.0/24   | Yes (on merge)     |
+| TEST        | lgx-test          | 10.20.0.0/24| 10.20.1.0/24   | Manual promotion   |
+| STAGE       | lgx-stage         | 10.30.0.0/24| 10.30.1.0/24   | Manual, 2 approvals|
+| PROD        | lgx-prod          | 10.40.0.0/24| 10.40.1.0/24   | Manual gate + PROD approval |
 
 ---
 
@@ -132,7 +132,7 @@ ansible-playbook playbooks/site.yml --inventory inventories/dev/hosts.yml
 
 ## Rollback procedure
 
-1. Identify the last known-good commit in `infra/openstack-atc`.
+1. Identify the last known-good commit in `infra/openstack-ledgrionyx`.
 2. Raise a Gerrit change reverting the problematic commits.
 3. Fast-track review (expedited, but still two approvers for PROD).
 4. Jenkins applies the revert.

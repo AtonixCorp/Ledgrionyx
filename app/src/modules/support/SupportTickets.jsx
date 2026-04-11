@@ -2,15 +2,7 @@ import React, { useState } from 'react';
 import { PageHeader, Card, Button, Input, Table, Modal } from '../../components/ui';
 import StandaloneModuleShell from '../../components/StandaloneModuleShell';
 
-const MOCK_TICKETS = [
-  { id: 'TKT-0042', subject: 'Bank reconciliation import fails with CSV format error', category: 'Accounting', priority: 'High', status: 'In Progress', created: '2024-06-12', updated: '2024-06-14' },
-  { id: 'TKT-0041', subject: 'Unable to export trial balance for subsidiary entity', category: 'Reporting', priority: 'Medium', status: 'Open', created: '2024-06-11', updated: '2024-06-11' },
-  { id: 'TKT-0040', subject: 'Invoice PDF shows wrong currency symbol for EUR invoices', category: 'Billing', priority: 'Low', status: 'Open', created: '2024-06-10', updated: '2024-06-10' },
-  { id: 'TKT-0039', subject: 'SSO login not working for users in Singapore region', category: 'Security', priority: 'High', status: 'Resolved', created: '2024-06-08', updated: '2024-06-09' },
-  { id: 'TKT-0038', subject: 'Tax rate not auto-applied on recurring invoices', category: 'Billing', priority: 'Medium', status: 'Resolved', created: '2024-06-05', updated: '2024-06-07' },
-  { id: 'TKT-0037', subject: 'Payroll subledger balance does not match general ledger', category: 'Accounting', priority: 'High', status: 'Closed', created: '2024-05-29', updated: '2024-06-01' },
-  { id: 'TKT-0036', subject: 'API key rotation breaks existing webhook integrations', category: 'Integrations', priority: 'Medium', status: 'Closed', created: '2024-05-22', updated: '2024-05-24' },
-];
+const ticketRows = [];
 
 const PRIORITY_COLORS = { High: '#ef4444', Medium: '#f59e0b', Low: '#6b7280' };
 const STATUS_COLORS = {
@@ -23,7 +15,7 @@ const STATUS_COLORS = {
 const BLANK_FORM = { subject: '', category: 'Accounting', priority: 'Medium', description: '' };
 
 export default function SupportTickets() {
-  const [tickets, setTickets] = useState(MOCK_TICKETS);
+  const [tickets, setTickets] = useState(ticketRows);
   const [filterStatus, setFilterStatus] = useState('All');
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -119,11 +111,11 @@ export default function SupportTickets() {
 
       {/* Ticket Table */}
       <Card header={`${filtered.length} ticket${filtered.length !== 1 ? 's' : ''}`}>
-        <Table
-          columns={columns}
-          data={filtered}
-          onRowClick={row => setViewTicket(row)}
-        />
+        {filtered.length > 0 ? (
+          <Table columns={columns} data={filtered} onRowClick={row => setViewTicket(row)} />
+        ) : (
+          <p className="empty-state">No tickets yet. Submit one to populate this box.</p>
+        )}
       </Card>
 
       {/* Create Ticket Modal */}

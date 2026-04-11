@@ -16,7 +16,7 @@ terraform {
 # ── API security group ────────────────────────────────────────────────────────
 
 resource "openstack_networking_secgroup_v2" "api" {
-  name        = "atc-${var.env}-sg-api"
+  name        = "lgx-${var.env}-sg-api"
   description = "Ledgrionyx API tier – HTTPS ingress only"
   tags        = local.tags
 }
@@ -57,7 +57,7 @@ resource "openstack_networking_secgroup_rule_v2" "api_app_port" {
 # ── Database security group ───────────────────────────────────────────────────
 
 resource "openstack_networking_secgroup_v2" "db" {
-  name        = "atc-${var.env}-sg-db"
+  name        = "lgx-${var.env}-sg-db"
   description = "Ledgrionyx database tier – backend subnet ingress only"
   tags        = local.tags
 }
@@ -75,7 +75,7 @@ resource "openstack_networking_secgroup_rule_v2" "db_postgres" {
 # ── Bastion security group ────────────────────────────────────────────────────
 
 resource "openstack_networking_secgroup_v2" "bastion" {
-  name        = "atc-${var.env}-sg-bastion"
+  name        = "lgx-${var.env}-sg-bastion"
   description = "Ledgrionyx bastion host – SSH from trusted CIDRs only"
   tags        = local.tags
 }
@@ -95,7 +95,7 @@ resource "openstack_networking_secgroup_rule_v2" "bastion_ssh" {
 # ── Monitoring security group ─────────────────────────────────────────────────
 
 resource "openstack_networking_secgroup_v2" "monitoring" {
-  name        = "atc-${var.env}-sg-monitoring"
+  name        = "lgx-${var.env}-sg-monitoring"
   description = "Ledgrionyx monitoring – Prometheus scrape from backend subnet"
   tags        = local.tags
 }

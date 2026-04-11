@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const mockRecurring = [
-  { name: 'Monthly Office Rent', type: 'Journal Entry', frequency: 'Monthly', nextRun: '2025-02-01', amount: '$5,500.00', status: 'Active' },
-  { name: 'Quarterly Insurance Premium', type: 'Bill', frequency: 'Quarterly', nextRun: '2025-04-01', amount: '$12,000.00', status: 'Active' },
-  { name: 'Annual Software Subscription', type: 'Expense', frequency: 'Annual', nextRun: '2025-06-15', amount: '$8,400.00', status: 'Active' },
-  { name: 'Bi-Weekly Payroll JE', type: 'Journal Entry', frequency: 'Bi-Weekly', nextRun: '2025-02-07', amount: '$38,000.00', status: 'Paused' },
-];
+const recurringRows = [];
 
 const STATUS_COLORS = { Active: 'var(--color-success)', Paused: 'var(--color-warning)' };
 
@@ -25,7 +20,7 @@ const BLANK_ENTRY = { name: '', type: '', frequency: '', startDate: '', amount: 
 
 export default function RecurringEntries() {
   const [showModal, setShowModal] = useState(false);
-  const [recurringList, setRecurringList] = useState(mockRecurring);
+  const [recurringList, setRecurringList] = useState(recurringRows);
   const [form, setForm] = useState(BLANK_ENTRY);
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
 
@@ -58,20 +53,20 @@ export default function RecurringEntries() {
       <div className="stats-row">
         <Card className="stat-card">
           <div className="stat-label">Active Entries</div>
-          <div className="stat-value" style={{ color: 'var(--color-success)' }}>3</div>
+          <div className="stat-value" style={{ color: 'var(--color-success)' }}>{recurringList.filter((entry) => entry.status === 'Active').length}</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Next 7 Days</div>
-          <div className="stat-value">1 entry</div>
+          <div className="stat-value">0 entries</div>
         </Card>
         <Card className="stat-card">
           <div className="stat-label">Monthly Recurring Value</div>
-          <div className="stat-value">$43,500.00</div>
+          <div className="stat-value">$0.00</div>
         </Card>
       </div>
 
       <Card>
-        <Table columns={columns} data={recurringList} />
+        {recurringList.length > 0 ? <Table columns={columns} data={recurringList} /> : <p className="empty-state">No recurring entries yet. Create one to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_ENTRY); }} title="New Recurring Entry" size="medium">

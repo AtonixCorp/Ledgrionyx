@@ -82,7 +82,7 @@ This is the Django REST API for the AI Financial Modeling Integration System. It
 
 ### Core Financial API v1 Documentation
 - OpenAPI blueprint: `openapi/ledgrionyx-v1-openapi.yaml`
-- External developer guide: `../README/ATC_CORE_FINANCIAL_API_V1_DEVELOPER_GUIDE.md`
+- External developer guide: Core financial API v1 developer guide
 - Redoc UI: `/v1/docs`
 - Swagger UI: `/v1/swagger`
 - CLI authentication guide: `../README/CLI_AUTHENTICATION_GUIDE.md`

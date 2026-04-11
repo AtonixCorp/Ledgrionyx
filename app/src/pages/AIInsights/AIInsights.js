@@ -7,7 +7,7 @@ import { aiFinanceService } from '../../services/aiFinanceService';
 const AIInsights = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { aiInsights, loadAIInsights, loading, transactions, mockPortfolio } = useFinance();
+  const { aiInsights, loadAIInsights, loading, transactions, portfolioData } = useFinance();
 
   const [cashflowPrediction, setCashflowPrediction] = useState(null);
   const [riskAnalysis, setRiskAnalysis] = useState(null);
@@ -29,7 +29,7 @@ const AIInsights = () => {
         );
 
         setRiskAnalysis(
-          aiFinanceService.analyzeInvestmentRisk(mockPortfolio)
+          aiFinanceService.analyzeInvestmentRisk(portfolioData)
         );
 
         setFraudDetection(
@@ -48,7 +48,7 @@ const AIInsights = () => {
     };
 
     loadData();
-  }, [loadAIInsights, transactions, mockPortfolio]);
+  }, [loadAIInsights, transactions, portfolioData]);
 
   // Redirect to login if not authenticated
   if (!user) {

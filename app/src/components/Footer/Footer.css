@@ -1,7 +1,7 @@
 .app-footer {
   width: 100%;
   color: var(--color-white);
-  font-family: var(--atc-font-family-sans), sans-serif;
+  font-family: var(--ly-font-family-sans), sans-serif;
   border-top: 1px solid var(--brand-steel-blue);
 }
 

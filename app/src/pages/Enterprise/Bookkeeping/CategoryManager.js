@@ -22,14 +22,18 @@ const CategoryManager = () => {
     description: ''
   });
 
-  const entity = entities.find(e => e.id === parseInt(entityId));
+  const entity = entities.find(e => String(e.id) === String(entityId));
 
   const loadCategories = useCallback(async () => {
+    if (!entity?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const data = await fetchBookkeepingCategories(entityId);
+    const data = await fetchBookkeepingCategories(entity.id);
     setCategories(data.results || data);
     setLoading(false);
-  }, [entityId, fetchBookkeepingCategories]);
+  }, [entity, fetchBookkeepingCategories]);
 
   useEffect(() => {
     loadCategories();
@@ -43,7 +47,7 @@ const CategoryManager = () => {
     }
 
     try {
-      await createDefaultCategories(entityId);
+      await createDefaultCategories(entity.id);
       alert('Default categories created successfully!');
       loadCategories();
     } catch (err) {
@@ -56,7 +60,7 @@ const CategoryManager = () => {
 
     try {
       await createBookkeepingCategory({
-        entity: parseInt(entityId),
+        entity: entity.id,
         ...formData
       });
       alert('Category created successfully!');

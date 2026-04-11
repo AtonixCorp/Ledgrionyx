@@ -1,5 +1,5 @@
 ---
-# roles/atc-common/defaults/main.yml
+# roles/lgx-common/defaults/main.yml
 # Baseline defaults for all Ledgrionyx hosts.
 
 atc_timezone: UTC
@@ -8,8 +8,8 @@ atc_ntp_servers:
   - 1.pool.ntp.org
 
 atc_log_dir: /var/log/ledgrionyx
-atc_app_user: atc
-atc_app_group: atc
+ledgrionyx_app_user: ledgrionyx
+ledgrionyx_app_group: ledgrionyx
 
 atc_security_packages:
   - unattended-upgrades

@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { PageHeader, Card, Table, Button, Modal, Input } from '../../components/ui';
 
-const mockKeys = [
-  { id: 'key_live_***4f8a', name: 'Production API', created: '2024-09-15', lastUsed: '2025-01-31', permissions: 'Read + Write', status: 'Active' },
-  { id: 'key_test_***2b1c', name: 'Development / Testing', created: '2024-11-01', lastUsed: '2025-01-28', permissions: 'Read + Write', status: 'Active' },
-  { id: 'key_live_***9e3d', name: 'Reporting Webhook', created: '2025-01-01', lastUsed: '2025-01-30', permissions: 'Read Only', status: 'Active' },
-];
+const keyRows = [];
 
 const columns = [
   { key: 'id', header: 'API Key' },
@@ -22,7 +18,7 @@ const BLANK_KEY = { keyName: '', permissions: '', ipAllowlist: '', expiryDate: '
 
 export default function APIKeys() {
   const [showModal, setShowModal] = useState(false);
-  const [keyList, setKeyList] = useState(mockKeys);
+  const [keyList, setKeyList] = useState(keyRows);
   const [form, setForm] = useState(BLANK_KEY);
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }));
 
@@ -54,7 +50,7 @@ export default function APIKeys() {
       </Card>
 
       <Card>
-        <Table columns={columns} data={keyList} />
+        {keyList.length > 0 ? <Table columns={columns} data={keyList} /> : <p className="empty-state">No API keys yet. Generate one to populate this box.</p>}
       </Card>
 
       <Modal isOpen={showModal} onClose={() => { setShowModal(false); setForm(BLANK_KEY); }} title="Generate API Key" size="medium">

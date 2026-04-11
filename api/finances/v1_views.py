@@ -56,6 +56,8 @@ from .models import (
 from .v1_auth import compose_cli_api_key, current_api_environment, issue_access_token, validate_client_credentials
 from .v1_permissions import APIKeyScopePermission
 from .v1_throttles import V1OrganizationBurstThrottle, V1OrganizationEndpointThrottle
+from workspaces.models import ParticipantStatus, WorkspaceMember
+from workspaces.services import MemberService, PermissionService, WorkspaceService
 
 
 User = get_user_model()
@@ -338,9 +340,9 @@ def _execute_webhook_delivery(delivery):
         data=payload_bytes,
         headers={
             'Content-Type': 'application/json',
-            'X-ATC-Event': delivery.event_type,
-            'X-ATC-Delivery-ID': delivery.event_id,
-            'X-ATC-Signature-SHA256': f'sha256={signature}',
+            'X-LGX-Event': delivery.event_type,
+            'X-LGX-Delivery-ID': delivery.event_id,
+            'X-LGX-Signature-SHA256': f'sha256={signature}',
         },
         method='POST',
     )
@@ -1281,6 +1283,61 @@ class TeamMemberInviteView(TeamMembersView):
     @transaction.atomic
     def post(self, request):
         return self._invite(request)
+
+
+class GlobalWorkspaceInviteView(V1BaseAPIView):
+    @transaction.atomic
+    def post(self, request):
+        payload = request.data or {}
+        workspace_ref = payload.get('workspace_id')
+        workspace_id = WorkspaceService.resolve_workspace_id(workspace_ref)
+        PermissionService.assert_owner_or_admin(workspace_id, request.user)
+
+        email = (payload.get('email') or '').strip().lower()
+        user_id = payload.get('user_id')
+        if not email and user_id in [None, '']:
+            return Response({'detail': 'email or user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = None
+        if user_id not in [None, '']:
+            try:
+                user = User.objects.get(pk=int(user_id))
+            except (TypeError, ValueError, User.DoesNotExist):
+                return Response({'detail': 'user_id is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            user = User.objects.filter(email=email).first()
+            if user is None:
+                base_username = slugify(email.split('@')[0]) or 'user'
+                username = base_username
+                suffix = 1
+                while User.objects.filter(username=username).exists():
+                    suffix += 1
+                    username = f'{base_username}-{suffix}'
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=secrets.token_urlsafe(16),
+                )
+                user.set_unusable_password()
+                user.save(update_fields=['password'])
+
+        membership = WorkspaceMember.objects.filter(workspace_id=workspace_id, user=user).first()
+        if membership and membership.role is not None and membership.status == ParticipantStatus.ACCEPTED:
+            return Response({'detail': 'This user is already a workspace member.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        invited = MemberService.invite_member(workspace_id, request.user, user)
+        response_data = {
+            'workspace_id': str(workspace_id),
+            'user': {
+                'id': invited.user_id,
+                'email': invited.user.email,
+                'username': invited.user.username,
+            },
+            'status': invited.status,
+            'role': invited.role,
+            'invitation_sent': True,
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class TeamMemberDeactivateView(V1BaseAPIView):

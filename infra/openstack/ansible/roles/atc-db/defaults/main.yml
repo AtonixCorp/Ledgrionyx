@@ -1,5 +1,5 @@
 ---
-# roles/atc-db/defaults/main.yml
+# roles/lgx-db/defaults/main.yml
 
 atc_db_port: 5432
 atc_db_data_dir: /opt/ledgrionyx/pgdata

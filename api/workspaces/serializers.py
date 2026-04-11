@@ -3,6 +3,7 @@ Workspace serializers.
 Input serializers validate incoming payloads.
 Output serializers render clean API responses.
 """
+from django.apps import apps
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -32,11 +33,143 @@ class WorkspaceSerializer(serializers.ModelSerializer):
     owner = UserBriefSerializer(read_only=True)
     linked_entity_id = serializers.IntegerField(read_only=True)
     linked_entity_name = serializers.ReadOnlyField(source='linked_entity.name')
+    linked_entity_industry = serializers.ReadOnlyField(source='linked_entity.industry')
+    business_type = serializers.SerializerMethodField()
+    country_of_incorporation = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
+    fiscal_year = serializers.SerializerMethodField()
+    tax_regime = serializers.SerializerMethodField()
+    component_count = serializers.SerializerMethodField()
+    members_count = serializers.SerializerMethodField()
+    departments_count = serializers.SerializerMethodField()
+    clients_count = serializers.SerializerMethodField()
+    workspace_mode = serializers.SerializerMethodField()
+    workspace_mode_label = serializers.SerializerMethodField()
 
     class Meta:
         model  = Workspace
-        fields = ('id', 'owner', 'name', 'description', 'tier', 'status', 'linked_entity_id', 'linked_entity_name', 'created_at', 'updated_at')
+        fields = (
+            'id', 'owner', 'name', 'description', 'tier', 'status',
+            'linked_entity_id', 'linked_entity_name', 'linked_entity_industry',
+            'business_type', 'country_of_incorporation', 'currency', 'fiscal_year',
+            'tax_regime', 'component_count',
+            'members_count', 'departments_count', 'clients_count',
+            'workspace_mode', 'workspace_mode_label',
+            'created_at', 'updated_at',
+        )
         read_only_fields = ('id', 'owner', 'created_at', 'updated_at')
+
+    @staticmethod
+    def _format_fiscal_year(fiscal_year_end):
+        if not fiscal_year_end:
+            return None
+
+        month = fiscal_year_end.month
+        day = fiscal_year_end.day
+        if month == 12 and day == 31:
+            return 'Jan–Dec'
+        if month == 3 and day == 31:
+            return 'Apr–Mar'
+        if month == 6 and day == 30:
+            return 'Jul–Jun'
+        if month == 9 and day == 30:
+            return 'Oct–Sep'
+
+        start_month = (month % 12) + 1
+        import calendar
+        return f'{calendar.month_abbr[start_month]}–{calendar.month_abbr[month]}'
+
+    def get_business_type(self, workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        organization = getattr(linked_entity, 'organization', None)
+        if organization and organization.industry:
+            return organization.industry
+        if linked_entity and getattr(linked_entity, 'entity_type', None):
+            return linked_entity.get_entity_type_display() if hasattr(linked_entity, 'get_entity_type_display') else linked_entity.entity_type
+        return 'Not Set'
+
+    def get_country_of_incorporation(self, workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        if linked_entity and linked_entity.country:
+            return linked_entity.country
+        organization = getattr(linked_entity, 'organization', None)
+        return getattr(organization, 'primary_country', None) or 'Not Set'
+
+    def get_currency(self, workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        if linked_entity and linked_entity.local_currency:
+            return linked_entity.local_currency
+        organization = getattr(linked_entity, 'organization', None)
+        return getattr(organization, 'primary_currency', None) or 'USD'
+
+    def get_fiscal_year(self, workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        if not linked_entity:
+            return 'Not Set'
+        fiscal_year = self._format_fiscal_year(getattr(linked_entity, 'fiscal_year_end', None))
+        return fiscal_year or 'Not Set'
+
+    def get_tax_regime(self, workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        if not linked_entity:
+            return 'Not Set'
+
+        tax_profile = linked_entity.tax_profiles.order_by('-updated_at').first()
+        if not tax_profile:
+            return 'Not Set'
+
+        regime_codes = list(getattr(tax_profile, 'active_regime_codes', []) or [])
+        if not regime_codes:
+            regime_codes = [code for code in tax_profile.registered_regimes or [] if code]
+
+        if not regime_codes:
+            return 'Not Set'
+
+        TaxRegimeRegistry = apps.get_model('finances', 'TaxRegimeRegistry')
+        registry = TaxRegimeRegistry.objects.filter(
+            regime_code__in=regime_codes,
+            country=tax_profile.country,
+        ).order_by('regime_name').first()
+
+        if registry:
+            return registry.regime_name
+        return regime_codes[0]
+
+    def get_component_count(self, workspace):
+        annotated = getattr(workspace, 'component_count', None)
+        if annotated is not None:
+            return annotated
+        if hasattr(workspace, 'modules'):
+            return workspace.modules.filter(enabled=True).count()
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        enabled_modules = getattr(linked_entity, 'enabled_modules', None)
+        return len(enabled_modules) if isinstance(enabled_modules, list) else 0
+
+    def get_members_count(self, workspace):
+        return getattr(workspace, 'members_count', None) if getattr(workspace, 'members_count', None) is not None else workspace.members.count()
+
+    def get_departments_count(self, workspace):
+        return getattr(workspace, 'departments_count', None) if getattr(workspace, 'departments_count', None) is not None else workspace.groups.count()
+
+    def get_clients_count(self, workspace):
+        annotated = getattr(workspace, 'clients_count', None)
+        if annotated is not None:
+                        return annotated
+        organization = getattr(getattr(workspace, 'linked_entity', None), 'organization', None)
+        return organization.clients.count() if organization else 0
+
+    def get_workspace_mode(self, workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        return getattr(linked_entity, 'workspace_mode', None) or 'accounting'
+
+    def get_workspace_mode_label(self, workspace):
+        mode = self.get_workspace_mode(workspace)
+        return {
+            'accounting': 'Accounting',
+            'equity': 'Equity Management',
+            'combined': 'Combined',
+            'standalone': 'Standalone',
+        }.get(mode, 'Accounting')
 
 
 class WorkspaceCreateSerializer(serializers.Serializer):
@@ -70,11 +203,21 @@ class StatusUpdateSerializer(serializers.Serializer):
 
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
     user = UserBriefSerializer(read_only=True)
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    member_code = serializers.CharField(read_only=True)
+    departments = serializers.SerializerMethodField()
 
     class Meta:
         model  = WorkspaceMember
-        fields = ('id', 'user', 'role', 'created_at')
+        fields = ('id', 'member_code', 'user_id', 'user', 'role', 'departments', 'status', 'created_at')
         read_only_fields = ('id', 'created_at')
+
+    def get_departments(self, obj):
+        department_map = self.context.get('department_map') or {}
+        department_names = department_map.get(obj.user_id, [])
+        if not department_names:
+            return '—'
+        return ', '.join(department_names)
 
 
 class MemberAddSerializer(serializers.Serializer):

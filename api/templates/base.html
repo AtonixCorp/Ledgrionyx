@@ -7,19 +7,19 @@
     <title>{% block title %}Ledgrionyx{% endblock %}</title>
     <style>
         :root {
-            --atc-color-primary: #0b1f3a;
-            --atc-color-primary-hover: #12315b;
-            --atc-color-primary-soft: #e9eef5;
-            --atc-color-accent: #c8a44d;
-            --atc-color-bg: #f4f7fb;
-            --atc-color-surface: rgba(255, 255, 255, 0.9);
-            --atc-color-text-primary: #0f172a;
-            --atc-color-text-muted: #526075;
-            --atc-color-border: rgba(11, 31, 58, 0.12);
-            --atc-shadow-panel: 0 24px 64px rgba(15, 23, 42, 0.08);
-            --atc-radius-panel: 24px;
-            --atc-radius-control: 16px;
-            --atc-shell-width: min(1180px, calc(100vw - 32px));
+            --lgx-color-primary: #0b1f3a;
+            --lgx-color-primary-hover: #12315b;
+            --lgx-color-primary-soft: #e9eef5;
+            --lgx-color-accent: #c8a44d;
+            --lgx-color-bg: #f4f7fb;
+            --lgx-color-surface: rgba(255, 255, 255, 0.9);
+            --lgx-color-text-primary: #0f172a;
+            --lgx-color-text-muted: #526075;
+            --lgx-color-border: rgba(11, 31, 58, 0.12);
+            --lgx-shadow-panel: 0 24px 64px rgba(15, 23, 42, 0.08);
+            --lgx-radius-panel: 24px;
+            --lgx-radius-control: 16px;
+            --lgx-shell-width: min(1180px, calc(100vw - 32px));
         }
 
         * {
@@ -33,11 +33,11 @@
         body {
             margin: 0;
             font-family: "Segoe UI", Arial, sans-serif;
-            color: var(--atc-color-text-primary);
+            color: var(--lgx-color-text-primary);
             background:
                 radial-gradient(circle at top left, rgba(200, 164, 77, 0.12), transparent 28%),
                 radial-gradient(circle at top right, rgba(11, 31, 58, 0.12), transparent 36%),
-                linear-gradient(180deg, #ffffff 0%, var(--atc-color-bg) 100%);
+                linear-gradient(180deg, #ffffff 0%, var(--lgx-color-bg) 100%);
         }
 
         a {
@@ -46,7 +46,7 @@
         }
 
         .site-shell {
-            width: var(--atc-shell-width);
+            width: var(--lgx-shell-width);
             margin: 0 auto;
         }
 
@@ -159,11 +159,11 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="{% block body_class %}atc-backend{% endblock %}">
+<body class="{% block body_class %}lgx-backend{% endblock %}">
     <div class="site-shell">
         <header class="site-header">
             <a class="brand-lockup" href="/">
-                <img class="brand-mark" src="{% static 'branding/atc-logo-round.svg' %}" alt="Ledgrionyx logo">
+                <img class="brand-mark" src="{% static 'branding/lgx-logo-round.svg' %}" alt="Ledgrionyx logo">
                 <span class="brand-copy">
                     <span class="brand-kicker">Ledgrionyx</span>
                     <span class="brand-name">Institutional Developer Platform</span>

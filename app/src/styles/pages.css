@@ -354,7 +354,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   padding: 32px 24px;
-  background: linear-gradient(180deg, var(--atc-color-bg) 0%, var(--atc-color-surface) 100%);
+  background: linear-gradient(180deg, var(--ly-color-bg) 0%, var(--ly-color-surface) 100%);
 }
 
 .auth-container {
@@ -372,13 +372,13 @@ body {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: var(--atc-color-primary);
+  color: var(--ly-color-primary);
 }
 
 .auth-card {
-  background: var(--atc-color-surface);
-  border: 1px solid var(--atc-color-border);
-  border-radius: var(--atc-radius-panel);
+  background: var(--ly-color-surface);
+  border: 1px solid var(--ly-color-border);
+  border-radius: var(--ly-radius-panel);
   padding: 32px;
   box-shadow: var(--shadow-md);
 }

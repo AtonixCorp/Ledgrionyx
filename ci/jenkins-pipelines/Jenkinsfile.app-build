@@ -6,7 +6,7 @@
 // Artifacts are tagged with commit SHA, Gerrit change ID, and build number.
 // =============================================================================
 
-@Library('atc-pipeline-library') _
+@Library('lgx-pipeline-library') _
 
 pipeline {
     agent { label 'docker-builder' }

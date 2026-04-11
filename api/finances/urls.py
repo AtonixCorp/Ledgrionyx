@@ -159,6 +159,7 @@ router.register(r'invoices', InvoiceViewSet, basename='invoice')
 router.register(r'credit-notes', CreditNoteViewSet, basename='credit-note')
 router.register(r'payments', PaymentViewSet, basename='payment')
 
+from .v1_views import GlobalWorkspaceInviteView
 # NEW: Accounts Payable (AP)
 router.register(r'vendors', VendorViewSet, basename='vendor')
 router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-order')
@@ -235,6 +236,7 @@ router.register(r'client-marketplace-integrations', ClientMarketplaceIntegration
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('global/invite', GlobalWorkspaceInviteView.as_view(), name='global-invite'),
     path('tax/regimes', TaxRegimeCollectionAPIView.as_view(), name='tax-regime-collection'),
     path('tax/regimes/<str:country>', TaxRegimeCountryAPIView.as_view(), name='tax-regime-country'),
     path('companies/<int:entity_id>/tax', CompanyTaxProfileAPIView.as_view(), name='company-tax-profile'),
