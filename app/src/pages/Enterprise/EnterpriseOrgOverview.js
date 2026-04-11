@@ -186,20 +186,23 @@ const EnterpriseOrgOverview = () => {
   const regionCount = Object.keys(regionData).length;
   const profitMargin = totalRevenue ? (totalProfit / totalRevenue) * 100 : 0;
   const attentionCount = pending_tax_returns + missing_data_entities;
+  const overviewNarrative = active_entities > 0
+    ? `This organization currently spans ${active_entities} active entities across ${active_jurisdictions} jurisdictions and ${regionCount} regions. Net position stands at ${formatCurrency(net_position, { maximumFractionDigits: 2 })}, supported by ${formatCompactCurrency(totalRevenue)} in consolidated revenue and a ${profitMargin.toFixed(1)}% margin. Tax exposure is ${formatCurrency(total_tax_exposure)} with ${attentionCount} items still needing review.`
+    : 'This organization overview is ready to summarize your consolidated position once entities, jurisdictions, and accounting activity are added. Use it to track assets, liabilities, tax exposure, and open compliance items in one place.';
 
   return (
     <div className="enterprise-overview enterprise-dashboard org-overview-container ed-page org-dashboard-page">
       <div className="ed-header org-dashboard-header">
         <div className="org-dashboard-title-block">
           <h1 className="ed-entity-name">{currentOrganization.name}</h1>
-          <p className="org-dashboard-subtitle">Ledgrionyx dashboard with consolidated branch performance, compliance posture, and financial positions.</p>
+          <p className="org-dashboard-subtitle">Organization overview for finance, operations, and compliance leaders. Use this view to understand the portfolio at a glance before drilling into entities, regions, or tax workflows.</p>
           <div className="ed-meta-row">
-            <span className="ed-meta-item">{active_entities} active entities</span>
+            <span className="ed-meta-item ed-meta-chip">{active_entities} active entities</span>
             <span className="ed-meta-sep">·</span>
-            <span className="ed-meta-item">{active_jurisdictions} jurisdictions</span>
+            <span className="ed-meta-item ed-meta-chip">{active_jurisdictions} jurisdictions</span>
             <span className="ed-meta-sep">·</span>
-            <span className="ed-meta-item">{regionCount} regions</span>
-            <span className={`badge ${attentionCount > 0 ? 'dormant' : 'success'}`}>
+            <span className="ed-meta-item ed-meta-chip">{regionCount} regions</span>
+            <span className={`badge ed-meta-badge ${attentionCount > 0 ? 'dormant' : 'success'}`}>
               {attentionCount > 0 ? `${attentionCount} pending review` : 'Portfolio healthy'}
             </span>
           </div>
@@ -242,6 +245,26 @@ const EnterpriseOrgOverview = () => {
       <div className="ed-content org-dashboard-content">
         {activeTab === 'overview' && (
           <div>
+            <div className="org-overview-story">
+              <div className="org-overview-story-copy">
+                <span className="section-caption">Overview</span>
+                <h2>What this dashboard tells you</h2>
+                <p>{overviewNarrative}</p>
+              </div>
+              <div className="org-overview-story-strip">
+                <div className="org-overview-story-item">
+                  <span className="label">Coverage</span>
+                  <strong>{active_entities} entities</strong>
+                  <span>{active_jurisdictions} jurisdictions and {regionCount} regions</span>
+                </div>
+                <div className="org-overview-story-item">
+                  <span className="label">Focus</span>
+                  <strong>{attentionCount > 0 ? `${attentionCount} items` : 'No open items'}</strong>
+                  <span>{pending_tax_returns} pending returns and {missing_data_entities} incomplete entity records</span>
+                </div>
+              </div>
+            </div>
+
             <div className="summary-cards org-summary-cards" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
               <div className="summary-card profit">
                 <div className="card-label">Net Position</div>

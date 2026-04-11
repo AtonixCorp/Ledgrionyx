@@ -1348,9 +1348,11 @@ class PaymentSerializer(serializers.ModelSerializer):
 # ============ AP Serializers ============
 
 class VendorSerializer(serializers.ModelSerializer):
+    vendor_code = serializers.CharField(read_only=True)
+
     class Meta:
         model = Vendor
-        fields = ['id', 'entity', 'vendor_code', 'vendor_name', 'email', 'phone', 'address', 'city', 'country', 'postal_code', 'contact_person', 'tax_id', 'payment_terms', 'currency', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'entity', 'vendor_code', 'vendor_name', 'email', 'phone', 'address', 'city', 'country', 'postal_code', 'contact_person', 'tax_id', 'website', 'service_description', 'payment_terms', 'currency', 'status', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
 

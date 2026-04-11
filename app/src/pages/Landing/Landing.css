@@ -1,302 +1,186 @@
-/* =============================================================================
-   LEDGRIONYX — LANDING PAGE
-   Hero Section + Three-Card Feature Row
-   Uses global design tokens from globals.css
-   Institutional banking standard — no shadows, no gradients, no rounded corners
-   ============================================================================= */
-
-/* ── Shared typography foundation ──────────────────────────────────────────── */
 .landing-page {
   font-family: var(--font-family);
-  background: var(--layout-body-bg);
-  color: var(--color-text);
+  background: #FFFFFF;
+  color: #000000;
 }
 
 .landing-page--loading {
   min-height: 100vh;
-  align-items: center;
   display: flex;
+  align-items: center;
   justify-content: center;
 }
 
-/* =============================================================================
-   HERO SECTION
-   Full-width, 520–580px height, white background
-   Left: headline + sub + CTAs  |  Right: institutional product card
-   ============================================================================= */
-.ly-hero {
-  width: 100%;
-  min-height: 460px;
-  max-height: 540px;
-  background: transparent;
-  border-bottom: 1px solid var(--border-color-default);
-  display: flex;
-  align-items: stretch;
+.landing-main {
+  background: #FFFFFF;
 }
 
-.ly-hero-inner {
-  max-width: 1440px;
+.landing-shell {
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 56px 40px;
+  padding: 0 40px;
+}
+
+.landing-hero {
+  padding: 72px 0 56px;
+}
+
+.landing-hero__grid {
   display: grid;
-  grid-template-columns: 1fr 480px;
-  gap: 56px;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 32px;
   align-items: center;
 }
 
-/* ── Hero text — left column ───────────────────────────────────────────────── */
-.ly-hero-text {
+.landing-hero__copy {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 18px;
 }
 
-.ly-hero-headline {
-  font-size: var(--font-size-5xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-black);
-  line-height: 1.15;
-  letter-spacing: -1px;
-  max-width: 620px;
-  margin: 0 0 18px 0;
-  font-family: var(--font-family);
+.landing-kicker {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.62);
 }
 
-.ly-hero-sub {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-regular);
-  color: rgba(0, 0, 0, 0.72);
-  line-height: 1.5;
-  max-width: 540px;
-  margin: 0 0 28px 0;
-  font-family: var(--font-family);
+.landing-hero h1,
+.landing-section h2 {
+  margin: 0;
+  font-size: clamp(2.4rem, 4vw, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: #000000;
+  max-width: 12ch;
 }
 
-.ly-hero-actions {
+.landing-section h2 {
+  font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+  max-width: 16ch;
+}
+
+.landing-lead,
+.landing-body,
+.landing-module p,
+.landing-summary__row span:last-child {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(0, 0, 0, 0.66);
+}
+
+.landing-actions {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 }
 
-/* ── Hero product card — right column ─────────────────────────────────────── */
-.ly-hero-card-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ly-product-card {
-  width: 100%;
-  max-width: 440px;
+.landing-summary {
+  padding: 28px;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 18px;
 }
 
-/* Card header row */
-.ly-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.ly-card-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-silver-dark);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-family: var(--font-family);
-}
-
-.ly-card-live {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-success);
-  font-family: var(--font-family);
-}
-
-.ly-live-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--color-success);
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* Balance display */
-.ly-card-balance {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-midnight);
-  letter-spacing: -0.5px;
-  line-height: 1.1;
-  margin-bottom: 4px;
-  font-family: var(--font-family);
-}
-
-.ly-card-currency {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-silver-dark);
-  margin-bottom: 16px;
-  font-family: var(--font-family);
-}
-
-/* Divider */
-.ly-card-divider {
-  height: 1px;
-  background: var(--border-color-default);
-  margin: 0 0 12px 0;
-}
-
-/* Metrics row */
-.ly-card-metrics {
+.landing-summary__row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.10);
 }
 
-.ly-card-metric {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.ly-metric-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-silver-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-family: var(--font-family);
-}
-
-.ly-metric-value {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-midnight);
-  font-family: var(--font-family);
-}
-
-.ly-metric-up   { color: var(--color-success); }
-.ly-metric-down { color: var(--color-error); }
-
-/* Activity section */
-.ly-card-activity {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.ly-activity-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-silver-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  display: block;
-  margin-bottom: 8px;
-  font-family: var(--font-family);
-}
-
-.ly-activity-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--color-silver-very-light);
-}
-
-.ly-activity-row:last-child {
-  border-bottom: none;
+.landing-summary__row:last-child {
   padding-bottom: 0;
+  border-bottom: 0;
 }
 
-.ly-activity-desc {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-midnight);
-  font-family: var(--font-family);
-}
-
-.ly-activity-time {
+.landing-label {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-silver-dark);
-  margin-top: 2px;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   font-family: var(--font-family);
 }
 
-.ly-activity-amount {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-  font-family: var(--font-family);
+.landing-section {
+  padding: 24px 0 72px;
 }
 
-/* =============================================================================
-   SECTION DIVIDER SYSTEM
-   ============================================================================= */
-.ly-section-divider {
-  height: 1px;
-  background: var(--border-color-default);
-  width: 100%;
-  margin: 28px 0;
+.landing-section--bordered {
+  border-top: 1px solid rgba(0, 0, 0, 0.10);
 }
 
-/* =============================================================================
-   THREE-CARD FEATURE ROW
-   "Choose What's Right for You"
-   ============================================================================= */
-.ly-feature-section {
-  width: 100%;
-  background: var(--color-white);
-  padding: 80px 0;
-}
-
-.ly-feature-inner {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 40px;
-}
-
-.ly-feature-title {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-midnight);
-  letter-spacing: -0.5px;
-  margin: 0 0 48px 0;
-  font-family: var(--font-family);
-}
-
-.ly-feature-cards {
+.landing-modules {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
 }
 
-/* Individual feature card */
-.ly-feature-card {
-  background: var(--color-white);
-  border: 1px solid var(--border-color-default);
-  border-radius: 0;
-  padding: 32px;
+.landing-module {
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  transition: border-color 0.12s;
+  gap: 10px;
 }
 
-.ly-feature-card:hover {
-  border-color: var(--color-cyan);
+.landing-module h2 {
+  font-size: 1.15rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.landing-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.landing-grid-2 .landing-body {
+  padding-top: 6px;
+}
+
+.landing-module.card,
+.landing-summary.card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-2);
+}
+
+@media (max-width: 1100px) {
+  .landing-modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-hero__grid,
+  .landing-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-shell {
+    padding: 0 20px;
+  }
+
+  .landing-hero {
+    padding-top: 48px;
+  }
+
+  .landing-modules {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-hero h1,
+  .landing-section h2 {
+    max-width: 100%;
+  }
 }
 
 /* Icon container */

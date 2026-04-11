@@ -3250,6 +3250,8 @@ class Vendor(models.Model):
     
     contact_person = models.CharField(max_length=255, blank=True)
     tax_id = models.CharField(max_length=100, blank=True)
+    website = models.URLField(blank=True)
+    service_description = models.TextField(blank=True)
     
     payment_terms = models.IntegerField(default=30)  # Days
     currency = models.CharField(max_length=3, default='USD')
@@ -3261,6 +3263,21 @@ class Vendor(models.Model):
     class Meta:
         ordering = ['vendor_name']
         unique_together = ('entity', 'vendor_code')
+
+    def _generate_vendor_code(self):
+        base = f"VEN-{self.entity_id or 0}"
+        sequence = Vendor.objects.filter(entity_id=self.entity_id).count() + 1
+
+        while True:
+            candidate = f"{base}-{sequence:04d}"
+            if not Vendor.objects.filter(vendor_code=candidate).exclude(pk=self.pk).exists():
+                return candidate
+            sequence += 1
+
+    def save(self, *args, **kwargs):
+        if not self.vendor_code:
+            self.vendor_code = self._generate_vendor_code()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.vendor_code} - {self.vendor_name}"

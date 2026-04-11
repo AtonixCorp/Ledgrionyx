@@ -1166,11 +1166,15 @@ const EnterpriseTaxCompliance = () => {
 
       {showDeadlineForm && (
         <div className="modal-overlay" onClick={() => setShowDeadlineForm(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content deadline-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Add Compliance Deadline</h3>
+              <div className="deadline-modal-heading">
+                <span className="deadline-modal-kicker">Filing Calendar</span>
+                <h3>Add Compliance Deadline</h3>
+              </div>
               <button className="close-btn" onClick={() => setShowDeadlineForm(false)}>×</button>
             </div>
+            <p className="deadline-modal-copy">Create a filing task with a title, due date, and type so the compliance queue can surface it by urgency.</p>
             <form onSubmit={handleAddDeadline}>
               <div className="form-grid">
                 <div className="form-field" style={{ gridColumn: '1 / -1' }}>
@@ -1192,7 +1196,10 @@ const EnterpriseTaxCompliance = () => {
                   <input type="date" required value={deadlineForm.deadline_date} onChange={(e) => setDeadlineForm({ ...deadlineForm, deadline_date: e.target.value })} />
                 </div>
               </div>
-              <button type="submit" className="btn-primary" disabled={deadlineSubmitting}>{deadlineSubmitting ? 'Adding...' : 'Add Deadline'}</button>
+              <div className="deadline-modal-footer">
+                <div className="deadline-modal-note">This deadline will appear in the filing queue immediately after creation.</div>
+                <button type="submit" className="btn-primary" disabled={deadlineSubmitting}>{deadlineSubmitting ? 'Adding...' : 'Add Deadline'}</button>
+              </div>
             </form>
           </div>
         </div>

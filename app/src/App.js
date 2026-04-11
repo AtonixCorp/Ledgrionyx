@@ -290,6 +290,21 @@ function App() {
                   <EntityLayout><JournalEntries /></EntityLayout>
                 </ProtectedRoute>
               } />
+              <Route path="/enterprise/entity/:entityId/journal-entries/create" element={
+                <ProtectedRoute>
+                  <EntityLayout><JournalEntries /></EntityLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/enterprise/entity/:entityId/journal-entries/edit/:id" element={
+                <ProtectedRoute>
+                  <EntityLayout><JournalEntries /></EntityLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/enterprise/entity/:entityId/journal-entries/view/:id" element={
+                <ProtectedRoute>
+                  <EntityLayout><JournalEntries /></EntityLayout>
+                </ProtectedRoute>
+              } />
               <Route path="/enterprise/entity/:entityId/intercompany" element={
                 <ProtectedRoute>
                   <EntityLayout><IntercompanyConsole /></EntityLayout>

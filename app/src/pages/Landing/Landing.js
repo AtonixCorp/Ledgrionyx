@@ -25,351 +25,75 @@ const Landing = () => {
     <div className="landing-page">
       <Header />
 
-      {/* ── HERO SECTION ─────────────────────────────────────────── */}
-      <section className="ly-hero" aria-label="Hero">
-        <div className="ly-hero-inner">
-          <div className="ly-hero-text">
-            <h1 className="ly-hero-headline">
-              Accounting Built for<br />Global Confidence
-            </h1>
-            <p className="ly-hero-sub">
-              Ledgrionyx delivers secure accounts, global transfers, and
-              institution-grade financial tools designed for individuals
-              and businesses worldwide.
-            </p>
-            <div className="ly-hero-actions">
-              <Link to="/register" className="btn btn-primary btn-large">
-                Open Your Account
-              </Link>
-              <Link to="/features" className="btn btn-outline btn-large">
-                Explore Products
-              </Link>
-            </div>
-          </div>
-
-          <div className="ly-hero-card-wrap">
-            <div className="card ly-product-card" role="presentation">
-              <div className="ly-card-header">
-                <span className="ly-card-label">Account Overview</span>
-                <span className="ly-card-live">
-                  <span className="ly-live-dot" aria-hidden="true" />
-                  Live
-                </span>
-              </div>
-
-              <div className="ly-card-balance">$2,847,392.00</div>
-              <div className="ly-card-currency">USD · Multi-Currency Ready</div>
-
-              <div className="ly-card-divider" />
-
-              <div className="ly-card-metrics">
-                <div className="ly-card-metric">
-                  <span className="ly-metric-label">Inflow (30d)</span>
-                  <span className="ly-metric-value ly-metric-up">+$184,720</span>
-                </div>
-                <div className="ly-card-metric">
-                  <span className="ly-metric-label">Outflow (30d)</span>
-                  <span className="ly-metric-value ly-metric-down">−$62,410</span>
-                </div>
-                <div className="ly-card-metric">
-                  <span className="ly-metric-label">Entities</span>
-                  <span className="ly-metric-value">12</span>
-                </div>
-              </div>
-
-              <div className="ly-card-divider" />
-
-              <div className="ly-card-activity">
-                <span className="ly-activity-label">Recent Activity</span>
-                {[
-                  { desc: 'Wire Transfer — HSBC London', amount: '−$12,000', time: '2m ago', up: false },
-                  { desc: 'Invoice Settlement — Acme Corp', amount: '+$45,200', time: '1h ago', up: true },
-                  { desc: 'FX Conversion — EUR/USD', amount: '+$8,340', time: '3h ago', up: true },
-                ].slice(0, 2).map((tx, i) => (
-                  <div className="ly-activity-row" key={i}>
-                    <div>
-                      <div className="ly-activity-desc">{tx.desc}</div>
-                      <div className="ly-activity-time">{tx.time}</div>
-                    </div>
-                    <span className={`ly-activity-amount ${tx.up ? 'ly-metric-up' : 'ly-metric-down'}`}>
-                      {tx.amount}
-                    </span>
-                  </div>
-                ))}
+      <main className="landing-main">
+        <section className="landing-hero" aria-label="Ledgrionyx overview">
+          <div className="landing-shell landing-hero__grid">
+            <div className="landing-hero__copy">
+              <p className="landing-kicker">Equity, Finance, and Tax Infrastructure</p>
+              <h1>Ledgrionyx is an institutional platform for ownership, finance, tax, and filing operations.</h1>
+              <p className="landing-lead">
+                It gives firms one controlled system for cap tables, financial records, compliance workflows,
+                tax preparation, filing activity, and team approvals.
+              </p>
+              <div className="landing-actions">
+                <Link to="/register" className="btn btn-primary btn-large">Open Account</Link>
+                <Link to="/features" className="btn btn-outline btn-large">Review Modules</Link>
               </div>
             </div>
+
+            <aside className="landing-summary card" aria-label="Platform summary">
+              <div className="landing-summary__row">
+                <span className="landing-label">Purpose</span>
+                <span>Institutional operations for equity, finance, and tax teams.</span>
+              </div>
+              <div className="landing-summary__row">
+                <span className="landing-label">Primary users</span>
+                <span>Finance teams, controllers, tax staff, and administrators.</span>
+              </div>
+              <div className="landing-summary__row">
+                <span className="landing-label">Core controls</span>
+                <span>Ownership records, ledger activity, filing workflows, and approvals.</span>
+              </div>
+            </aside>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── SECTION DIVIDER ────────────────────────────────────────── */}
-      <div className="ly-section-divider" />
-
-      {/*  PROBLEM STRIP  */}
-      <section className="problem-strip">
-        <div className="problem-strip-inner">
-          <p className="problem-label">The Industry Problem</p>
-          <div className="problem-items">
-            {[
-              'Disconnected Tools',
-              'Manual Processes',
-              'Zero Real-Time Visibility',
-              'Poor Client Collaboration',
-              'Ever-Growing Compliance Burden',
-              'Banking That Doesn\'t Integrate',
-            ].map((item) => (
-              <span key={item} className="problem-item">{item}</span>
-            ))}
+        <section className="landing-section">
+          <div className="landing-shell">
+            <p className="landing-kicker">Core Modules</p>
+            <div className="landing-modules">
+              {[
+                { title: 'Equity', text: 'Cap table management, ownership records, vesting, grants, exercises, and approvals.' },
+                { title: 'Finance', text: 'Ledgers, balances, transactions, reporting, and operating controls.' },
+                { title: 'Tax', text: 'Tax preparation, filing support, compliance tracking, and jurisdiction handling.' },
+                { title: 'Filings', text: 'Submission workflows, document control, and audit-ready records.' },
+                { title: 'Team Management', text: 'Roles, permissions, review steps, and internal accountability.' },
+              ].map((module) => (
+                <article key={module.title} className="landing-module card">
+                  <h2>{module.title}</h2>
+                  <p>{module.text}</p>
+                </article>
+              ))}
+            </div>
           </div>
-          <p className="problem-resolve">Ledgrionyx eliminates every one of these — permanently.</p>
-        </div>
-      </section>
+        </section>
 
-      <section className="landing-deployment-promo" aria-label="Deployment Overview">
-        <div className="landing-deployment-promo__inner">
-          <div className="landing-deployment-promo__copy">
-            <p className="landing-deployment-promo__eyebrow">Platform Delivery</p>
-            <h2 className="landing-deployment-promo__title">Deployment is now part of the app experience.</h2>
-            <p className="landing-deployment-promo__text">
-              Review how Ledgrionyx moves from GitHub validation to Docker images, Kubernetes promotion,
-              health verification, and infrastructure controls through a public deployment page built directly
-              into the app.
+        <section className="landing-section landing-section--bordered">
+          <div className="landing-shell landing-grid-2">
+            <div>
+              <p className="landing-kicker">Operational Standard</p>
+              <h2>Built for institutions that need clarity, control, and auditability.</h2>
+            </div>
+            <p className="landing-body">
+              The platform is not a social product, a blog, or a marketplace. It is a professional system
+              for managing financial structures, compliance obligations, and team execution in one place.
             </p>
           </div>
-          <div className="landing-deployment-promo__actions">
-            <Link to="/deployment" className="btn btn-primary btn-large">
-              View Deployment Page
-            </Link>
-            <Link to="/v1/docs" className="btn btn-outline btn-large">
-              Open API Portal
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/*  IDENTITY / PILLARS  */}
-      <section className="pillars-section">
-        <div className="pillars-container">
-          <div className="section-header">
-            <p className="section-eyebrow">Core Architecture</p>
-            <h2 className="section-title">Nine Pillars of a Financial Operating System</h2>
-            <p className="section-subtitle">Every decision, every feature, every line of code is anchored to these foundational principles.
-            </p>
-          </div>
-          <div className="pillars-grid">
-            {[
-              { title: 'Institutional-Grade Security', desc: 'Every component is designed with enterprise-level protection at its core.' },
-              { title: 'Multi-Tenant Architecture', desc: 'Each accounting firm receives its own fully isolated, secure environment.' },
-              { title: 'Multi-Entity Support', desc: 'Manage multiple businesses under one unified umbrella without switching.' },
-              { title: 'Multi-Currency Engine', desc: 'Global operations demand global currency support — fully built in.' },
-              { title: 'API-Driven Integrations', desc: 'Seamless connections to banks, payment processors, and financial data providers.' },
-              { title: 'Automation-Powered Workflows', desc: 'Replace every manual, repetitive task with intelligent, rule-based automation.' },
-              { title: 'Real-Time Financial Visibility', desc: 'Balances, transactions, and insights that update the moment they change.' },
-              { title: 'Compliance-Aware Infrastructure', desc: 'KYC, KYB, AML, and immutable audit trails are embedded at the platform level.' },
-              { title: 'Client Collaboration Tools', desc: 'Portals, messaging, approvals, and document sharing — unified in one flow.' },
-            ].map((pillar, i) => (
-              <div className="pillar-card" key={i}>
-                <div className="pillar-number">0{i + 1}</div>
-                <div className="pillar-icon">{pillar.icon}</div>
-                <h3>{pillar.title}</h3>
-                <p>{pillar.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/*  FEATURE BLUEPRINT  */}
-      <section className="blueprint-section">
-        <div className="blueprint-container">
-          <div className="section-header">
-            <p className="section-eyebrow">Full Feature Blueprint</p>
-            <h2 className="section-title">Everything Under One Roof</h2>
-            <p className="section-subtitle">Seven interconnected modules that replace dozens of fragmented tools.
-            </p>
-          </div>
-          <div className="blueprint-grid">
-            <div className="blueprint-card bp-accent-1">
-              <div className="bp-icon"></div>
-              <h3>Core Accounting Engine</h3>
-              <ul>
-                <li>Multi-entity General Ledger</li>
-                <li>Chart of Accounts Templates</li>
-                <li>AI-Powered Automated Bookkeeping</li>
-                <li>Real-Time Bank Reconciliation</li>
-                <li>Balance Sheet · P&amp;L · Cash Flow</li>
-                <li>Immutable Audit Trail</li>
-              </ul>
-            </div>
-            <div className="blueprint-card bp-accent-2">
-              <div className="bp-icon"></div>
-              <h3>Banking + Accounting Integration</h3>
-              <ul>
-                <li>Real-Time Banking Dashboard</li>
-                <li>Embedded Bill Pay &amp; Payroll</li>
-                <li>Loan Management &amp; Repayment Tracking</li>
-                <li>AML + KYC/KYB Compliance Monitoring</li>
-                <li>Secure API Bank Connections</li>
-                <li>Risk Scoring Engine</li>
-              </ul>
-            </div>
-            <div className="blueprint-card bp-accent-3">
-              <div className="bp-icon"></div>
-              <h3>Client Management System</h3>
-              <ul>
-                <li>Full CRM with Financial History</li>
-                <li>Secure Client Portal &amp; Messaging</li>
-                <li>Task Management &amp; Deadlines</li>
-                <li>Document Upload &amp; Version Control</li>
-                <li>Digital Approvals Workflow</li>
-                <li>Multi-Client Oversight Dashboard</li>
-              </ul>
-            </div>
-            <div className="blueprint-card bp-accent-4">
-              <div className="bp-icon"></div>
-              <h3>Automation Engine</h3>
-              <ul>
-                <li>Month-End &amp; Year-End Close Automation</li>
-                <li>Payroll Cycle &amp; Tax Reminder Workflows</li>
-                <li>AI Cash Flow Predictions</li>
-                <li>Expense Analysis &amp; Risk Alerts</li>
-                <li>Auto-Generated Financial Reports</li>
-                <li>KPI Dashboards on Demand</li>
-              </ul>
-            </div>
-            <div className="blueprint-card bp-accent-5">
-              <div className="bp-icon"></div>
-              <h3>Compliance &amp; Security</h3>
-              <ul>
-                <li>KYC / KYB Identity Verification</li>
-                <li>AML Transaction Monitoring</li>
-                <li>Suspicious Activity Alerting</li>
-                <li>Regulatory Report Generation</li>
-                <li>Role-Based Access Control (RBAC)</li>
-                <li>Admin · Accountant · Client · Auditor Roles</li>
-              </ul>
-            </div>
-            <div className="blueprint-card bp-accent-6">
-              <div className="bp-icon"></div>
-              <h3>Firm Operations Suite</h3>
-              <ul>
-                <li>Billing &amp; Subscription Management</li>
-                <li>Firm-Wide Staff &amp; Workload Dashboard</li>
-                <li>White-Label: Custom Domain &amp; Brand</li>
-                <li>Marketplace: Add-Ons &amp; Partner Services</li>
-                <li>Multi-Branch &amp; Multi-Region Support</li>
-                <li>Enterprise Analytics Suite</li>
-              </ul>
-            </div>
-            <div className="blueprint-card bp-accent-7">
-              <div className="bp-icon"></div>
-              <h3>Platform Infrastructure</h3>
-              <ul>
-                <li>Multi-Tenant Isolated Environments</li>
-                <li>Bank &amp; Payroll API Integrations</li>
-                <li>Tax Authority Connections</li>
-                <li>Mobile App: Approvals &amp; Alerts</li>
-                <li> 99.9% SLA Uptime Guarantee</li>
-                <li>Enterprise SSO &amp; Audit Compliance</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/*  VISION STATEMENT  */}
-      <section className="vision-section">
-        <div className="vision-container">
-          <div className="section-header">
-            <p className="section-eyebrow">Platform Vision</p>
-            <h2 className="section-title">
-              "One Platform. All Financial Operations. Fully Connected."
-            </h2>
-          </div>
-          <div className="vision-unified-list">
-            {[
-              'One Login', 'One Dashboard', 'One Financial Engine',
-              'One Reporting System', 'One Automation Layer', 'One Compliance Framework',
-              'One Client Portal', 'One Integration Hub',
-            ].map((item) => (
-              <div className="vision-unified-item" key={item}>
-
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-          <div className="vision-closing">Ledgrionyx replaces dozens of disconnected tools with a single, unified Financial Operating System.
-          </div>
-        </div>
-      </section>
-
-      {/*  BRAND PILLARS  */}
-      <section className="brand-pillars-section">
-        <div className="section-header">
-          <p className="section-eyebrow">Brand Identity</p>
-          <h2 className="section-title">Built on Seven Commitments</h2>
-        </div>
-        <div className="brand-pillars-row">
-          {['Precision', 'Security', 'Automation', 'Clarity', 'Professionalism', 'Scalability', 'Trust'].map(
-            (p) => (
-              <div className="brand-pillar-chip" key={p}>{p}</div>
-            )
-          )}
-        </div>
-        <div className="brand-promise-block">
-          <blockquote>
-            "Ledgrionyx gives accounting firms the power, speed, and intelligence they need to
-            operate at the highest level."
-          </blockquote>
-        </div>
-      </section>
-
-      {/*  FUTURE ROADMAP  */}
-      <section className="roadmap-section">
-        <div className="roadmap-container">
-          <div className="section-header">
-            <p className="section-eyebrow">Long-Term Vision</p>
-            <h2 className="section-title">The Future of Ledgrionyx</h2>
-            <p className="section-subtitle">Ledgrionyx is not just a platform — it is a movement. A transformation. A new standard.
-            </p>
-          </div>
-          <div className="roadmap-grid">
-            {[
-              { item: 'Global Banking Integrations' },
-              { item: 'AI-Driven Financial Forecasting' },
-              { item: 'Automated Compliance Engines' },
-              { item: 'Full Tax Automation' },
-              { item: 'Enterprise-Grade Analytics' },
-              { item: 'Cross-Border Financial Intelligence' },
-              { item: 'Global Marketplace of Financial Tools' },
-            ].map((r) => (
-              <div className="roadmap-item" key={r.item}>
-                <div className="roadmap-icon">{r.icon}</div>
-                <span>{r.item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/*  CTA  */}
-      <section className="cta-section">
-        <div className="cta-content">
-          <p className="cta-eyebrow">The Future of Financial Operations</p>
-          <h2>Built for Firms That Refuse to Fall Behind.</h2>
-          <p>Ledgrionyx is built for firms that demand excellence, businesses that want clarity,
-            and institutions that require precision. Your entire financial world — unified.
-          </p>
-          <div className="cta-buttons">
-            <Link to="/register" className="btn btn-primary btn-large">Create Enterprise Account
-            </Link>
-            <Link to="/features" className="btn btn-outline btn-large">Explore the Platform
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
+
     </div>
   );
 };

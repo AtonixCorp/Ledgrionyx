@@ -1,58 +1,124 @@
 :root {
-  --ly-icon-on-dark: #ffffff;
+  /* ── Core palette: Black · White · EE6C4D ──────────────────── */
+  --color-black:   #000000;
+  --color-white:   #FFFFFF;
+  --color-accent:  #EE6C4D;
+  --color-accent-hover:  #D95A3C;
+  --color-accent-rgb: 238, 108, 77;
+
+  /* ── Functional aliases ─────────────────────────────────────── */
+  --color-primary:            var(--color-accent);
+  --color-primary-rgb:        var(--color-accent-rgb);
+  --color-secondary:          var(--color-black);
+  --color-background:         var(--color-white);
+  --color-background-rgb:     255, 255, 255;
+  --color-surface:            var(--color-white);
+  --color-surface-rgb:        255, 255, 255;
+  --color-text:               rgba(0, 0, 0, 0.60);
+  --color-text-rgb:           0, 0, 0;
+  --color-heading:            var(--color-black);
+  --color-heading-rgb:        0, 0, 0;
+  --color-border:             rgba(0, 0, 0, 0.12);
+  --color-border-rgb:         0, 0, 0;
+  --color-success:            var(--color-black);
+  --color-error:              var(--color-accent);
+  --color-warning:            rgba(0, 0, 0, 0.60);
+  --color-info:               rgba(0, 0, 0, 0.60);
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  --layout-header:      var(--color-black);
+  --layout-footer:      var(--color-black);
+  --layout-body-bg:     var(--color-white);
+  --layout-body-text:   rgba(0, 0, 0, 0.60);
+  --layout-body-text-rgb: 0, 0, 0;
+
+  /* ── Button tokens ──────────────────────────────────────────── */
+  --ly-button-primary:         var(--color-accent);
+  --ly-button-primary-hover:   var(--color-accent-hover);
+  --ly-button-critical:        var(--color-accent);
+  --ly-button-critical-hover:  var(--color-accent-hover);
+  --ly-button-secondary:       var(--color-black);
+  --ly-button-secondary-hover: rgba(0, 0, 0, 0.82);
+  --ly-button-ghost-border:    var(--color-black);
+  --ly-button-ghost-hover-bg:  rgba(0, 0, 0, 0.06);
+  --ly-button-ghost-text:      var(--color-black);
+
+  /* ── Icon tokens ────────────────────────────────────────────── */
+  --ly-icon-on-dark:  #FFFFFF;
   --ly-icon-on-light: #000000;
-  --ly-icon-active: #08538c;
-  --ly-button-primary: #f36d5d;
-  --ly-button-primary-hover: #de5f50;
-  --ly-button-critical: #c7202c;
-  --ly-button-critical-hover: #9e1a23;
-  --ly-button-secondary: #08538c;
-  --ly-button-secondary-hover: #063d68;
-  --ly-button-ghost-border: #08538c;
-  --ly-button-ghost-hover-bg: rgba(8, 83, 140, 0.08);
-  --ly-button-ghost-text: #08538c;
+  --ly-icon-active:   var(--color-accent);
 
-  --brand-deep-navy: #002026;
-  --brand-deep-navy-rgb: 0, 32, 38;
-  --brand-steel-blue: #003f5c;
-  --brand-steel-blue-rgb: 0, 63, 92;
-  --brand-accent-red: #e74c3c;
-  --brand-accent-red-rgb: 231, 76, 60;
-  --brand-institutional-blue: #005b96;
-  --brand-institutional-blue-rgb: 0, 91, 150;
-  --brand-soft-grey: #a9b7b8;
-  --brand-soft-grey-rgb: 169, 183, 184;
+  /* ── Legacy brand aliases (kept for existing components) ─────── */
+  --brand-deep-navy:              var(--color-black);
+  --brand-deep-navy-rgb:          0, 0, 0;
+  --brand-steel-blue:             rgba(0, 0, 0, 0.72);
+  --brand-steel-blue-rgb:         0, 0, 0;
+  --brand-accent-red:             var(--color-accent);
+  --brand-accent-red-rgb:         var(--color-accent-rgb);
+  --brand-institutional-blue:     var(--color-accent);
+  --brand-institutional-blue-rgb: var(--color-accent-rgb);
+  --brand-soft-grey:              rgba(0, 0, 0, 0.12);
+  --brand-soft-grey-rgb:          0, 0, 0;
 
-  --color-primary: var(--ly-button-secondary);
-  --color-primary-rgb: var(--brand-institutional-blue-rgb);
-  --color-secondary: var(--ly-button-secondary);
-  --color-secondary-rgb: var(--brand-steel-blue-rgb);
-  --color-background: #ffffff;
-  --color-background-rgb: 255, 255, 255;
-  --color-surface: #ffffff;
-  --color-surface-rgb: 255, 255, 255;
-  --color-text: #a0a0a0;
-  --color-text-rgb: 160, 160, 160;
-  --color-heading: var(--brand-deep-navy);
-  --color-heading-rgb: var(--brand-deep-navy-rgb);
-  --color-border: var(--brand-soft-grey);
-  --color-border-rgb: var(--brand-soft-grey-rgb);
-  --color-success: var(--brand-institutional-blue);
-  --color-success-rgb: var(--brand-institutional-blue-rgb);
-  --color-warning: var(--brand-steel-blue);
-  --color-warning-rgb: var(--brand-steel-blue-rgb);
-  --color-error: var(--ly-button-critical);
-  --color-error-rgb: var(--brand-accent-red-rgb);
-  --color-info: var(--brand-steel-blue);
-  --color-info-rgb: var(--brand-steel-blue-rgb);
-  --color-black: #000000;
-  --color-white: #ffffff;
+  /* ── Component aliases ──────────────────────────────────────── */
+  --ly-graphite:            var(--color-black);
+  --ly-graphite-dark:       var(--color-black);
+  --ly-graphite-panel:      rgba(0, 0, 0, 0.04);
+  --ly-graphite-border:     rgba(0, 0, 0, 0.12);
+  --ly-graphite-rule:       rgba(0, 0, 0, 0.12);
+  --ly-graphite-hover:      rgba(0, 0, 0, 0.06);
+  --ly-graphite-muted:      rgba(0, 0, 0, 0.60);
+  --ly-white:               var(--color-white);
+  --ly-white-soft:          var(--color-white);
+  --ly-crimson:             var(--color-accent);
+  --ly-crimson-hover:       var(--color-accent-hover);
+  --ly-crimson-pressed:     var(--color-accent-hover);
+  --ly-crimson-tint:        rgba(238, 108, 77, 0.10);
+  --ly-crimson-border:      var(--color-accent);
+  --ly-color-primary:       var(--color-accent);
+  --ly-color-primary-hover: var(--color-accent-hover);
+  --ly-color-primary-soft:  rgba(238, 108, 77, 0.10);
+  --ly-color-accent:        var(--color-accent);
+  --ly-color-accent-soft:   rgba(238, 108, 77, 0.10);
+  --ly-color-bg:            var(--color-white);
+  --ly-color-surface:       var(--color-white);
+  --ly-color-header-utility: var(--color-black);
+  --ly-color-text-primary:  var(--color-black);
+  --ly-color-text-muted:    rgba(0, 0, 0, 0.60);
+  --ly-color-border:        rgba(0, 0, 0, 0.12);
+  --ly-color-error:         var(--color-accent);
+  --ly-color-warning:       rgba(0, 0, 0, 0.60);
+  --ly-color-success:       var(--color-black);
 
-  --layout-header: #000000;
-  --layout-footer: #000000;
-  --layout-body-bg: #ffffff;
-  --layout-body-text: #a0a0a0;
-  --layout-body-text-rgb: 160, 160, 160;
+  --color-midnight:           var(--color-black);
+  --color-midnight-light:     rgba(0, 0, 0, 0.72);
+  --color-midnight-lighter:   rgba(0, 0, 0, 0.60);
+  --primary-600:              var(--color-accent);
+  --primary-500:              var(--color-accent-hover);
+  --primary-100:              rgba(238, 108, 77, 0.10);
+  --color-cyan:               var(--color-accent);
+  --color-cyan-hover:         var(--color-accent-hover);
+  --color-cyan-dark:          var(--color-black);
+  --color-cyan-text:          var(--color-accent);
+  --color-cyan-light:         rgba(238, 108, 77, 0.12);
+  --color-cyan-very-light:    rgba(238, 108, 77, 0.06);
+  --gray-900:                 var(--color-black);
+  --gray-700:                 rgba(0, 0, 0, 0.72);
+  --gray-500:                 rgba(0, 0, 0, 0.48);
+  --gray-300:                 rgba(0, 0, 0, 0.16);
+  --gray-100:                 rgba(0, 0, 0, 0.06);
+  --color-silver:             rgba(0, 0, 0, 0.16);
+  --color-silver-dark:        rgba(0, 0, 0, 0.48);
+  --color-silver-light:       rgba(0, 0, 0, 0.10);
+  --color-silver-very-light:  rgba(0, 0, 0, 0.06);
+  --color-silver-white:       var(--color-white);
+  --success-600:              var(--color-black);
+  --warning-600:              rgba(0, 0, 0, 0.60);
+  --error-600:                var(--color-accent);
+  --color-success-light:      rgba(0, 0, 0, 0.06);
+  --color-warning-light:      rgba(0, 0, 0, 0.06);
+  --color-error-light:        rgba(238, 108, 77, 0.08);
+  --color-info-light:         rgba(0, 0, 0, 0.06);
 
   --font-family: 'IBM Plex Sans', 'Open Sans', sans-serif;
   --font-family-mono: 'SF Mono', 'Monaco', 'Courier New', monospace;
@@ -110,62 +176,67 @@
   --z-modal: 1201;
   --z-tooltip: 1100;
 
-  --ly-graphite: var(--brand-deep-navy);
-  --ly-graphite-dark: var(--brand-deep-navy);
-  --ly-graphite-panel: var(--brand-steel-blue);
-  --ly-graphite-border: var(--brand-soft-grey);
-  --ly-graphite-rule: var(--brand-soft-grey);
-  --ly-graphite-hover: var(--brand-soft-grey);
-  --ly-graphite-muted: var(--layout-body-text);
-  --ly-white: var(--color-white);
-  --ly-white-soft: var(--color-white);
-  --ly-crimson: var(--ly-button-primary);
-  --ly-crimson-hover: var(--ly-button-primary-hover);
-  --ly-crimson-pressed: var(--ly-button-primary-hover);
-  --ly-crimson-tint: rgba(243, 109, 93, 0.12);
-  --ly-crimson-border: var(--ly-button-primary);
-  --ly-color-primary: var(--brand-institutional-blue);
-  --ly-color-primary-hover: var(--brand-steel-blue);
-  --ly-color-primary-soft: var(--brand-soft-grey);
-  --ly-color-accent: var(--brand-accent-red);
-  --ly-color-accent-soft: var(--brand-soft-grey);
-  --ly-color-bg: var(--color-background);
-  --ly-color-surface: var(--color-surface);
-  --ly-color-header-utility: var(--layout-header);
-  --ly-color-text-primary: var(--brand-deep-navy);
-  --ly-color-text-muted: var(--layout-body-text);
-  --ly-color-border: var(--brand-soft-grey);
-  --ly-color-error: var(--brand-accent-red);
-  --ly-color-warning: var(--brand-steel-blue);
-  --ly-color-success: var(--brand-institutional-blue);
+  /* ── Typography ────────────────────────────────────────────── */
+  --font-family: 'IBM Plex Sans', 'Open Sans', sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Courier New', monospace;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+  --font-size-5xl: 52px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-body: 1.5;
+  --line-height-heading: 1.2;
 
-  --color-midnight: var(--brand-deep-navy);
-  --color-midnight-light: var(--brand-steel-blue);
-  --color-midnight-lighter: var(--layout-body-text);
-  --primary-600: var(--brand-institutional-blue);
-  --primary-500: var(--brand-steel-blue);
-  --primary-100: var(--brand-soft-grey);
-  --color-cyan: var(--brand-institutional-blue);
-  --color-cyan-hover: var(--brand-steel-blue);
-  --color-cyan-dark: var(--brand-deep-navy);
-  --color-cyan-text: var(--brand-institutional-blue);
-  --color-cyan-light: var(--brand-soft-grey);
-  --color-cyan-very-light: var(--brand-soft-grey);
-  --gray-900: var(--brand-deep-navy);
-  --gray-700: var(--brand-steel-blue);
-  --gray-500: var(--layout-body-text);
-  --gray-300: var(--brand-soft-grey);
-  --gray-100: var(--brand-soft-grey);
-  --color-silver: var(--brand-soft-grey);
-  --color-silver-dark: var(--layout-body-text);
-  --color-silver-light: var(--brand-soft-grey);
-  --color-silver-very-light: var(--brand-soft-grey);
-  --color-silver-white: var(--color-white);
-  --success-600: var(--brand-institutional-blue);
-  --warning-600: var(--brand-steel-blue);
-  --error-600: var(--brand-accent-red);
-  --color-success-light: var(--brand-soft-grey);
-  --color-warning-light: var(--brand-soft-grey);
-  --color-error-light: var(--brand-soft-grey);
-  --color-info-light: var(--brand-soft-grey);
+  /* ── Spacing ────────────────────────────────────────────────── */
+  --space-0: 0;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-base: 16px;
+  --space-lg: 24px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+
+  /* ── Radius ─────────────────────────────────────────────────── */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* ── Border ─────────────────────────────────────────────────── */
+  --border-width-thin: 1px;
+  --border-width-base: 1.5px;
+  --border-width-thick: 2px;
+  --border-color-default: rgba(0, 0, 0, 0.12);
+  --border-color-active:  var(--color-accent);
+  --border-color-error:   var(--color-accent);
+
+  /* ── Shadows (disciplined, no color) ────────────────────────── */
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-base: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md:   0 2px 8px rgba(0, 0, 0, 0.10);
+  --shadow-lg:   0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* ── Transitions ────────────────────────────────────────────── */
+  --transition-fast: 100ms ease;
+  --transition-base: 150ms ease;
+  --transition-slow: 200ms ease;
+
+  /* ── Z-index ────────────────────────────────────────────────── */
+  --z-sticky: 20;
+  --z-fixed: 100;
+  --z-modal-bg: 1200;
+  --z-modal: 1201;
+  --z-tooltip: 1100;
 }
