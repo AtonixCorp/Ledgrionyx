@@ -236,8 +236,8 @@ const Layout = ({ children }) => {
             {!sidebarMinimized && <span style={{ color: '#fff', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap' }}>Ledgrionyx Console</span>}
           </div>
           {!sidebarMinimized && (
-            <NavLink to="/app/console" className="sidebar-console-link" title="All Workspaces">
-              ← All Workspaces
+            <NavLink to="/app/console" className="sidebar-console-link" title="All Organizations">
+              ← All Organizations
             </NavLink>
           )}
 

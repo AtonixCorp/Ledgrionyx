@@ -258,6 +258,31 @@
   justify-content: space-between;
 }
 
+.ws-selector-card-brand {
+  flex-shrink: 0;
+}
+
+.ws-selector-card-logo {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(30, 35, 40, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(30, 35, 40, 0.08);
+  display: block;
+  height: 56px;
+  object-fit: cover;
+  width: 56px;
+}
+
+.ws-selector-card-logo--fallback {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.16), rgba(196, 30, 58, 0.16));
+  color: #1e2328;
+  display: flex;
+  font-size: 18px;
+  font-weight: 900;
+  justify-content: center;
+}
+
 .ws-selector-card-head h2 {
   color: #1e2328;
   font-size: 18px;
@@ -323,6 +348,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .ws-selector-open {

@@ -3,11 +3,9 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEnterprise } from '../context/EnterpriseContext';
 
-const ALLOWED_ROLES = new Set(['ORG_OWNER', 'CFO']);
-
 const GlobalConsoleRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  const { currentUserRole, isRoleResolved, loading: enterpriseLoading } = useEnterprise();
+  const { isRoleResolved, loading: enterpriseLoading } = useEnterprise();
   const location = useLocation();
 
   if (loading || enterpriseLoading || !isRoleResolved) {
@@ -29,10 +27,6 @@ const GlobalConsoleRoute = ({ children }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (!ALLOWED_ROLES.has(currentUserRole)) {
-    return <Navigate to="/app/workspaces/select" replace />;
   }
 
   return children;

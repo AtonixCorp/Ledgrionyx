@@ -31,26 +31,26 @@ export const EQUITY_MODULE_KEYS = [
 export const WORKSPACE_PACKAGE_OPTIONS = [
   {
     id: 'accounting',
-    title: 'Accounting Workspace',
+    title: 'Accounting Organization',
     description: 'General ledger, payables, receivables, treasury, compliance, and reporting.',
     modules: ACCOUNTING_MODULE_KEYS,
   },
   {
     id: 'equity',
-    title: 'Equity Management Workspace',
+    title: 'Equity Management Organization',
     description: 'Ownership registry, cap table engine, valuations, transactions, and governance.',
     modules: EQUITY_MODULE_KEYS,
   },
   {
     id: 'combined',
     title: 'Combined Financial Operating System',
-    description: 'Accounting and equity management under one workspace with shared compliance context.',
+    description: 'Accounting and equity management under one organization with shared compliance context.',
     modules: [...ACCOUNTING_MODULE_KEYS, ...EQUITY_MODULE_KEYS],
   },
   {
     id: 'standalone',
-    title: 'Standalone Workspace',
-    description: 'An isolated workspace shell where you can enable only the modules you need.',
+    title: 'Standalone Organization',
+    description: 'An isolated organization shell where you can enable only the modules you need.',
     modules: [],
   },
 ];

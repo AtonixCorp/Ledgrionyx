@@ -9,7 +9,7 @@ import './GlobalConsole.css';
 /* ─────────────────────────────────────────────────────────────────────────────
   Ledgrionyx — Global Capital Console
    The cross-company control center a user sees immediately after login.
-   Shows: My Workspaces · Global Notifications · Global Tasks · Quick Actions
+   Shows: My Entities · Global Notifications · Global Tasks · Quick Actions
 ───────────────────────────────────────────────────────────────────────────── */
 
 const formatDate = (value) => {
@@ -94,6 +94,7 @@ const GlobalConsole = () => {
   const {
     currentOrganization,
     entities,
+    organizations,
     globalNotifications,
     fetchGlobalNotifications,
     teamMembers,
@@ -174,14 +175,14 @@ const GlobalConsole = () => {
     };
   }, [costCenterFilter, departmentFilter, taskFilter, user?.id]);
 
-  const workspaceCount = entities.length;
-  const showWorkspaceOnboarding = !loading && workspaceCount === 0;
+  const entityCount = entities.length;
+  const showOrganizationOnboarding = !loading && organizations.length === 0;
   const pendingInvitations = Array.isArray(teamMembers)
     ? teamMembers.filter((member) => member?.accepted_at == null || member?.invitation_status === 'pending' || member?.status === 'pending').length
     : 0;
-  const workspaceSelectOptions = entities.map((entity) => ({
-    value: String(entity.id),
-    label: `${entity.name}${entity.linked_entity_name ? ` · ${entity.linked_entity_name}` : ''}`,
+  const workspaceSelectOptions = organizations.map((org) => ({
+    value: String(org.id),
+    label: org.name,
   }));
 
   const handleInviteUser = async () => {
@@ -192,7 +193,7 @@ const GlobalConsole = () => {
     const invitee = String(inviteForm.invitee || '').trim();
 
     if (!workspaceId || !invitee) {
-      setInviteError('Workspace and invitee are required.');
+      setInviteError('Organization and invitee are required.');
       return;
     }
 
@@ -205,7 +206,7 @@ const GlobalConsole = () => {
         payload.email = invitee.toLowerCase();
       }
       await globalInviteAPI.create(payload);
-      setInviteSuccess('Workspace invitation sent.');
+      setInviteSuccess('Organization invitation sent.');
       setInviteForm({ invitee: '', workspaceId: '' });
       fetchGlobalNotifications?.();
       setTimeout(() => {
@@ -213,14 +214,14 @@ const GlobalConsole = () => {
         setInviteSuccess('');
       }, 700);
     } catch (error) {
-      setInviteError(error?.response?.data?.detail || error?.response?.data?.user_id?.[0] || error?.response?.data?.email?.[0] || 'Failed to invite user to the workspace.');
+      setInviteError(error?.response?.data?.detail || error?.response?.data?.user_id?.[0] || error?.response?.data?.email?.[0] || 'Failed to invite user to the organization.');
     } finally {
       setInviteSaving(false);
     }
   };
 
   const scrollToWorkspaces = () => {
-    navigate('/app/workspaces/select');
+    navigate('/app/organizations/select');
   };
 
   const notifs = auditEvents.length > 0
@@ -281,13 +282,13 @@ const GlobalConsole = () => {
       organizationId: currentOrganization?.id || null,
       organizationName: currentOrganization?.name || null,
       userId: user?.id || null,
-      workspaceCount,
+      entityCount,
       ...payload,
     });
-  }, [currentOrganization?.id, currentOrganization?.name, user?.id, workspaceCount]);
+  }, [currentOrganization?.id, currentOrganization?.name, user?.id, entityCount]);
 
   useEffect(() => {
-    if (!showWorkspaceOnboarding) {
+    if (!showOrganizationOnboarding) {
       onboardingEnteredAtRef.current = null;
       onboardingCtaClickedRef.current = false;
       return undefined;
@@ -305,31 +306,31 @@ const GlobalConsole = () => {
         trackWorkspaceLandingEvent('workspace_empty_state_dropoff', { elapsedSeconds });
       }
     };
-  }, [showWorkspaceOnboarding, trackWorkspaceLandingEvent]);
+  }, [showOrganizationOnboarding, trackWorkspaceLandingEvent]);
 
   const handleCreateWorkspace = useCallback((source = 'console') => {
     if (source === 'empty_state') {
       onboardingCtaClickedRef.current = true;
     }
     trackWorkspaceLandingEvent('workspace_create_cta_click', { source });
-    navigate('/app/workspaces/create');
+    navigate('/app/organizations/create');
   }, [navigate, trackWorkspaceLandingEvent]);
 
   const handleNotificationsClick = useCallback(() => {
     trackWorkspaceLandingEvent('workspace_landing_notifications_click', { notificationCount: notifs.length });
-    if (showWorkspaceOnboarding) return;
+    if (showOrganizationOnboarding) return;
     const target = document.querySelector('.gc-notif-section');
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [notifs.length, showWorkspaceOnboarding, trackWorkspaceLandingEvent]);
+  }, [notifs.length, showOrganizationOnboarding, trackWorkspaceLandingEvent]);
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
-  const activeWorkspaceCount = workspaceCount;
+  const activeOrganizationCount = organizations.length;
   const complianceAlertCount = notifs.filter((item) => item.severity === 'critical' || item.severity === 'high').length;
   const pendingCapitalTasks = tasks.length;
   const marketPulse = [
@@ -343,7 +344,7 @@ const GlobalConsole = () => {
     'Vesting Schedules',
     'Equity Events',
     'Compliance Filings',
-    'Entity Management',
+    'Organization Management',
   ];
   const todaysOverview = [
     'No active filings',
@@ -443,13 +444,13 @@ const GlobalConsole = () => {
 
           <section className="gc-action-ribbon" aria-label="Institutional actions">
             <button className="gc-action-btn gc-action-primary gc-action-btn--ribbon" onClick={() => handleCreateWorkspace('institutional_ribbon')}>
-              New Equity Workspace
+              New Organization
             </button>
             <button className="gc-action-btn gc-action-secondary gc-action-btn--ribbon" onClick={() => setInviteModalOpen(true)}>
-              Add Participant / Entity
+              New Organization
             </button>
             <button className="gc-action-btn gc-action-secondary gc-action-btn--ribbon" onClick={scrollToWorkspaces}>
-              Portfolio Workspaces
+              Portfolio Organizations
             </button>
           </section>
 
@@ -462,8 +463,8 @@ const GlobalConsole = () => {
             </div>
             <div className="gc-kpi-grid">
               <article className="gc-kpi-card">
-                <span>Active Workspaces</span>
-                <strong>{activeWorkspaceCount}</strong>
+                <span>Active Organizations</span>
+                <strong>{activeOrganizationCount}</strong>
               </article>
               <article className="gc-kpi-card">
                 <span>Outstanding Compliance Alerts</span>
@@ -555,14 +556,14 @@ const GlobalConsole = () => {
             <div className="gc-modal-header">
               <div>
                 <p className="gc-modal-kicker">Global Invite</p>
-                <h3 id="global-invite-title">Invite User to a Workspace</h3>
+                <h3 id="global-invite-title">Invite User to an Organization</h3>
               </div>
               <button className="gc-modal-close" onClick={() => setInviteModalOpen(false)} disabled={inviteSaving} aria-label="Close invite dialog">
                 ×
               </button>
             </div>
             <p className="gc-modal-copy">
-              Use a user ID to attach someone to a workspace. Department, role, and module access stay inside the workspace itself.
+              Use a user ID to attach someone to an organization. Department, role, and module access stay inside that organization environment.
             </p>
             <div className="gc-modal-grid">
               <label className="gc-modal-field">
@@ -575,12 +576,12 @@ const GlobalConsole = () => {
                 />
               </label>
               <label className="gc-modal-field">
-                <span>Workspace</span>
+                <span>Organization</span>
                 <select
                   value={inviteForm.workspaceId}
                   onChange={(event) => setInviteForm((current) => ({ ...current, workspaceId: event.target.value }))}
                 >
-                  <option value="">Select a workspace</option>
+                  <option value="">Select an organization</option>
                   {workspaceSelectOptions.map((workspace) => (
                     <option key={workspace.value} value={workspace.value}>{workspace.label}</option>
                   ))}

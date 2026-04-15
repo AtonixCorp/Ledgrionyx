@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
@@ -12,9 +12,9 @@ import {
 import './CreateWorkspace.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Ledgrionyx — Create Workspace
-   Form to create a new company workspace (entity).
-  On success: activates the new workspace and opens it from the workspace flow.
+   Ledgrionyx — Create Organization
+   Form to create a new organization record.
+  On success: provisions the organization record and returns the user to the console.
 ───────────────────────────────────────────────────────────────────────────── */
 const CURRENCIES = [
   { code: 'AED', label: 'AED — UAE Dirham' },
@@ -134,8 +134,14 @@ const EMPTY_FORM = {
   registrationNumber: '',
   businessType: 'corporation',
   industry: '',
+  logoUrl: '',
+  website: '',
+  employeeCount: '1',
   country: '',
   currency: 'USD',
+  email: '',
+  address: '',
+  serviceTime: '',
   fiscalYearEnd: '12-31',
   taxRegime: '',
   workspaceMode: '',
@@ -143,16 +149,16 @@ const EMPTY_FORM = {
 };
 
 const ACCOUNTING_MODULE_OPTIONS = [
-  { key: 'overview', label: 'Workspace Overview', detail: 'Home dashboard and entity launchpad.' },
+  { key: 'overview', label: 'Organization Overview', detail: 'Home dashboard and entity launchpad.' },
   { key: 'members', label: 'Members', detail: 'Team invitations and membership visibility.' },
   { key: 'groups', label: 'Departments', detail: 'Finance department structure, ownership, and access grouping.' },
   { key: 'meetings', label: 'Meetings', detail: 'Meeting scheduling, records, and follow-ups.' },
   { key: 'calendar', label: 'Calendar', detail: 'Operational timeline and key dates.' },
-  { key: 'files', label: 'Files', detail: 'Document storage and workspace file access.' },
-  { key: 'permissions', label: 'Permissions', detail: 'Workspace access and approval controls.' },
-  { key: 'settings', label: 'Settings', detail: 'Workspace-level configuration and policies.' },
+  { key: 'files', label: 'Files', detail: 'Document storage and organization file access.' },
+  { key: 'permissions', label: 'Permissions', detail: 'Organization access and approval controls.' },
+  { key: 'settings', label: 'Settings', detail: 'Organization-level configuration and policies.' },
   { key: 'email', label: 'Email', detail: 'Messaging and communication workflows.' },
-  { key: 'marketing', label: 'Marketing', detail: 'Growth and outbound workspace tools.' },
+  { key: 'marketing', label: 'Marketing', detail: 'Growth and outbound organization tools.' },
 ];
 
 const EQUITY_MODULE_OPTIONS = [
@@ -167,15 +173,27 @@ const EQUITY_MODULE_OPTIONS = [
 
 const CreateWorkspace = () => {
   const navigate = useNavigate();
-  const { createWorkspace, createEntity, currentOrganization, setActiveWorkspace } = useEnterprise();
+  const [searchParams] = useSearchParams();
+  const { createWorkspace, createEntity, createOrganization, currentOrganization, setActiveWorkspace } = useEnterprise();
+  const location = useLocation();
+  const isOrgCreate = location.pathname.includes('/organizations/create');
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [fyOpen, setFyOpen] = useState(false);
-  const [fyMonth, setFyMonth] = useState(null); // 1–12 once user picks a month
+  const [fyMonth, setFyMonth] = useState(null);
   const fyRef = React.useRef(null);
+
+  // Pre-select workspace mode from URL param e.g. ?mode=equity
+  React.useEffect(() => {
+    const modeParam = searchParams.get('mode');
+    if (modeParam) {
+      selectPackage(modeParam);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Close fiscal picker when clicking outside
   React.useEffect(() => {
@@ -232,49 +250,73 @@ const CreateWorkspace = () => {
     e.preventDefault();
     if (!form.name.trim()) { setError('Company name is required'); return; }
     if (!form.country)     { setError('Country is required'); return; }
-    if (!form.workspaceMode) { setError('Select a workspace package before launch.'); return; }
-    if (!currentOrganization?.id) { setError('No active organization is selected for this account.'); return; }
+    if (!form.workspaceMode) { setError('Select an organization package before launch.'); return; }
+    if (!isOrgCreate && !currentOrganization?.id) { setError('No active organization is selected for this account.'); return; }
 
     setSubmitting(true);
     setError(null);
 
     try {
-      const payload = {
-        name: form.name.trim(),
-        country: form.country,
-        entity_type: form.businessType,
-        local_currency: form.currency,
-        fiscal_year_end: toFiscalYearEndDate(form.fiscalYearEnd),
-        status: 'active',
-        organization_id: currentOrganization?.id,
-        registration_number: form.registrationNumber || undefined,
-        workspace_mode: form.workspaceMode,
-        enabled_modules: form.enabledModules,
-      };
-
-      // Use createWorkspace if available (wraps createEntity + activates), otherwise fall back
-      let newWorkspace;
-      if (typeof createWorkspace === 'function') {
-        newWorkspace = await createWorkspace({
-          organizationId: currentOrganization?.id,
-          ...form,
-          fiscalYearEnd: toFiscalYearEndDate(form.fiscalYearEnd),
+      if (isOrgCreate) {
+        // Creating a top-level organization — no currentOrganization required
+        const newOrg = await createOrganization({
+          name: form.name.trim(),
+          primary_country: form.country,
+          primary_currency: form.currency,
+          industry: form.industry.trim() || form.businessType,
+          description: '',
+          logo_url: form.logoUrl.trim(),
+          website: form.website.trim(),
+          employee_count: Number(form.employeeCount) || 1,
+          settings: {
+            email: form.email.trim(),
+            address: form.address.trim(),
+            service_time: form.serviceTime.trim(),
+            registration_number: form.registrationNumber.trim(),
+            tax_regime: form.taxRegime.trim(),
+          },
+        });
+        if (newOrg) {
+          navigate('/app/console');
+        }
+      } else {
+        // Creating an entity within the current organization
+        const payload = {
+          name: form.name.trim(),
+          country: form.country,
+          entity_type: form.businessType,
+          local_currency: form.currency,
           fiscal_year_end: toFiscalYearEndDate(form.fiscalYearEnd),
+          status: 'active',
+          organization_id: currentOrganization?.id,
+          registration_number: form.registrationNumber || undefined,
           workspace_mode: form.workspaceMode,
           enabled_modules: form.enabledModules,
-        });
-      } else {
-        newWorkspace = await createEntity(payload);
-        if (newWorkspace && typeof setActiveWorkspace === 'function') {
-          setActiveWorkspace(newWorkspace);
+        };
+
+        let newWorkspace;
+        if (typeof createWorkspace === 'function') {
+          newWorkspace = await createWorkspace({
+            organizationId: currentOrganization?.id,
+            ...form,
+            fiscalYearEnd: toFiscalYearEndDate(form.fiscalYearEnd),
+            fiscal_year_end: toFiscalYearEndDate(form.fiscalYearEnd),
+            workspace_mode: form.workspaceMode,
+            enabled_modules: form.enabledModules,
+          });
+        } else {
+          newWorkspace = await createEntity(payload);
+          if (newWorkspace && typeof setActiveWorkspace === 'function') {
+            setActiveWorkspace(newWorkspace);
+          }
+        }
+
+        if (newWorkspace) {
+          navigate('/app/console');
         }
       }
-
-      if (newWorkspace) {
-        navigate('/app/console');
-      }
     } catch (err) {
-      setError(err?.message || 'Failed to create workspace. Please try again.');
+      setError(err?.message || 'Failed to create organization. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -292,7 +334,7 @@ const CreateWorkspace = () => {
           onChange={(e) => update('name', e.target.value)}
           autoFocus
         />
-        <span className="cw-hint">This will be displayed as the workspace name throughout Ledgrionyx.</span>
+        <span className="cw-hint">This will be displayed as the organization name throughout Ledgrionyx.</span>
       </div>
       <div className="cw-field">
         <label className="cw-label">Registration Number <span className="cw-optional">(optional)</span></label>
@@ -317,6 +359,37 @@ const CreateWorkspace = () => {
           {INDUSTRIES.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
         </select>
       </div>
+      <div className="cw-field">
+        <label className="cw-label">Employees</label>
+        <input
+          className="cw-input"
+          type="number"
+          min="1"
+          placeholder="e.g. 1"
+          value={form.employeeCount}
+          onChange={(e) => update('employeeCount', e.target.value)}
+        />
+      </div>
+      <div className="cw-field">
+        <label className="cw-label">Organization Email <span className="cw-optional">(optional)</span></label>
+        <input
+          className="cw-input"
+          type="email"
+          placeholder="e.g. finance@company.com"
+          value={form.email}
+          onChange={(e) => update('email', e.target.value)}
+        />
+      </div>
+      <div className="cw-field cw-field-wide">
+        <label className="cw-label">Logo URL <span className="cw-optional">(optional)</span></label>
+        <input
+          className="cw-input"
+          type="url"
+          placeholder="https://example.com/logo.png"
+          value={form.logoUrl}
+          onChange={(e) => update('logoUrl', e.target.value)}
+        />
+      </div>
     </div>
   );
 
@@ -335,6 +408,16 @@ const CreateWorkspace = () => {
         <select className="cw-select" value={form.currency} onChange={(e) => update('currency', e.target.value)}>
           {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
         </select>
+      </div>
+      <div className="cw-field cw-field-wide">
+        <label className="cw-label">Website <span className="cw-optional">(optional)</span></label>
+        <input
+          className="cw-input"
+          type="url"
+          placeholder="https://company.com"
+          value={form.website}
+          onChange={(e) => update('website', e.target.value)}
+        />
       </div>
     </div>
   );
@@ -413,17 +496,42 @@ const CreateWorkspace = () => {
           onChange={(e) => update('taxRegime', e.target.value)}
         />
       </div>
+      <div className="cw-field">
+        <label className="cw-label">Service Time <span className="cw-optional">(optional)</span></label>
+        <input
+          className="cw-input"
+          type="text"
+          placeholder="e.g. Mon-Fri, 9:00 AM - 6:00 PM"
+          value={form.serviceTime}
+          onChange={(e) => update('serviceTime', e.target.value)}
+        />
+      </div>
+      <div className="cw-field cw-field-wide">
+        <label className="cw-label">Address <span className="cw-optional">(optional)</span></label>
+        <textarea
+          className="cw-input"
+          rows="3"
+          placeholder="Street, city, state, postal code"
+          value={form.address}
+          onChange={(e) => update('address', e.target.value)}
+        />
+      </div>
 
       {/* Summary Review */}
       <div className="cw-field cw-field-wide">
         <div className="cw-review-card">
-          <h4 className="cw-review-title">Review — New Workspace</h4>
+          <h4 className="cw-review-title">Review — New Organization</h4>
           <div className="cw-review-rows">
             <div className="cw-review-row"><span>Name</span><strong>{form.name}</strong></div>
             <div className="cw-review-row"><span>Type</span><strong>{ENTITY_TYPES.find(t => t.value === form.businessType)?.label}</strong></div>
             {form.industry && <div className="cw-review-row"><span>Industry</span><strong>{INDUSTRIES.find(i => i.value === form.industry)?.label}</strong></div>}
             <div className="cw-review-row"><span>Country</span><strong>{COUNTRIES.find(c => c.code === form.country)?.name || form.country}</strong></div>
             <div className="cw-review-row"><span>Currency</span><strong>{form.currency}</strong></div>
+            <div className="cw-review-row"><span>Employees</span><strong>{form.employeeCount || '1'}</strong></div>
+            {form.email && <div className="cw-review-row"><span>Email</span><strong>{form.email}</strong></div>}
+            {form.website && <div className="cw-review-row"><span>Website</span><strong>{form.website}</strong></div>}
+            {form.serviceTime && <div className="cw-review-row"><span>Service Time</span><strong>{form.serviceTime}</strong></div>}
+            {form.address && <div className="cw-review-row"><span>Address</span><strong>{form.address}</strong></div>}
             <div className="cw-review-row"><span>Fiscal Year End</span><strong>{FISCAL_YEAR_ENDS.find(f => f.value === form.fiscalYearEnd)?.label}</strong></div>
           </div>
           <div className="cw-review-note">
@@ -436,13 +544,13 @@ const CreateWorkspace = () => {
 
   const renderStep4 = () => {
     const selectedPackage = WORKSPACE_PACKAGE_OPTIONS.find((option) => option.id === form.workspaceMode) || null;
-    const packageTitle = selectedPackage?.title || 'Choose a workspace package';
+    const packageTitle = selectedPackage?.title || 'Choose an organization package';
     const accountingModules = ACCOUNTING_MODULE_OPTIONS.filter((module) => form.enabledModules.includes(module.key));
     const equityModules = EQUITY_MODULE_OPTIONS.filter((module) => form.enabledModules.includes(module.key));
     const governanceModules = equityModules.filter((module) => module.key === 'equity_governance');
     const preinstalledCount = selectedPackage?.modules?.length || 0;
-    const operatingSystem = WORKSPACE_MODE_LABELS[form.workspaceMode] || 'Choose a workspace package';
-    const licenseLabel = selectedPackage ? 'Included with workspace package' : 'Not selected';
+    const operatingSystem = WORKSPACE_MODE_LABELS[form.workspaceMode] || 'Choose an organization package';
+    const licenseLabel = selectedPackage ? 'Included with organization package' : 'Not selected';
     const userLabel = '1 owner';
 
     const renderModuleNames = (modules) => {
@@ -455,8 +563,8 @@ const CreateWorkspace = () => {
         <section className="cw-launch-section cw-launch-section--summary">
           <div className="cw-launch-section-header">
             <div>
-              <h4 className="cw-launch-section-title">Workspace Summary</h4>
-              <p className="cw-launch-section-subtitle">Select the operating model, then confirm the package that will be created.</p>
+              <h4 className="cw-launch-section-title">Organization Summary</h4>
+              <p className="cw-launch-section-subtitle">Select the operating model, then confirm the organization package that will be provisioned.</p>
             </div>
             <span className="cw-launch-section-pill">Ready to configure</span>
           </div>
@@ -484,7 +592,7 @@ const CreateWorkspace = () => {
             </div>
           </div>
 
-          <div className="cw-launch-package-grid" aria-label="Workspace packages">
+          <div className="cw-launch-package-grid" aria-label="Organization packages">
             {WORKSPACE_PACKAGE_OPTIONS.map((option) => (
               <button
                 key={option.id}
@@ -504,7 +612,7 @@ const CreateWorkspace = () => {
           <div className="cw-launch-section-header">
             <div>
               <h4 className="cw-launch-section-title">Module Overview</h4>
-              <p className="cw-launch-section-subtitle">Only the selected modules will preinstall into the workspace shell.</p>
+              <p className="cw-launch-section-subtitle">Only the selected modules will preinstall into the organization shell.</p>
             </div>
           </div>
 
@@ -532,22 +640,22 @@ const CreateWorkspace = () => {
             <div className="cw-launch-section-header cw-launch-section-header--center">
               <div>
                 <h4 className="cw-launch-section-title">Launch Confirmation</h4>
-                <p className="cw-launch-section-subtitle">Review the final preview, then create the workspace.</p>
+                <p className="cw-launch-section-subtitle">Review the final preview, then create the organization.</p>
               </div>
             </div>
 
             <div className="cw-launch-confirmation-copy">
               <span>Launch Preview</span>
-              <strong>{selectedPackage?.description || 'Pick a package to preview how this workspace will be configured.'}</strong>
+              <strong>{selectedPackage?.description || 'Pick a package to preview how this organization will be configured.'}</strong>
             </div>
 
             <div className="cw-launch-confirmation-actions">
               <button
                 type="submit"
                 className="cw-btn cw-btn-create"
-                disabled={submitting || !form.name || !form.country || !form.workspaceMode || !currentOrganization?.id}
+                disabled={submitting || !form.name || !form.country || !form.workspaceMode || (!isOrgCreate && !currentOrganization?.id)}
               >
-                {submitting ? 'Creating Workspace…' : 'Create Workspace'}
+                {submitting ? 'Creating Organization…' : 'Create Organization'}
               </button>
             </div>
           </div>
@@ -562,16 +670,16 @@ const CreateWorkspace = () => {
 
   const dashboardGuide = [
     {
-      title: 'Visible in Workspace Selector',
-      description: 'After creation, the new workspace shows in the selector so users can open it directly.',
+      title: 'Returns to Ledgrionyx Console',
+      description: 'After creation, you return to the console where the new organization is available from the top-level flow.',
     },
     {
-      title: 'Workspace-first operating model',
-      description: 'Every workspace starts with shared collaboration, finance, and access controls inside the workspace shell.',
+      title: 'Organization-first operating model',
+      description: 'The organization becomes the first operational layer, with workspaces remaining a lower-tier environment.',
     },
     {
-      title: 'Equity stays inside the workspace',
-      description: 'If equity modules are enabled, they remain attached to the workspace and launch from the equity sidebar.',
+      title: 'Dashboards stay intact',
+      description: 'Internal dashboards, modules, and permissions remain unchanged while entry now starts from the console.',
     },
   ];
 
@@ -583,7 +691,7 @@ const CreateWorkspace = () => {
           <LedgrionyxLogo variant="dark" size="small" withText text="Ledgrionyx" />
         </div>
         <button className="cw-topnav-back" onClick={() => navigate('/app/console')}>
-          ← All Workspaces
+          ← All Organizations
         </button>
       </header>
 
@@ -596,10 +704,10 @@ const CreateWorkspace = () => {
       <div className="cw-card">
         {/* Header */}
         <div className="cw-header">
-          <span className="cw-kicker">New Workspace</span>
-          <h1 className="cw-title">Create a Workspace</h1>
+          <span className="cw-kicker">New Organization</span>
+          <h1 className="cw-title">Create Organization</h1>
           <p className="cw-subtitle">
-            A workspace represents one company or entity. You can launch it as accounting, equity management, a combined operating system, or a standalone shell.
+            An organization represents the primary operating container. You can provision it for accounting, equity management, a combined operating system, or a standalone shell.
           </p>
         </div>
 
@@ -673,13 +781,13 @@ const CreateWorkspace = () => {
           <li>
             <div>
               <strong>Scoped Environment</strong>
-              <p>All financial data — ledger entries, invoices, budgets, tax filings — is scoped exclusively to this workspace.</p>
+              <p>All financial data — ledger entries, invoices, budgets, tax filings — is scoped inside this organization environment.</p>
             </div>
           </li>
           <li>
             <div>
               <strong>Dedicated Equity Sidebar</strong>
-              <p>If you enable equity management, the workspace gets a separate Ledgrionyx Equity Management navigation with registry, cap table, valuation, transactions, and governance flows.</p>
+              <p>If you enable equity management, the organization gets a separate Ledgrionyx Equity Management navigation with registry, cap table, valuation, transactions, and governance flows.</p>
             </div>
           </li>
         </ul>

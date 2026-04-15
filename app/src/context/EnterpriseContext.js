@@ -258,15 +258,20 @@ export const EnterpriseProvider = ({ children }) => {
         setOrganizations(data);
         if (data.length > 0 && !currentOrganization) {
           setCurrentOrganization(data[0]);
+        } else if (data.length === 0) {
+          // No organizations — nothing to resolve permissions against, unblock the gate.
+          setIsRoleResolved(true);
         }
       } else {
         setOrganizations([]);
+        setIsRoleResolved(true);
         setError(response.status === 401 ? 'Your session expired. Please log in again.' : 'Failed to fetch organizations');
       }
     } catch (err) {
       setError('Failed to fetch organizations');
       console.error(err);
       setOrganizations([]);
+      setIsRoleResolved(true);
     } finally {
       setLoading(false);
     }
@@ -611,11 +616,13 @@ export const EnterpriseProvider = ({ children }) => {
         switchOrganization(newOrg);
         return newOrg;
       } else {
-        throw new Error('Failed to create organization');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || errorData?.slug?.[0] || errorData?.name?.[0] || 'Failed to create organization');
       }
     } catch (err) {
       setError(err.message);
       console.error(err);
+      throw err;
     }
   }, [apiUrl, buildAuthHeaders, organizations, switchOrganization]);
 
@@ -744,7 +751,7 @@ export const EnterpriseProvider = ({ children }) => {
   }, [apiUrl, buildAuthHeaders, fetchEntities]);
 
   /**
-   * Create a new workspace (entity) and activate it.
+   * Create a new organization record and activate its backing workspace context.
    * Also triggers default chart-of-accounts setup on the backend.
    */
   const createWorkspace = useCallback(async (workspaceData) => {

@@ -233,10 +233,34 @@ const EnterpriseEntities = () => {
   };
 
   const kpis = [
-    { label: 'Total Entities', value: entities.length, accent: '#000000' },
+    { label: 'Total Business Suites', value: entities.length, accent: '#000000' },
     { label: 'Active', value: entities.filter(e => e.status === 'active').length, accent: '#EE6C4D' },
     { label: 'Countries', value: new Set(entities.map(e => e.country)).size, accent: '#000000' },
     { label: 'Currencies', value: new Set(entities.map(e => e.local_currency)).size, accent: '#EE6C4D' },
+  ];
+
+  const creationActions = [
+    {
+      key: 'entity',
+      title: 'Add Entity',
+      description: 'Create a legal entity with accounting-focused setup and launch its dashboard.',
+      path: '/app/workspaces/create?mode=accounting',
+      accent: 'Accounting',
+    },
+    {
+      key: 'workspace',
+      title: 'Add Workspace',
+      description: 'Create a combined operating workspace for accounting and equity workflows.',
+      path: '/app/workspaces/create?mode=combined',
+      accent: 'Operations',
+    },
+    {
+      key: 'equity',
+      title: 'Add Equity',
+      description: 'Create an equity environment for cap table, vesting, grants, and ownership records.',
+      path: '/app/workspaces/create?mode=equity',
+      accent: 'Equity',
+    },
   ];
 
   return (
@@ -245,16 +269,19 @@ const EnterpriseEntities = () => {
       <section className="action-page-hero">
         <div className="action-page-copy">
           <span className="action-page-kicker">Quick Action Destination</span>
-          <h1 className="action-page-title">Entities</h1>
-          <p className="action-page-subtitle">Create, monitor, and drill into the legal entities that power your consolidated overview.</p>
+          <h1 className="action-page-title">Business Suite</h1>
+          <p className="action-page-subtitle">See every business suite dashboard, monitor operations, and drill into each organization structure from one place.</p>
           {hasPermission(PERMISSIONS.CREATE_ENTITY) && (
             <div className="action-page-actions">
-              <button
-                onClick={() => handleOpenModal()}
-                style={{ background: '#ffffff', color: '#000000', border: 'none', borderRadius: 999, padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
-              >
-                Add Entity
-              </button>
+              {creationActions.map((action) => (
+                <button
+                  key={action.key}
+                  onClick={() => navigate(action.path)}
+                  style={{ background: '#ffffff', color: '#000000', border: 'none', borderRadius: 999, padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  {action.title}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -266,10 +293,28 @@ const EnterpriseEntities = () => {
           <div key={kpi.label} className="action-page-stat">
             <span className="action-page-stat-label">{kpi.label}</span>
             <span className="action-page-stat-value">{kpi.value}</span>
-            <span className="action-page-stat-caption">Entity footprint across jurisdictions</span>
+            <span className="action-page-stat-caption">Business suite footprint across jurisdictions</span>
           </div>
         ))}
       </section>
+
+      {hasPermission(PERMISSIONS.CREATE_ENTITY) && (
+        <section className="business-suite-create-grid">
+          {creationActions.map((action) => (
+            <button
+              key={action.key}
+              type="button"
+              className="business-suite-create-card"
+              onClick={() => navigate(action.path)}
+            >
+              <span className="business-suite-create-accent">{action.accent}</span>
+              <h3 className="business-suite-create-title">{action.title}</h3>
+              <p className="business-suite-create-copy">{action.description}</p>
+              <span className="business-suite-create-link">Open creation card</span>
+            </button>
+          ))}
+        </section>
+      )}
 
       {error && (
         <div className="error-banner" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -284,11 +329,11 @@ const EnterpriseEntities = () => {
 
       {/* Entity Cards Grid */}
       {loading ? (
-        <div className="loading">Loading entities…</div>
+        <div className="loading">Loading business suites…</div>
       ) : entities.length === 0 ? (
         <div className="entity-empty-state">
-          <div className="entity-empty-title">No entities yet</div>
-          <div className="entity-empty-text">Create your first entity to get started.</div>
+          <div className="entity-empty-title">No business suites yet</div>
+          <div className="entity-empty-text">Create your first business suite using one of the creation cards above.</div>
         </div>
       ) : (
         <div className="entity-cards-grid">
@@ -365,13 +410,13 @@ const EnterpriseEntities = () => {
       {entities.length > 0 && (
         <div className="entity-table-section">
           <div className="entity-table-header">
-            <h3 className="entity-table-title">All Entities</h3>
+            <h3 className="entity-table-title">All Business Suites</h3>
           </div>
           <div style={{ overflowX: 'auto' }}>
             <table>
               <thead>
                 <tr>
-                  {['Entity Name', 'Country', 'Type', 'Status', 'Currency', 'Filing Date', 'Actions'].map(h => (
+                  {['Business Suite', 'Country', 'Type', 'Status', 'Currency', 'Filing Date', 'Actions'].map(h => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>

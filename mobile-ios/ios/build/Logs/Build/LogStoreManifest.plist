@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>10</integer>
+	<key>logs</key>
+	<dict>
+		<key>62CCD578-53DB-4F45-A105-72420874AA83</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>62CCD578-53DB-4F45-A105-72420874AA83.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>E</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>1</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>26</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>LedgrionyxMobile project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>LedgrionyxMobile</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building workspace LedgrionyxMobile with scheme LedgrionyxMobile and configuration Debug</string>
+			<key>timeStartedRecording</key>
+			<real>797907493.43164206</real>
+			<key>timeStoppedRecording</key>
+			<real>797907972.00271595</real>
+			<key>title</key>
+			<string>Building workspace LedgrionyxMobile with scheme LedgrionyxMobile and configuration Debug</string>
+			<key>uniqueIdentifier</key>
+			<string>62CCD578-53DB-4F45-A105-72420874AA83</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

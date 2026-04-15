@@ -36,10 +36,34 @@ const buildFinancialPositions = () => [
 
 const buildQuickActions = (handleNavigate) => [
   {
+    key: 'create-entity',
+    eyebrow: 'Structure',
+    title: 'Create Entity',
+    description: 'Add a subsidiary, branch, or holding company with full accounting',
+    path: '/app/workspaces/create?mode=accounting',
+    accent: 'entities',
+  },
+  {
+    key: 'create-workspace',
+    eyebrow: 'Operations',
+    title: 'Create Organization',
+    description: 'Set up an operational workspace with combined accounting & equity',
+    path: '/app/workspaces/create?mode=combined',
+    accent: 'team',
+  },
+  {
+    key: 'create-equity',
+    eyebrow: 'Equity',
+    title: 'Create Equity',
+    description: 'Launch an equity tracking environment — cap table, vesting, registry',
+    path: '/app/workspaces/create?mode=equity',
+    accent: 'reports',
+  },
+  {
     key: 'entities',
     eyebrow: 'Structure',
-    title: 'View All Entities',
-    description: 'Manage and monitor all legal entities',
+    title: 'Manage Business Suite',
+    description: 'Manage and monitor the full business suite across legal entities',
     path: '/app/enterprise/entities',
     accent: 'entities',
   },
@@ -209,7 +233,7 @@ const EnterpriseOrgOverview = () => {
         </div>
 
         <div className="org-dashboard-actions">
-          <button className="btn-secondary btn-sm" onClick={() => navigate('/app/enterprise/entities')}>Manage Entities</button>
+          <button className="btn-secondary btn-sm" onClick={() => navigate('/app/enterprise/entities')}>Manage Business Suite</button>
           <button
             className="btn-primary btn-sm"
             onClick={() => {
@@ -369,8 +393,14 @@ const EnterpriseOrgOverview = () => {
                       </div>
                     </div>
                     <div className="ed-ob-actions">
-                      <button className="btn-primary btn-sm" onClick={() => navigate('/app/enterprise/entities')}>
-                        Add First Entity
+                      <button className="btn-primary btn-sm" onClick={() => navigate('/app/workspaces/create?mode=accounting')}>
+                        Create Entity
+                      </button>
+                      <button className="btn-secondary btn-sm" onClick={() => navigate('/app/workspaces/create?mode=combined')}>
+                        Create Organization
+                      </button>
+                      <button className="btn-secondary btn-sm" onClick={() => navigate('/app/workspaces/create?mode=equity')}>
+                        Create Equity
                       </button>
                     </div>
                   </div>

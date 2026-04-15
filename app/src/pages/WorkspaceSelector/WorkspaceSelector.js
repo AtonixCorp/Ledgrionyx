@@ -1,12 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { workspacesAPI } from '../../services/api';
+import { useEnterprise } from '../../context/EnterpriseContext';
+import { organizationsAPI } from '../../services/api';
+import { countryDropdownOptionsByCode, countryDropdownOptionsByName } from '../../utils/countryDropdowns';
 import './WorkspaceSelector.css';
+
+const getCountryLabel = (country) => {
+  if (!country) return 'Not Set';
+  return countryDropdownOptionsByCode.get(country)?.name || countryDropdownOptionsByName.get(country)?.name || country;
+};
+
+const formatDate = (value) => {
+  if (!value) return 'Not Set';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+const getInitials = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'LG';
 
 const WorkspaceSelector = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { switchOrganization } = useEnterprise();
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -21,13 +38,13 @@ const WorkspaceSelector = () => {
       setLoading(true);
       setError('');
       try {
-        const response = await workspacesAPI.getMine();
+        const response = await organizationsAPI.getMyOrganizations();
         if (!active) return;
         const items = Array.isArray(response.data) ? response.data : response.data?.results || [];
         setWorkspaces(items);
       } catch (err) {
         if (!active) return;
-        setError(err.response?.data?.detail || 'Failed to load your workspaces.');
+        setError(err.response?.data?.detail || 'Failed to load your organizations.');
         setWorkspaces([]);
       } finally {
         if (active) {
@@ -43,8 +60,9 @@ const WorkspaceSelector = () => {
     };
   }, []);
 
-  const handleOpenWorkspace = (workspaceId) => {
-    navigate(`/app/workspace/${workspaceId}/overview`);
+  const handleOpenWorkspace = (org) => {
+    switchOrganization(org);
+    navigate('/app/enterprise/org-overview');
   };
 
   return (
@@ -52,20 +70,20 @@ const WorkspaceSelector = () => {
       <main className="ws-selector-shell">
         <section className="ws-selector-hero">
           <div className="ws-selector-copy">
-            <p className="ws-selector-kicker">Workspace Selector</p>
-            <h1>Choose a workspace</h1>
-            <p className="ws-selector-subtitle">{userLabel ? `${userLabel}, ` : ''}open the workspace you want to work in.</p>
+            <p className="ws-selector-kicker">Organization Selector</p>
+            <h1>Choose an organization</h1>
+            <p className="ws-selector-subtitle">{userLabel ? `${userLabel}, ` : ''}open the organization you want to work in.</p>
 
-            <div className="ws-selector-summary" aria-label="Workspace summary">
-              <span>{workspaceCount} {workspaceCount === 1 ? 'workspace' : 'workspaces'} available</span>
+            <div className="ws-selector-summary" aria-label="Organization summary">
+              <span>{workspaceCount} {workspaceCount === 1 ? 'organization' : 'organizations'} available</span>
               <strong>{pendingAccessCount} {pendingAccessCount === 1 ? 'pending access request' : 'pending access requests'}</strong>
             </div>
           </div>
         </section>
 
         <div className="ws-selector-actions ws-selector-actions--top">
-          <button className="ws-selector-create" onClick={() => navigate('/app/workspaces/create')}>
-            Create Workspace
+          <button className="ws-selector-create" onClick={() => navigate('/app/organizations/create')}>
+            Create Organization
           </button>
           <button className="ws-selector-secondary" onClick={() => navigate('/app/console')}>
             Back to Console
@@ -73,7 +91,7 @@ const WorkspaceSelector = () => {
         </div>
 
         {loading ? (
-          <div className="ws-selector-state">Loading workspaces…</div>
+          <div className="ws-selector-state">Loading organizations…</div>
         ) : error ? (
           <div className="ws-selector-state ws-selector-state-error">{error}</div>
         ) : (
@@ -81,74 +99,74 @@ const WorkspaceSelector = () => {
             {workspaces.length === 0 ? (
               <section className="ws-selector-empty">
                 <div className="ws-selector-empty-copy">
-                  <p className="ws-selector-kicker">No workspaces yet</p>
-                  <h2>Create the first workspace</h2>
-                  <p>Once a workspace exists, it will appear here for direct opening.</p>
-                </div>
-                <div className="ws-selector-summary ws-selector-summary--light" aria-label="Workspace summary">
-                  <span>{workspaceCount} available</span>
-                  <strong>{pendingAccessCount} pending access</strong>
-                </div>
-                <div className="ws-selector-empty-actions">
-                  <button className="ws-selector-create" onClick={() => navigate('/app/workspaces/create')}>
-                    Create Workspace
-                  </button>
-                  <button className="ws-selector-secondary" onClick={() => navigate('/app/console')}>
-                    Back to Console
-                  </button>
+                  <p className="ws-selector-kicker">No organizations yet</p>
+                  <h2>Create your first organization</h2>
+                  <p>Use the button above to create an organization and get started.</p>
                 </div>
               </section>
             ) : (
-              <section className="ws-selector-grid" aria-label="My workspaces">
-                {workspaces.map((workspace) => {
-                  const countryOfIncorporation = workspace.country_of_incorporation || 'Not Set';
-                  const profileLabel = workspace.business_type || workspace.linked_entity_industry || 'Business profile unavailable';
-
-                  return (
+              <section className="ws-selector-grid" aria-label="My organizations">
+                {workspaces.map((workspace) => (
                     <article key={workspace.id} className="ws-selector-card">
                       <div className="ws-selector-card-top">
+                        <div className="ws-selector-card-brand">
+                          {workspace.logo_url ? (
+                            <img className="ws-selector-card-logo" src={workspace.logo_url} alt={`${workspace.name} logo`} />
+                          ) : (
+                            <div className="ws-selector-card-logo ws-selector-card-logo--fallback">{getInitials(workspace.name)}</div>
+                          )}
+                        </div>
                         <div className="ws-selector-card-head">
                           <h2>{workspace.name}</h2>
-                          <p>{profileLabel}</p>
+                          <p>{workspace.description || workspace.industry || 'Organization'}</p>
                         </div>
-                        <span className="ws-selector-card-badge">
-                          {workspace.component_count ?? 0} components
-                        </span>
+                        <div className="ws-selector-card-badge">{formatDate(workspace.created_at)}</div>
                       </div>
 
                       <div className="ws-selector-card-fields">
                         <div className="ws-selector-card-field">
-                          <span>Business Type / Industry</span>
-                          <strong>{workspace.business_type || workspace.linked_entity_industry || 'Not Set'}</strong>
+                          <span>Industry</span>
+                          <strong>{workspace.industry || 'Not Set'}</strong>
                         </div>
                         <div className="ws-selector-card-field">
-                          <span>Country of Incorporation</span>
-                          <strong>{countryOfIncorporation}</strong>
+                          <span>Country</span>
+                          <strong>{getCountryLabel(workspace.primary_country)}</strong>
                         </div>
                         <div className="ws-selector-card-field">
                           <span>Currency</span>
-                          <strong>{workspace.currency || 'USD'}</strong>
+                          <strong>{workspace.primary_currency || 'USD'}</strong>
                         </div>
                         <div className="ws-selector-card-field">
-                          <span>Fiscal Year</span>
-                          <strong>{workspace.fiscal_year || 'Not Set'}</strong>
-                        </div>
-                        <div className="ws-selector-card-field">
-                          <span>Tax Regime</span>
-                          <strong>{workspace.tax_regime || 'Not Set'}</strong>
+                          <span>Employees</span>
+                          <strong>{workspace.employee_count ?? 'Not Set'}</strong>
                         </div>
                         <div className="ws-selector-card-field ws-selector-card-field--compact">
-                          <span>Components</span>
-                          <strong>{workspace.component_count ?? 0}</strong>
+                          <span>Email</span>
+                          <strong>{workspace.email || workspace.owner_email || 'Not Set'}</strong>
+                        </div>
+                        <div className="ws-selector-card-field ws-selector-card-field--compact">
+                          <span>Address</span>
+                          <strong>{workspace.address || 'Not Set'}</strong>
+                        </div>
+                        <div className="ws-selector-card-field">
+                          <span>Service Time</span>
+                          <strong>{workspace.service_time || 'Not Set'}</strong>
+                        </div>
+                        <div className="ws-selector-card-field">
+                          <span>Created</span>
+                          <strong>{formatDate(workspace.created_at)}</strong>
+                        </div>
+                        <div className="ws-selector-card-field ws-selector-card-field--compact">
+                          <span>Website</span>
+                          <strong>{workspace.website || 'Not Set'}</strong>
                         </div>
                       </div>
 
-                      <button className="ws-selector-open" onClick={() => handleOpenWorkspace(workspace.id)}>
-                        Open Workspace
+                      <button className="ws-selector-open" onClick={() => handleOpenWorkspace(workspace)}>
+                        Open Organization
                       </button>
                     </article>
-                  );
-                })}
+                ))}
               </section>
             )}
           </>

@@ -145,7 +145,9 @@ import EquityTransactions from './pages/Equity/modules/EquityTransactions';
 import GovernanceReporting from './pages/Equity/modules/GovernanceReporting';
 
 function App() {
-  const routerBasename = process.env.PUBLIC_URL || '/';
+  const routerBasename = process.env.NODE_ENV === 'production'
+    ? (process.env.PUBLIC_URL || '/')
+    : '/';
 
   // Console module routes — open inside the Ledgrionyx Console (Layout with sidebar).
   // WorkspaceRoute / WorkspaceLayout is reserved for workspace-scoped routes only.
@@ -206,8 +208,9 @@ function App() {
 
               {/* Global Console — no sidebar */}
               <Route path="/app/console" element={<ProtectedRoute><GlobalConsoleRoute><GlobalConsole /></GlobalConsoleRoute></ProtectedRoute>} />
-              <Route path="/app/workspaces/select" element={<ProtectedRoute><WorkspaceSelector /></ProtectedRoute>} />
+              <Route path="/app/organizations/select" element={<ProtectedRoute><WorkspaceSelector /></ProtectedRoute>} />
               <Route path="/app/workspaces/create" element={<ProtectedRoute><CreateWorkspace /></ProtectedRoute>} />
+              <Route path="/app/organizations/create" element={<ProtectedRoute><CreateWorkspace /></ProtectedRoute>} />
 
               {/* Enterprise Routes */}
               <Route path="/app/enterprise/org-overview" element={

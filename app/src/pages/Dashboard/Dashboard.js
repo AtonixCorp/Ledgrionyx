@@ -5,7 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import './Dashboard.css';
 
 const sidebarItems = [
-  { label: 'Search', route: '/app/workspaces/select' },
+  { label: 'Search', route: '/app/organizations/select' },
   { label: 'Budget Calculator', route: '/budget' },
   { label: 'Set New Goal', route: '/help-center' },
   { label: 'Ask Coach', route: '/support-center' },

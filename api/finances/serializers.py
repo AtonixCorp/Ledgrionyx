@@ -1,3 +1,4 @@
+from django.utils.text import slugify
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
@@ -70,14 +71,44 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class OrganizationSerializer(serializers.ModelSerializer):
     owner_name = serializers.ReadOnlyField(source='owner.get_full_name')
+    owner_email = serializers.ReadOnlyField(source='owner.email')
     # Backward-compatible aliases (frontend previously used `country`/`currency`)
     country = serializers.CharField(source='primary_country', required=False)
     currency = serializers.CharField(source='primary_currency', required=False)
+    email = serializers.EmailField(source='settings.email', required=False, allow_blank=True)
+    address = serializers.CharField(source='settings.address', required=False, allow_blank=True)
+    service_time = serializers.CharField(source='settings.service_time', required=False, allow_blank=True)
 
     class Meta:
         model = Organization
-        fields = ['id', 'name', 'slug', 'description', 'logo_url', 'industry', 'employee_count', 'primary_currency', 'primary_country', 'country', 'currency', 'settings', 'website', 'owner_name', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'slug', 'description', 'logo_url', 'industry', 'employee_count', 'primary_currency', 'primary_country', 'country', 'currency', 'email', 'address', 'service_time', 'settings', 'website', 'owner_name', 'owner_email', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
+        extra_kwargs = {
+            'slug': {'required': False, 'allow_blank': True},
+        }
+
+    def _merge_settings(self, validated_data, instance=None):
+        incoming_settings = validated_data.pop('settings', None) or {}
+        existing_settings = dict(getattr(instance, 'settings', {}) or {}) if instance is not None else {}
+        existing_settings.update(incoming_settings)
+        validated_data['settings'] = existing_settings
+
+    def create(self, validated_data):
+        self._merge_settings(validated_data)
+        slug = (validated_data.get('slug') or '').strip()
+        if not slug:
+            base_slug = slugify(validated_data.get('name') or '') or 'organization'
+            slug = base_slug
+            suffix = 2
+            while Organization.objects.filter(slug=slug).exists():
+                slug = f'{base_slug}-{suffix}'
+                suffix += 1
+            validated_data['slug'] = slug
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        self._merge_settings(validated_data, instance=instance)
+        return super().update(instance, validated_data)
 
 
 # ============ Entity Serializers ============

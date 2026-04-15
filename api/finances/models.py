@@ -138,7 +138,6 @@ class Entity(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('organization', 'name', 'country')
         ordering = ['country', 'name']
 
     def __str__(self):
