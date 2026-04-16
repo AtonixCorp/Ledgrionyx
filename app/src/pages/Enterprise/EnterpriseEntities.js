@@ -244,21 +244,21 @@ const EnterpriseEntities = () => {
       key: 'entity',
       title: 'Add Entity',
       description: 'Create a legal entity with accounting-focused setup and launch its dashboard.',
-      path: '/app/workspaces/create?mode=accounting',
+      path: '/app/entities/create?mode=accounting',
       accent: 'Accounting',
     },
     {
       key: 'workspace',
       title: 'Add Workspace',
       description: 'Create a combined operating workspace for accounting and equity workflows.',
-      path: '/app/workspaces/create?mode=combined',
+      path: '/app/workspaces/new',
       accent: 'Operations',
     },
     {
       key: 'equity',
       title: 'Add Equity',
       description: 'Create an equity environment for cap table, vesting, grants, and ownership records.',
-      path: '/app/workspaces/create?mode=equity',
+      path: '/app/equity/create',
       accent: 'Equity',
     },
   ];
@@ -297,24 +297,6 @@ const EnterpriseEntities = () => {
           </div>
         ))}
       </section>
-
-      {hasPermission(PERMISSIONS.CREATE_ENTITY) && (
-        <section className="business-suite-create-grid">
-          {creationActions.map((action) => (
-            <button
-              key={action.key}
-              type="button"
-              className="business-suite-create-card"
-              onClick={() => navigate(action.path)}
-            >
-              <span className="business-suite-create-accent">{action.accent}</span>
-              <h3 className="business-suite-create-title">{action.title}</h3>
-              <p className="business-suite-create-copy">{action.description}</p>
-              <span className="business-suite-create-link">Open creation card</span>
-            </button>
-          ))}
-        </section>
-      )}
 
       {error && (
         <div className="error-banner" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

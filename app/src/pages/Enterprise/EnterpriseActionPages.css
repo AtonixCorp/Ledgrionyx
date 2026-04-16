@@ -191,7 +191,7 @@
   text-transform: uppercase;
 }
 
-.entities-page>*:not(.action-page-hero):not(.action-page-stats),
+.entities-page>*:not(.action-page-hero):not(.action-page-stats):not(.business-suite-create-grid),
 .team-container>*:not(.action-page-hero):not(.action-page-stats):not(.modal-overlay),
 .reports-container>*:not(.action-page-hero):not(.action-page-stats) {
   background: var(--overview-surface);
