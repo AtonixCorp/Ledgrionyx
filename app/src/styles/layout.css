@@ -791,6 +791,7 @@
 }
 
 @media (max-width: 960px) {
+
   .ly-primary-nav,
   .ly-utility-links {
     display: none;
