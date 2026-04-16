@@ -375,12 +375,12 @@
 }
 
 .ly-header .ly-nav-link {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: var(--font-weight-medium);
   color: #101820;
   text-decoration: none;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   border-bottom: 2px solid transparent;
   padding: 2px 0 4px;
 }
