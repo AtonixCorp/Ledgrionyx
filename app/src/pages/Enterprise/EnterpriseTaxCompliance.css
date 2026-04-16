@@ -2232,9 +2232,9 @@
    Complete restyle: hero, nav, stat cards, sections, alerts
    ============================================================ */
 
-/* 1. Page-specific hero gradient — deep indigo/navy/teal */
+/* 1. Page-specific hero gradient */
 .enterprise-tax-compliance {
-  --overview-hero-bg: #EE6C4D;
+  --overview-hero-bg: linear-gradient(135deg, #EE6C4D 0%, #D95A3C 60%, #c44d30 100%);
 }
 
 /* 2. Sticky section navigation with glass-morphism */
@@ -2795,7 +2795,7 @@
 
 /* Brand enforcement overrides */
 .enterprise-tax-compliance {
-  --overview-hero-bg: #EE6C4D;
+  --overview-hero-bg: linear-gradient(135deg, #EE6C4D 0%, #D95A3C 60%, #c44d30 100%);
 }
 
 .enterprise-tax-compliance .action-page-stat:nth-child(1)::before,

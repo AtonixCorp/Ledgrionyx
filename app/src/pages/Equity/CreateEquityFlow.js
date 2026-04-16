@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
+import { countryDropdownOptions } from '../../utils/countryDropdowns';
 import '../Workspace/CreateWorkspace.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -25,6 +26,7 @@ const EMPTY_FORM = {
   // Step 1 — Structure type + name
   structureName: '',
   equityType: '',
+  country: '',
   // Step 2 — Shareholders
   shareholders: [{ name: '', email: '', role: 'Founder', percentage: '', shareClass: '' }],
   // Step 3 — Capital
@@ -44,7 +46,7 @@ const STEPS = [
 
 export default function CreateEquityFlow() {
   const navigate = useNavigate();
-  const { createEquityStructure, currentOrganization } = useEnterprise();
+  const { createEntity, currentOrganization } = useEnterprise();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -76,7 +78,7 @@ export default function CreateEquityFlow() {
   };
 
   const canGoNext = () => {
-    if (step === 1) return form.structureName.trim().length >= 2 && !!form.equityType;
+    if (step === 1) return form.structureName.trim().length >= 2 && !!form.equityType && !!form.country;
     if (step === 2) return form.shareholders.some((s) => s.name.trim().length > 0);
     if (step === 3) return !!form.totalShares;
     return true;
@@ -97,6 +99,20 @@ export default function CreateEquityFlow() {
       const payload = {
         organization_id: currentOrganization.id,
         name: form.structureName.trim(),
+        country: form.country,
+        entity_type: 'corporation',
+        workspace_mode: 'equity',
+        status: 'active',
+        enabled_modules: [
+          'equity_registry',
+          'equity_cap_table',
+          'equity_valuation',
+          'equity_transactions',
+          'equity_governance',
+        ],
+        // Store equity-specific metadata in notes fields available on entity
+        registration_number: '',
+        // Pass equity detail as extra context (backend ignores unknown fields gracefully)
         equity_type: form.equityType,
         shareholders: form.shareholders.filter((s) => s.name.trim()),
         total_shares: Number(form.totalShares) || 0,
@@ -105,8 +121,8 @@ export default function CreateEquityFlow() {
         funding_rounds: form.fundingRounds.trim(),
         dilution_model: form.dilutionModel.trim(),
       };
-      await createEquityStructure(payload);
-      navigate('/app/enterprise/org-overview');
+      const newEntity = await createEntity(payload);
+      navigate(`/app/equity/${newEntity.id}/registry`);
     } catch (err) {
       setError(err?.message || 'Failed to create equity structure. Please try again.');
     } finally {
@@ -127,6 +143,20 @@ export default function CreateEquityFlow() {
           autoFocus
         />
         <span className="cw-hint">A descriptive name for this equity structure.</span>
+      </div>
+      <div className="cw-field">
+        <label className="cw-label">Country / Jurisdiction <span className="cw-required">*</span></label>
+        <select
+          className="cw-select"
+          value={form.country}
+          onChange={(e) => update('country', e.target.value)}
+        >
+          <option value="">Select country…</option>
+          {countryDropdownOptions.map((c) => (
+            <option key={c.code} value={c.code}>{c.name}</option>
+          ))}
+        </select>
+        <span className="cw-hint">The jurisdiction where this equity structure is registered.</span>
       </div>
       <div className="cw-field cw-field-wide">
         <label className="cw-label">Equity Structure Type <span className="cw-required">*</span></label>

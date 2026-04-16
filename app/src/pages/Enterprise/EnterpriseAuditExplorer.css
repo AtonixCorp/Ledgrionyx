@@ -3,7 +3,7 @@
 }
 
 .audit-hero {
-  --overview-hero-bg: linear-gradient(135deg, #1E2328 0%, #EE6C4D 100%);
+  --overview-hero-bg: linear-gradient(135deg, #EE6C4D 0%, #D95A3C 60%, #c44d30 100%);
 }
 
 .audit-toolbar {

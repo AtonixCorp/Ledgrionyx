@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useEnterprise } from '../../context/EnterpriseContext';
 import { LogoMark } from '../Brand/LogoMark';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
+  const { currentOrganization } = useEnterprise();
   const navigate = useNavigate();
 
   const [sidebarMinimized, setSidebarMinimized] = React.useState(false);
@@ -233,7 +235,7 @@ const Layout = ({ children }) => {
         <div className="sidebar-header">
           <div className="sidebar-brand">
             <LogoMark size={24} />
-            {!sidebarMinimized && <span style={{ color: '#fff', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap' }}>Ledgrionyx Console</span>}
+            {!sidebarMinimized && <span style={{ color: '#fff', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap' }}>{currentOrganization?.name || 'Ledgrionyx'}</span>}
           </div>
           {!sidebarMinimized && (
             <NavLink to="/app/console" className="sidebar-console-link" title="All Organizations">
@@ -300,7 +302,7 @@ const Layout = ({ children }) => {
         {/* Top Bar */}
         <header className="topbar">
           <div className="topbar-left">
-            <h2 className="topbar-title">Ledgrionyx Console</h2>
+            <h2 className="topbar-title">{currentOrganization?.name || 'Ledgrionyx'}</h2>
           </div>
           <div className="topbar-right">
             <div className="profile-menu" ref={profileRef}>

@@ -1,6 +1,6 @@
 import React from 'react';
-import FooterPrimary from '../footer/FooterPrimary';
-import FooterSecondary from '../footer/FooterSecondary';
+import FooterPrimary from './FooterPrimary';
+import FooterSecondary from './FooterSecondary';
 import './Footer.css';
 
 const Footer = () => {

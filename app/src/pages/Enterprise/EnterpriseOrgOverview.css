@@ -29,7 +29,7 @@
   position: absolute;
 }
 
-.quick-actions > * {
+.quick-actions>* {
   position: relative;
   z-index: 1;
 }
@@ -100,12 +100,29 @@
   gap: 10px;
 }
 
-.position-card.cash { background: linear-gradient(180deg, #ffffff 0%, #f0fdfa 100%); }
-.position-card.investments { background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%); }
-.position-card.real-estate { background: linear-gradient(180deg, #ffffff 0%, #fefce8 100%); }
-.position-card.crypto { background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%); }
-.position-card.derivatives { background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%); }
-.position-card.private-equity { background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); }
+.position-card.cash {
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdfa 100%);
+}
+
+.position-card.investments {
+  background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+}
+
+.position-card.real-estate {
+  background: linear-gradient(180deg, #ffffff 0%, #fefce8 100%);
+}
+
+.position-card.crypto {
+  background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
+}
+
+.position-card.derivatives {
+  background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+}
+
+.position-card.private-equity {
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
 
 .action-button {
   align-items: start;
@@ -152,15 +169,37 @@
   z-index: 1;
 }
 
-.action-button.entities::before { background: linear-gradient(90deg, #0f766e, #14b8a6); }
-.action-button.compliance::before { background: linear-gradient(90deg, #b45309, #f59e0b); }
-.action-button.team::before { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
-.action-button.reports::before { background: linear-gradient(90deg, #4f46e5, #818cf8); }
+.action-button.entities::before {
+  background: linear-gradient(90deg, #0f766e, #14b8a6);
+}
 
-.action-button.entities .action-icon { background: linear-gradient(135deg, #0f766e, #14b8a6); }
-.action-button.compliance .action-icon { background: linear-gradient(135deg, #b45309, #f59e0b); }
-.action-button.team .action-icon { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
-.action-button.reports .action-icon { background: linear-gradient(135deg, #4f46e5, #818cf8); }
+.action-button.compliance::before {
+  background: linear-gradient(90deg, #b45309, #f59e0b);
+}
+
+.action-button.team::before {
+  background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+}
+
+.action-button.reports::before {
+  background: linear-gradient(90deg, #4f46e5, #818cf8);
+}
+
+.action-button.entities .action-icon {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+}
+
+.action-button.compliance .action-icon {
+  background: linear-gradient(135deg, #b45309, #f59e0b);
+}
+
+.action-button.team .action-icon {
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+}
+
+.action-button.reports .action-icon {
+  background: linear-gradient(135deg, #4f46e5, #818cf8);
+}
 
 .action-eyebrow {
   border-radius: 999px;
@@ -237,12 +276,27 @@
 }
 
 .org-dashboard-header {
+  background: linear-gradient(135deg, #EE6C4D 0%, #D95A3C 60%, #c44d30 100%) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.10) !important;
+  border-radius: 0;
   gap: 20px;
+  padding: 36px 40px 32px !important;
   position: relative;
 }
 
 .org-dashboard-header::before {
-  background: radial-gradient(circle at top right, rgba(20, 184, 166, 0.12), transparent 36%);
+  background:
+    radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom left, rgba(0, 0, 0, 0.12) 0%, transparent 55%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  border-radius: inherit;
+}
+
+.org-dashboard-header::after {
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   content: '';
   inset: 0;
   pointer-events: none;
@@ -252,6 +306,15 @@
 .org-dashboard-header > * {
   position: relative;
   z-index: 1;
+}
+
+/* Text colours on accent header */
+.org-dashboard-header .ed-entity-name {
+  color: #ffffff;
+}
+
+.org-dashboard-header .org-dashboard-subtitle {
+  color: rgba(255, 255, 255, 0.80);
 }
 
 .org-dashboard-title-block {
@@ -272,6 +335,27 @@
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
+}
+
+/* Buttons on the accent header */
+.org-dashboard-header .btn-secondary {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.org-dashboard-header .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.org-dashboard-header .btn-primary {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #EE6C4D !important;
+}
+
+.org-dashboard-header .btn-primary:hover {
+  background: rgba(255, 255, 255, 0.88) !important;
 }
 
 .org-dashboard-content {
@@ -301,7 +385,7 @@
   position: absolute;
 }
 
-.org-overview-story > * {
+.org-overview-story>* {
   position: relative;
   z-index: 1;
 }
@@ -367,10 +451,10 @@
 
 .org-dashboard-header .ed-meta-chip {
   align-items: center;
-  background: #ffffff;
-  border: 1px solid var(--overview-line);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.30);
   border-radius: 999px;
-  color: var(--overview-ink);
+  color: #ffffff;
   display: inline-flex;
   font-size: 12px;
   font-weight: 700;
@@ -386,7 +470,7 @@
 }
 
 .org-dashboard-header .ed-meta-sep {
-  color: var(--overview-muted);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .org-summary-cards {
@@ -567,25 +651,29 @@
     display: none;
   }
 }
+
 /* ─── Creation flow output card groups ──────────────────────────────────── */
 .overview-resource-group {
   margin: 32px 0;
 }
+
 .org-group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
 }
+
 .org-group-title {
   font-size: 16px;
   font-weight: 700;
   color: #111;
   margin: 0;
 }
+
 .org-group-add {
   background: none;
-  border: 1px solid rgba(238,108,77,0.4);
+  border: 1px solid rgba(238, 108, 77, 0.4);
   color: #EE6C4D;
   font-size: 12px;
   font-weight: 600;
@@ -594,17 +682,20 @@
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .org-group-add:hover {
-  background: rgba(238,108,77,0.07);
+  background: rgba(238, 108, 77, 0.07);
 }
+
 .org-resource-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 14px;
 }
+
 .org-resource-card {
   background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.10);
+  border: 1px solid rgba(0, 0, 0, 0.10);
   border-radius: 10px;
   padding: 18px 20px;
   display: flex;
@@ -612,22 +703,26 @@
   gap: 6px;
   transition: box-shadow 0.15s;
 }
+
 .org-resource-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
 }
+
 .orc-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 4px;
 }
+
 .orc-type {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(0,0,0,0.44);
+  color: rgba(0, 0, 0, 0.44);
 }
+
 .orc-status {
   display: inline-block;
   font-size: 10px;
@@ -637,36 +732,42 @@
   padding: 2px 7px;
   border-radius: 20px;
 }
+
 .orc-status--active {
-  background: rgba(0,180,80,0.1);
+  background: rgba(0, 180, 80, 0.1);
   color: #0a7a38;
 }
+
 .orc-status--inactive,
 .orc-status--disabled {
-  background: rgba(0,0,0,0.06);
-  color: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.5);
 }
+
 .orc-name {
   font-size: 15px;
   font-weight: 700;
   color: #111;
 }
+
 .orc-meta {
   font-size: 12px;
-  color: rgba(0,0,0,0.48);
+  color: rgba(0, 0, 0, 0.48);
   line-height: 1.4;
 }
+
 .orc-actions {
   display: flex;
   gap: 8px;
   margin-top: 10px;
   padding-top: 12px;
-  border-top: 1px solid rgba(0,0,0,0.07);
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
 }
+
 .orc-btn {
   flex: 1;
   background: transparent;
-  border: 1px solid rgba(0,0,0,0.14);
+  border: 1px solid rgba(0, 0, 0, 0.14);
   color: #333;
   font-size: 12px;
   font-weight: 600;
@@ -675,7 +776,8 @@
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s;
 }
+
 .orc-btn:hover {
-  background: rgba(0,0,0,0.04);
-  border-color: rgba(0,0,0,0.24);
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.24);
 }

@@ -17,6 +17,7 @@ const WorkspaceRoute = ({ children }) => {
   const [resolvedWorkspace, setResolvedWorkspace] = React.useState(null);
   const [permissionLoading, setPermissionLoading] = React.useState(true);
   const [permissionDenied, setPermissionDenied] = React.useState(false);
+  const [workspaceLookupFailed, setWorkspaceLookupFailed] = React.useState(false);
 
   const localResolvedWorkspace = React.useMemo(() => {
     if (!workspaceId) {
@@ -55,9 +56,17 @@ const WorkspaceRoute = ({ children }) => {
   }, [activeWorkspace, entities, workspaceId]);
 
   const effectiveWorkspace = resolvedWorkspace || localResolvedWorkspace;
-  const resolvedWorkspaceId = effectiveWorkspace?.id || workspaceId || null;
+  const rawResolvedId = effectiveWorkspace?.id || workspaceId || null;
+  // Only treat IDs that look like a real UUID or integer as valid workspace IDs.
+  // Local/fake IDs (e.g. equity_1234567890) must not trigger API calls.
+  const isValidWorkspaceId = (id) => {
+    if (!id) return false;
+    const s = String(id);
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s) || /^\d+$/.test(s);
+  };
+  const resolvedWorkspaceId = isValidWorkspaceId(rawResolvedId) ? rawResolvedId : null;
   const permissionSummary = getWorkspacePermissionSummary(resolvedWorkspaceId);
-  const lookupInProgress = Boolean(workspaceId) && !effectiveWorkspace;
+  const lookupInProgress = Boolean(workspaceId) && !effectiveWorkspace && !workspaceLookupFailed;
 
   React.useEffect(() => {
     let active = true;
@@ -70,6 +79,13 @@ const WorkspaceRoute = ({ children }) => {
     }
 
     setPermissionLoading(true);
+
+    // Don't even attempt an API call for fake/local IDs — mark as failed immediately.
+    if (!isValidWorkspaceId(workspaceId)) {
+      setWorkspaceLookupFailed(true);
+      setPermissionLoading(false);
+      return () => { active = false; };
+    }
 
     const token = localStorage.getItem('token') || localStorage.getItem('access_token');
     fetch(`${API_BASE_URL}/v1/workspaces/${workspaceId}`, {
@@ -94,6 +110,7 @@ const WorkspaceRoute = ({ children }) => {
       .catch(() => {
         if (!active) return;
         setResolvedWorkspace(null);
+        setWorkspaceLookupFailed(true);
       })
       .finally(() => {
         if (active) {

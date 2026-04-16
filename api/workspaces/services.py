@@ -290,7 +290,11 @@ class WorkspaceService:
         ])
 
         # Owner is automatically a member with role=owner
-        WorkspaceMember.objects.create(workspace=ws, user=user, role=MemberRole.OWNER, status=ParticipantStatus.ACCEPTED)
+        existing_codes = set(WorkspaceMember.objects.values_list('member_code', flat=True))
+        member_code = None
+        while member_code is None or member_code in existing_codes:
+            member_code = f'{secrets.randbelow(1_000_000):06d}'
+        WorkspaceMember.objects.create(workspace=ws, user=user, role=MemberRole.OWNER, status=ParticipantStatus.ACCEPTED, member_code=member_code)
 
         WorkspaceService._seed_default_departments(ws)
 

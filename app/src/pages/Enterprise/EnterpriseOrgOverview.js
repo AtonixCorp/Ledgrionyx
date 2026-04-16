@@ -79,7 +79,6 @@ const EnterpriseOrgOverview = () => {
     fetchEntities,
     hasPermission,
     PERMISSIONS,
-    equityStructures,
   } = useEnterprise();
   const [loading, setLoading] = useState(false);
   const [branchData, setBranchData] = useState([]);
@@ -88,8 +87,8 @@ const EnterpriseOrgOverview = () => {
   const [sortBy, setSortBy] = useState('revenue');
 
   const createdWorkspaces = (entities || []).filter((e) => e.workspace_mode === 'workspace');
-  const createdEntities = (entities || []).filter((e) => e.workspace_mode !== 'workspace');
-  const createdEquity = equityStructures || [];
+  const createdEquity = (entities || []).filter((e) => e.workspace_mode === 'equity');
+  const createdEntities = (entities || []).filter((e) => e.workspace_mode !== 'workspace' && e.workspace_mode !== 'equity');
 
   const buildBranchData = useCallback((entitiesList) => {
     const branches = entitiesList.map((entity) => ({
@@ -250,26 +249,6 @@ const EnterpriseOrgOverview = () => {
       <div className="ed-content org-dashboard-content">
         {activeTab === 'overview' && (
           <div>
-            <div className="org-overview-story">
-              <div className="org-overview-story-copy">
-                <span className="section-caption">Overview</span>
-                <h2>What this dashboard tells you</h2>
-                <p>{overviewNarrative}</p>
-              </div>
-              <div className="org-overview-story-strip">
-                <div className="org-overview-story-item">
-                  <span className="label">Coverage</span>
-                  <strong>{active_entities} entities</strong>
-                  <span>{active_jurisdictions} jurisdictions and {regionCount} regions</span>
-                </div>
-                <div className="org-overview-story-item">
-                  <span className="label">Focus</span>
-                  <strong>{attentionCount > 0 ? `${attentionCount} items` : 'No open items'}</strong>
-                  <span>{pending_tax_returns} pending returns and {missing_data_entities} incomplete entity records</span>
-                </div>
-              </div>
-            </div>
-
             <div className="summary-cards org-summary-cards" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
               <div className="summary-card profit">
                 <div className="card-label">Net Position</div>
@@ -569,15 +548,15 @@ const EnterpriseOrgOverview = () => {
               {createdEquity.map((eq) => (
                 <div className="org-resource-card" key={eq.id}>
                   <div className="orc-top">
-                    <span className="orc-type">{eq.structureType || eq.structure_type || 'Equity'}</span>
-                    <span className="orc-status orc-status--active">active</span>
+                    <span className="orc-type">{eq.entity_type || 'Equity'}</span>
+                    <span className={`orc-status orc-status--${eq.status || 'active'}`}>{eq.status || 'active'}</span>
                   </div>
                   <div className="orc-name">{eq.name}</div>
-                  <div className="orc-meta">{eq.totalShares ? `${Number(eq.totalShares).toLocaleString()} shares` : ''}</div>
-                  <div className="orc-meta">{eq.createdAt ? new Date(eq.createdAt).toLocaleDateString() : ''}</div>
+                  <div className="orc-meta">{eq.country || ''}{eq.local_currency ? ` · ${eq.local_currency}` : ''}</div>
+                  <div className="orc-meta">{eq.created_at ? new Date(eq.created_at).toLocaleDateString() : ''}</div>
                   <div className="orc-actions">
-                    <button className="orc-btn" onClick={() => navigate(`/app/equity/${eq.id}`)}>Open</button>
-                    <button className="orc-btn" onClick={() => navigate(`/app/equity/${eq.id}/settings`)}>Settings</button>
+                    <button className="orc-btn" onClick={() => navigate(`/app/equity/${eq.id}/registry`)}>Open</button>
+                    <button className="orc-btn" onClick={() => navigate(`/app/enterprise/entities/${eq.id}/dashboard`)}>Settings</button>
                   </div>
                 </div>
               ))}

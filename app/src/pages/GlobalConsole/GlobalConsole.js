@@ -407,23 +407,22 @@ const GlobalConsole = () => {
         </div>
       </header>
 
+      <section className="gc-capital-hero">
+        <div className="gc-capital-hero-copy">
+          <p className="gc-capital-subtitle">Oversight • Risk • Compliance • Liquidity</p>
+          <div className="gc-capital-meta-row">
+            <span className="gc-capital-pill">Prime capital posture</span>
+            <span className="gc-capital-pill gc-capital-pill--muted">Market pulse enabled</span>
+          </div>
+        </div>
+        <div className="gc-capital-badges">
+          <span className="gc-compliance-badge">Compliance: Current</span>
+          <span className="gc-capital-watermark">LEDGRIONYX GLOBAL</span>
+        </div>
+      </section>
+
       <div className="gc-body">
         <div className="global-console">
-          <section className="gc-capital-hero">
-            <div className="gc-capital-hero-copy">
-              <span className="gc-kicker gc-kicker--capital">Ledgrionyx — Global Capital Console</span>
-              <h1 className="gc-capital-title">Ledgrionyx — Global Capital Console</h1>
-              <p className="gc-capital-subtitle">Oversight • Risk • Compliance • Liquidity</p>
-              <div className="gc-capital-meta-row">
-                <span className="gc-capital-pill">Prime capital posture</span>
-                <span className="gc-capital-pill gc-capital-pill--muted">Market pulse enabled</span>
-              </div>
-            </div>
-            <div className="gc-capital-badges">
-              <span className="gc-compliance-badge">Compliance: Current</span>
-              <span className="gc-capital-watermark">LEDGRIONYX GLOBAL</span>
-            </div>
-          </section>
 
           <section className="gc-market-strip">
             <div className="gc-section-header gc-section-header--tight">
