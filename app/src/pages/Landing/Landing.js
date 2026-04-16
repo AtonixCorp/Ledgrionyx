@@ -25,10 +25,10 @@ const systemSteps = [
 ];
 
 const operatingPrinciples = [
-  'Separate entity records, approvals, and responsibilities without losing enterprise visibility.',
-  'Give controllers, tax leads, and administrators one source of operational truth.',
-  'Keep execution structured enough for audits, board reviews, and regulated reporting cycles.',
-  'Reduce handoffs by keeping ownership, accounting, and tax execution inside one governed system.',
+  'One environment for entity records, approvals, and responsibilities — without losing enterprise visibility.',
+  'Controllers, tax leads, and administrators share one source of operational truth.',
+  'Execution stays structured enough for audits, board reviews, and regulated reporting cycles.',
+  'Ownership, accounting, and tax execution stay inside one governed system — reducing handoffs.',
 ];
 
 const operationalPillars = [
@@ -146,11 +146,6 @@ const Landing = () => {
 
         <section className="landing-section landing-section--system">
           <div className="landing-shell">
-            <div className="landing-section-heading">
-              <p className="landing-kicker">Three-Step System</p>
-              <h2 className="landing-section-title">The homepage should explain the system in one calm sequence.</h2>
-            </div>
-
             <div className="landing-system-grid">
               {systemSteps.map((lane) => (
                 <article key={lane.step} className="landing-system-card">
@@ -165,10 +160,6 @@ const Landing = () => {
 
         <section className="landing-section">
           <div className="landing-shell landing-philosophy">
-            <div>
-              <p className="landing-kicker">Operational Philosophy</p>
-              <h2 className="landing-section-title">A cleaner architecture for operational finance and governance.</h2>
-            </div>
             <ul className="landing-principles">
               {operatingPrinciples.map((principle) => (
                 <li key={principle}>{principle}</li>
@@ -179,11 +170,6 @@ const Landing = () => {
 
         <section className="landing-section landing-section--pillars">
           <div className="landing-shell">
-            <div className="landing-section-heading">
-              <p className="landing-kicker">Operational Pillars</p>
-              <h2 className="landing-section-title">Three controlled layers for the work that matters.</h2>
-            </div>
-
             <div className="landing-pillars-grid">
               {operationalPillars.map((pillar) => (
                 <article key={pillar.title} className="landing-pillar-card">

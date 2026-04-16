@@ -108,7 +108,7 @@
 .about-page .future-closing,
 .about-page .about-cta-inner p,
 .support-page .section-subtitle,
-.help-center-page .contact-text > p,
+.help-center-page .contact-text>p,
 .help-center-page .faq-answer p,
 .pricing-page .plan-header p,
 .pricing-page .pricing-features .feature-item p,
@@ -242,6 +242,7 @@
 }
 
 @media (min-width: 1440px) {
+
   .landing-page,
   .product-page,
   .features-page,
@@ -261,6 +262,7 @@
 }
 
 @media (min-width: 1024px) and (max-width: 1439px) {
+
   .landing-page,
   .product-page,
   .features-page,
@@ -281,6 +283,7 @@
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
+
   .landing-page,
   .product-page,
   .features-page,
@@ -302,6 +305,7 @@
 }
 
 @media (max-width: 767px) {
+
   .landing-page,
   .product-page,
   .features-page,
@@ -384,7 +388,7 @@
   color: var(--color-text);
 }
 
-.pricing-page .switch input:checked + .slider,
+.pricing-page .switch input:checked+.slider,
 .global-tax-page .tax-list-item.active,
 .deployment-page .deployment-status-card__live {
   color: var(--color-primary);
@@ -399,7 +403,7 @@
   background: rgba(var(--color-text-rgb), 0.12);
 }
 
-.pricing-page .switch input:checked + .slider {
+.pricing-page .switch input:checked+.slider {
   background: rgba(var(--color-primary-rgb), 0.2);
 }
 
@@ -530,13 +534,11 @@
 .features-page .showcase-image {
   border: 1px solid rgba(var(--color-text-rgb), 0.12);
   border-radius: var(--radius-lg);
-  background: repeating-linear-gradient(
-    90deg,
-    rgba(var(--color-text-rgb), 0.02),
-    rgba(var(--color-text-rgb), 0.02) 16px,
-    rgba(var(--color-background-rgb), 1) 16px,
-    rgba(var(--color-background-rgb), 1) 32px
-  );
+  background: repeating-linear-gradient(90deg,
+      rgba(var(--color-text-rgb), 0.02),
+      rgba(var(--color-text-rgb), 0.02) 16px,
+      rgba(var(--color-background-rgb), 1) 16px,
+      rgba(var(--color-background-rgb), 1) 32px);
   color: var(--color-text);
 }
 
@@ -636,6 +638,7 @@
 }
 
 @media (max-width: 768px) {
+
   .product-page .product-hero,
   .features-page .features-hero,
   .pricing-page .pricing-hero,
