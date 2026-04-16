@@ -17,6 +17,13 @@
 .deployment-page {
   background: var(--color-background);
   color: var(--color-text);
+  --public-max-width: 1280px;
+  --public-pad-inline: 24px;
+  --public-section-space: 120px;
+  --public-hero-title-size: 52px;
+  --public-section-title-size: 32px;
+  --public-body-size: 18px;
+  --public-body-line-height: 1.6;
 }
 
 .product-page .container,
@@ -33,10 +40,10 @@
 .tax-search-container,
 .tax-status-banner,
 .tax-content-wrapper {
-  max-width: 1240px;
+  max-width: var(--public-max-width);
   margin: 0 auto;
-  padding-left: var(--space-xl);
-  padding-right: var(--space-xl);
+  padding-left: var(--public-pad-inline);
+  padding-right: var(--public-pad-inline);
   box-sizing: border-box;
 }
 
@@ -53,8 +60,8 @@
 .global-tax-page .tax-hero {
   background: var(--color-background);
   border-bottom: 1px solid var(--border-color-default);
-  padding-top: var(--space-4xl);
-  padding-bottom: var(--space-4xl);
+  padding-top: var(--public-section-space);
+  padding-bottom: var(--public-section-space);
 }
 
 .about-page .about-hero-bg {
@@ -74,9 +81,9 @@
 .global-tax-page .tax-hero-title,
 .landing-page .ly-hero-headline {
   color: var(--color-text);
-  font-size: var(--font-size-3xl);
+  font-size: var(--public-hero-title-size);
   font-weight: var(--font-weight-semibold);
-  line-height: 1.2;
+  line-height: 1.1;
   letter-spacing: 0;
 }
 
@@ -181,8 +188,8 @@
 .contact-page .hours-section {
   background: var(--color-background);
   color: var(--color-text);
-  padding-top: var(--space-4xl);
-  padding-bottom: var(--space-4xl);
+  padding-top: var(--public-section-space);
+  padding-bottom: var(--public-section-space);
   border-bottom: 1px solid var(--border-color-default);
 }
 
@@ -234,6 +241,88 @@
   box-shadow: none;
 }
 
+@media (min-width: 1440px) {
+  .landing-page,
+  .product-page,
+  .features-page,
+  .pricing-page,
+  .about-page,
+  .support-page,
+  .help-center-page,
+  .contact-page,
+  .privacy-page,
+  .global-tax-page,
+  .cli-docs-page,
+  .deployment-page {
+    --public-max-width: 1440px;
+    --public-section-space: 132px;
+    --public-hero-title-size: 56px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .landing-page,
+  .product-page,
+  .features-page,
+  .pricing-page,
+  .about-page,
+  .support-page,
+  .help-center-page,
+  .contact-page,
+  .privacy-page,
+  .global-tax-page,
+  .cli-docs-page,
+  .deployment-page {
+    --public-max-width: 1280px;
+    --public-section-space: 116px;
+    --public-hero-title-size: 48px;
+    --public-section-title-size: 30px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .landing-page,
+  .product-page,
+  .features-page,
+  .pricing-page,
+  .about-page,
+  .support-page,
+  .help-center-page,
+  .contact-page,
+  .privacy-page,
+  .global-tax-page,
+  .cli-docs-page,
+  .deployment-page {
+    --public-pad-inline: 24px;
+    --public-section-space: 104px;
+    --public-hero-title-size: 40px;
+    --public-section-title-size: 28px;
+    --public-body-size: 17px;
+  }
+}
+
+@media (max-width: 767px) {
+  .landing-page,
+  .product-page,
+  .features-page,
+  .pricing-page,
+  .about-page,
+  .support-page,
+  .help-center-page,
+  .contact-page,
+  .privacy-page,
+  .global-tax-page,
+  .cli-docs-page,
+  .deployment-page {
+    --public-pad-inline: 24px;
+    --public-section-space: 88px;
+    --public-hero-title-size: 34px;
+    --public-section-title-size: 28px;
+    --public-body-size: 16px;
+    --public-body-line-height: 1.55;
+  }
+}
+
 .product-page .product-card:hover,
 .features-page .feature-card:hover,
 .support-page .help-link:hover,
@@ -243,25 +332,13 @@
 .help-center-page .quick-link:hover,
 .help-center-page .article-list a:hover,
 .features-page .features-cta .btn-outline:hover,
-.pricing-page .plan-button.outline:hover,
-.product-page .btn-outline:hover,
-.deployment-page .deployment-btn:hover,
-.global-tax-page .tax-list-item:hover,
-.global-tax-page .summary-link:hover,
-.global-tax-page .reference-link:hover,
-.global-tax-page .primary-link:hover,
-.global-tax-page .secondary-link:hover,
-.about-page .btn-outline-hero:hover,
-.about-page .about-cta-buttons .btn-outline:hover {
-  transform: none;
-  text-decoration: none;
-}
-
-.product-page .product-icon,
 .features-page .feature-icon,
 .pricing-page .plan-icon,
-.support-page .help-icon,
-.support-page .contact-icon,
+.deployment-page .deployment-btn:hover,
+.global-tax-page .tax-list-item:hover {
+  border-color: rgba(var(--color-text-rgb), 0.16);
+}
+
 .help-center-page .category-icon,
 .about-page .solution-chip-icon,
 .about-page .future-icon,
@@ -600,8 +677,8 @@
   .contact-page .contact-form-section,
   .contact-page .offices-section,
   .contact-page .hours-section {
-    padding-top: var(--space-2xl);
-    padding-bottom: var(--space-2xl);
+    padding-top: var(--public-section-space);
+    padding-bottom: var(--public-section-space);
   }
 
   .product-page .container,
@@ -618,7 +695,7 @@
   .tax-search-container,
   .tax-status-banner,
   .tax-content-wrapper {
-    padding-left: var(--space-base);
-    padding-right: var(--space-base);
+    padding-left: var(--public-pad-inline);
+    padding-right: var(--public-pad-inline);
   }
 }

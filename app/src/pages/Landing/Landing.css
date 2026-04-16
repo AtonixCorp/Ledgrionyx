@@ -2,6 +2,13 @@
     font-family: Inter, 'IBM Plex Sans', system-ui, sans-serif;
     background: #ffffff;
     color: #111111;
+    --landing-max-width: 1280px;
+    --landing-pad-inline: 24px;
+    --landing-section-space: 120px;
+    --landing-hero-title-size: 52px;
+    --landing-section-title-size: 32px;
+    --landing-body-size: 18px;
+    --landing-grid-gap: 24px;
 }
 
 .landing-page--loading {
@@ -16,7 +23,7 @@
 }
 
 .landing-shell {
-    width: min(1180px, calc(100% - 48px));
+    width: min(var(--landing-max-width), calc(100% - (var(--landing-pad-inline) * 2)));
     margin: 0 auto;
 }
 
@@ -32,7 +39,7 @@
 .landing-section-title {
     margin: 0;
     max-width: 16ch;
-    font-size: clamp(2rem, 3vw, 2.75rem);
+    font-size: var(--landing-section-title-size);
     line-height: 1.12;
     letter-spacing: -0.03em;
     color: #111111;
@@ -45,36 +52,37 @@
 .landing-principles li,
 .landing-hero__frame-copy p {
     margin: 0;
-    font-size: 17px;
+    font-size: var(--landing-body-size);
     line-height: 1.6;
     color: #4d4d4d;
 }
 
-.landing-hero,
 .landing-section {
-    padding: 112px 0;
+    padding: var(--landing-section-space) 0;
 }
 
 .landing-hero {
+    padding: 56px 0 var(--landing-section-space);
     background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
     border-bottom: 1px solid #e7e7e7;
 }
 
 .landing-hero__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
-    gap: 56px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--landing-grid-gap);
     align-items: center;
 }
 
 .landing-hero__copy {
+    grid-column: span 7;
     padding-right: 12px;
 }
 
 .landing-hero__copy h1 {
     margin: 0;
     max-width: 12ch;
-    font-size: clamp(2.4rem, 4.4vw, 3.45rem);
+    font-size: var(--landing-hero-title-size);
     line-height: 1.04;
     letter-spacing: -0.045em;
     color: #111111;
@@ -83,7 +91,7 @@
 .landing-lead {
     margin-top: 24px;
     max-width: 58ch;
-    font-size: 18px;
+    font-size: var(--landing-body-size);
 }
 
 .landing-actions {
@@ -152,6 +160,7 @@
 }
 
 .landing-hero__frame {
+    grid-column: span 5;
     min-height: 440px;
     padding: 32px;
     border: 1px solid #e3e3e3;
@@ -284,12 +293,13 @@
 .landing-system-grid,
 .landing-pillars-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 28px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--landing-grid-gap);
 }
 
 .landing-system-card,
 .landing-pillar-card {
+    grid-column: span 4;
     min-height: 100%;
     padding: 28px 0 0;
     border-top: 1px solid #111111;
@@ -341,19 +351,56 @@
     width: 7px;
     height: 7px;
     border-radius: 999px;
-    background: #111111;
+    background: #b8b8b8;
+}
+
+.landing-philosophy>div {
+    grid-column: span 7;
+}
+
+.landing-philosophy .landing-principles {
+    grid-column: span 5;
+}
+
+@media (min-width: 1440px) {
+    .landing-page {
+        --landing-section-space: 132px;
+        --landing-hero-title-size: 56px;
+    }
+
+    .landing-shell {
+        width: min(1440px, calc(100% - 48px));
+    }
 }
 
 @media (max-width: 1080px) {
+    .landing-page {
+        --landing-section-space: 104px;
+        --landing-hero-title-size: 40px;
+        --landing-section-title-size: 28px;
+        --landing-body-size: 17px;
+    }
 
     .landing-hero__layout,
     .landing-philosophy,
+    .landing-hero__summary-grid {
+        grid-template-columns: 1fr;
+    }
+
     .landing-system-grid,
     .landing-pillars-grid {
         grid-template-columns: 1fr;
     }
 
-    .landing-section-title,
+    .landing-hero__copy,
+    .landing-hero__frame,
+    .landing-philosophy>div,
+    .landing-philosophy .landing-principles,
+    .landing-system-card,
+    .landing-pillar-card {
+        grid-column: span 12;
+    }
+
     .landing-hero__copy h1 {
         max-width: 100%;
     }
@@ -365,10 +412,13 @@
 
 @media (max-width: 720px) {
     .landing-shell {
-        width: min(1180px, calc(100% - 32px));
+        width: min(100%, calc(100% - 32px));
     }
 
-    .landing-hero,
+    .landing-hero {
+        padding: 40px 0 88px;
+    }
+
     .landing-section {
         padding: 88px 0;
     }

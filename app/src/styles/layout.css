@@ -292,7 +292,7 @@
 
 .ly-utility-inner,
 .ly-primary-inner {
-  max-width: 1440px;
+  max-width: 1280px;
   height: 100%;
   margin: 0 auto;
   display: flex;
@@ -788,7 +788,7 @@
   color: #FFFFFF;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1023px) {
 
   .ly-primary-nav,
   .ly-utility-links {
@@ -817,6 +817,11 @@
 
   .ly-primary-inner {
     padding: 15px 24px;
+    max-width: 100%;
+  }
+
+  .ly-utility-inner {
+    max-width: 100%;
   }
 
   .ly-mobile-link {
@@ -845,6 +850,23 @@
 
   .main-content {
     overflow-y: visible;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ly-primary-bar {
+    min-height: 72px;
+  }
+
+  .ly-header .ly-nav-link {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .ly-utility-inner,
+  .ly-primary-inner {
+    max-width: 1440px;
   }
 }
 
