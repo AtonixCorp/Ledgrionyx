@@ -1,39 +1,15 @@
 .ledgrionyx-logo-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  color: var(--ly-color-primary);
+  gap: 10px;
+  text-decoration: none;
+  user-select: none;
 }
 
 .ledgrionyx-logo-mark {
   display: block;
   flex-shrink: 0;
-}
-
-.ledgrionyx-logo-mark__ring,
-.ledgrionyx-logo-mark__orbit,
-.ledgrionyx-logo-mark__beam,
-.ledgrionyx-logo-mark__crossbar {
-  vector-effect: non-scaling-stroke;
-}
-
-.ledgrionyx-logo-mark__ring {
-  stroke: currentColor;
-  stroke-width: 4;
-}
-
-.ledgrionyx-logo-mark__orbit {
-  stroke: var(--ly-color-accent);
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-
-.ledgrionyx-logo-mark__beam,
-.ledgrionyx-logo-mark__crossbar {
-  stroke: currentColor;
-  stroke-width: 4.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  border-radius: 12px;
 }
 
 .ledgrionyx-logo-wordmark {
@@ -43,49 +19,64 @@
   line-height: 1;
 }
 
+/* ── Institutional wordmark ─────────────────────────────────── */
 .ledgrionyx-logo-wordmark__primary {
-  font-family: var(--ly-font-family-sans);
+  font-family: 'Inter', 'IBM Plex Sans', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: currentColor;
+  color: var(--color-black);
   letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .ledgrionyx-logo-wordmark__secondary {
-  font-family: var(--ly-font-family-sans);
-  font-size: 0.75rem;
+  font-family: 'Inter', 'IBM Plex Sans', sans-serif;
+  font-size: 0.625rem;
   font-weight: 600;
-  color: var(--ly-color-text-muted);
+  color: rgba(0, 0, 0, 0.40);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.ledgrionyx-logo--small {
-  gap: 10px;
+/* ── Variant: full (light background) ───────────────────────── */
+.ledgrionyx-logo--full .ledgrionyx-logo-wordmark__primary {
+  color: #000000;
+}
+.ledgrionyx-logo--full .ledgrionyx-logo-wordmark__secondary {
+  color: rgba(0, 0, 0, 0.40);
 }
 
+/* ── Variant: white — dark backgrounds ──────────────────────── */
+.ledgrionyx-logo--white .ledgrionyx-logo-wordmark__primary,
+.ledgrionyx-logo--dark .ledgrionyx-logo-wordmark__primary {
+  color: #FFFFFF;
+}
+.ledgrionyx-logo--white .ledgrionyx-logo-wordmark__secondary,
+.ledgrionyx-logo--dark .ledgrionyx-logo-wordmark__secondary {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Variant: mono ───────────────────────────────────────────── */
+.ledgrionyx-logo--mono .ledgrionyx-logo-wordmark__primary {
+  color: #000000;
+}
+.ledgrionyx-logo--mono .ledgrionyx-logo-wordmark__secondary {
+  color: rgba(0, 0, 0, 0.40);
+}
+
+/* ── Sizes ───────────────────────────────────────────────────── */
 .ledgrionyx-logo--small .ledgrionyx-logo-wordmark__primary {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
+  letter-spacing: -0.015em;
 }
 
 .ledgrionyx-logo--large {
-  gap: 14px;
+  gap: 12px;
 }
 
 .ledgrionyx-logo--large .ledgrionyx-logo-wordmark__primary {
-  font-size: 1.125rem;
-}
-
-.ledgrionyx-logo--white {
-  color: #ffffff;
-}
-
-.ledgrionyx-logo--white .ledgrionyx-logo-wordmark__secondary {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.ledgrionyx-logo--white .ledgrionyx-logo-mark__orbit {
-  stroke: rgba(255, 255, 255, 0.72);
+  font-size: 1.1875rem;
+  letter-spacing: -0.025em;
 }
 
 .ledgrionyx-logo--mono {

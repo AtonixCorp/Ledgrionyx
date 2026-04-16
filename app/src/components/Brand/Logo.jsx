@@ -1,14 +1,8 @@
 import React from 'react';
-import logoSrc from '../../assets/logo-ledgrionyx.svg';
+import LedgrionyxLogo from '../branding/LedgrionyxLogo';
 
 export const Logo = ({ height = 32 }) => {
-  return (
-    <img
-      src={logoSrc}
-      alt="Ledgrionyx Global Platform"
-      style={{ display: 'block', height, width: 'auto' }}
-    />
-  );
+  return <LedgrionyxLogo variant="full" size={height} withText />;
 };
 
 export default Logo;

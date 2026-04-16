@@ -307,7 +307,7 @@ export default function CreateEquityFlow() {
     <div className="cw-page">
       <nav className="cw-topnav">
         <div className="cw-topnav-brand">
-          <LedgrionyxLogo size={28} />
+          <LedgrionyxLogo variant="white" size={28} withText={false} />
           <span className="cw-topnav-title">Create Equity Structure</span>
         </div>
         <button className="cw-topnav-cancel" onClick={() => navigate('/app/enterprise/org-overview')}>

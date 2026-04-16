@@ -1,31 +1,36 @@
 {
   "brand": "Ledgrionyx",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "colors": {
     "primary": {
-      "navy":        { "hex": "#0A2A6C", "rgb": [10, 42, 108],  "usage": "App icon background, splash background, primary UI" },
-      "navyDark":    { "hex": "#061848", "rgb": [6,  24,  72],  "usage": "Dark mode background" }
+      "accent":      { "hex": "#EE6C4D", "rgb": [238, 108, 77],  "usage": "App icon background, splash background, CTAs, primary buttons" },
+      "accentHover": { "hex": "#D95A3C", "rgb": [217,  90, 60],  "usage": "Button hover / pressed state" }
     },
-    "accent": {
-      "gold":        { "hex": "#C8A44D", "rgb": [200, 164, 77], "usage": "Shield ring, borders, gold accents" }
-    },
-    "secondary": {
-      "shieldBlue":  { "hex": "#1F4BA8", "rgb": [31,  75, 168], "usage": "Shield inner border on light backgrounds" },
-      "textMuted":   { "hex": "#4A5578", "rgb": [74,  85, 120], "usage": "Tagline, secondary text" }
+    "base": {
+      "black":       { "hex": "#000000", "rgb": [0, 0, 0],       "usage": "Text, headings, secondary buttons, dark surfaces" },
+      "white":       { "hex": "#FFFFFF", "rgb": [255, 255, 255],  "usage": "Shield emblem, text on dark, card backgrounds" }
     },
     "neutral": {
-      "white":       { "hex": "#FFFFFF", "rgb": [255, 255, 255], "usage": "Monogram A, text on dark" },
-      "textDark":    { "hex": "#0B0B0B", "rgb": [11,  11,  11],  "usage": "Body text on light backgrounds" }
+      "gray":        { "hex": "#6B6B6B", "rgb": [107, 107, 107], "usage": "Muted text, input borders, secondary labels" },
+      "grayLight":   { "hex": "#F5F5F5", "rgb": [245, 245, 245], "usage": "Backgrounds, accent surfaces" }
     }
   },
   "typography": {
-    "primary":   { "family": "IBM Plex Sans", "weights": [600, 700] },
-    "fallback":  ["Inter", "system-ui", "sans-serif"],
-    "wordmark":  { "size": 21, "weight": 700, "letterSpacing": -0.5 },
-    "tagline":   { "text": "GLOBAL PLATFORM", "size": 10.5, "weight": 600, "letterSpacing": 2, "transform": "uppercase" }
+    "primary":   { "family": "Inter", "weights": [400, 500, 600, 700] },
+    "fallback":  ["IBM Plex Sans", "system-ui", "sans-serif"],
+    "wordmark":  { "size": 21, "weight": 600, "letterSpacing": -0.5 }
+  },
+  "iconSpec": {
+    "background":  "#EE6C4D",
+    "emblem":      "white-shield",
+    "safeZone":    "14%",
+    "cornerRadius": "14% of canvas width",
+    "masterSize":  1024,
+    "ios":         [1024, 180, 120, 87, 60, 58, 40, 29],
+    "android":     [512, 192, 144, 96, 72, 48]
   },
   "lockup": {
-    "rule":      "icon-left, text-right",
+    "rule":      "icon-left, wordmark-right",
     "spacing":   "25% of icon width",
     "alignment": "center-vertical"
   }

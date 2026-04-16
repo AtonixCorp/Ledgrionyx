@@ -281,7 +281,7 @@ export default function CreateWorkspaceFlow() {
       {/* Top Nav */}
       <nav className="cw-topnav">
         <div className="cw-topnav-brand">
-          <LedgrionyxLogo size={28} />
+          <LedgrionyxLogo variant="white" size={28} withText={false} />
           <span className="cw-topnav-title">Create Workspace</span>
         </div>
         <button className="cw-topnav-cancel" onClick={() => navigate('/app/enterprise/org-overview')}>

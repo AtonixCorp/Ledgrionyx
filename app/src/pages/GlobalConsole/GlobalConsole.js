@@ -359,7 +359,7 @@ const GlobalConsole = () => {
       <header className="gc-topnav">
         <div className="gc-topnav-left">
           <div className="gc-topnav-brand">
-            <LedgrionyxLogo variant="dark" size="small" withText text="Ledgrionyx" />
+            <LedgrionyxLogo variant="white" size="small" withText text="Ledgrionyx" />
           </div>
           <div className="gc-topnav-org-block">
             <span className="gc-topnav-org-label">Organization</span>

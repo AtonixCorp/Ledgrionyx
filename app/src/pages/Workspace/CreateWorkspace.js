@@ -707,7 +707,7 @@ const CreateWorkspace = () => {
       {/* Top Navbar */}
       <header className="cw-topnav">
         <div className="cw-topnav-brand">
-          <LedgrionyxLogo variant="dark" size="small" withText text="Ledgrionyx" />
+          <LedgrionyxLogo variant="white" size="small" withText text="Ledgrionyx" />
         </div>
         <button className="cw-topnav-back" onClick={() => navigate('/app/console')}>
           ← {isEntityCreate ? 'All Entities' : 'All Organizations'}

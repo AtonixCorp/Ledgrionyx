@@ -1,21 +1,20 @@
 import React from 'react';
 import './LedgrionyxLogo.css';
 
-
 const SIZE_MAP = {
-  small: 24,
+  small:  24,
   medium: 32,
-  large: 40,
+  large:  40,
 };
 
-
 function LedgrionyxLogo({ variant = 'full', withText = true, size = 'medium', text = 'Ledgrionyx', className = '' }) {
-  const dimension = SIZE_MAP[size] || SIZE_MAP.medium;
-  const classes = ['ledgrionyx-logo-lockup', `ledgrionyx-logo--${variant}`, `ledgrionyx-logo--${size}`, className].filter(Boolean).join(' ');
+  const dimension = typeof size === 'number' ? size : (SIZE_MAP[size] || SIZE_MAP.medium);
+  const classes = ['ledgrionyx-logo-lockup', `ledgrionyx-logo--${variant}`, className].filter(Boolean).join(' ');
   const secondaryText = text === 'Ledgrionyx' ? '' : text.replace('Ledgrionyx', '').trim();
 
   return (
     <span className={classes}>
+      {/* Square brand mark: #EE6C4D background + white shield */}
       <svg
         className="ledgrionyx-logo-mark"
         width={dimension}
@@ -25,10 +24,11 @@ function LedgrionyxLogo({ variant = 'full', withText = true, size = 'medium', te
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        <circle cx="32" cy="32" r="30" className="ledgrionyx-logo-mark__ring" />
-        <path className="ledgrionyx-logo-mark__orbit" d="M14 36.5C20.2 46 31 51.2 42.3 49.3C48.5 48.2 54 44.7 58 39.4" />
-        <path className="ledgrionyx-logo-mark__beam" d="M20 42L31.8 16L44 42" />
-        <path className="ledgrionyx-logo-mark__crossbar" d="M25.4 31.5H38.4" />
+        <rect width="64" height="64" rx="12" fill="#EE6C4D"/>
+        <path d="M32 12 L50 19 L50 34 C50 44 42 52 32 56 C22 52 14 44 14 34 L14 19 Z"
+              fill="#FFFFFF"/>
+        <path d="M32 17 L46 23 L46 34 C46 42 40 49 32 53 C24 49 18 42 18 34 L18 23 Z"
+              fill="none" stroke="#EE6C4D" strokeWidth="1.5"/>
       </svg>
       {withText ? (
         <span className="ledgrionyx-logo-wordmark">
@@ -39,6 +39,5 @@ function LedgrionyxLogo({ variant = 'full', withText = true, size = 'medium', te
     </span>
   );
 }
-
 
 export default LedgrionyxLogo;

@@ -1,10 +1,10 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Opaque brand-primary background — no rounded corners (iOS applies them) -->
-  <rect width="64" height="64" fill="#0A2A6C"/>
-  <!-- Shield body — same navy; invisible against background, implied by the gold ring -->
-  <path d="M32 4L52 12V28C52 43 43.4 54.2 32 60C20.6 54.2 12 43 12 28V12L32 4Z" fill="#0A2A6C"/>
-  <!-- Gold inner border ring -->
-  <path d="M32 7.2L49 13.9V28C49 40.7 41.9 50.7 32 56C22.1 50.7 15 40.7 15 28V13.9L32 7.2Z"
-        stroke="#C8A44D" stroke-width="2.5" fill="none"/>
-
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Brand background: #EE6C4D, no rounded corners (iOS/Android apply them) -->
+  <rect width="1024" height="1024" fill="#EE6C4D"/>
+  <!-- White shield centered, 14% safe zone -->
+  <path d="M512 204 L788 308 L788 544 C788 700 668 820 512 876 C356 820 236 700 236 544 L236 308 Z"
+        fill="#FFFFFF"/>
+  <!-- Inner shield accent in brand color -->
+  <path d="M512 268 L732 356 L732 544 C732 668 636 764 512 812 C388 764 292 668 292 544 L292 356 Z"
+        fill="none" stroke="#EE6C4D" stroke-width="18"/>
 </svg>

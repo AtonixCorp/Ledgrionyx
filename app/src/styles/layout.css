@@ -352,8 +352,9 @@
   text-decoration: none;
 }
 
-.ly-utility-links a:hover {
+.ly-utility-bar .ly-utility-links a:hover {
   opacity: 0.8;
+  color: #FFFFFF;
 }
 
 .ly-signin {
@@ -620,6 +621,7 @@
 .ws-sidebar-title {
   font-size: 13px;
   font-weight: var(--font-weight-bold);
+  letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -631,7 +633,7 @@
 .ws-department-sidebar-meta {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
 }
 

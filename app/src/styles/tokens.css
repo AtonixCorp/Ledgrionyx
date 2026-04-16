@@ -5,6 +5,7 @@
   --color-accent:  #EE6C4D;
   --color-accent-hover:  #D95A3C;
   --color-accent-rgb: 238, 108, 77;
+  --color-gray:    #6B6B6B;
 
   /* ── Functional aliases ─────────────────────────────────────── */
   --color-primary:            var(--color-accent);
@@ -120,7 +121,7 @@
   --color-error-light:        rgba(238, 108, 77, 0.08);
   --color-info-light:         rgba(0, 0, 0, 0.06);
 
-  --font-family: 'IBM Plex Sans', 'Open Sans', sans-serif;
+  --font-family: 'Inter', 'IBM Plex Sans', 'Open Sans', sans-serif;
   --font-family-mono: 'SF Mono', 'Monaco', 'Courier New', monospace;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
@@ -157,9 +158,9 @@
   --border-width-base: 1.5px;
   --border-width-thick: 2px;
 
-  --border-color-default: var(--brand-soft-grey);
-  --border-color-active: var(--brand-steel-blue);
-  --border-color-error: var(--brand-accent-red);
+  --border-color-default: rgba(0, 0, 0, 0.12);
+  --border-color-active: var(--color-accent);
+  --border-color-error: var(--color-accent);
 
   --shadow-sm: none;
   --shadow-base: none;
@@ -177,7 +178,7 @@
   --z-tooltip: 1100;
 
   /* ── Typography ────────────────────────────────────────────── */
-  --font-family: 'IBM Plex Sans', 'Open Sans', sans-serif;
+  --font-family: 'Inter', 'IBM Plex Sans', 'Open Sans', sans-serif;
   --font-family-mono: 'SF Mono', 'Monaco', 'Courier New', monospace;
   --font-size-xs: 12px;
   --font-size-sm: 14px;

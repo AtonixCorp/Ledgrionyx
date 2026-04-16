@@ -235,7 +235,7 @@ const Layout = ({ children }) => {
         <div className="sidebar-header">
           <div className="sidebar-brand">
             <LogoMark size={24} />
-            {!sidebarMinimized && <span style={{ color: '#fff', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap' }}>{currentOrganization?.name || 'Ledgrionyx'}</span>}
+            {!sidebarMinimized && <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: 13, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>{currentOrganization?.name || 'Ledgrionyx'}</span>}
           </div>
           {!sidebarMinimized && (
             <NavLink to="/app/console" className="sidebar-console-link" title="All Organizations">

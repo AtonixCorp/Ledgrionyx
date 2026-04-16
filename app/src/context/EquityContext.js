@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useAuth } from './AuthContext';
 import { useEnterprise } from './EnterpriseContext';
 import { entityStaffAPI, equityAPI } from '../services/api';
 import { hasEquityModule } from '../utils/workspaceModules';
@@ -27,6 +28,7 @@ const triggerBlobDownload = (blob, filename) => {
 };
 
 export const EquityProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const { activeWorkspace } = useEnterprise();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -74,7 +76,7 @@ export const EquityProvider = ({ children }) => {
   const equityEnabled = hasEquityModule(activeWorkspace);
 
   const refreshEquity = useCallback(async (entityId = workspaceId) => {
-    if (!entityId || !equityEnabled) return;
+    if (!entityId || !equityEnabled || !isAuthenticated) return;
 
     setLoading(true);
     setError(null);
@@ -168,7 +170,7 @@ export const EquityProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [equityEnabled, workspaceId]);
+  }, [equityEnabled, isAuthenticated, workspaceId]);
 
   const mutateResource = useCallback(async (resourceKey, method, payload, id) => {
     if (!workspaceId) {
