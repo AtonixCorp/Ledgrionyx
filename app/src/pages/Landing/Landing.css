@@ -28,12 +28,20 @@
 }
 
 .landing-kicker {
-    margin: 0 0 16px;
-    font-size: 12px;
+    margin: 0 0 20px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #6f6f6f;
+    color: #1e63ff;
+}
+
+.landing-hero__copy .landing-kicker {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 1px solid rgba(30, 99, 255, 0.22);
+    background: rgba(30, 99, 255, 0.06);
+    border-radius: 4px;
 }
 
 .landing-section-title {
@@ -75,23 +83,26 @@
 }
 
 .landing-hero__copy {
-    grid-column: span 7;
+    grid-column: 2 / span 6;
     padding-right: 12px;
 }
 
 .landing-hero__copy h1 {
-    margin: 0;
-    max-width: 12ch;
+    margin: 16px 0 0;
+    max-width: 14ch;
     font-size: var(--landing-hero-title-size);
-    line-height: 1.04;
-    letter-spacing: -0.045em;
-    color: #111111;
+    line-height: 1.06;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    color: #0a0a0a;
 }
 
 .landing-lead {
-    margin-top: 24px;
-    max-width: 58ch;
+    margin-top: 20px;
+    max-width: 52ch;
     font-size: var(--landing-body-size);
+    line-height: 1.65;
+    color: #3a3a3a;
 }
 
 .landing-actions {
