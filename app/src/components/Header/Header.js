@@ -8,12 +8,9 @@ import './Header.css';
 const NAV_ITEMS = [
   { label: 'Home',       to: '/' },
   { label: 'Services',   to: '/product' },
-  { label: 'Deployment', to: '/deployment' },
   { label: 'Features',   to: '/features' },
   { label: 'Global Tax', to: '/global-tax' },
   { label: 'Pricing',    to: '/pricing' },
-  { label: 'Resources',  to: '/help-center' },
-  { label: 'Security Center', to: '/security-center' },
   { label: 'About',      to: '/about' },
   { label: 'Contact',    to: '/contact' },
 ];

@@ -32,6 +32,9 @@ export const footerLinks = {
   resources: {
     title: 'Resources',
     links: [
+      { label: 'Resources', to: '/help-center' },
+      { label: 'Deployment', to: '/deployment' },
+      { label: 'Security Center', to: '/security-center' },
       { label: 'Documentation', to: '/help-center' },
       { label: 'API Reference', to: '/v1/docs' },
       { label: 'Developer Guides', to: '/v1/docs' },

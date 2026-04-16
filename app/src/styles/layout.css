@@ -88,8 +88,8 @@
 }
 
 .ly-utility-bar {
-  background: transparent;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  background: #FFFFFF;
+  border-bottom: 1px solid rgba(16, 24, 32, 0.10);
 }
 
 .ly-primary-bar {
@@ -189,6 +189,14 @@
 .ly-header .ly-mobile-link,
 .ly-header .ly-mobile-signin {
   color: var(--color-white);
+}
+
+.ly-utility-bar .ly-utility-brand,
+.ly-utility-bar .ly-utility-links a,
+.ly-utility-bar .ly-lang-select,
+.ly-utility-bar .ly-signin,
+.ly-utility-bar .ly-hamburger {
+  color: #101820;
 }
 
 .nav-section-label,
@@ -369,7 +377,7 @@
 .ly-primary-nav {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 32px;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -795,10 +803,10 @@
     padding: 0;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(16, 24, 32, 0.16);
     border-radius: var(--radius-md);
     background: transparent;
-    color: #FFFFFF;
+    color: #101820;
   }
 
   .ly-mobile-nav {
