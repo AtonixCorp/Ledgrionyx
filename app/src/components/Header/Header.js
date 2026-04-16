@@ -5,6 +5,14 @@ import { Icon } from '../ui';
 import { FiMenu, FiX } from 'react-icons/fi';
 import './Header.css';
 
+const UTILITY_ITEMS = [
+  { label: 'Contact', to: '/contact' },
+  { label: 'Media', to: '/contact#media' },
+  { label: 'Support', to: '/support' },
+  { label: 'Security', to: '/security-center' },
+  { label: 'Login', to: '/login' },
+];
+
 const NAV_ITEMS = [
   { label: 'Home',       to: '/' },
   { label: 'Services',   to: '/product' },
@@ -23,29 +31,22 @@ const Header = () => {
 
       <div className="ly-utility-bar">
         <div className="ly-utility-inner">
-          <Link to="/" className="ly-logo-link" aria-label="Ledgrionyx Home">
-            <Logo height={32} />
-          </Link>
-
           <nav className="ly-utility-links" aria-label="Utility navigation">
-            <Link to="/login">Login</Link>
-            <Link to="/register" className="ly-cta-primary">Open Account</Link>
-            <Link to="/support">Support</Link>
+            {UTILITY_ITEMS.map(({ label, to }) => (
+              <Link key={label} to={to}>
+                {label}
+              </Link>
+            ))}
           </nav>
-
-          <button
-            className="ly-hamburger"
-            onClick={() => setMobileOpen((open) => !open)}
-            aria-label="Toggle navigation menu"
-            aria-expanded={mobileOpen}
-          >
-            <Icon icon={mobileOpen ? FiX : FiMenu} size="md" />
-          </button>
         </div>
       </div>
 
       <div className="ly-primary-bar">
         <div className="ly-primary-inner">
+          <Link to="/" className="ly-logo-link" aria-label="Ledgrionyx Home">
+            <Logo height={34} />
+          </Link>
+
           <nav className="ly-primary-nav" aria-label="Primary navigation">
             {NAV_ITEMS.map(({ label, to }) => (
               <NavLink
@@ -60,6 +61,15 @@ const Header = () => {
               </NavLink>
             ))}
           </nav>
+
+          <button
+            className="ly-hamburger"
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileOpen}
+          >
+            <Icon icon={mobileOpen ? FiX : FiMenu} size="md" />
+          </button>
         </div>
       </div>
 
@@ -75,17 +85,17 @@ const Header = () => {
               {label}
             </Link>
           ))}
-          <div className="ly-mobile-actions">
-            <Link
-              to="/register"
-              className="ly-cta-primary"
-              onClick={() => setMobileOpen(false)}
-            >
-              Open Account
-            </Link>
-            <Link to="/login" className="ly-mobile-signin" onClick={() => setMobileOpen(false)}>
-              Login
-            </Link>
+          <div className="ly-mobile-utility-links">
+            {UTILITY_ITEMS.map(({ label, to }) => (
+              <Link
+                key={label}
+                to={to}
+                className="ly-mobile-link ly-mobile-link--utility"
+                onClick={() => setMobileOpen(false)}
+              >
+                {label}
+              </Link>
+            ))}
           </div>
         </nav>
       )}
