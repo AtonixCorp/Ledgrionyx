@@ -235,6 +235,7 @@
 }
 
 @media (max-width: 720px) {
+
   .audit-toolbar-grid,
   .audit-detail-grid {
     grid-template-columns: 1fr;

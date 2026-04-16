@@ -303,7 +303,7 @@
   position: absolute;
 }
 
-.org-dashboard-header > * {
+.org-dashboard-header>* {
   position: relative;
   z-index: 1;
 }

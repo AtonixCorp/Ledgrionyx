@@ -707,6 +707,7 @@
 }
 
 @media (max-width: 1100px) {
+
   .enterprise-tax-compliance .overview-stats,
   .enterprise-tax-compliance .status-overview,
   .enterprise-tax-compliance .reconciliation-stats,
@@ -733,6 +734,7 @@
 }
 
 @media (max-width: 820px) {
+
   .enterprise-tax-compliance .section-navigation,
   .enterprise-tax-compliance .quick-actions,
   .enterprise-tax-compliance .compliance-health,
@@ -1515,6 +1517,7 @@
 }
 
 @media (max-width: 1100px) {
+
   .enterprise-tax-compliance .filing-hero-card,
   .enterprise-tax-compliance .filing-summary-grid,
   .enterprise-tax-compliance .filing-board,
@@ -1524,6 +1527,7 @@
 }
 
 @media (max-width: 820px) {
+
   .enterprise-tax-compliance .filing-column-header,
   .enterprise-tax-compliance .filing-item,
   .enterprise-tax-compliance .filing-step-card {
@@ -1823,6 +1827,7 @@
 }
 
 @media (max-width: 1100px) {
+
   .filing-assistant-page .filing-assistant-hero,
   .filing-assistant-page .filing-assistant-grid,
   .filing-assistant-page .filing-assistant-grid.lower,
@@ -1832,6 +1837,7 @@
 }
 
 @media (max-width: 820px) {
+
   .filing-assistant-page .filing-item,
   .filing-assistant-page .filing-history-item,
   .filing-assistant-page .filing-step-card.compact {
@@ -2201,6 +2207,7 @@
 }
 
 @media (max-width: 1100px) {
+
   .tax-monitoring-page .monitoring-hero-card,
   .tax-monitoring-page .monitoring-summary-grid,
   .tax-monitoring-page .monitoring-main-grid,
@@ -2210,6 +2217,7 @@
 }
 
 @media (max-width: 820px) {
+
   .tax-monitoring-page .monitoring-column-header,
   .tax-monitoring-page .monitoring-alert-card,
   .tax-monitoring-page .timeline-item,
@@ -2297,9 +2305,17 @@
   background: linear-gradient(90deg, #8b5cf6, #a78bfa);
 }
 
-.enterprise-tax-compliance .action-page-stat:nth-child(1) .action-page-stat-value { color: #1d4ed8; }
-.enterprise-tax-compliance .action-page-stat:nth-child(2) .action-page-stat-value { color: #dc2626; }
-.enterprise-tax-compliance .action-page-stat:nth-child(3) .action-page-stat-value { color: #7c3aed; }
+.enterprise-tax-compliance .action-page-stat:nth-child(1) .action-page-stat-value {
+  color: #1d4ed8;
+}
+
+.enterprise-tax-compliance .action-page-stat:nth-child(2) .action-page-stat-value {
+  color: #dc2626;
+}
+
+.enterprise-tax-compliance .action-page-stat:nth-child(3) .action-page-stat-value {
+  color: #7c3aed;
+}
 
 /* 5. Stat card color variants — top border + icon tint */
 .enterprise-tax-compliance .stat-card {
@@ -2325,12 +2341,29 @@
   top: 0;
 }
 
-.enterprise-tax-compliance .stat-card-blue::before  { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-.enterprise-tax-compliance .stat-card-green::before { background: linear-gradient(90deg, #10b981, #34d399); }
-.enterprise-tax-compliance .stat-card-red::before   { background: linear-gradient(90deg, #ef4444, #f87171); }
-.enterprise-tax-compliance .stat-card-orange::before{ background: linear-gradient(90deg, #f97316, #fb923c); }
-.enterprise-tax-compliance .stat-card-amber::before { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
-.enterprise-tax-compliance .stat-card-purple::before{ background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.enterprise-tax-compliance .stat-card-blue::before {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.enterprise-tax-compliance .stat-card-green::before {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.enterprise-tax-compliance .stat-card-red::before {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.enterprise-tax-compliance .stat-card-orange::before {
+  background: linear-gradient(90deg, #f97316, #fb923c);
+}
+
+.enterprise-tax-compliance .stat-card-amber::before {
+  background: linear-gradient(90deg, #f59e0b, #fcd34d);
+}
+
+.enterprise-tax-compliance .stat-card-purple::before {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
 
 .enterprise-tax-compliance .stat-card-blue .stat-icon {
   background: linear-gradient(135deg, #dbeafe, #eff6ff);
@@ -2338,12 +2371,14 @@
   font-size: 18px;
   line-height: 1;
 }
+
 .enterprise-tax-compliance .stat-card-green .stat-icon {
   background: linear-gradient(135deg, #d1fae5, #ecfdf5);
   color: #047857;
   font-size: 18px;
   line-height: 1;
 }
+
 .enterprise-tax-compliance .stat-card-red .stat-icon {
   background: linear-gradient(135deg, #fee2e2, #fff5f5);
   color: #dc2626;
@@ -2351,18 +2386,21 @@
   font-weight: 900;
   line-height: 1;
 }
+
 .enterprise-tax-compliance .stat-card-orange .stat-icon {
   background: linear-gradient(135deg, #ffedd5, #fff7ed);
   color: #c2410c;
   font-size: 16px;
   line-height: 1;
 }
+
 .enterprise-tax-compliance .stat-card-amber .stat-icon {
   background: linear-gradient(135deg, #fef3c7, #fffbeb);
   color: #b45309;
   font-size: 18px;
   line-height: 1;
 }
+
 .enterprise-tax-compliance .stat-card-purple .stat-icon {
   background: linear-gradient(135deg, #ede9fe, #f5f3ff);
   color: #7c3aed;
@@ -2396,9 +2434,17 @@
   font-weight: 600;
 }
 
-.enterprise-tax-compliance .stat-trend.neutral { color: #94a3b8; }
-.enterprise-tax-compliance .stat-trend.up      { color: #059669; }
-.enterprise-tax-compliance .stat-trend.down    { color: #dc2626; }
+.enterprise-tax-compliance .stat-trend.neutral {
+  color: #94a3b8;
+}
+
+.enterprise-tax-compliance .stat-trend.up {
+  color: #059669;
+}
+
+.enterprise-tax-compliance .stat-trend.down {
+  color: #dc2626;
+}
 
 /* 7. Quick actions bar — styled left accent */
 .enterprise-tax-compliance .quick-actions {
@@ -2427,10 +2473,25 @@
   flex-shrink: 0;
 }
 
-.enterprise-tax-compliance .score-status.excellent { color: #047857; font-weight: 800; }
-.enterprise-tax-compliance .score-status.good      { color: #0369a1; font-weight: 800; }
-.enterprise-tax-compliance .score-status.fair      { color: #b45309; font-weight: 800; }
-.enterprise-tax-compliance .score-status.warning   { color: #dc2626; font-weight: 800; }
+.enterprise-tax-compliance .score-status.excellent {
+  color: #047857;
+  font-weight: 800;
+}
+
+.enterprise-tax-compliance .score-status.good {
+  color: #0369a1;
+  font-weight: 800;
+}
+
+.enterprise-tax-compliance .score-status.fair {
+  color: #b45309;
+  font-weight: 800;
+}
+
+.enterprise-tax-compliance .score-status.warning {
+  color: #dc2626;
+  font-weight: 800;
+}
 
 .enterprise-tax-compliance .score-details {
   display: grid;
@@ -2475,9 +2536,17 @@
   transition: border-left-color 160ms ease, background 160ms ease;
 }
 
-.enterprise-tax-compliance .activity-item:has(.activity-icon.info)    { border-left-color: #3b82f6; }
-.enterprise-tax-compliance .activity-item:has(.activity-icon.success)  { border-left-color: #10b981; }
-.enterprise-tax-compliance .activity-item:has(.activity-icon.warning)  { border-left-color: #f59e0b; }
+.enterprise-tax-compliance .activity-item:has(.activity-icon.info) {
+  border-left-color: #3b82f6;
+}
+
+.enterprise-tax-compliance .activity-item:has(.activity-icon.success) {
+  border-left-color: #10b981;
+}
+
+.enterprise-tax-compliance .activity-item:has(.activity-icon.warning) {
+  border-left-color: #f59e0b;
+}
 
 .enterprise-tax-compliance .activity-icon.info {
   background: linear-gradient(135deg, #dbeafe, #eff6ff);
@@ -2566,9 +2635,17 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-.enterprise-tax-compliance .alert-item.severity-high   { border-left-color: #ef4444; }
-.enterprise-tax-compliance .alert-item.severity-medium { border-left-color: #f59e0b; }
-.enterprise-tax-compliance .alert-item.severity-low    { border-left-color: #10b981; }
+.enterprise-tax-compliance .alert-item.severity-high {
+  border-left-color: #ef4444;
+}
+
+.enterprise-tax-compliance .alert-item.severity-medium {
+  border-left-color: #f59e0b;
+}
+
+.enterprise-tax-compliance .alert-item.severity-low {
+  border-left-color: #10b981;
+}
 
 .enterprise-tax-compliance .alert-icon {
   background: linear-gradient(135deg, #dbeafe, #eff6ff);
@@ -2771,6 +2848,7 @@
 
 /* 19. Responsive — keep grid from collapsing too early */
 @media (max-width: 1200px) {
+
   .enterprise-tax-compliance .overview-stats,
   .enterprise-tax-compliance .monitoring-stats,
   .enterprise-tax-compliance .vault-stats {
@@ -2779,6 +2857,7 @@
 }
 
 @media (max-width: 768px) {
+
   .enterprise-tax-compliance .overview-stats,
   .enterprise-tax-compliance .monitoring-stats,
   .enterprise-tax-compliance .vault-stats,

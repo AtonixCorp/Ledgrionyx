@@ -132,7 +132,9 @@
 .metric-card.primary::before,
 .metric-card.warning::before,
 .metric-card.info::before,
-.metric-card.success::before { background: linear-gradient(90deg, #EE6C4D, #000000); }
+.metric-card.success::before {
+  background: linear-gradient(90deg, #EE6C4D, #000000);
+}
 
 .metric-header.stacked {
   display: grid;
@@ -202,6 +204,7 @@
 }
 
 @media (max-width: 820px) {
+
   .enterprise-overview,
   .overview-hero,
   .metrics-grid {
