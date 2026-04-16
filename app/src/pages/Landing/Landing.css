@@ -33,14 +33,14 @@
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #1e63ff;
+    color: #EE6C4D;
 }
 
 .landing-hero__copy .landing-kicker {
     display: inline-block;
     padding: 5px 12px;
-    border: 1px solid rgba(30, 99, 255, 0.22);
-    background: rgba(30, 99, 255, 0.06);
+    border: 1px solid rgba(238, 108, 77, 0.22);
+    background: rgba(238, 108, 77, 0.06);
     border-radius: 4px;
 }
 
@@ -127,15 +127,15 @@
 }
 
 .landing-button--primary {
-    background: #1e63ff;
-    border-color: #1e63ff;
+    background: #EE6C4D;
+    border-color: #EE6C4D;
     color: #ffffff;
 }
 
 .landing-button--primary:hover,
 .landing-button--primary:focus-visible {
-    background: #164ed1;
-    border-color: #164ed1;
+    background: #D95A3C;
+    border-color: #D95A3C;
     color: #ffffff;
 }
 
@@ -272,8 +272,8 @@
 }
 
 .landing-hero__timeline-item.is-active .landing-hero__timeline-dot {
-    background: #1e63ff;
-    box-shadow: 0 0 0 6px rgba(30, 99, 255, 0.10);
+    background: #EE6C4D;
+    box-shadow: 0 0 0 6px rgba(238, 108, 77, 0.10);
 }
 
 .landing-hero__timeline-item p {
