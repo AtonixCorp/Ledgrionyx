@@ -1,7 +1,7 @@
 {
   "name": "ledgrionyx",
   "version": "1.0.0",
-  "homepage": "https://atonixcorp.github.io/ledgrionyx",
+  "homepage": "/",
   "private": true,
   "proxy": "http://localhost:8000",
   "engines": {
