@@ -63,17 +63,32 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* Tokens */
+/* Tokens — defined on .cw-page (the actual root element) */
+.cw-page {
+  --cw-ink: #1E2328;
+  --cw-muted: #6B7280;
+  --cw-surface: #ffffff;
+  --cw-bg: #F8F9FB;
+  --cw-line: #E0E2E5;
+  --cw-accent: var(--color-accent, #EE6C4D);
+  --cw-accent-10: rgba(238, 108, 77, 0.10);
+  --cw-green: #1E2328;
+  --cw-red: var(--color-accent, #EE6C4D);
+  --cw-radius: 12px;
+  --cw-shadow: 0 4px 24px rgba(30, 35, 40, 0.08);
+}
+
+/* Legacy alias kept for any remaining old markup */
 .create-workspace {
   --cw-ink: #1E2328;
   --cw-muted: #6B7280;
   --cw-surface: #ffffff;
   --cw-bg: #F8F9FB;
   --cw-line: #E0E2E5;
-  --cw-accent: #C41E3A;
-  --cw-accent-10: rgba(196, 30, 58, 0.10);
+  --cw-accent: var(--color-accent, #EE6C4D);
+  --cw-accent-10: rgba(238, 108, 77, 0.10);
   --cw-green: #1E2328;
-  --cw-red: #C41E3A;
+  --cw-red: var(--color-accent, #EE6C4D);
   --cw-radius: 12px;
   --cw-shadow: 0 4px 24px rgba(30, 35, 40, 0.08);
 }
@@ -279,16 +294,25 @@
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 14px;
-  color: var(--cw-ink);
-  background: var(--cw-surface);
+  color: #1E2328;
+  background: #ffffff;
   outline: none;
+  appearance: none;
+  -webkit-appearance: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cw-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
 }
 
 .cw-input:focus,
 .cw-select:focus {
-  border-color: var(--cw-accent);
-  box-shadow: 0 0 0 3px var(--cw-accent-10);
+  border-color: var(--cw-accent, #EE6C4D);
+  box-shadow: 0 0 0 3px rgba(238, 108, 77, 0.12);
 }
 
 .cw-input::placeholder {

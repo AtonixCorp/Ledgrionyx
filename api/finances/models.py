@@ -94,6 +94,7 @@ class Entity(models.Model):
         ('equity', 'Equity'),
         ('combined', 'Combined'),
         ('standalone', 'Standalone'),
+        ('workspace', 'Workspace'),
     ]
 
     ENTITY_TYPE_CHOICES = [

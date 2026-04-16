@@ -116,8 +116,12 @@ export default function CreateEntityFlow() {
         enabled_modules: ['finance', 'compliance'],
         status: 'active',
       };
-      await createEntity(payload);
-      navigate('/app/enterprise/org-overview');
+      const newEntity = await createEntity(payload);
+      if (newEntity?.id) {
+        navigate(`/app/enterprise/entities/${newEntity.id}/dashboard`);
+      } else {
+        navigate('/app/enterprise/org-overview');
+      }
     } catch (err) {
       const msg = err?.message || '';
       if (msg.toLowerCase().includes('registration number')) {

@@ -501,8 +501,8 @@ const EnterpriseOrgOverview = () => {
                   <div className="orc-meta">{ws.country || ''}{ws.industry ? ` · ${ws.industry}` : ''}</div>
                   <div className="orc-meta">{ws.created_at ? new Date(ws.created_at).toLocaleDateString() : ''}</div>
                   <div className="orc-actions">
-                    <button className="orc-btn" onClick={() => navigate(`/app/workspaces/${ws.id}`)}>Open</button>
-                    <button className="orc-btn" onClick={() => navigate(`/app/workspaces/${ws.id}/settings`)}>Settings</button>
+                    <button className="orc-btn" onClick={() => navigate(`/app/workspace/${ws.id}/overview`)}>Open</button>
+                    <button className="orc-btn" onClick={() => navigate(`/app/workspace/${ws.id}/settings`)}>Settings</button>
                   </div>
                 </div>
               ))}

@@ -98,7 +98,7 @@ export default function CreateWorkspaceFlow() {
         name: form.name.trim(),
         country: form.country,
         currency: 'USD',
-        entity_type: 'workspace',
+        entity_type: 'other',
         workspace_mode: 'workspace',
         workspace_type: form.workspaceType,
         address: form.address.trim(),
@@ -111,8 +111,12 @@ export default function CreateWorkspaceFlow() {
         enabled_modules: form.enabledModules,
         status: 'active',
       };
-      await createWorkspace(payload);
-      navigate('/app/enterprise/org-overview');
+      const newWorkspace = await createWorkspace(payload);
+      if (newWorkspace?.id) {
+        navigate(`/app/workspace/${newWorkspace.id}/overview`);
+      } else {
+        navigate('/app/enterprise/org-overview');
+      }
     } catch (err) {
       setError(err?.message || 'Failed to create workspace. Please try again.');
     } finally {
@@ -169,7 +173,7 @@ export default function CreateWorkspaceFlow() {
         <select className="cw-select" value={form.country} onChange={(e) => update('country', e.target.value)}>
           <option value="">Select country</option>
           {countryDropdownOptions.map((c) => (
-            <option key={c.value} value={c.value}>{c.label}</option>
+            <option key={c.code} value={c.code}>{c.name}</option>
           ))}
         </select>
       </div>
