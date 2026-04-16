@@ -177,6 +177,12 @@ const CreateWorkspace = () => {
   const { createWorkspace, createEntity, createOrganization, currentOrganization, setActiveWorkspace } = useEnterprise();
   const location = useLocation();
   const isOrgCreate = location.pathname.includes('/organizations/create');
+  const isEntityCreate = location.pathname.includes('/entities/create');
+  const flowLabel = isEntityCreate ? 'Entity' : 'Organization';
+  const flowKicker = isEntityCreate ? 'New Legal Entity' : 'New Organization';
+  const flowSubtitle = isEntityCreate
+    ? 'A legal entity represents a registered company, subsidiary, or branch. Configure its jurisdiction, currency, fiscal year, and operating modules.'
+    : 'An organization represents the primary operating container. You can provision it for accounting, equity management, a combined operating system, or a standalone shell.';
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -316,7 +322,7 @@ const CreateWorkspace = () => {
         }
       }
     } catch (err) {
-      setError(err?.message || 'Failed to create organization. Please try again.');
+      setError(err?.message || `Failed to create ${flowLabel.toLowerCase()}. Please try again.`);
     } finally {
       setSubmitting(false);
     }
@@ -520,7 +526,7 @@ const CreateWorkspace = () => {
       {/* Summary Review */}
       <div className="cw-field cw-field-wide">
         <div className="cw-review-card">
-          <h4 className="cw-review-title">Review — New Organization</h4>
+          <h4 className="cw-review-title">Review — New {flowLabel}</h4>
           <div className="cw-review-rows">
             <div className="cw-review-row"><span>Name</span><strong>{form.name}</strong></div>
             <div className="cw-review-row"><span>Type</span><strong>{ENTITY_TYPES.find(t => t.value === form.businessType)?.label}</strong></div>
@@ -655,7 +661,7 @@ const CreateWorkspace = () => {
                 className="cw-btn cw-btn-create"
                 disabled={submitting || !form.name || !form.country || !form.workspaceMode || (!isOrgCreate && !currentOrganization?.id)}
               >
-                {submitting ? 'Creating Organization…' : 'Create Organization'}
+                {submitting ? `Creating ${flowLabel}…` : `Create ${flowLabel}`}
               </button>
             </div>
           </div>
@@ -668,7 +674,20 @@ const CreateWorkspace = () => {
   const accountingCount = form.enabledModules.filter((moduleKey) => ACCOUNTING_MODULE_KEYS.includes(moduleKey)).length;
   const equityCount = form.enabledModules.filter((moduleKey) => EQUITY_MODULE_KEYS.includes(moduleKey)).length;
 
-  const dashboardGuide = [
+  const dashboardGuide = isEntityCreate ? [
+    {
+      title: 'Returns to Organization Dashboard',
+      description: 'After creation, the new entity is linked to the active organization and visible in the Entities section.',
+    },
+    {
+      title: 'Entity-level accounting',
+      description: 'Each entity has its own chart of accounts, tax jurisdiction, and reporting currency.',
+    },
+    {
+      title: 'Dashboards stay intact',
+      description: 'Internal dashboards, modules, and permissions remain unchanged.',
+    },
+  ] : [
     {
       title: 'Returns to Ledgrionyx Console',
       description: 'After creation, you return to the console where the new organization is available from the top-level flow.',
@@ -691,7 +710,7 @@ const CreateWorkspace = () => {
           <LedgrionyxLogo variant="dark" size="small" withText text="Ledgrionyx" />
         </div>
         <button className="cw-topnav-back" onClick={() => navigate('/app/console')}>
-          ← All Organizations
+          ← {isEntityCreate ? 'All Entities' : 'All Organizations'}
         </button>
       </header>
 
@@ -704,10 +723,10 @@ const CreateWorkspace = () => {
       <div className="cw-card">
         {/* Header */}
         <div className="cw-header">
-          <span className="cw-kicker">New Organization</span>
-          <h1 className="cw-title">Create Organization</h1>
+          <span className="cw-kicker">{flowKicker}</span>
+          <h1 className="cw-title">Create {flowLabel}</h1>
           <p className="cw-subtitle">
-            An organization represents the primary operating container. You can provision it for accounting, equity management, a combined operating system, or a standalone shell.
+            {flowSubtitle}
           </p>
         </div>
 

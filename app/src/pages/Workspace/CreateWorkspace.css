@@ -1136,3 +1136,327 @@
   background: #FAE9EC;
   border-color: #E6A3AE;
 }
+
+/* ─── New creation flow shared classes ────────────────────────────────────── */
+
+/* Top nav cancel button */
+.cw-topnav-cancel {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.cw-topnav-cancel:hover {
+  color: #ffffff;
+  border-color: rgba(255,255,255,0.5);
+}
+
+/* Top nav title */
+.cw-topnav-title {
+  margin-left: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Progress bar for new flows */
+.cw-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.cw-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+.cw-progress-step--done,
+.cw-progress-step--active {
+  opacity: 1;
+}
+.cw-progress-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.08);
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  flex-shrink: 0;
+}
+.cw-progress-step--done .cw-progress-num {
+  background: var(--color-accent, #EE6C4D);
+  color: #ffffff;
+}
+.cw-progress-step--active .cw-progress-num {
+  background: #000000;
+  color: #ffffff;
+}
+.cw-progress-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #444;
+}
+
+/* Main wrapper */
+.cw-main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+/* Step header */
+.cw-step-header {
+  margin-bottom: 28px;
+}
+.cw-step-eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent, #EE6C4D);
+  margin-bottom: 6px;
+}
+.cw-step-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111111;
+}
+
+/* Actions row */
+.cw-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Button variants used by new flows */
+.cw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  border: 1px solid transparent;
+}
+.cw-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cw-btn--primary {
+  background: var(--color-accent, #EE6C4D);
+  color: #ffffff;
+  border-color: var(--color-accent, #EE6C4D);
+}
+.cw-btn--primary:hover:not(:disabled) {
+  background: var(--color-accent-hover, #D95A3C);
+  border-color: var(--color-accent-hover, #D95A3C);
+}
+.cw-btn--ghost {
+  background: transparent;
+  color: #444;
+  border-color: rgba(0,0,0,0.16);
+}
+.cw-btn--ghost:hover:not(:disabled) {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.28);
+}
+
+/* Section description */
+.cw-section-desc {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: rgba(0,0,0,0.56);
+  line-height: 1.5;
+}
+
+/* Workspace type / entity type tile grid */
+.cw-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.cw-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cw-tile:hover {
+  border-color: rgba(0,0,0,0.3);
+  background: #fafafa;
+}
+.cw-tile--selected {
+  border-color: var(--color-accent, #EE6C4D);
+  background: rgba(238,108,77,0.06);
+}
+.cw-tile-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+}
+.cw-tile--selected .cw-tile-label {
+  color: var(--color-accent, #EE6C4D);
+}
+
+/* Module cards */
+.cw-module-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(0,0,0,0.10);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cw-module-card:hover {
+  border-color: rgba(0,0,0,0.24);
+}
+.cw-module-card--active {
+  border-color: var(--color-accent, #EE6C4D);
+  background: rgba(238,108,77,0.05);
+}
+.cw-module-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+}
+.cw-module-card--active .cw-module-name {
+  color: var(--color-accent, #EE6C4D);
+}
+.cw-module-desc {
+  font-size: 12px;
+  color: rgba(0,0,0,0.52);
+  line-height: 1.4;
+}
+.cw-module-check {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 13px;
+  color: var(--color-accent, #EE6C4D);
+  font-weight: 700;
+}
+.cw-hint--warn {
+  color: rgba(180,60,0,0.72);
+  margin-top: 8px;
+}
+
+/* Equity type cards (larger than tiles) */
+.cw-equity-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.cw-equity-type-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cw-equity-type-card:hover {
+  border-color: rgba(0,0,0,0.28);
+}
+.cw-equity-type-card--selected {
+  border-color: var(--color-accent, #EE6C4D);
+  background: rgba(238,108,77,0.06);
+}
+.cw-equity-type-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+}
+.cw-equity-type-card--selected .cw-equity-type-label {
+  color: var(--color-accent, #EE6C4D);
+}
+.cw-equity-type-desc {
+  font-size: 12px;
+  color: rgba(0,0,0,0.52);
+  line-height: 1.4;
+}
+
+/* Shareholder rows */
+.cw-shareholder-row {
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  background: #fafafa;
+}
+.cw-shareholder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cw-shareholder-num {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(0,0,0,0.48);
+}
+.cw-shareholder-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+.cw-remove-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: rgba(200,50,50,0.7);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.cw-remove-btn:hover {
+  background: rgba(200,50,50,0.08);
+}
+.cw-add-shareholder-btn {
+  margin-top: 4px;
+  align-self: flex-start;
+  font-size: 13px;
+}

@@ -80,6 +80,9 @@ export const EnterpriseProvider = ({ children }) => {
   const [entities, setEntities] = useState([]);
   const [selectedEntities, setSelectedEntities] = useState([]);
 
+  // Equity Structures
+  const [equityStructures, setEquityStructures] = useState([]);
+
   // Active Workspace (the entity/company currently being worked on)
   const [activeWorkspace, setActiveWorkspaceState] = useState(() => {
     try {
@@ -1790,11 +1793,32 @@ export const EnterpriseProvider = ({ children }) => {
     }
   }, [apiUrl, buildAuthHeaders]);
 
+  /**
+   * Create an equity structure (cap table, share class, vesting plan, etc.)
+   */
+  const createEquityStructure = useCallback(async (equityData) => {
+    try {
+      // Store locally — API endpoint to be wired when backend is ready
+      const newStructure = {
+        id: `equity_${Date.now()}`,
+        created_at: new Date().toISOString(),
+        status: 'active',
+        ...equityData,
+      };
+      setEquityStructures((prev) => [...prev, newStructure]);
+      return newStructure;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
   const value = {
     // State
     organizations,
     currentOrganization,
     entities,
+    equityStructures,
     selectedEntities,
     teamMembers,
     currentUserRole,
@@ -1885,6 +1909,10 @@ export const EnterpriseProvider = ({ children }) => {
     activeWorkspace,
     setActiveWorkspace,
     createWorkspace,
+
+    // Equity
+    createEquityStructure,
+
     globalNotifications,
     globalTasks,
     setGlobalTasks,

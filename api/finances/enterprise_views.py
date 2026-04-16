@@ -1479,7 +1479,16 @@ class EntityViewSet(viewsets.ModelViewSet):
         
         # Get the organization owned by the current user
         organization = get_object_or_404(Organization, id=org_id, owner=self.request.user)
-        
+
+        # Validate registration number uniqueness per country (NOT name)
+        registration_number = (self.request.data.get('registration_number') or '').strip()
+        country = (self.request.data.get('country') or '').strip()
+        if registration_number and country:
+            if Entity.objects.filter(registration_number=registration_number, country=country).exists():
+                raise ValidationError({
+                    'detail': 'This registration number is already used for an entity in this country.'
+                })
+
         try:
             entity = serializer.save(organization=organization, enabled_modules=enabled_modules)
             # Create default structure for the new entity
@@ -1516,9 +1525,9 @@ class EntityViewSet(viewsets.ModelViewSet):
                     'governance_reporting_enabled': 'equity_governance' in enabled_modules,
                 },
             )
-        except IntegrityError as e:
+        except IntegrityError:
             raise ValidationError({
-                'detail': f"An entity with the name '{self.request.data.get('name')}' already exists in {self.request.data.get('country')} for this organization."
+                'detail': 'Entity could not be created due to a data conflict. Please check your input and try again.'
             })
 
     @action(detail=True, methods=['get'])

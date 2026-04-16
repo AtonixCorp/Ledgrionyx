@@ -36,30 +36,6 @@ const buildFinancialPositions = () => [
 
 const buildQuickActions = (handleNavigate) => [
   {
-    key: 'create-entity',
-    eyebrow: 'Structure',
-    title: 'Create Entity',
-    description: 'Add a subsidiary, branch, or holding company with full accounting',
-    path: '/app/workspaces/create?mode=accounting',
-    accent: 'entities',
-  },
-  {
-    key: 'create-workspace',
-    eyebrow: 'Operations',
-    title: 'Create Organization',
-    description: 'Set up an operational workspace with combined accounting & equity',
-    path: '/app/workspaces/create?mode=combined',
-    accent: 'team',
-  },
-  {
-    key: 'create-equity',
-    eyebrow: 'Equity',
-    title: 'Create Equity',
-    description: 'Launch an equity tracking environment — cap table, vesting, registry',
-    path: '/app/workspaces/create?mode=equity',
-    accent: 'reports',
-  },
-  {
     key: 'entities',
     eyebrow: 'Structure',
     title: 'Manage Business Suite',
@@ -103,12 +79,17 @@ const EnterpriseOrgOverview = () => {
     fetchEntities,
     hasPermission,
     PERMISSIONS,
+    equityStructures,
   } = useEnterprise();
   const [loading, setLoading] = useState(false);
   const [branchData, setBranchData] = useState([]);
   const [regionData, setRegionData] = useState({});
   const [activeTab, setActiveTab] = useState('overview');
   const [sortBy, setSortBy] = useState('revenue');
+
+  const createdWorkspaces = (entities || []).filter((e) => e.workspace_mode === 'workspace');
+  const createdEntities = (entities || []).filter((e) => e.workspace_mode !== 'workspace');
+  const createdEquity = equityStructures || [];
 
   const buildBranchData = useCallback((entitiesList) => {
     const branches = entitiesList.map((entity) => ({
@@ -313,7 +294,7 @@ const EnterpriseOrgOverview = () => {
             </div>
 
             <div className="ed-section">
-              <h2 className="ed-section-title">Workspace</h2>
+              <h2 className="ed-section-title">Quick Actions</h2>
               <div className="ed-quick-access">
                 {quickActions.map((action) => (
                   <button key={action.key} onClick={action.onClick} className={`ed-quick-card org-quick-card ${action.accent}`}>
@@ -393,14 +374,8 @@ const EnterpriseOrgOverview = () => {
                       </div>
                     </div>
                     <div className="ed-ob-actions">
-                      <button className="btn-primary btn-sm" onClick={() => navigate('/app/workspaces/create?mode=accounting')}>
-                        Create Entity
-                      </button>
-                      <button className="btn-secondary btn-sm" onClick={() => navigate('/app/workspaces/create?mode=combined')}>
-                        Create Organization
-                      </button>
-                      <button className="btn-secondary btn-sm" onClick={() => navigate('/app/workspaces/create?mode=equity')}>
-                        Create Equity
+                      <button className="btn-primary btn-sm" onClick={() => navigate('/app/enterprise/entities')}>
+                        Go to Business Suite
                       </button>
                     </div>
                   </div>
@@ -526,6 +501,87 @@ const EnterpriseOrgOverview = () => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ─── Created Workspaces ───────────────────────────── */}
+        {activeTab === 'overview' && createdWorkspaces.length > 0 && (
+          <div className="overview-resource-group">
+            <div className="org-group-header">
+              <h3 className="org-group-title">Workspaces</h3>
+              <button className="org-group-add" onClick={() => navigate('/app/workspaces/new')}>+ New Workspace</button>
+            </div>
+            <div className="org-resource-grid">
+              {createdWorkspaces.map((ws) => (
+                <div className="org-resource-card" key={ws.id}>
+                  <div className="orc-top">
+                    <span className="orc-type">{ws.workspace_type || ws.entity_type || 'Workspace'}</span>
+                    <span className={`orc-status orc-status--${ws.status || 'active'}`}>{ws.status || 'active'}</span>
+                  </div>
+                  <div className="orc-name">{ws.name}</div>
+                  <div className="orc-meta">{ws.country || ''}{ws.industry ? ` · ${ws.industry}` : ''}</div>
+                  <div className="orc-meta">{ws.created_at ? new Date(ws.created_at).toLocaleDateString() : ''}</div>
+                  <div className="orc-actions">
+                    <button className="orc-btn" onClick={() => navigate(`/app/workspaces/${ws.id}`)}>Open</button>
+                    <button className="orc-btn" onClick={() => navigate(`/app/workspaces/${ws.id}/settings`)}>Settings</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─── Created Entities ─────────────────────────────── */}
+        {activeTab === 'overview' && createdEntities.length > 0 && (
+          <div className="overview-resource-group">
+            <div className="org-group-header">
+              <h3 className="org-group-title">Legal Entities</h3>
+              <button className="org-group-add" onClick={() => navigate('/app/entities/create?mode=accounting')}>+ New Entity</button>
+            </div>
+            <div className="org-resource-grid">
+              {createdEntities.map((ent) => (
+                <div className="org-resource-card" key={ent.id}>
+                  <div className="orc-top">
+                    <span className="orc-type">{ent.entity_type || 'Entity'}</span>
+                    <span className={`orc-status orc-status--${ent.status || 'active'}`}>{ent.status || 'active'}</span>
+                  </div>
+                  <div className="orc-name">{ent.name}</div>
+                  <div className="orc-meta">{ent.country || ''}{ent.local_currency ? ` · ${ent.local_currency}` : ''}</div>
+                  <div className="orc-meta">{ent.created_at ? new Date(ent.created_at).toLocaleDateString() : ''}</div>
+                  <div className="orc-actions">
+                    <button className="orc-btn" onClick={() => navigate(`/app/enterprise/entities/${ent.id}/dashboard`)}>Open</button>
+                    <button className="orc-btn" onClick={() => navigate(`/app/enterprise/entities/${ent.id}/settings`)}>Settings</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─── Created Equity Structures ────────────────────── */}
+        {activeTab === 'overview' && createdEquity.length > 0 && (
+          <div className="overview-resource-group">
+            <div className="org-group-header">
+              <h3 className="org-group-title">Equity Structures</h3>
+              <button className="org-group-add" onClick={() => navigate('/app/equity/create')}>+ New Equity Structure</button>
+            </div>
+            <div className="org-resource-grid">
+              {createdEquity.map((eq) => (
+                <div className="org-resource-card" key={eq.id}>
+                  <div className="orc-top">
+                    <span className="orc-type">{eq.structureType || eq.structure_type || 'Equity'}</span>
+                    <span className="orc-status orc-status--active">active</span>
+                  </div>
+                  <div className="orc-name">{eq.name}</div>
+                  <div className="orc-meta">{eq.totalShares ? `${Number(eq.totalShares).toLocaleString()} shares` : ''}</div>
+                  <div className="orc-meta">{eq.createdAt ? new Date(eq.createdAt).toLocaleDateString() : ''}</div>
+                  <div className="orc-actions">
+                    <button className="orc-btn" onClick={() => navigate(`/app/equity/${eq.id}`)}>Open</button>
+                    <button className="orc-btn" onClick={() => navigate(`/app/equity/${eq.id}/settings`)}>Settings</button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

@@ -119,6 +119,9 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import GlobalConsole from './pages/GlobalConsole/GlobalConsole';
 import WorkspaceSelector from './pages/WorkspaceSelector/WorkspaceSelector';
 import CreateWorkspace from './pages/Workspace/CreateWorkspace';
+import CreateWorkspaceFlow from './pages/Workspace/CreateWorkspaceFlow';
+import CreateEntityFlow from './pages/Enterprise/CreateEntityFlow';
+import CreateEquityFlow from './pages/Equity/CreateEquityFlow';
 import WorkspaceRoute from './components/WorkspaceRoute';
 import WorkspaceLayout from './components/WorkspaceLayout/WorkspaceLayout';
 import WorkspaceOverview     from './pages/Workspace/modules/WorkspaceOverview';
@@ -211,6 +214,9 @@ function App() {
               <Route path="/app/organizations/select" element={<ProtectedRoute><WorkspaceSelector /></ProtectedRoute>} />
               <Route path="/app/workspaces/create" element={<ProtectedRoute><CreateWorkspace /></ProtectedRoute>} />
               <Route path="/app/organizations/create" element={<ProtectedRoute><CreateWorkspace /></ProtectedRoute>} />
+              <Route path="/app/workspaces/new" element={<ProtectedRoute><CreateWorkspaceFlow /></ProtectedRoute>} />
+              <Route path="/app/entities/create" element={<ProtectedRoute><CreateEntityFlow /></ProtectedRoute>} />
+              <Route path="/app/equity/create" element={<ProtectedRoute><CreateEquityFlow /></ProtectedRoute>} />
 
               {/* Enterprise Routes */}
               <Route path="/app/enterprise/org-overview" element={
