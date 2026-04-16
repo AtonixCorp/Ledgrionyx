@@ -2,9 +2,9 @@ import React from 'react';
 import './LedgrionyxLogo.css';
 
 const SIZE_MAP = {
-  small:  24,
+  small: 24,
   medium: 32,
-  large:  40,
+  large: 40,
 };
 
 function LedgrionyxLogo({ variant = 'full', withText = true, size = 'medium', text = 'Ledgrionyx', className = '' }) {
@@ -24,11 +24,11 @@ function LedgrionyxLogo({ variant = 'full', withText = true, size = 'medium', te
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        <rect width="64" height="64" rx="12" fill="#EE6C4D"/>
+        <rect width="64" height="64" rx="12" fill="#EE6C4D" />
         <path d="M32 12 L50 19 L50 34 C50 44 42 52 32 56 C22 52 14 44 14 34 L14 19 Z"
-              fill="#FFFFFF"/>
+          fill="#FFFFFF" />
         <path d="M32 17 L46 23 L46 34 C46 42 40 49 32 53 C24 49 18 42 18 34 L18 23 Z"
-              fill="none" stroke="#EE6C4D" strokeWidth="1.5"/>
+          fill="none" stroke="#EE6C4D" strokeWidth="1.5" />
       </svg>
       {withText ? (
         <span className="ledgrionyx-logo-wordmark">
