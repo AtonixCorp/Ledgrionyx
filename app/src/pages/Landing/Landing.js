@@ -48,6 +48,29 @@ const operationalPillars = [
 
 const heroDomains = ['Equity', 'Finance', 'Tax', 'Governance', 'Compliance'];
 
+const heroSignals = ['Entity governance', 'Approval discipline', 'Filing readiness'];
+
+const heroSummary = [
+  { label: 'Coverage', value: 'Equity + Finance + Tax' },
+  { label: 'Execution mode', value: 'Structured and accountable' },
+];
+
+const heroTimeline = [
+  {
+    title: 'Governance records',
+    detail: 'Ownership, approvals, permissions',
+    active: true,
+  },
+  {
+    title: 'Operational books',
+    detail: 'Ledger activity, controls, reporting',
+  },
+  {
+    title: 'Compliance execution',
+    detail: 'Tax obligations, filings, evidence',
+  },
+];
+
 const Landing = () => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -82,6 +105,12 @@ const Landing = () => {
                 <Link to="/register" className="landing-button landing-button--primary">Open Account</Link>
                 <Link to="/features" className="landing-button landing-button--secondary">Review Modules</Link>
               </div>
+
+              <div className="landing-hero__trustband" aria-label="Operational trust indicators">
+                {heroSignals.map((signal) => (
+                  <span key={signal}>{signal}</span>
+                ))}
+              </div>
             </div>
 
             <aside className="landing-hero__frame" aria-label="Platform operating frame">
@@ -92,10 +121,24 @@ const Landing = () => {
                   <span key={domain}>{domain}</span>
                 ))}
               </div>
+              <div className="landing-hero__summary-grid">
+                {heroSummary.map((item) => (
+                  <div key={item.label} className="landing-hero__summary-card">
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                  </div>
+                ))}
+              </div>
               <div className="landing-hero__frame-copy">
-                <p>Structured records</p>
-                <p>Governed workflows</p>
-                <p>Inspection-ready evidence</p>
+                {heroTimeline.map((item) => (
+                  <div key={item.title} className={`landing-hero__timeline-item${item.active ? ' is-active' : ''}`}>
+                    <span className="landing-hero__timeline-dot" aria-hidden="true" />
+                    <div>
+                      <p>{item.title}</p>
+                      <small>{item.detail}</small>
+                    </div>
+                  </div>
+                ))}
               </div>
             </aside>
           </div>
