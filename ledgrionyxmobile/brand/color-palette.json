@@ -1,0 +1,32 @@
+{
+  "brand": "Ledgrionyx",
+  "version": "1.0.0",
+  "colors": {
+    "primary": {
+      "navy":        { "hex": "#0A2A6C", "rgb": [10, 42, 108],  "usage": "App icon background, splash background, primary UI" },
+      "navyDark":    { "hex": "#061848", "rgb": [6,  24,  72],  "usage": "Dark mode background" }
+    },
+    "accent": {
+      "gold":        { "hex": "#C8A44D", "rgb": [200, 164, 77], "usage": "Shield ring, borders, gold accents" }
+    },
+    "secondary": {
+      "shieldBlue":  { "hex": "#1F4BA8", "rgb": [31,  75, 168], "usage": "Shield inner border on light backgrounds" },
+      "textMuted":   { "hex": "#4A5578", "rgb": [74,  85, 120], "usage": "Tagline, secondary text" }
+    },
+    "neutral": {
+      "white":       { "hex": "#FFFFFF", "rgb": [255, 255, 255], "usage": "Monogram A, text on dark" },
+      "textDark":    { "hex": "#0B0B0B", "rgb": [11,  11,  11],  "usage": "Body text on light backgrounds" }
+    }
+  },
+  "typography": {
+    "primary":   { "family": "IBM Plex Sans", "weights": [600, 700] },
+    "fallback":  ["Inter", "system-ui", "sans-serif"],
+    "wordmark":  { "size": 21, "weight": 700, "letterSpacing": -0.5 },
+    "tagline":   { "text": "GLOBAL PLATFORM", "size": 10.5, "weight": 600, "letterSpacing": 2, "transform": "uppercase" }
+  },
+  "lockup": {
+    "rule":      "icon-left, text-right",
+    "spacing":   "25% of icon width",
+    "alignment": "center-vertical"
+  }
+}
