@@ -1,7 +1,7 @@
 {
   "name": "ledgrionyx",
   "version": "1.0.0",
-  "homepage": "/",
+  "homepage": "/Ledgrionyx",
   "private": true,
   "proxy": "http://localhost:8000",
   "engines": {
