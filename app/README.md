@@ -14,18 +14,26 @@ A modern React-based personal finance management application with expense tracki
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js 18, 20, or 21
 - npm or yarn
+
+This app includes an [.nvmrc](/Users/ofidohubvm/Ledgrionyx/app/.nvmrc) file pinned to Node.js 20. If you use `nvm`, switch first:
+
+```bash
+nvm use
+```
 
 ### Installation
 
 1. Install dependencies:
 ```bash
+nvm use
 npm install
 ```
 
 2. Start the development server:
 ```bash
+nvm use
 npm start
 ```
 

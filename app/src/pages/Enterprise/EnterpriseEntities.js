@@ -232,6 +232,27 @@ const EnterpriseEntities = () => {
     navigate(`/app/workspace/${workspace.id}/overview`);
   };
 
+  const openBusinessSuite = (entity) => {
+    if (!entity?.id) {
+      return;
+    }
+
+    if (entity.workspace_mode === 'workspace') {
+      const workspace = workspaceByEntityId[String(entity.id)];
+      if (workspace?.id) {
+        navigate(`/app/workspace/${workspace.id}/overview`);
+        return;
+      }
+    }
+
+    if (entity.workspace_mode === 'equity') {
+      navigate(`/app/equity/${entity.id}/registry`);
+      return;
+    }
+
+    navigate(`/app/enterprise/entities/${entity.id}/dashboard`);
+  };
+
   const kpis = [
     { label: 'Total Business Suites', value: entities.length, accent: '#000000' },
     { label: 'Active', value: entities.filter(e => e.status === 'active').length, accent: '#EE6C4D' },
@@ -325,7 +346,7 @@ const EnterpriseEntities = () => {
               <div
                 key={entity.id}
                 className="entity-card"
-                onClick={() => navigate(`/app/enterprise/entities/${entity.id}/dashboard`)}
+                onClick={() => openBusinessSuite(entity)}
               >
                 <div className="entity-card-top">
                   <div className="entity-card-avatar">
@@ -367,7 +388,7 @@ const EnterpriseEntities = () => {
                   <button
                     className="btn-primary btn-sm"
                     style={{ flex: 1 }}
-                    onClick={() => navigate(`/app/enterprise/entities/${entity.id}/dashboard`)}
+                    onClick={() => openBusinessSuite(entity)}
                   >Open Dashboard</button>
                   {hasPermission(PERMISSIONS.EDIT_ENTITY) && (
                     <button className="btn-secondary btn-sm" onClick={() => handleOpenModal(entity)}>Edit</button>
@@ -410,7 +431,7 @@ const EnterpriseEntities = () => {
                     <tr
                       key={entity.id}
                       style={{ cursor: 'pointer' }}
-                      onClick={() => navigate(`/app/enterprise/entities/${entity.id}/dashboard`)}
+                      onClick={() => openBusinessSuite(entity)}
                     >
                       <td>
                         <div style={{ fontWeight: 600 }}>{entity.name}</div>
@@ -431,7 +452,7 @@ const EnterpriseEntities = () => {
                           {workspaceByEntityId[String(entity.id)]?.id && (
                             <button className="btn-secondary btn-sm" onClick={() => openWorkspace(entity.id)}>Workspace</button>
                           )}
-                          <button className="btn-view btn-sm" onClick={() => navigate(`/app/enterprise/entities/${entity.id}/dashboard`)}>View</button>
+                          <button className="btn-view btn-sm" onClick={() => openBusinessSuite(entity)}>View</button>
                           {hasPermission(PERMISSIONS.EDIT_ENTITY) && (
                             <button className="btn-secondary btn-sm" onClick={() => handleOpenModal(entity)}>Edit</button>
                           )}
