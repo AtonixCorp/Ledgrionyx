@@ -26,6 +26,7 @@ from .models import (
     WorkspaceSetting,
 )
 from .accounting_permissions import AccountingPermissionService
+from .type_registry import get_workspace_type_definition
 
 
 FINANCE_DEPARTMENT_TEMPLATES = [
@@ -255,6 +256,62 @@ class WorkspaceService:
 
     @staticmethod
     def _seed_default_departments(workspace: Workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        hierarchy_metadata = getattr(linked_entity, 'hierarchy_metadata', {}) or {}
+        selected_branch = hierarchy_metadata.get('selected_branch_label') or hierarchy_metadata.get('selected_branch')
+        selected_sub_branch = hierarchy_metadata.get('selected_sub_branch_label') or hierarchy_metadata.get('selected_sub_branch')
+        available_branches = hierarchy_metadata.get('available_branches') or []
+
+        templates = []
+        if selected_branch:
+            templates.append({
+                'name': selected_branch,
+                'description': f'{selected_branch} branch for {workspace.name}',
+                'cost_center': f'OPS-{selected_branch[:6].upper()}',
+            })
+
+        matching_branch = None
+        for branch in available_branches:
+            if branch.get('label') == selected_branch or branch.get('key') == selected_branch:
+                matching_branch = branch
+                break
+
+        if selected_sub_branch:
+            templates.append({
+                'name': selected_sub_branch,
+                'description': f'{selected_sub_branch} team for {workspace.name}',
+                'cost_center': f'OPS-{selected_sub_branch[:6].upper()}',
+            })
+
+        if matching_branch:
+            for child in matching_branch.get('children', []):
+                if child == selected_sub_branch:
+                    continue
+                templates.append({
+                    'name': child,
+                    'description': f'{child} function within {matching_branch.get("label")}',
+                    'cost_center': f'OPS-{child[:6].upper()}',
+                })
+
+        manual_departments = [item.strip() for item in str(hierarchy_metadata.get('departments_text') or '').split(',') if item.strip()]
+        for department_name in manual_departments:
+            templates.append({
+                'name': department_name,
+                'description': f'{department_name} department',
+                'cost_center': f'OPS-{department_name[:6].upper()}',
+            })
+
+        if not templates:
+            templates = FINANCE_DEPARTMENT_TEMPLATES
+
+        deduped_templates = []
+        seen_names = set()
+        for template in templates:
+            if template['name'] in seen_names:
+                continue
+            seen_names.add(template['name'])
+            deduped_templates.append(template)
+
         WorkspaceGroup.objects.bulk_create([
             WorkspaceGroup(
                 workspace=workspace,
@@ -263,8 +320,20 @@ class WorkspaceService:
                 owner=workspace.owner,
                 cost_center=template['cost_center'],
             )
-            for template in FINANCE_DEPARTMENT_TEMPLATES
+            for template in deduped_templates
         ])
+
+    @staticmethod
+    def _workspace_module_keys(linked_entity):
+        enabled_modules = getattr(linked_entity, 'enabled_modules', None)
+        if isinstance(enabled_modules, list) and enabled_modules:
+            return enabled_modules
+
+        workspace_type_definition = get_workspace_type_definition(getattr(linked_entity, 'workspace_type', '')) if linked_entity else None
+        if workspace_type_definition:
+            return workspace_type_definition['modules']
+
+        return DEFAULT_MODULES
 
     @staticmethod
     @transaction.atomic
@@ -286,7 +355,7 @@ class WorkspaceService:
         # Seed default modules
         WorkspaceModule.objects.bulk_create([
             WorkspaceModule(workspace=ws, module_key=key, enabled=True)
-            for key in DEFAULT_MODULES
+            for key in WorkspaceService._workspace_module_keys(linked_entity)
         ])
 
         # Owner is automatically a member with role=owner

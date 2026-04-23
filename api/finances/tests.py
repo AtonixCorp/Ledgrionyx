@@ -1720,6 +1720,59 @@ class EntityViewSetTests(TestCase):
         self.assertIn('view_entities', response.data['permission_codes'])
         self.assertIn('create_entity', response.data['permission_codes'])
 
+    def test_workspace_type_registry_provisions_modules_and_hierarchy(self):
+        parent_entity = Entity.objects.create(
+            organization=self.organization,
+            name='Parent Workspace',
+            country='US',
+            entity_type='other',
+            status='active',
+            local_currency='USD',
+            workspace_mode='workspace',
+        )
+
+        response = self.client.post(
+            '/api/entities/',
+            {
+                'organization_id': self.organization.id,
+                'name': 'Engineering Delivery Hub',
+                'country': 'US',
+                'entity_type': 'other',
+                'status': 'active',
+                'local_currency': 'USD',
+                'workspace_mode': 'workspace',
+                'workspace_type': 'technology',
+                'parent_entity': parent_entity.id,
+                'hierarchy_metadata': {
+                    'selected_branch': 'software_development',
+                    'selected_branch_label': 'Software Development',
+                    'selected_sub_branch': 'Frontend',
+                    'selected_sub_branch_label': 'Frontend',
+                    'departments_text': 'Platform, DevOps',
+                },
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['workspace_type'], 'technology')
+        self.assertEqual(response.data['parent_entity'], parent_entity.id)
+        self.assertEqual(response.data['hierarchy_metadata']['selected_branch_label'], 'Software Development')
+
+        entity = Entity.objects.get(pk=response.data['id'])
+        workspace = Workspace.objects.get(linked_entity=entity)
+        module_keys = set(workspace.modules.values_list('module_key', flat=True))
+        department_names = set(workspace.groups.values_list('name', flat=True))
+
+        self.assertIn('project_tracking', module_keys)
+        self.assertIn('code_repositories', module_keys)
+        self.assertIn('Software Development', department_names)
+        self.assertIn('Frontend', department_names)
+        self.assertIn('Backend', department_names)
+        self.assertIn('QA', department_names)
+        self.assertIn('Platform', department_names)
+        self.assertIn('DevOps', department_names)
+
 
 @override_settings(
     EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',

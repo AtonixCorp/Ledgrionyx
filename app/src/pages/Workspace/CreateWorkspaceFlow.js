@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEnterprise } from '../../context/EnterpriseContext';
 import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
 import { countryDropdownOptions } from '../../utils/countryDropdowns';
+import { getWorkspaceTypeDefinition, WORKSPACE_TYPE_OPTIONS } from '../../utils/workspaceTypeRegistry';
 import './CreateWorkspace.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -11,34 +12,16 @@ import './CreateWorkspace.css';
    Separate from Organization creation and Entity creation.
 ───────────────────────────────────────────────────────────────────────────── */
 
-const WORKSPACE_TYPES = [
-  { value: 'technology',      label: 'Technology' },
-  { value: 'retail',          label: 'Retail' },
-  { value: 'manufacturing',   label: 'Manufacturing' },
-  { value: 'creative_studio', label: 'Creative Studio' },
-  { value: 'consulting',      label: 'Consulting' },
-  { value: 'finance',         label: 'Finance' },
-  { value: 'custom',          label: 'Custom' },
-];
-
-const WORKSPACE_MODULES = [
-  { key: 'meetings',    label: 'Meetings',    desc: 'Schedule and manage team meetings' },
-  { key: 'files',       label: 'Files',       desc: 'Document storage and sharing' },
-  { key: 'calendar',    label: 'Calendar',    desc: 'Event and deadline tracking' },
-  { key: 'marketing',   label: 'Marketing',   desc: 'Campaign and content management' },
-  { key: 'email',       label: 'Email',       desc: 'Internal and external communications' },
-  { key: 'hr',          label: 'HR',          desc: 'Staff records and personnel management' },
-  { key: 'finance',     label: 'Finance',     desc: 'Budgets, expenses, and reporting' },
-  { key: 'compliance',  label: 'Compliance',  desc: 'Regulatory filings and deadlines' },
-];
-
 const EMPTY_FORM = {
   name: '',
   workspaceType: '',
+  parentEntity: '',
   country: '',
   address: '',
   registrationNumber: '',
   industry: '',
+  selectedBranch: '',
+  selectedSubBranch: '',
   departments: '',
   teams: '',
   staffCount: '',
@@ -57,13 +40,45 @@ const STEPS = [
 
 export default function CreateWorkspaceFlow() {
   const navigate = useNavigate();
-  const { createWorkspace, currentOrganization } = useEnterprise();
+  const { createWorkspace, currentOrganization, entities } = useEnterprise();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
+  const selectedType = getWorkspaceTypeDefinition(form.workspaceType);
+  const availableBranches = selectedType?.branches || [];
+  const selectedBranch = availableBranches.find((branch) => branch.key === form.selectedBranch) || null;
+  const moduleCards = (selectedType?.modules || []).map((moduleKey) => ({
+    key: moduleKey,
+    label: moduleKey.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase()),
+    desc: 'Provisioned from the selected workspace template.',
+  }));
+  const workspaceParents = (entities || []).filter((entity) => entity.workspace_mode === 'workspace');
+
+  const update = (field, value) => setForm((prev) => {
+    if (field === 'workspaceType') {
+      const definition = getWorkspaceTypeDefinition(value);
+      return {
+        ...prev,
+        workspaceType: value,
+        industry: definition?.industryLabel || prev.industry,
+        selectedBranch: '',
+        selectedSubBranch: '',
+        enabledModules: definition?.modules || [],
+      };
+    }
+
+    if (field === 'selectedBranch') {
+      return {
+        ...prev,
+        selectedBranch: value,
+        selectedSubBranch: '',
+      };
+    }
+
+    return { ...prev, [field]: value };
+  });
 
   const toggleModule = (key) => {
     setForm((prev) => {
@@ -76,7 +91,7 @@ export default function CreateWorkspaceFlow() {
   const canGoNext = () => {
     if (step === 1) return form.name.trim().length >= 2 && !!form.workspaceType;
     if (step === 2) return !!form.country;
-    if (step === 3) return true;
+    if (step === 3) return availableBranches.length === 0 || !!form.selectedBranch;
     if (step === 4) return form.enabledModules.length > 0;
     return true;
   };
@@ -101,9 +116,28 @@ export default function CreateWorkspaceFlow() {
         entity_type: 'other',
         workspace_mode: 'workspace',
         workspace_type: form.workspaceType,
+        parent_entity: form.parentEntity || undefined,
         address: form.address.trim(),
         registration_number: form.registrationNumber.trim() || undefined,
-        industry: form.industry.trim() || form.workspaceType,
+        industry: form.industry.trim() || selectedType?.industryLabel || form.workspaceType,
+        hierarchy_metadata: {
+          workspace_type: form.workspaceType,
+          workspace_type_label: selectedType?.label || form.workspaceType,
+          selected_branch: form.selectedBranch,
+          selected_branch_label: selectedBranch?.label || '',
+          selected_sub_branch: form.selectedSubBranch,
+          selected_sub_branch_label: form.selectedSubBranch || '',
+          available_branches: availableBranches,
+          departments_text: form.departments.trim(),
+          teams_text: form.teams.trim(),
+          staff_count: Number(form.staffCount) || 0,
+          ownership_hierarchy: form.ownershipHierarchy.trim(),
+        },
+        dashboard_config: {
+          dashboards: selectedType?.dashboards || [],
+          landing: 'overview',
+        },
+        rbac_config: selectedType?.rbac || {},
         departments: form.departments.trim(),
         teams: form.teams.trim(),
         staff_count: Number(form.staffCount) || 0,
@@ -140,18 +174,23 @@ export default function CreateWorkspaceFlow() {
       </div>
       <div className="cw-field cw-field-wide">
         <label className="cw-label">Workspace Type <span className="cw-required">*</span></label>
-        <div className="cw-tile-grid">
-          {WORKSPACE_TYPES.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              className={`cw-tile${form.workspaceType === t.value ? ' cw-tile--selected' : ''}`}
-              onClick={() => update('workspaceType', t.value)}
-            >
-              <span className="cw-tile-label">{t.label}</span>
-            </button>
+        <select
+          className="cw-select"
+          value={form.workspaceType}
+          onChange={(e) => update('workspaceType', e.target.value)}
+        >
+          <option value="">Select workspace type</option>
+          {WORKSPACE_TYPE_OPTIONS.map((t) => (
+            <option key={t.value} value={t.value}>{t.label}</option>
           ))}
-        </div>
+        </select>
+        {selectedType && (
+          <div className="cw-field cw-field-wide" style={{ paddingTop: 12 }}>
+            <span className="cw-hint">{selectedType.description}</span>
+            <span className="cw-hint">Dashboards: {selectedType.dashboards.join(', ')}</span>
+            <span className="cw-hint">Branches: {availableBranches.map((branch) => branch.label).join(', ')}</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -192,7 +231,7 @@ export default function CreateWorkspaceFlow() {
         <input
           className="cw-input"
           type="text"
-          placeholder="e.g. Software, Retail, Healthcare"
+          placeholder="Auto-filled from workspace type, but editable"
           value={form.industry}
           onChange={(e) => update('industry', e.target.value)}
         />
@@ -203,6 +242,33 @@ export default function CreateWorkspaceFlow() {
   const renderStep3 = () => (
     <div className="cw-step-fields">
       <div className="cw-field">
+        <label className="cw-label">Parent Workspace <span className="cw-optional">(optional)</span></label>
+        <select className="cw-select" value={form.parentEntity} onChange={(e) => update('parentEntity', e.target.value)}>
+          <option value="">Top-level workspace</option>
+          {workspaceParents.map((workspace) => (
+            <option key={workspace.id} value={workspace.id}>{workspace.name}</option>
+          ))}
+        </select>
+      </div>
+      <div className="cw-field">
+        <label className="cw-label">Branch <span className="cw-required">*</span></label>
+        <select className="cw-select" value={form.selectedBranch} onChange={(e) => update('selectedBranch', e.target.value)}>
+          <option value="">Select branch</option>
+          {availableBranches.map((branch) => (
+            <option key={branch.key} value={branch.key}>{branch.label}</option>
+          ))}
+        </select>
+      </div>
+      <div className="cw-field">
+        <label className="cw-label">Sub-branch</label>
+        <select className="cw-select" value={form.selectedSubBranch} onChange={(e) => update('selectedSubBranch', e.target.value)} disabled={!selectedBranch}>
+          <option value="">Select sub-branch</option>
+          {(selectedBranch?.children || []).map((child) => (
+            <option key={child} value={child}>{child}</option>
+          ))}
+        </select>
+      </div>
+      <div className="cw-field cw-field-wide">
         <label className="cw-label">Departments</label>
         <input
           className="cw-input"
@@ -245,6 +311,11 @@ export default function CreateWorkspaceFlow() {
         />
         <span className="cw-hint">Briefly describe the reporting or ownership structure.</span>
       </div>
+      {selectedType && (
+        <div className="cw-field cw-field-wide">
+          <span className="cw-hint">Template hierarchy: {availableBranches.map((branch) => `${branch.label} (${branch.children.join(', ')})`).join(' • ')}</span>
+        </div>
+      )}
     </div>
   );
 
@@ -252,7 +323,7 @@ export default function CreateWorkspaceFlow() {
     <div className="cw-step-fields">
       <p className="cw-section-desc">Select the modules to activate in this workspace. You can add more later.</p>
       <div className="cw-module-grid">
-        {WORKSPACE_MODULES.map((mod) => {
+        {moduleCards.map((mod) => {
           const active = form.enabledModules.includes(mod.key);
           return (
             <button
@@ -270,6 +341,9 @@ export default function CreateWorkspaceFlow() {
       </div>
       {form.enabledModules.length === 0 && (
         <p className="cw-hint cw-hint--warn">Select at least one module to continue.</p>
+      )}
+      {selectedType && (
+        <p className="cw-hint">RBAC template: {Object.keys(selectedType.rbac).join(', ')}</p>
       )}
     </div>
   );

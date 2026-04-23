@@ -80,15 +80,19 @@ const ENTITY_TYPES = [
 
 const INDUSTRIES = [
   { value: 'technology', label: 'Technology' },
-  { value: 'finance', label: 'Finance & Banking' },
+  
+  { value: 'engineering', label: 'Engineering' },
+  { value: 'accounting', label: 'Accounting' },
+  { value: 'education', label: 'Education' },
   { value: 'healthcare', label: 'Healthcare' },
-  { value: 'retail', label: 'Retail & E-Commerce' },
+  { value: 'media_entertainment', label: 'Media/Entertainment' },
+  { value: 'retail_commerce', label: 'Retail/Commerce' },
+  { value: 'construction', label: 'Construction' },
   { value: 'manufacturing', label: 'Manufacturing' },
+  { value: 'research', label: 'Research' },
   { value: 'real_estate', label: 'Real Estate' },
   { value: 'consulting', label: 'Consulting & Professional Services' },
   { value: 'hospitality', label: 'Hospitality & Tourism' },
-  { value: 'education', label: 'Education' },
-  { value: 'media', label: 'Media & Entertainment' },
   { value: 'logistics', label: 'Logistics & Supply Chain' },
   { value: 'energy', label: 'Energy & Utilities' },
   { value: 'agriculture', label: 'Agriculture' },

@@ -853,6 +853,12 @@ export const EnterpriseProvider = ({ children }) => {
       fiscal_year_end: toFullDate(rawFye),
       status: 'active',
       workspace_mode: workspaceData.workspace_mode || workspaceData.workspaceMode || 'accounting',
+      industry: workspaceData.industry || '',
+      workspace_type: workspaceData.workspace_type || workspaceData.workspaceType || '',
+      parent_entity: workspaceData.parent_entity || workspaceData.parentEntity || null,
+      hierarchy_metadata: workspaceData.hierarchy_metadata || workspaceData.hierarchyMetadata || {},
+      dashboard_config: workspaceData.dashboard_config || workspaceData.dashboardConfig || {},
+      rbac_config: workspaceData.rbac_config || workspaceData.rbacConfig || {},
       enabled_modules: workspaceData.enabled_modules || workspaceData.enabledModules || [],
     };
     const newEntity = await createEntity(payload);

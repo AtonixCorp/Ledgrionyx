@@ -1522,15 +1522,21 @@ class EntityViewSet(viewsets.ModelViewSet):
         from rest_framework.exceptions import ValidationError
         from equity.models import WorkspaceEquityProfile
         from workspaces.services import WorkspaceService
+        from workspaces.type_registry import get_workspace_type_definition
         
         org_id = self.request.data.get('organization_id')
         if not org_id:
             raise ValidationError({'organization_id': 'This field is required.'})
 
+        requested_workspace_type = (self.request.data.get('workspace_type') or '').strip()
+        workspace_type_definition = get_workspace_type_definition(requested_workspace_type)
+
         enabled_modules = self.request.data.get('enabled_modules') or [
             'overview', 'members', 'groups', 'meetings', 'calendar',
             'files', 'permissions', 'settings', 'email', 'marketing',
         ]
+        if workspace_type_definition:
+            enabled_modules = list(dict.fromkeys([*workspace_type_definition['modules'], *enabled_modules]))
         
         # Get the organization owned by the current user
         organization = get_object_or_404(Organization, id=org_id, owner=self.request.user)
@@ -1545,7 +1551,32 @@ class EntityViewSet(viewsets.ModelViewSet):
                 })
 
         try:
-            entity = serializer.save(organization=organization, enabled_modules=enabled_modules)
+            parent_entity = None
+            parent_entity_id = self.request.data.get('parent_entity') or self.request.data.get('parent_entity_id')
+            if parent_entity_id not in (None, ''):
+                parent_entity = get_object_or_404(Entity, pk=parent_entity_id, organization=organization)
+
+            hierarchy_metadata = self.request.data.get('hierarchy_metadata') or {}
+            if workspace_type_definition:
+                hierarchy_metadata = {
+                    **hierarchy_metadata,
+                    'workspace_type': requested_workspace_type,
+                    'workspace_type_label': workspace_type_definition['label'],
+                    'template_key': workspace_type_definition['template_key'],
+                    'available_branches': workspace_type_definition['branches'],
+                }
+
+            entity = serializer.save(
+                organization=organization,
+                enabled_modules=enabled_modules,
+                parent_entity=parent_entity,
+                industry=(self.request.data.get('industry') or (workspace_type_definition or {}).get('industry_label') or '').strip(),
+                workspace_type=requested_workspace_type,
+                workspace_template_key=(workspace_type_definition or {}).get('template_key', ''),
+                hierarchy_metadata=hierarchy_metadata,
+                dashboard_config=self.request.data.get('dashboard_config') or ({'dashboards': workspace_type_definition['dashboards']} if workspace_type_definition else {}),
+                rbac_config=self.request.data.get('rbac_config') or ((workspace_type_definition or {}).get('rbac') or {}),
+            )
             # Create default structure for the new entity
             entity.create_default_structure()
             WorkspaceService.ensure_workspace_for_entity(entity)

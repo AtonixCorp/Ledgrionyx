@@ -117,10 +117,11 @@ class OrganizationSerializer(serializers.ModelSerializer):
 class EntitySerializer(serializers.ModelSerializer):
     child_entities = serializers.SerializerMethodField()
     registration_number_masked = serializers.SerializerMethodField()
+    parent_entity_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Entity
-        fields = ['id', 'name', 'country', 'entity_type', 'status', 'registration_number', 'registration_number_masked', 'local_currency', 'main_bank', 'tax_authority_url', 'fiscal_year_end', 'next_filing_date', 'workspace_mode', 'enabled_modules', 'parent_entity', 'child_entities', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'country', 'entity_type', 'status', 'registration_number', 'registration_number_masked', 'local_currency', 'main_bank', 'tax_authority_url', 'fiscal_year_end', 'next_filing_date', 'workspace_mode', 'industry', 'workspace_type', 'workspace_template_key', 'hierarchy_metadata', 'dashboard_config', 'rbac_config', 'enabled_modules', 'parent_entity', 'parent_entity_name', 'child_entities', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
     def get_child_entities(self, obj):
@@ -129,6 +130,9 @@ class EntitySerializer(serializers.ModelSerializer):
 
     def get_registration_number_masked(self, obj):
         return mask_tax_identifier(obj.registration_number)
+
+    def get_parent_entity_name(self, obj):
+        return getattr(obj.parent_entity, 'name', None)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

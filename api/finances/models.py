@@ -141,6 +141,12 @@ class Entity(models.Model):
     fiscal_year_end = models.DateField(null=True, blank=True)
     next_filing_date = models.DateField(null=True, blank=True)
     workspace_mode = models.CharField(max_length=20, choices=WORKSPACE_MODE_CHOICES, default='accounting')
+    industry = models.CharField(max_length=100, blank=True)
+    workspace_type = models.CharField(max_length=50, blank=True, default='')
+    workspace_template_key = models.CharField(max_length=50, blank=True, default='')
+    hierarchy_metadata = models.JSONField(default=dict, blank=True)
+    dashboard_config = models.JSONField(default=dict, blank=True)
+    rbac_config = models.JSONField(default=dict, blank=True)
     enabled_modules = models.JSONField(default=list, blank=True)
     parent_entity = models.ForeignKey(
         'self',

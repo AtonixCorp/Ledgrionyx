@@ -45,6 +45,11 @@ class WorkspaceSerializer(serializers.ModelSerializer):
     clients_count = serializers.SerializerMethodField()
     workspace_mode = serializers.SerializerMethodField()
     workspace_mode_label = serializers.SerializerMethodField()
+    workspace_type = serializers.ReadOnlyField(source='linked_entity.workspace_type')
+    workspace_type_label = serializers.SerializerMethodField()
+    hierarchy_metadata = serializers.ReadOnlyField(source='linked_entity.hierarchy_metadata')
+    dashboard_config = serializers.ReadOnlyField(source='linked_entity.dashboard_config')
+    rbac_config = serializers.ReadOnlyField(source='linked_entity.rbac_config')
 
     class Meta:
         model  = Workspace
@@ -54,7 +59,8 @@ class WorkspaceSerializer(serializers.ModelSerializer):
             'business_type', 'country_of_incorporation', 'currency', 'fiscal_year',
             'tax_regime', 'component_count',
             'members_count', 'departments_count', 'clients_count',
-            'workspace_mode', 'workspace_mode_label',
+            'workspace_mode', 'workspace_mode_label', 'workspace_type', 'workspace_type_label',
+            'hierarchy_metadata', 'dashboard_config', 'rbac_config',
             'created_at', 'updated_at',
         )
         read_only_fields = ('id', 'owner', 'created_at', 'updated_at')
@@ -169,7 +175,15 @@ class WorkspaceSerializer(serializers.ModelSerializer):
             'equity': 'Equity Management',
             'combined': 'Combined',
             'standalone': 'Standalone',
+            'workspace': 'Workspace',
         }.get(mode, 'Accounting')
+
+    def get_workspace_type_label(self, workspace):
+        linked_entity = getattr(workspace, 'linked_entity', None)
+        if not linked_entity:
+            return None
+        hierarchy_metadata = getattr(linked_entity, 'hierarchy_metadata', {}) or {}
+        return hierarchy_metadata.get('workspace_type_label') or getattr(linked_entity, 'workspace_type', None)
 
 
 class WorkspaceCreateSerializer(serializers.Serializer):

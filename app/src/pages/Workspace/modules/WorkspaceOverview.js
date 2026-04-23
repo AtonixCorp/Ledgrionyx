@@ -127,6 +127,11 @@ const WorkspaceOverview = () => {
   const entityLabel = ENTITY_TYPE_LABELS[ws.entity_type] || ws.entity_type || '—';
   const initials = (ws.name || 'W').slice(0, 2).toUpperCase();
   const equityEnabled = hasEquityModule(ws);
+  const workspaceTypeLabel = ws.workspace_type_label || ws.workspace_type || ws.hierarchy_metadata?.workspace_type_label || null;
+  const hierarchyMetadata = ws.hierarchy_metadata || {};
+  const dashboardNames = ws.dashboard_config?.dashboards || [];
+  const branchLabel = hierarchyMetadata.selected_branch_label || hierarchyMetadata.selected_branch || null;
+  const subBranchLabel = hierarchyMetadata.selected_sub_branch_label || hierarchyMetadata.selected_sub_branch || null;
   const enabledModules = useMemo(() => {
     const fallbackModules = [
       ...REQUIRED_MODULES.map((module) => module.key),
@@ -174,6 +179,9 @@ const WorkspaceOverview = () => {
               <tbody>
                 <DetailRow label="Legal Name" value={ws.name} />
                 <DetailRow label="Entity Type" value={entityLabel} />
+                <DetailRow label="Workspace Type" value={workspaceTypeLabel} />
+                <DetailRow label="Branch" value={branchLabel} />
+                <DetailRow label="Sub-branch" value={subBranchLabel} />
                 <DetailRow label="Registration No." value={ws.registration_number} />
                 <DetailRow label="Country" value={ws.country} />
                 <DetailRow label="Status" value={statusCfg.label} />
@@ -215,6 +223,12 @@ const WorkspaceOverview = () => {
             <span className="wso-footer-item">
               <span className="wso-footer-label">Created</span>
               {fmtDate(ws.created_at)}
+            </span>
+          )}
+          {dashboardNames.length > 0 && (
+            <span className="wso-footer-item">
+              <span className="wso-footer-label">Dashboards</span>
+              {dashboardNames.join(', ')}
             </span>
           )}
           {canOpenEntityDashboard && (
