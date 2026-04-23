@@ -551,6 +551,33 @@ export const EnterpriseProvider = ({ children }) => {
     return permissions.includes(permissionCode);
   }, [isRoleResolved, permissions]);
 
+  const getDefaultDashboardPath = useCallback(() => {
+    if (!user || user.account_type !== 'enterprise') {
+      return '/app/console';
+    }
+
+    if (permissions.includes(PERMISSIONS.VIEW_ORG_OVERVIEW)) {
+      return '/app/console';
+    }
+
+    const workspaceEntity = entities.find((entity) => entity.workspace_mode === 'workspace');
+    if (workspaceEntity?.id) {
+      return `/app/workspace/${workspaceEntity.id}/overview`;
+    }
+
+    const equityEntity = entities.find((entity) => entity.workspace_mode === 'equity');
+    if (equityEntity?.id) {
+      return `/app/equity/${equityEntity.id}/registry`;
+    }
+
+    const standardEntity = entities.find((entity) => entity.workspace_mode !== 'workspace' && entity.workspace_mode !== 'equity');
+    if (standardEntity?.id) {
+      return `/app/enterprise/entities/${standardEntity.id}/dashboard`;
+    }
+
+    return '/app/console';
+  }, [entities, permissions, PERMISSIONS.VIEW_ORG_OVERVIEW, user]);
+
   /**
    * Check if user has specific role
    */
@@ -659,6 +686,53 @@ export const EnterpriseProvider = ({ children }) => {
       throw err;
     }
   }, [apiUrl, buildAuthHeaders]);
+
+  /**
+   * Delete organization when it has no remaining organization-scoped data.
+   */
+  const deleteOrganization = useCallback(async (orgId) => {
+    if (!orgId) throw new Error('Organization id is required');
+
+    try {
+      const response = await fetch(apiUrl(`/api/organizations/${orgId}/`), {
+        method: 'DELETE',
+        headers: buildAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || 'Failed to delete organization');
+      }
+
+      let nextCurrentOrganization = null;
+      setOrganizations((prev) => {
+        const nextOrganizations = prev.filter((org) => org.id !== orgId);
+        nextCurrentOrganization = nextOrganizations[0] || null;
+        return nextOrganizations;
+      });
+
+      setCurrentOrganization((prev) => {
+        if (!prev || prev.id !== orgId) {
+          return prev;
+        }
+        return nextCurrentOrganization;
+      });
+
+      if (nextCurrentOrganization?.id) {
+        switchOrganization(nextCurrentOrganization);
+      } else {
+        setEntities([]);
+        setTeamMembers([]);
+        setOrganizationPermissionContext(null);
+      }
+
+      return true;
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+      throw err;
+    }
+  }, [apiUrl, buildAuthHeaders, switchOrganization]);
 
   /**
    * Set the active workspace (entity) and persist to localStorage.
@@ -1852,9 +1926,11 @@ export const EnterpriseProvider = ({ children }) => {
     hasRole,
     fetchWorkspacePermissionSummary,
     getWorkspacePermissionSummary,
+    getDefaultDashboardPath,
     switchOrganization,
     createOrganization,
     updateOrganization,
+    deleteOrganization,
     createEntity,
     deleteEntity,
     addTeamMember,

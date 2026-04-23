@@ -37,10 +37,11 @@ const CURRENCIES = [
 ];
 
 const EnterpriseSettings = () => {
-  const { currentOrganization, updateOrganization } = useEnterprise();
+  const { currentOrganization, deleteOrganization, updateOrganization } = useEnterprise();
   const [activeTab, setActiveTab] = useState('organization');
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   // Organization Settings State
   const [orgSettings, setOrgSettings] = useState({
@@ -191,6 +192,26 @@ const EnterpriseSettings = () => {
     setSaveError(null);
   };
 
+  const handleDeleteOrganization = async () => {
+    if (!currentOrganization?.id || deleteBusy) return;
+
+    const confirmed = window.confirm(
+      `Delete organization "${currentOrganization.name}"? This will only succeed if there is no data inside the organization.`
+    );
+    if (!confirmed) return;
+
+    setDeleteBusy(true);
+    setSaveError(null);
+
+    try {
+      await deleteOrganization(currentOrganization.id);
+    } catch (err) {
+      setSaveError(err.message || 'Failed to delete organization');
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
+
   return (
     <div className="page-container enterprise-settings">
       <div className="settings-header">
@@ -334,6 +355,21 @@ const EnterpriseSettings = () => {
               <button className="btn-primary" onClick={handleSaveSettings}>
                 Save Organization Settings
               </button>
+
+              <div className="settings-card" style={{ marginTop: '1.5rem', borderColor: '#f3c2b8', background: '#fff7f5' }}>
+                <h3>Delete Organization</h3>
+                <p style={{ marginBottom: '1rem', color: '#6b7280' }}>
+                  The organization can only be deleted when there is no data inside it. Remove entities, team members, clients, workflows, and other organization records first.
+                </p>
+                <button
+                  className="btn-secondary"
+                  onClick={handleDeleteOrganization}
+                  disabled={deleteBusy || !currentOrganization?.id}
+                  style={{ borderColor: '#dc2626', color: '#dc2626' }}
+                >
+                  {deleteBusy ? 'Deleting...' : 'Delete Organization'}
+                </button>
+              </div>
             </div>
           )}
 

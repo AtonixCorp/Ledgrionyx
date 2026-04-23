@@ -1,3 +1,4 @@
+import secrets
 import uuid
 from decimal import Decimal
 
@@ -36,6 +37,7 @@ ACCOUNT_TYPE_CHOICES = [
 class UserProfile(models.Model):
     """Extended user profile with account type and preferences"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    secure_user_id = models.CharField(max_length=10, unique=True, editable=False, db_index=True, blank=True)
     account_type = models.CharField(
         max_length=20,
         choices=ACCOUNT_TYPE_CHOICES,
@@ -58,6 +60,18 @@ class UserProfile(models.Model):
     avatar_color = models.CharField(max_length=7, default='#667eea')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def generate_secure_user_id():
+        while True:
+            candidate = str(secrets.randbelow(9_000_000_000) + 1_000_000_000)
+            if not UserProfile.objects.filter(secure_user_id=candidate).exists():
+                return candidate
+
+    def save(self, *args, **kwargs):
+        if not self.secure_user_id:
+            self.secure_user_id = self.generate_secure_user_id()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.email} ({self.get_account_type_display()})"

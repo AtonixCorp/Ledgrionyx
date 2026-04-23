@@ -50,6 +50,7 @@ from .tax_security import mask_json_payload, mask_tax_identifier, should_mask_ta
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.ReadOnlyField(source='user.id')
+    secure_user_id = serializers.ReadOnlyField()
     email = serializers.ReadOnlyField(source='user.email')
     username = serializers.ReadOnlyField(source='user.username')
     first_name = serializers.SerializerMethodField()
@@ -57,7 +58,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['user_id', 'email', 'username', 'first_name', 'last_name', 'account_type', 'country', 'phone', 'tax_type', 'tax_rate', 'avatar_color', 'created_at']
+        fields = ['user_id', 'secure_user_id', 'email', 'username', 'first_name', 'last_name', 'account_type', 'country', 'phone', 'tax_type', 'tax_rate', 'avatar_color', 'created_at']
         read_only_fields = ['created_at']
 
     def get_first_name(self, obj):

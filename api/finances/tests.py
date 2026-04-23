@@ -777,6 +777,38 @@ class DeveloperPortalViewTests(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data['error']['code'], 'UNAUTHORIZED')
 
+    def test_register_generates_secure_user_id_and_allows_token_login_with_it(self):
+        register_response = self.client.post(
+            '/api/auth/register/',
+            {
+                'email': 'secure-id@example.com',
+                'password': 'strong-pass-123',
+                'username': 'secure-id@example.com',
+                'account_type': 'enterprise',
+                'country': 'Nigeria',
+                'org_name': 'Secure ID Org',
+            },
+            format='json',
+        )
+
+        self.assertEqual(register_response.status_code, 201)
+        secure_user_id = register_response.data['user']['secure_user_id']
+        self.assertEqual(len(secure_user_id), 10)
+        self.assertTrue(secure_user_id.isdigit())
+
+        token_response = self.client.post(
+            '/api/auth/token/',
+            {
+                'username': secure_user_id,
+                'password': 'strong-pass-123',
+            },
+            format='json',
+        )
+
+        self.assertEqual(token_response.status_code, 200)
+        self.assertEqual(token_response.data['user']['secure_user_id'], secure_user_id)
+        self.assertIn('access', token_response.data)
+
 
 @override_settings(LEDGRIONYX_API_ENVIRONMENT='sandbox')
 class CoreFinancialAPIV1Tests(TestCase):

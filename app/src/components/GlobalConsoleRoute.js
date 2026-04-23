@@ -5,7 +5,7 @@ import { useEnterprise } from '../context/EnterpriseContext';
 
 const GlobalConsoleRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  const { isRoleResolved, loading: enterpriseLoading } = useEnterprise();
+  const { getDefaultDashboardPath, hasPermission, isRoleResolved, loading: enterpriseLoading } = useEnterprise();
   const location = useLocation();
 
   if (loading || enterpriseLoading || !isRoleResolved) {
@@ -27,6 +27,33 @@ const GlobalConsoleRoute = ({ children }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (!hasPermission('view_org_overview')) {
+    const fallbackPath = getDefaultDashboardPath();
+
+    if (fallbackPath !== location.pathname) {
+      return <Navigate to={fallbackPath} state={{ from: location }} replace />;
+    }
+
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh',
+        fontFamily: 'var(--font-family)',
+        gap: '12px',
+      }}>
+        <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 600, color: 'var(--color-midnight)' }}>
+          Access Restricted
+        </div>
+        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-silver-dark)' }}>
+          No dashboard is available for your current permissions.
+        </div>
+      </div>
+    );
   }
 
   return children;

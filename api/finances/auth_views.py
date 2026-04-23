@@ -3,6 +3,7 @@ from django.utils.text import slugify
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -11,6 +12,46 @@ from .models import Organization, UserProfile, ACCOUNT_TYPE_ENTERPRISE, ACCOUNT_
 
 
 User = get_user_model()
+
+
+class SecureUserIdTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def _resolve_username(cls, submitted_username):
+        raw_value = (submitted_username or '').strip()
+        if not raw_value:
+            return raw_value
+
+        if raw_value.isdigit() and len(raw_value) == 10:
+            profile = UserProfile.objects.select_related('user').filter(secure_user_id=raw_value).first()
+            if profile:
+                return profile.user.get_username()
+
+        user = User.objects.filter(email__iexact=raw_value).first()
+        if user:
+            return user.get_username()
+
+        return raw_value
+
+    def validate(self, attrs):
+        attrs = attrs.copy()
+        attrs[self.username_field] = self._resolve_username(attrs.get(self.username_field))
+        data = super().validate(attrs)
+
+        profile = getattr(self.user, 'profile', None)
+        data['user'] = {
+            'id': self.user.id,
+            'username': self.user.username,
+            'email': self.user.email,
+            'first_name': self.user.first_name,
+            'last_name': self.user.last_name,
+            'account_type': getattr(profile, 'account_type', ACCOUNT_TYPE_PERSONAL),
+            'country': getattr(profile, 'country', ''),
+            'phone': getattr(profile, 'phone', ''),
+            'tax_type': getattr(profile, 'tax_type', UserProfile.TAX_TYPE_CORPORATE),
+            'tax_rate': float(getattr(profile, 'tax_rate', 0) or 0),
+            'secure_user_id': getattr(profile, 'secure_user_id', ''),
+        }
+        return data
 
 
 class RegisterView(DeveloperFacingAPIView):
@@ -91,6 +132,7 @@ class RegisterView(DeveloperFacingAPIView):
                     "phone": getattr(profile, 'phone', ''),
                     "tax_type": getattr(profile, 'tax_type', UserProfile.TAX_TYPE_CORPORATE),
                     "tax_rate": float(getattr(profile, 'tax_rate', 0) or 0),
+                    "secure_user_id": getattr(profile, 'secure_user_id', ''),
                 },
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
@@ -117,6 +159,7 @@ class MeView(DeveloperFacingAPIView):
                 "phone": getattr(profile, 'phone', ''),
                 "tax_type": getattr(profile, 'tax_type', UserProfile.TAX_TYPE_CORPORATE),
                 "tax_rate": float(getattr(profile, 'tax_rate', 0) or 0),
+                "secure_user_id": getattr(profile, 'secure_user_id', ''),
             }
         )
 

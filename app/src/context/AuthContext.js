@@ -56,6 +56,17 @@ export const AuthProvider = ({ children }) => {
     return fallbackMessage;
   }, []);
 
+  const normalizeUser = useCallback((source) => ({
+    id: source?.id,
+    secure_user_id: source?.secure_user_id || '',
+    name: source?.username || source?.email?.split('@')[0] || 'User',
+    email: source?.email || '',
+    avatar: (source?.username || source?.email || 'U').charAt(0).toUpperCase(),
+    account_type: source?.account_type || 'enterprise',
+    country: source?.country || '',
+    phone: source?.phone || '',
+  }), []);
+
   useEffect(() => {
     const initialize = async () => {
       const token = localStorage.getItem('token');
@@ -77,15 +88,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const me = await response.json();
-        const derivedUser = {
-          id: me.id,
-          name: me.username || me.email?.split('@')[0] || 'User',
-          email: me.email,
-          avatar: (me.username || me.email || 'U').charAt(0).toUpperCase(),
-          account_type: me.account_type || 'enterprise',
-          country: me.country || '',
-          phone: me.phone || '',
-        };
+        const derivedUser = normalizeUser(me);
 
         setUser(derivedUser);
         setIsAuthenticated(true);
@@ -103,14 +106,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     initialize();
-  }, [apiUrl, buildAuthHeaders]);
+  }, [apiUrl, buildAuthHeaders, normalizeUser]);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (identifier, password) => {
     try {
       const tokenRes = await fetch(apiUrl('/api/auth/token/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: email, password }),
+        body: JSON.stringify({ username: identifier, password }),
       });
 
       if (!tokenRes.ok) {
@@ -134,15 +137,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const me = await meRes.json();
-      const derivedUser = {
-        id: me.id,
-        name: me.username || me.email?.split('@')[0] || 'User',
-        email: me.email,
-        avatar: (me.username || me.email || 'U').charAt(0).toUpperCase(),
-        account_type: me.account_type || 'enterprise',
-        country: me.country || '',
-        phone: me.phone || '',
-      };
+      const derivedUser = normalizeUser(tokenData.user || me);
 
       setUser(derivedUser);
       setIsAuthenticated(true);
@@ -152,9 +147,9 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', error);
       return { success: false, error: 'Login failed' };
     }
-  };
+  }, [apiUrl, buildAuthHeaders, normalizeUser, parseApiError]);
 
-  const register = async (name, email, password, country, phone, account_type, org_name) => {
+  const register = useCallback(async (name, email, password, country, phone, account_type, org_name) => {
     try {
       const response = await fetch(apiUrl('/api/auth/register/'), {
         method: 'POST',
@@ -179,15 +174,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.access);
       localStorage.setItem('refreshToken', data.refresh);
 
-      const derivedUser = {
-        id: data.user?.id,
-        name: name || data.user?.username || email?.split('@')[0] || 'User',
+      const derivedUser = normalizeUser({
+        ...data.user,
+        username: data.user?.username || name || email,
         email: data.user?.email || email,
-        avatar: ((name || data.user?.username || email || 'U').charAt(0) || 'U').toUpperCase(),
         account_type: data.user?.account_type || account_type || 'enterprise',
         country: data.user?.country || country,
         phone: data.user?.phone || phone,
-      };
+      });
 
       setUser(derivedUser);
       setIsAuthenticated(true);
@@ -197,7 +191,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Register error:', error);
       return { success: false, error: 'Registration failed' };
     }
-  };
+  }, [apiUrl, normalizeUser, parseApiError]);
 
   const logout = () => {
     setUser(null);

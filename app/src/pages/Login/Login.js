@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import LedgrionyxLogo from '../../components/branding/LedgrionyxLogo';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -15,19 +15,14 @@ const Login = () => {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       setError('Please fill in all fields');
       return;
     }
 
-    if (!email.includes('@')) {
-      setError('Please enter a valid email');
-      return;
-    }
-
-    const result = await login(email, password);
+    const result = await login(identifier, password);
     if (result.success) {
-      navigate('/app/console');
+      navigate('/app/console', { replace: true });
     } else {
       setError(result.error || 'Login failed. Please try again.');
     }
@@ -50,14 +45,14 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="identifier">Email or User ID</label>
               <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                autoComplete="email"
+                type="text"
+                id="identifier"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="your@email.com or 10-digit user ID"
+                autoComplete="username"
               />
             </div>
 

@@ -260,6 +260,26 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     """ViewSet for managing organizations"""
     serializer_class = OrganizationSerializer
     permission_classes = [IsAuthenticated]
+    ORGANIZATION_DELETE_BLOCKERS = [
+        ('entities', 'entities'),
+        ('team_members', 'team members'),
+        ('payroll_runs', 'payroll runs'),
+        ('compliance_deadlines', 'compliance deadlines'),
+        ('custom_kpis', 'custom KPIs'),
+        ('consolidations', 'consolidations'),
+        ('intercompany_transactions', 'intercompany transactions'),
+        ('task_requests', 'task requests'),
+        ('clients', 'clients'),
+        ('client_documents', 'client documents'),
+        ('document_templates', 'document templates'),
+        ('services', 'services'),
+        ('white_label_branding', 'white-label branding'),
+        ('banking_integrations', 'banking integrations'),
+        ('banking_consent_logs', 'banking consent logs'),
+        ('automation_workflows', 'automation workflows'),
+        ('automation_artifacts', 'automation artifacts'),
+        ('firm_metrics', 'firm metrics'),
+    ]
 
     def get_queryset(self):
         """Return organizations the user can access"""
@@ -268,6 +288,41 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create organization with current user as owner"""
         serializer.save(owner=self.request.user)
+
+    def _get_organization_delete_blockers(self, organization):
+        blockers = []
+        for accessor_name, label in self.ORGANIZATION_DELETE_BLOCKERS:
+            relation = getattr(organization, accessor_name, None)
+            if relation is None:
+                continue
+
+            if hasattr(relation, 'exists') and relation.exists():
+                blockers.append(label)
+                continue
+
+            if hasattr(relation, 'pk') and relation.pk:
+                blockers.append(label)
+
+        return blockers
+
+    def destroy(self, request, *args, **kwargs):
+        organization = self.get_object()
+        blockers = self._get_organization_delete_blockers(organization)
+
+        if blockers:
+            blocker_text = ', '.join(blockers)
+            return Response(
+                {
+                    'detail': (
+                        'This organization cannot be deleted because it still contains data. '
+                        f'Remove the existing {blocker_text} first.'
+                    ),
+                    'blockers': blockers,
+                },
+                status=drf_status.HTTP_400_BAD_REQUEST,
+            )
+
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=['get'])
     def permission_context(self, request, pk=None):
